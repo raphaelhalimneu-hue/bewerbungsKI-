@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: BewerbungsKI API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: user
+    description: User operations
+  - name: documents
+    description: Document operations
+  - name: generate
+    description: AI generation
+  - name: checkout
+    description: Payments
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,137 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [user]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+
+  /generate:
+    post:
+      operationId: generateDocument
+      tags: [generate]
+      summary: Generate CV or cover letter with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateInput"
+      responses:
+        "200":
+          description: Generated content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateResult"
+        "403":
+          description: Free limit reached
+
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List all documents for current user
+      responses:
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Save a generated document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Created document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get a single document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Delete a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /checkout:
+    post:
+      operationId: createCheckout
+      tags: [checkout]
+      summary: Create Stripe checkout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResult"
+
+  /webhook/stripe:
+    post:
+      operationId: stripeWebhook
+      tags: [checkout]
+      summary: Stripe webhook handler
+      responses:
+        "200":
+          description: OK
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +171,103 @@ components:
       required:
         - status
 
+    UserProfile:
+      type: object
+      properties:
+        email:
+          type: string
+        is_premium:
+          type: boolean
+        documents_count:
+          type: integer
+      required:
+        - email
+        - is_premium
+        - documents_count
+
+    GenerateInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [cv, letter]
+        systemPrompt:
+          type: string
+        userPrompt:
+          type: string
+      required:
+        - type
+        - systemPrompt
+        - userPrompt
+
+    GenerateResult:
+      type: object
+      properties:
+        result:
+          type: string
+      required:
+        - result
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        template:
+          type: string
+        cv_html:
+          type: ["string", "null"]
+        cover_letter:
+          type: ["string", "null"]
+        profile_data:
+          type: object
+        job_title:
+          type: ["string", "null"]
+        job_company:
+          type: ["string", "null"]
+        created_at:
+          type: string
+      required:
+        - id
+        - name
+        - template
+        - created_at
+
+    DocumentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        template:
+          type: string
+        profileData:
+          type: object
+        cvHtml:
+          type: string
+        coverLetter:
+          type: string
+        jobTitle:
+          type: string
+        jobCompany:
+          type: string
+      required:
+        - name
+        - template
+
+    CheckoutInput:
+      type: object
+      properties:
+        plan:
+          type: string
+      required:
+        - plan
+
+    CheckoutResult:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url

@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BewerbungsKI – Professionelle Bewerbungen mit KI</title>
+<meta name="description" content="Erstelle in wenigen Minuten professionelle Lebensläufe und Anschreiben – optimiert für den deutschen Arbeitsmarkt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+/* ── RESET & VARIABLES ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#1a56db;--brand-d:#1239a0;--brand-l:#e8f0fe;--accent:#0ea5e9;
+  --ok:#16a34a;--warn:#d97706;--err:#dc2626;
+  --bg:#f8f9fc;--bg2:#fff;--bg3:#f0f2f8;
+  --text:#0f172a;--text2:#374151;--muted:#6b7280;--muted2:#9ca3af;
+  --border:#e2e6f0;--border2:#cdd3e4;
+  --sh:0 4px 16px rgba(15,23,42,.08),0 2px 4px rgba(15,23,42,.04);
+  --sh-lg:0 16px 48px rgba(15,23,42,.12);
+  --r:12px;--r-lg:20px;
+  --ff:'Geist',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;
+}
+[data-theme=dark]{
+  --bg:#0c0f1a;--bg2:#111827;--bg3:#1a2035;
+  --text:#f1f5f9;--text2:#cbd5e1;--muted:#94a3b8;--muted2:#64748b;
+  --border:#1f2d4a;--border2:#2d3f60;--brand-l:#172042;
+  --sh:0 4px 16px rgba(0,0,0,.4);--sh-lg:0 16px 48px rgba(0,0,0,.5);
+}
+html,body{height:100%;-webkit-font-smoothing:antialiased}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;transition:background .2s,color .2s}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap;position:relative}
+.btn-p{background:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(26,86,219,.3)}
+.btn-p:hover{background:var(--brand-d);transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,86,219,.35)}
+.btn-s{background:var(--bg3);color:var(--text2);border:1.5px solid var(--border)}
+.btn-s:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-l)}
+.btn-g{background:transparent;color:var(--muted);padding:8px 14px}
+.btn-g:hover{background:var(--bg3);color:var(--text)}
+.btn-d{background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+.btn-d:hover{background:var(--err);color:#fff}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-lg{padding:14px 32px;font-size:16px;border-radius:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-full{width:100%;justify-content:center}
+
+/* ── FORM ── */
+.field{display:flex;flex-direction:column;gap:6px}
+.label{font-size:13px;font-weight:600;color:var(--text2);letter-spacing:.02em}
+.input,.textarea,.select{width:100%;padding:10px 14px;background:var(--bg2);color:var(--text);border:1.5px solid var(--border);border-radius:10px;font-family:var(--ff);font-size:14px;transition:border-color .15s,box-shadow .15s;outline:none}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.textarea{min-height:90px;resize:vertical}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:0 1px 3px rgba(15,23,42,.05)}
+
+/* ── NAV ── */
+.nav{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(15,23,42,.05)}
+.nav-brand{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--brand);letter-spacing:-.02em}
+.nav-brand span{color:var(--text)}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:16px 10px;display:flex;flex-direction:column;gap:3px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.si{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.si:hover{background:var(--bg3);color:var(--text)}
+.si.on{background:var(--brand-l);color:var(--brand);font-weight:600}
+.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);padding:14px 14px 4px}
+.main{flex:1;padding:32px;max-width:880px}
+@media(max-width:768px){.sidebar{display:none}.main{padding:16px}}
+
+/* ── ANIMATIONS ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.fade{animation:fadeUp .3s ease both}
+.spin{width:18px;height:18px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+
+/* ── PROGRESS ── */
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--accent));border-radius:2px;transition:width .4s ease}
+.step-line{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:2px}
+.sdot{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-size:11px;font-weight:700;border:2px solid var(--border2);background:var(--bg2);color:var(--muted);flex-shrink:0;transition:all .2s;cursor:pointer}
+.sdot.on{border-color:var(--brand);background:var(--brand);color:#fff;box-shadow:0 0 0 4px rgba(26,86,219,.12)}
+.sdot.done{border-color:var(--ok);background:var(--ok);color:#fff}
+.scon{flex:1;height:2px;background:var(--border);min-width:16px;max-width:50px}
+.scon.done{background:var(--ok)}
+
+/* ── TAG / BADGE ── */
+.tag{display:inline-flex;align-items:center;gap:5px;background:var(--brand-l);color:var(--brand);padding:3px 9px;border-radius:6px;font-size:12px;font-weight:600}
+.tag-ok{background:#dcfce7;color:var(--ok)}
+.tag-w{background:#fef3c7;color:var(--warn)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;backdrop-filter:blur(4px);animation:fadeUp .2s}
+.modal{background:var(--bg2);border-radius:var(--r-lg);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:fadeUp .25s}
+.mh{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.mb{padding:20px 24px 24px}
+
+/* ── CV PREVIEW ── */
+.cv-wrap{background:#dde3f0;padding:24px;border-radius:16px;overflow-x:auto}
+.cv-sheet{background:white;color:#111;font-family:'Geist',sans-serif;width:100%;max-width:760px;margin:0 auto;min-height:600px;box-shadow:0 8px 32px rgba(0,0,0,.15);border-radius:3px;overflow:hidden;font-size:13px;line-height:1.55}
+
+/* ── TOAST ── */
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--sh-lg);animation:fadeUp .3s ease;display:flex;align-items:center;gap:10px;min-width:220px;max-width:340px;background:var(--bg2);border-left:4px solid var(--brand)}
+.toast.ok{border-left-color:var(--ok)}
+.toast.err{border-left-color:var(--err)}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:56px 20px 40px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--brand-l);color:var(--brand);padding:6px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:24px}
+.hero-title{font-family:var(--fd);font-size:clamp(34px,6vw,60px);font-weight:700;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px}
+.hero-title em{font-style:italic;color:var(--brand)}
+.hero-sub{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 32px;line-height:1.6}
+.feats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:32px}
+.feat{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text2)}
+.feat .ok{color:var(--ok)}
+
+/* ── PRICING ── */
+.pc{border:2px solid var(--border);border-radius:var(--r-lg);padding:28px;background:var(--bg2);transition:all .2s}
+.pc.hot{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--sh)}
+.pc:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+.price-num{font-size:36px;font-weight:800;color:var(--brand);line-height:1}
+
+/* ── AUTH MODAL ── */
+.auth-card{background:var(--bg2);border-radius:var(--r-lg);width:100%;max-width:420px;padding:36px;box-shadow:var(--sh-lg);animation:fadeUp .3s}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG – Werte nach dem Setup hier eintragen
+// ══════════════════════════════════════════════
+const CONFIG = {
+  SUPABASE_URL: window.ENV_SUPABASE_URL || "https://bsdfaidadvdojyeiqcqj.supabase.co",
+  SUPABASE_ANON_KEY: window.ENV_SUPABASE_ANON || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzZGZhaWRhZHZkb2p5ZWlxY3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODAzMDQsImV4cCI6MjA5MzA1NjMwNH0.UjDfb-w1-ABTiE4S_xp1Zx4wkecZ3S7icbEcooZobSk",
+  APP_URL: window.location.origin,
+};
+
+// ── SUPABASE INIT ──
+const { createClient } = supabase;
+const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let STATE = {
+  view: "home",       // home | wizard | documents | preview | pricing
+  theme: "light",
+  user: null,
+  profile: null,      // { is_premium, documents_count, email }
+  authModal: false,   // "login" | false
+  wizardStep: 0,
+  generating: false,
+  streamPhase: "",
+  documents: [],
+  previewDoc: null,
+  formData: blankForm(),
+};
+
+function blankForm() {
+  return {
+    personal: { firstName:"", lastName:"", title:"", email:"", phone:"", address:"", zip:"", city:"", linkedin:"", website:"", summary:"" },
+    experience: [],
+    education: [],
+    skills: [],
+    languages: [],
+    jobad: { title:"", company:"", description:"" },
+    template: "modern",
+  };
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) await setUser(session.user, session.access_token);
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      await setUser(session.user, session.access_token);
+      // Magic Link redirect – nach Login direkt zu Wizard
+      if (event === "SIGNED_IN" && window.location.hash.includes("access_token")) {
+        STATE.view = "wizard";
+      }
+    } else {
+      STATE.user = null; STATE.profile = null;
+    }
+    render();
+  });
+}
+
+async function setUser(user, token) {
+  STATE.user = user;
+  try {
+    const res = await api("/api/me", "GET", null, token);
+    STATE.profile = res;
+  } catch {
+    STATE.profile = { email: user.email, is_premium: false, documents_count: 0 };
+  }
+}
+
+async function sendMagicLink(email) {
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: CONFIG.APP_URL }
+  });
+  if (error) throw error;
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  STATE.user = null; STATE.profile = null;
+  STATE.view = "home";
+  toast("Abgemeldet.", "ok");
+  render();
+}
+
+// ══════════════════════════════════════════════
+// API HELPER
+// ══════════════════════════════════════════════
+async function api(path, method = "GET", body = null, tokenOverride = null) {
+  let token = tokenOverride;
+  if (!token) {
+    const { data: { session } } = await sb.auth.getSession();
+    token = session?.access_token;
+  }
+  const opts = {
+    method,
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Fehler " + res.status);
+  return data;
+}
+
+// ══════════════════════════════════════════════
+// GENERATE
+// ══════════════════════════════════════════════
+async function generate() {
+  if (!STATE.user) { STATE.authModal = "login"; render(); return; }
+  const p = STATE.formData;
+  if (!p.personal.firstName || !p.personal.lastName) {
+    toast("Bitte Vor- und Nachname eingeben.", "err"); return;
+  }
+
+  STATE.generating = true; STATE.streamPhase = "✨ Lebenslauf wird generiert …"; render();
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+
+    // CV generieren
+    const cvRes = await api("/api/generate", "POST", {
+      type: "cv",
+      systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte nur mit HTML-Inhalt, kein Wrapper.",
+      userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(p, null, 2)}\n\nOptimiert für: ${p.jobad.title || "allgemein"} bei ${p.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen.`,
+    }, token);
+
+    let letterText = "";
+    if (p.jobad.title || p.jobad.description) {
+      STATE.streamPhase = "✨ Anschreiben wird generiert …"; render();
+      const letterRes = await api("/api/generate", "POST", {
+        type: "letter",
+        systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe nur den Anschreiben-Text ohne HTML.",
+        userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${p.personal.firstName} ${p.personal.lastName}, ${p.personal.title || ""}\nStelle: ${p.jobad.title} bei ${p.jobad.company}\nStellenbeschreibung: ${p.jobad.description || "nicht angegeben"}\nErfahrung: ${p.experience.slice(0,3).map(e=>`${e.position} bei ${e.company}`).join("; ")}\nSkills: ${p.skills.slice(0,8).map(s=>s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter.`,
+      }, token);
+      letterText = letterRes.result;
+    }
+
+    // Dokument serverseitig speichern
+    STATE.streamPhase = "💾 Dokument wird gespeichert …"; render();
+    const saved = await api("/api/documents", "POST", {
+      name: `${p.personal.firstName} ${p.personal.lastName}${p.jobad.title ? " – " + p.jobad.title : ""}`,
+      template: p.template,
+      profileData: p,
+      cvHtml: cvRes.result,
+      coverLetter: letterText,
+      jobTitle: p.jobad.title,
+      jobCompany: p.jobad.company,
+    }, token);
+
+    // Profil-Counter lokal aktualisieren
+    if (STATE.profile) STATE.profile.documents_count = (STATE.profile.documents_count || 0) + 1;
+
+    toast("🎉 Bewerbung erfolgreich erstellt!", "ok");
+    STATE.view = "documents";
+    await loadDocuments();
+
+  } catch (e) {
+    if (e.message === "free_limit_reached") {
+      STATE.view = "pricing";
+    } else {
+      toast("Fehler: " + e.message, "err");
+    }
+  } finally {
+    STATE.generating = false; STATE.streamPhase = ""; render();
+  }
+}
+
+// ══════════════════════════════════════════════
+// DOCUMENTS
+// ══════════════════════════════════════════════
+async function loadDocuments() {
+  if (!STATE.user) return;
+  try {
+    const docs = await api("/api/documents");
+    STATE.documents = docs;
+  } catch { STATE.documents = []; }
+  render();
+}
+
+async function deleteDocument(id) {
+  if (!confirm("Dokument wirklich löschen?")) return;
+  try {
+    await api("/api/documents?id=" + id, "DELETE");
+    STATE.documents = STATE.documents.filter(d => d.id !== id);
+    toast("Dokument gelöscht.", "ok");
+    render();
+  } catch (e) { toast("Fehler: " + e.message, "err"); }
+}
+
+// ══════════════════════════════════════════════
+// STRIPE CHECKOUT
+// ══════════════════════════════════════════════
+async function startCheckout(plan = "lifetime") {
+  if (!STATE.user) { STATE.authModal = "login"; render(); return; }
+  try {
+    toast("Weiterleitung zu Stripe …", "");
+    const res = await api("/api/checkout", "POST", { plan });
+    window.location.href = res.url;
+  } catch (e) { toast("Fehler: " + e.message, "err"); }
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type = "") {
+  const el = document.createElement("div");
+  el.className = "toast " + type;
+  el.innerHTML = (type === "ok" ? "✓ " : type === "err" ? "✕ " : "ℹ ") + msg;
+  document.getElementById("toasts").appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════
+// CV HTML BUILDER
+// ══════════════════════════════════════════════
+function buildCVHTML(profile, template) {
+  const p = profile?.personal || {};
+  const exp = profile?.experience || [];
+  const edu = profile?.education || [];
+  const skills = profile?.skills || [];
+  const langs = profile?.languages || [];
+  const name = `${p.firstName||""} ${p.lastName||""}`.trim();
+  const contact = [p.email, p.phone, p.city ? `${p.zip||""} ${p.city}`.trim() : "", p.linkedin].filter(Boolean);
+
+  const cvStyles = `
+    .cv-h{padding:36px 40px}.cv-h h1{font-size:24px;font-weight:700;letter-spacing:-.02em;font-family:'Fraunces',serif;margin-bottom:4px}
+    .cv-h .sub{font-size:13px;opacity:.85;margin-bottom:14px}.cv-h .con{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;opacity:.9}
+    .cv-body{display:grid}.cv-side{padding:24px 20px;border-top:1px solid rgba(0,0,0,.08)}.cv-main{padding:24px 28px}
+    .sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid currentColor}
+    .sec{margin-bottom:20px}
+    .ent{margin-bottom:12px}.ent-t{font-weight:700;font-size:13px}.ent-s{font-size:11px;color:#6b7280;margin-bottom:2px}.ent-d{font-size:12px;color:#374151;line-height:1.5}
+    .sk{margin-bottom:7px}.sk-l{font-size:12px;margin-bottom:3px;display:flex;justify-content:space-between}.sk-b{height:5px;background:#e8eef8;border-radius:3px;overflow:hidden}.sk-f{height:100%;border-radius:3px}
+    .lang-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#374151}
+  `;
+
+  if (template === "classic") {
+    return `<style>@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Geist:wght@400;600;700&display=swap');${cvStyles}
+    .cv-h{border-bottom:3px solid #0f172a;background:#fff}.cv-h h1{color:#0f172a}.cv-h .sub{color:#6b7280}.cv-h .con{color:#374151}
+    .cv-body{grid-template-columns:1fr}.cv-main{padding:28px 40px}
+    .sec-t{color:#0f172a;border-color:#0f172a}
+    .ent{display:grid;grid-template-columns:130px 1fr;gap:14px}.ent-date{font-size:11px;color:#6b7280;padding-top:2px}
+    </style>
+    <div class="cv-h"><h1>${name}</h1><div class="sub">${p.title||""}</div><div class="con">${contact.map(c=>`<span>${c}</span>`).join("")}</div></div>
+    <div class="cv-body"><div class="cv-main">
+    ${p.summary?`<div class="sec"><div class="sec-t">Profil</div><p style="font-size:13px;color:#374151;line-height:1.6">${p.summary}</p></div>`:""}
+    ${exp.length?`<div class="sec"><div class="sec-t">Berufserfahrung</div>${exp.map(e=>`<div class="ent"><div class="ent-date">${e.start?e.start.slice(0,7).replace("-","/")+"":" "}${e.start&&(e.end||e.current)?" –<br>":""}${e.current?"heute":(e.end?e.end.slice(0,7).replace("-","/"):"")}</div><div><div class="ent-t">${e.position}</div><div class="ent-s">${e.company}</div><div class="ent-d">${e.description||""}</div></div></div>`).join("")}</div>`:""}
+    ${edu.length?`<div class="sec"><div class="sec-t">Ausbildung</div>${edu.map(e=>`<div class="ent"><div class="ent-date">${e.start?e.start.slice(0,7).replace("-","/"):""} – ${e.end?e.end.slice(0,7).replace("-","/"):""}</div><div><div class="ent-t">${e.degree}${e.field?" – "+e.field:""}</div><div class="ent-s">${e.institution}${e.grade?" · Note: "+e.grade:""}</div></div></div>`).join("")}</div>`:""}
+    ${skills.length?`<div class="sec"><div class="sec-t">Kenntnisse</div><div style="display:flex;flex-wrap:wrap;gap:7px">${skills.map(s=>`<span style="background:#f1f5f9;padding:3px 9px;border-radius:4px;font-size:12px">${s.name}</span>`).join("")}</div></div>`:""}
+    ${langs.length?`<div class="sec"><div class="sec-t">Sprachen</div>${langs.map(l=>`<div class="lang-row"><span>${l.language}</span><span style="color:#6b7280">${l.level}</span></div>`).join("")}</div>`:""}
+    </div></div>`;
+  }
+
+  const isCreative = template === "creative";
+  const brandColor = isCreative ? "#1e3a8a" : "#1a56db";
+  const headerBg = isCreative ? "background:linear-gradient(135deg,#0f172a,#1e3a8a)" : "background:#1a56db";
+
+  return `<style>@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Geist:wght@400;600;700&display=swap');${cvStyles}
+  .cv-h{${headerBg};color:white}.cv-h h1{color:white}.cv-h .con{opacity:.88}
+  .cv-body{grid-template-columns:${isCreative?"1fr 240px":"220px 1fr"}}.cv-side{${isCreative?"border-left":"border-right"}:1px solid #e8eef8;background:#f8faff;border-top:none}
+  .sec-t{color:${brandColor};border-color:${brandColor}}
+  .sk-f{background:${brandColor}}
+  </style>
+  <div class="cv-h"><h1>${name}</h1><div class="sub">${p.title||""}</div><div class="con">${contact.map(c=>`<span>${c}</span>`).join("")}</div></div>
+  <div class="cv-body">
+  ${isCreative ? "" : `<div class="cv-side">
+    ${skills.length?`<div class="sec"><div class="sec-t" style="color:${brandColor}">Kenntnisse</div>${skills.map(s=>`<div class="sk"><div class="sk-l"><span>${s.name}</span></div><div class="sk-b"><div class="sk-f" style="width:${s.level||80}%"></div></div></div>`).join("")}</div>`:""}
+    ${langs.length?`<div class="sec"><div class="sec-t" style="color:${brandColor}">Sprachen</div>${langs.map(l=>`<div class="lang-row"><span>${l.language}</span><span style="color:#6b7280">${l.level}</span></div>`).join("")}</div>`:""}
+  </div>`}
+  <div class="cv-main">
+    ${p.summary?`<div class="sec"><div class="sec-t">Profil</div><p style="font-size:13px;color:#374151;line-height:1.6">${p.summary}</p></div>`:""}
+    ${exp.length?`<div class="sec"><div class="sec-t">Berufserfahrung</div>${exp.map(e=>`<div class="ent"><div class="ent-t">${e.position} <span style="font-weight:400;color:#6b7280">· ${e.company}</span></div><div class="ent-s">${e.start?e.start.slice(0,7).replace("-","/"):""} – ${e.current?"heute":(e.end?e.end.slice(0,7).replace("-","/"):"")}</div><div class="ent-d">${e.description||""}</div></div>`).join("")}</div>`:""}
+    ${edu.length?`<div class="sec"><div class="sec-t">Ausbildung</div>${edu.map(e=>`<div class="ent"><div class="ent-t">${e.degree}${e.field?" – "+e.field:""}</div><div class="ent-s">${e.institution}${e.grade?" · Note: "+e.grade:""} · ${e.start?e.start.slice(0,7).replace("-","/"):""} – ${e.end?e.end.slice(0,7).replace("-","/"):""}</div></div>`).join("")}</div>`:""}
+  </div>
+  ${isCreative ? `<div class="cv-side">
+    ${skills.length?`<div class="sec"><div class="sec-t" style="color:${brandColor}">Kenntnisse</div>${skills.map(s=>`<div class="sk"><div class="sk-l"><span>${s.name}</span></div><div class="sk-b"><div class="sk-f" style="width:${s.level||80}%"></div></div></div>`).join("")}</div>`:""}
+    ${langs.length?`<div class="sec"><div class="sec-t" style="color:${brandColor}">Sprachen</div>${langs.map(l=>`<div class="lang-row"><span>${l.language}</span><span style="color:#6b7280">${l.level}</span></div>`).join("")}</div>`:""}
+  </div>` : ""}
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// RENDER ENGINE
+// ══════════════════════════════════════════════
+function render() {
+  document.documentElement.setAttribute("data-theme", STATE.theme);
+  const root = document.getElementById("root");
+  root.innerHTML = `
+    ${renderNav()}
+    <div class="app">
+      ${renderSidebar()}
+      <main class="main fade">
+        ${STATE.authModal ? renderAuthModal() : ""}
+        ${renderView()}
+      </main>
+    </div>
+  `;
+  attachEvents();
+}
+
+function renderNav() {
+  return `<nav class="nav">
+    <div class="nav-brand">Bewerbungs<span>KI</span></div>
+    <div style="flex:1"></div>
+    ${STATE.profile?.is_premium ? `<span class="tag tag-w">👑 Premium</span>` : ""}
+    <button class="btn btn-g btn-sm" onclick="toggleTheme()">${STATE.theme==="light"?"🌙":"☀️"}</button>
+    ${STATE.user
+      ? `<span style="font-size:13px;color:var(--muted);margin:0 4px">${STATE.user.email?.split("@")[0]}</span>
+         <button class="btn btn-s btn-sm" onclick="logout()">Abmelden</button>`
+      : `<button class="btn btn-p btn-sm" onclick="showAuth()">Anmelden</button>`
+    }
+  </nav>`;
+}
+
+function renderSidebar() {
+  const items = [
+    { v: "home", icon: "🏠", label: "Startseite" },
+    { v: "wizard", icon: "✨", label: "Neu erstellen" },
+    { v: "documents", icon: "📄", label: "Meine Dokumente", badge: STATE.documents.length || "" },
+    { v: "pricing", icon: "👑", label: "Premium" },
+  ];
+  return `<aside class="sidebar">
+    <div class="sec-lbl">Navigation</div>
+    ${items.map(i => `
+      <button class="si ${STATE.view===i.v&&!STATE.authModal?"on":""}" onclick="nav('${i.v}')">
+        <span style="font-size:16px">${i.icon}</span>${i.label}
+        ${i.badge ? `<span class="tag" style="margin-left:auto;font-size:11px;padding:1px 7px">${i.badge}</span>` : ""}
+      </button>`).join("")}
+    <div style="flex:1"></div>
+    ${!STATE.profile?.is_premium ? `
+      <div style="background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1px solid #bfdbfe;border-radius:12px;padding:14px;margin:6px 4px">
+        <div style="font-weight:700;font-size:13px;color:#1e40af;margin-bottom:5px">🔒 Free-Plan</div>
+        <div style="font-size:12px;color:#374151;margin-bottom:10px">1 kostenloser Lebenslauf. Upgrade für unbegrenzt.</div>
+        <button class="btn btn-p btn-sm btn-full" onclick="nav('pricing')">Upgrade →</button>
+      </div>` : ""}
+  </aside>`;
+}
+
+function renderView() {
+  if (STATE.generating) return renderGenerating();
+  switch (STATE.view) {
+    case "home": return renderHome();
+    case "wizard": return renderWizard();
+    case "documents": return renderDocuments();
+    case "preview": return renderPreview();
+    case "pricing": return renderPricing();
+    default: return renderHome();
+  }
+}
+
+// ── HOME ──
+function renderHome() {
+  return `<div class="fade">
+    <div class="hero">
+      <div class="hero-badge">🇩🇪 Für den deutschsprachigen Markt</div>
+      <h1 class="hero-title">Perfekte Bewerbungen<br>mit <em>KI-Unterstützung</em></h1>
+      <p class="hero-sub">Erstelle in wenigen Minuten professionelle Lebensläufe und Anschreiben — optimiert für den deutschen Arbeitsmarkt.</p>
+      <div class="feats">
+        ${["KI-generierter Lebenslauf","Individuelles Anschreiben","3 professionelle Vorlagen","PDF-Export","Sicher gespeichert"].map(f=>`<div class="feat"><span class="ok">✓</span>${f}</div>`).join("")}
+      </div>
+      <button class="btn btn-p btn-lg" onclick="nav('wizard')">✨ Jetzt Bewerbung erstellen</button>
+      <p style="margin-top:12px;font-size:13px;color:var(--muted)">${STATE.profile?.is_premium?"✓ Premium aktiv – unbegrenzte Bewerbungen":`${STATE.profile?.documents_count||0}/1 kostenlose Bewerbung genutzt`}</p>
+    </div>
+    <div class="grid3" style="margin-top:8px">
+      ${[
+        {i:"📝",t:"Schritt-für-Schritt",d:"Einfacher Wizard führt durch alle Felder — kein Aufwand."},
+        {i:"✨",t:"KI-Optimierung",d:"Claude AI erstellt professionellen Text, angepasst an die Stellenanzeige."},
+        {i:"📑",t:"Direkt-Download",d:"Hochwertige Dokumente — druckfertig als PDF speicherbar."},
+      ].map(c=>`<div class="card" style="text-align:center"><div style="font-size:32px;margin-bottom:12px">${c.i}</div><div style="font-weight:700;margin-bottom:8px">${c.t}</div><div style="font-size:13px;color:var(--muted);line-height:1.5">${c.d}</div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+// ── WIZARD ──
+const STEPS = [
+  {id:"personal",label:"Persönliche Daten",icon:"👤"},
+  {id:"experience",label:"Berufserfahrung",icon:"💼"},
+  {id:"education",label:"Ausbildung",icon:"🎓"},
+  {id:"skills",label:"Kenntnisse",icon:"⚡"},
+  {id:"languages",label:"Sprachen",icon:"🌍"},
+  {id:"jobad",label:"Stellenanzeige",icon:"📋"},
+  {id:"template",label:"Vorlage",icon:"🎨"},
+  {id:"generate",label:"Generieren",icon:"✨"},
+];
+
+function renderWizard() {
+  const s = STATE.wizardStep;
+  const step = STEPS[s];
+  const pct = ((s+1)/STEPS.length*100).toFixed(0);
+  return `<div class="fade">
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <h2 style="font-family:var(--fd);font-size:22px;font-weight:700">${step.icon} ${step.label}</h2>
+        <span style="font-size:13px;color:var(--muted)">Schritt ${s+1} / ${STEPS.length}</span>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="step-line" style="margin-top:10px">
+        ${STEPS.map((st,i)=>`
+          <div class="sdot ${i===s?"on":i<s?"done":""}" onclick="goStep(${i})" title="${st.label}">${i<s?"✓":i+1}</div>
+          ${i<STEPS.length-1?`<div class="scon ${i<s?"done":""}"></div>`:""}`).join("")}
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">${renderStep(s)}</div>
+    <div style="display:flex;gap:12px;justify-content:space-between">
+      <button class="btn btn-s" onclick="prevStep()" ${s===0?"disabled":""}>← Zurück</button>
+      ${s<STEPS.length-1
+        ? `<button class="btn btn-p" onclick="nextStep()">Weiter →</button>`
+        : `<button class="btn btn-p btn-lg" onclick="generate()">✨ Bewerbung generieren</button>`}
+    </div>
+  </div>`;
+}
+
+function renderStep(s) {
+  switch(s) {
+    case 0: return renderPersonal();
+    case 1: return renderExperience();
+    case 2: return renderEducation();
+    case 3: return renderSkills();
+    case 4: return renderLanguages();
+    case 5: return renderJobAd();
+    case 6: return renderTemplate();
+    case 7: return renderGenerateStep();
+    default: return "";
+  }
+}
+
+function renderPersonal() {
+  const p = STATE.formData.personal;
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    <div class="grid2">
+      <div class="field"><label class="label">Vorname *</label><input class="input" data-field="personal.firstName" value="${esc(p.firstName)}" placeholder="Max"></div>
+      <div class="field"><label class="label">Nachname *</label><input class="input" data-field="personal.lastName" value="${esc(p.lastName)}" placeholder="Mustermann"></div>
+    </div>
+    <div class="field"><label class="label">Berufsbezeichnung</label><input class="input" data-field="personal.title" value="${esc(p.title)}" placeholder="z. B. Senior Software Engineer"></div>
+    <div class="grid2">
+      <div class="field"><label class="label">E-Mail</label><input class="input" type="email" data-field="personal.email" value="${esc(p.email)}" placeholder="max@beispiel.de"></div>
+      <div class="field"><label class="label">Telefon</label><input class="input" data-field="personal.phone" value="${esc(p.phone)}" placeholder="+49 151 …"></div>
+    </div>
+    <div class="grid3">
+      <div class="field"><label class="label">Straße & Nr.</label><input class="input" data-field="personal.address" value="${esc(p.address)}" placeholder="Musterstr. 12"></div>
+      <div class="field"><label class="label">PLZ</label><input class="input" data-field="personal.zip" value="${esc(p.zip)}" placeholder="10115"></div>
+      <div class="field"><label class="label">Ort</label><input class="input" data-field="personal.city" value="${esc(p.city)}" placeholder="Berlin"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="label">LinkedIn</label><input class="input" data-field="personal.linkedin" value="${esc(p.linkedin)}" placeholder="linkedin.com/in/…"></div>
+      <div class="field"><label class="label">Website</label><input class="input" data-field="personal.website" value="${esc(p.website)}" placeholder="www.beispiel.de"></div>
+    </div>
+    <div class="field"><label class="label">Kurzprofil / Über mich</label><textarea class="textarea" data-field="personal.summary" placeholder="2–3 Sätze über dich und deine Stärken …">${esc(p.summary)}</textarea></div>
+  </div>`;
+}
+
+function renderExperience() {
+  const items = STATE.formData.experience;
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    ${items.length===0?`<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:14px">Noch keine Berufserfahrung. Klicke auf „Hinzufügen".</div>`:""}
+    ${items.map((e,i)=>`<div style="border:1px solid var(--border);border-radius:12px;padding:18px;position:relative">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Stelle #${i+1}</div>
+      <button class="btn btn-d btn-sm" style="position:absolute;top:12px;right:12px" onclick="delExp(${i})">×</button>
+      <div class="grid2" style="gap:10px;margin-bottom:10px">
+        <div class="field"><label class="label">Unternehmen</label><input class="input" data-exp="${i}" data-key="company" value="${esc(e.company)}" placeholder="Musterfirma GmbH"></div>
+        <div class="field"><label class="label">Position</label><input class="input" data-exp="${i}" data-key="position" value="${esc(e.position)}" placeholder="Software Engineer"></div>
+      </div>
+      <div class="grid2" style="gap:10px;margin-bottom:10px">
+        <div class="field"><label class="label">Von</label><input class="input" type="month" data-exp="${i}" data-key="start" value="${e.start||""}"></div>
+        <div class="field"><label class="label">Bis</label><input class="input" type="month" data-exp="${i}" data-key="end" value="${e.end||""}" ${e.current?"disabled":""}><label style="display:flex;align-items:center;gap:7px;margin-top:5px;font-size:13px;color:var(--muted);cursor:pointer"><input type="checkbox" data-exp="${i}" data-key="current" ${e.current?"checked":""}>Aktuelle Stelle</label></div>
+      </div>
+      <div class="field"><label class="label">Aufgaben & Erfolge</label><textarea class="textarea" data-exp="${i}" data-key="description" placeholder="Hauptaufgaben und wichtigste Erfolge …" style="min-height:70px">${esc(e.description)}</textarea></div>
+    </div>`).join("")}
+    <button class="btn btn-s" style="align-self:flex-start" onclick="addExp()">+ Berufserfahrung hinzufügen</button>
+  </div>`;
+}
+
+function renderEducation() {
+  const items = STATE.formData.education;
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    ${items.length===0?`<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:14px">Noch keine Ausbildung eingetragen.</div>`:""}
+    ${items.map((e,i)=>`<div style="border:1px solid var(--border);border-radius:12px;padding:18px;position:relative">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px">Abschluss #${i+1}</div>
+      <button class="btn btn-d btn-sm" style="position:absolute;top:12px;right:12px" onclick="delEdu(${i})">×</button>
+      <div class="grid2" style="gap:10px;margin-bottom:10px">
+        <div class="field"><label class="label">Hochschule / Schule</label><input class="input" data-edu="${i}" data-key="institution" value="${esc(e.institution)}" placeholder="TU Berlin"></div>
+        <div class="field"><label class="label">Abschluss</label><input class="input" data-edu="${i}" data-key="degree" value="${esc(e.degree)}" placeholder="B.Sc., M.Sc., Ausbildung …"></div>
+      </div>
+      <div class="grid2" style="gap:10px;margin-bottom:10px">
+        <div class="field"><label class="label">Fachrichtung</label><input class="input" data-edu="${i}" data-key="field" value="${esc(e.field)}" placeholder="Informatik"></div>
+        <div class="field"><label class="label">Note (optional)</label><input class="input" data-edu="${i}" data-key="grade" value="${esc(e.grade)}" placeholder="1,8"></div>
+      </div>
+      <div class="grid2" style="gap:10px">
+        <div class="field"><label class="label">Von</label><input class="input" type="month" data-edu="${i}" data-key="start" value="${e.start||""}"></div>
+        <div class="field"><label class="label">Bis</label><input class="input" type="month" data-edu="${i}" data-key="end" value="${e.end||""}"></div>
+      </div>
+    </div>`).join("")}
+    <button class="btn btn-s" style="align-self:flex-start" onclick="addEdu()">+ Ausbildung hinzufügen</button>
+  </div>`;
+}
+
+function renderSkills() {
+  const items = STATE.formData.skills;
+  const lvlLabels = ["Anfänger","Grundkenntnisse","Fortgeschritten","Sehr gut","Experte"];
+  const lvlVals = [20,40,60,80,100];
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <div class="field" style="flex:1"><label class="label">Skill</label><input class="input" id="skill-input" placeholder="z. B. React, Python, Projektmanagement …" onkeydown="if(event.key==='Enter')addSkill()"></div>
+      <div class="field" style="width:150px"><label class="label">Niveau</label>
+        <select class="select" id="skill-level">
+          ${lvlVals.map((v,i)=>`<option value="${v}" ${v===80?"selected":""}>${lvlLabels[i]}</option>`).join("")}
+        </select>
+      </div>
+      <button class="btn btn-p btn-sm" onclick="addSkill()" style="margin-bottom:0;flex-shrink:0">+ Hinzufügen</button>
+    </div>
+    ${items.length===0?`<div style="text-align:center;color:var(--muted);padding:20px 0;font-size:14px">Noch keine Skills eingetragen.</div>`:""}
+    ${items.map((sk,i)=>`<div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:14px;font-weight:500">${esc(sk.name)}</span>
+          <span style="font-size:12px;color:var(--muted)">${lvlLabels[lvlVals.indexOf(sk.level)]||sk.level+"%"}</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${sk.level}%;height:100%;background:linear-gradient(90deg,var(--brand),var(--accent));border-radius:3px"></div></div>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="delSkill(${i})" style="color:var(--err)">×</button>
+    </div>`).join("")}
+  </div>`;
+}
+
+function renderLanguages() {
+  const items = STATE.formData.languages;
+  const levels = ["A1","A2","B1","B2","C1","C2","Muttersprache"];
+  return `<div style="display:flex;flex-direction:column;gap:10px">
+    ${items.map((l,i)=>`<div style="display:flex;gap:10px;align-items:flex-end">
+      <div class="field" style="flex:1"><label class="label">Sprache</label><input class="input" data-lang="${i}" data-key="language" value="${esc(l.language)}" placeholder="Deutsch, Englisch …"></div>
+      <div class="field" style="width:160px"><label class="label">Niveau</label>
+        <select class="select" data-lang="${i}" data-key="level">
+          ${levels.map(lv=>`<option ${l.level===lv?"selected":""}>${lv}</option>`).join("")}
+        </select>
+      </div>
+      <button class="btn btn-d btn-sm" style="margin-bottom:0" onclick="delLang(${i})">×</button>
+    </div>`).join("")}
+    ${items.length===0?`<div style="text-align:center;color:var(--muted);padding:20px 0;font-size:14px">Noch keine Sprachen eingetragen.</div>`:""}
+    <button class="btn btn-s" style="align-self:flex-start" onclick="addLang()">+ Sprache hinzufügen</button>
+  </div>`;
+}
+
+function renderJobAd() {
+  const j = STATE.formData.jobad;
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    <div style="background:var(--brand-l);border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:13px;color:var(--brand);display:flex;gap:10px">
+      <span>ℹ️</span><span>Optional aber empfohlen: Die KI schneidet Anschreiben und Lebenslauf gezielt auf diese Stelle zu.</span>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="label">Stelle / Position</label><input class="input" data-field="jobad.title" value="${esc(j.title)}" placeholder="Senior Frontend Developer"></div>
+      <div class="field"><label class="label">Unternehmen</label><input class="input" data-field="jobad.company" value="${esc(j.company)}" placeholder="Muster AG"></div>
+    </div>
+    <div class="field"><label class="label">Stellenbeschreibung (copy & paste)</label><textarea class="textarea" data-field="jobad.description" placeholder="Füge hier die Stellenanzeige ein …" style="min-height:160px">${esc(j.description)}</textarea></div>
+  </div>`;
+}
+
+function renderTemplate() {
+  const tpls = [
+    {id:"modern",name:"Modern",desc:"Zweispaltig, farbiger Header",e:"🔵"},
+    {id:"classic",name:"Classic",desc:"Zeitlos, diskret, elegant",e:"⚫"},
+    {id:"creative",name:"Creative",desc:"Dunkel, mutig, auffällig",e:"🎨"},
+  ];
+  return `<div>
+    <p style="color:var(--muted);margin-bottom:20px;font-size:14px">Wähle das Design für deinen Lebenslauf:</p>
+    <div class="grid3">
+      ${tpls.map(t=>`<div onclick="selTemplate('${t.id}')" style="border:2px solid ${STATE.formData.template===t.id?"var(--brand)":"var(--border)"};border-radius:14px;padding:20px;cursor:pointer;background:${STATE.formData.template===t.id?"var(--brand-l)":"var(--bg2)"};transition:all .15s;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">${t.e}</div>
+        <div style="font-weight:700;margin-bottom:4px">${t.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${t.desc}</div>
+        ${STATE.formData.template===t.id?`<span class="tag" style="margin-top:10px">✓ Ausgewählt</span>`:""}
+      </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function renderGenerateStep() {
+  const hasName = !!STATE.formData.personal.firstName;
+  return `<div style="text-align:center;padding:24px 0">
+    <div style="font-size:52px;margin-bottom:16px">✨</div>
+    <h3 style="font-family:var(--fd);font-size:22px;margin-bottom:10px">Bereit zur Generierung</h3>
+    <p style="color:var(--muted);max-width:400px;margin:0 auto 24px;font-size:14px;line-height:1.6">
+      Die KI erstellt deinen professionellen Lebenslauf${STATE.formData.jobad.title?" und ein passendes Anschreiben":""} für den deutschen Markt.
+    </p>
+    ${!hasName?`<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:#92400e">⚠️ Bitte zuerst persönliche Daten ausfüllen (Schritt 1).</div>`:""}
+    ${!STATE.user?`<div style="background:var(--brand-l);border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--brand)">🔒 Du musst angemeldet sein, um Bewerbungen zu erstellen.</div>`:""}
+    <button class="btn btn-p btn-lg" onclick="generate()" ${!hasName?"disabled":""}>✨ Jetzt generieren</button>
+    <div style="margin-top:16px">
+      ${["Lebenslauf auf Deutsch","Anschreiben zur Stelle",
+         STATE.formData.template==="modern"?"Modern-Vorlage":STATE.formData.template==="classic"?"Classic-Vorlage":"Creative-Vorlage",
+         "Sicher in deinem Account gespeichert"]
+        .map(f=>`<div style="font-size:13px;color:var(--muted);margin-bottom:3px">✓ ${f}</div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function renderGenerating() {
+  return `<div style="display:flex;min-height:calc(100vh - 60px)">
+    <div style="flex:1;padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+      <div style="font-size:52px;margin-bottom:20px;animation:spin 2s linear infinite">✨</div>
+      <h2 style="font-family:var(--fd);font-size:24px;margin-bottom:10px">${STATE.streamPhase}</h2>
+      <p style="color:var(--muted);max-width:360px;margin:0 auto 24px;font-size:14px">Claude AI arbeitet an deiner Bewerbung …</p>
+      <div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px"><span class="spin"></span> Bitte einen Moment Geduld</div>
+    </div>
+  </div>`;
+}
+
+// ── DOCUMENTS ──
+function renderDocuments() {
+  const docs = STATE.documents;
+  return `<div class="fade">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <h2 style="font-family:var(--fd);font-size:24px;font-weight:700">📄 Meine Dokumente</h2>
+      <button class="btn btn-p" onclick="nav('wizard')">+ Neue Bewerbung</button>
+    </div>
+    ${!STATE.user ? `<div class="card" style="text-align:center;padding:40px">
+      <div style="font-size:42px;margin-bottom:14px">🔒</div>
+      <h3 style="margin-bottom:8px">Anmelden erforderlich</h3>
+      <p style="color:var(--muted);margin-bottom:20px">Melde dich an, um deine Bewerbungen zu sehen.</p>
+      <button class="btn btn-p btn-lg" onclick="showAuth()">Anmelden / Registrieren</button>
+    </div>` : docs.length===0 ? `<div class="card" style="text-align:center;padding:48px">
+      <div style="font-size:48px;margin-bottom:14px">📭</div>
+      <h3 style="margin-bottom:8px">Noch keine Dokumente</h3>
+      <p style="color:var(--muted);margin-bottom:20px">Erstelle jetzt deine erste Bewerbung.</p>
+      <button class="btn btn-p btn-lg" onclick="nav('wizard')">✨ Erste Bewerbung erstellen</button>
+    </div>` : `<div style="display:flex;flex-direction:column;gap:10px">
+      ${docs.map(doc=>`<div class="card" style="display:flex;align-items:center;gap:16px">
+        <div style="font-size:30px;flex-shrink:0">${doc.template==="modern"?"🔵":doc.template==="classic"?"⚫":"🎨"}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(doc.name)}</div>
+          <div style="font-size:13px;color:var(--muted);display:flex;gap:12px">
+            <span>📅 ${new Date(doc.created_at).toLocaleDateString("de-DE")}</span>
+            <span>🎨 ${doc.template||"Modern"}</span>
+            ${doc.job_title?`<span>💼 ${esc(doc.job_title)}</span>`:""}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-s btn-sm" onclick="previewDoc('${doc.id}')">👁 Ansehen</button>
+          <button class="btn btn-d btn-sm" onclick="deleteDocument('${doc.id}')">× Löschen</button>
+        </div>
+      </div>`).join("")}
+    </div>`}
+  </div>`;
+}
+
+// ── PREVIEW ──
+function renderPreview() {
+  const doc = STATE.previewDoc;
+  if (!doc) return `<div><button class="btn btn-s" onclick="nav('documents')">← Zurück</button></div>`;
+  return `<div class="fade">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button class="btn btn-g" onclick="nav('documents')">← Zurück</button>
+      <h2 style="font-family:var(--fd);font-size:20px;font-weight:700;flex:1">${esc(doc.name||"Lebenslauf")}</h2>
+      <button class="btn btn-p" onclick="printCV()">📑 Als PDF drucken</button>
+    </div>
+    <div id="preview-tabs" style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn btn-p btn-sm" id="tab-cv" onclick="switchTab('cv')">📄 Lebenslauf</button>
+      ${doc.cover_letter?`<button class="btn btn-s btn-sm" id="tab-letter" onclick="switchTab('letter')">📝 Anschreiben</button>`:""}
+    </div>
+    <div id="tab-content-cv">
+      <div class="cv-wrap">
+        <div class="cv-sheet" id="cv-sheet">
+          ${buildCVHTML(doc.profile_data, doc.template)}
+        </div>
+      </div>
+    </div>
+    ${doc.cover_letter?`<div id="tab-content-letter" style="display:none">
+      <div class="card" style="max-width:700px;margin:0 auto">
+        <div style="font-family:'Geist',sans-serif;line-height:1.8;white-space:pre-wrap;font-size:14px;color:var(--text2)">${esc(doc.cover_letter)}</div>
+      </div>
+    </div>`:""}
+  </div>`;
+}
+
+// ── PRICING ──
+function renderPricing() {
+  return `<div class="fade">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+      <button class="btn btn-g" onclick="nav('home')">← Zurück</button>
+      <h2 style="font-family:var(--fd);font-size:24px;font-weight:700">👑 Premium freischalten</h2>
+    </div>
+    <div style="text-align:center;margin-bottom:32px">
+      <p style="font-family:var(--fd);font-size:18px;margin-bottom:8px">Einmal bezahlen. Lebenslang nutzen.</p>
+      <p style="color:var(--muted)">Unbegrenzte Bewerbungen — für einen fairen Einmalpreis.</p>
+    </div>
+    <div class="grid2" style="max-width:600px;margin:0 auto 32px">
+      <div class="pc">
+        <div style="font-weight:700;font-size:18px;margin-bottom:6px">Free</div>
+        <div class="price-num" style="color:var(--text)">0 €</div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:18px">Immer kostenlos</div>
+        ${["1 Lebenslauf","Alle Vorlagen","KI-Generierung","PDF-Download"].map(f=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">✓ ${f}</div>`).join("")}
+        ${["Unbegrenzte Dokumente","Server-Speicherung"].map(f=>`<div style="font-size:13px;color:var(--muted2);margin-bottom:5px;text-decoration:line-through">✕ ${f}</div>`).join("")}
+      </div>
+      <div class="pc hot">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:700;font-size:18px">Premium</div>
+          <span class="tag tag-w">Empfohlen</span>
+        </div>
+        <div class="price-num">9,90 €</div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:18px">Einmalig · Lifetime</div>
+        ${["Unbegrenzte Lebensläufe","Unbegrenzte Anschreiben","Alle 3 Vorlagen","Serverseitige Speicherung","Priorität-Support"].map(f=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">✓ ${f}</div>`).join("")}
+        <button class="btn btn-p btn-full" style="margin-top:18px" onclick="startCheckout('lifetime')">
+          👑 Jetzt für 9,90 € freischalten
+        </button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Sichere Zahlung via Stripe</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:13px">
+      💳 Kreditkarte, SEPA-Lastschrift oder PayPal · Sofort-Freischaltung · Einmalig, kein Abo
+    </div>
+  </div>`;
+}
+
+// ── AUTH MODAL ──
+function renderAuthModal() {
+  return `<div class="overlay" onclick="if(event.target===this)closeAuth()">
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="font-family:var(--fd);font-size:24px;font-weight:700;color:var(--brand);margin-bottom:8px">BewerbungsKI</div>
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:6px">Anmelden / Registrieren</h2>
+        <p style="color:var(--muted);font-size:14px">Wir senden dir einen Magic Link per E-Mail — kein Passwort nötig.</p>
+      </div>
+      <div class="field" style="margin-bottom:16px">
+        <label class="label">E-Mail-Adresse</label>
+        <input class="input" type="email" id="auth-email" placeholder="deine@email.de" style="font-size:16px">
+      </div>
+      <button class="btn btn-p btn-full btn-lg" id="auth-btn" onclick="doMagicLink()">✉️ Magic Link senden</button>
+      <div id="auth-msg" style="margin-top:14px;text-align:center;font-size:14px;color:var(--ok);display:none"></div>
+      <div style="margin-top:20px;font-size:12px;color:var(--muted);text-align:center;line-height:1.5">
+        Mit der Anmeldung stimmst du unseren Nutzungsbedingungen zu.<br>Deine Daten werden sicher und DSGVO-konform gespeichert.
+      </div>
+      <button class="btn btn-g btn-sm" style="margin-top:12px;width:100%;justify-content:center" onclick="closeAuth()">Abbrechen</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// EVENT HANDLERS
+// ══════════════════════════════════════════════
+function attachEvents() {
+  // Data-field inputs (personal, jobad)
+  document.querySelectorAll("[data-field]").forEach(el => {
+    el.addEventListener("input", e => {
+      const path = e.target.getAttribute("data-field").split(".");
+      if (path.length === 2) STATE.formData[path[0]][path[1]] = e.target.value;
+    });
+  });
+
+  // Experience inputs
+  document.querySelectorAll("[data-exp]").forEach(el => {
+    el.addEventListener("change", e => {
+      const i = +e.target.getAttribute("data-exp");
+      const key = e.target.getAttribute("data-key");
+      STATE.formData.experience[i][key] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    });
+    el.addEventListener("input", e => {
+      const i = +e.target.getAttribute("data-exp");
+      const key = e.target.getAttribute("data-key");
+      if (e.target.type !== "checkbox") STATE.formData.experience[i][key] = e.target.value;
+    });
+  });
+
+  // Education inputs
+  document.querySelectorAll("[data-edu]").forEach(el => {
+    el.addEventListener("input", e => {
+      const i = +e.target.getAttribute("data-edu");
+      const key = e.target.getAttribute("data-key");
+      STATE.formData.education[i][key] = e.target.value;
+    });
+  });
+
+  // Language inputs
+  document.querySelectorAll("[data-lang]").forEach(el => {
+    el.addEventListener("change", e => {
+      const i = +e.target.getAttribute("data-lang");
+      const key = e.target.getAttribute("data-key");
+      STATE.formData.languages[i][key] = e.target.value;
+    });
+    el.addEventListener("input", e => {
+      const i = +e.target.getAttribute("data-lang");
+      const key = e.target.getAttribute("data-key");
+      STATE.formData.languages[i][key] = e.target.value;
+    });
+  });
+}
+
+// ── GLOBAL ACTIONS ──
+function nav(v) {
+  STATE.view = v; STATE.authModal = false;
+  if (v === "documents") loadDocuments();
+  render();
+}
+function goStep(i) { STATE.wizardStep = i; render(); }
+function nextStep() { if (STATE.wizardStep < STEPS.length-1) { STATE.wizardStep++; render(); } }
+function prevStep() { if (STATE.wizardStep > 0) { STATE.wizardStep--; render(); } }
+function selTemplate(t) { STATE.formData.template = t; render(); }
+function toggleTheme() {
+  STATE.theme = STATE.theme === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", STATE.theme);
+  document.getElementById("root").querySelectorAll(".nav")[0] && render();
+}
+
+function addExp() { STATE.formData.experience.push({id:Date.now(),company:"",position:"",start:"",end:"",current:false,description:""}); render(); }
+function delExp(i) { STATE.formData.experience.splice(i,1); render(); }
+function addEdu() { STATE.formData.education.push({id:Date.now(),institution:"",degree:"",field:"",start:"",end:"",grade:""}); render(); }
+function delEdu(i) { STATE.formData.education.splice(i,1); render(); }
+function addLang() { STATE.formData.languages.push({id:Date.now(),language:"",level:"B2"}); render(); }
+function delLang(i) { STATE.formData.languages.splice(i,1); render(); }
+function addSkill() {
+  const inp = document.getElementById("skill-input");
+  const sel = document.getElementById("skill-level");
+  if (!inp || !inp.value.trim()) return;
+  STATE.formData.skills.push({id:Date.now(),name:inp.value.trim(),level:+sel.value});
+  render();
+}
+function delSkill(i) { STATE.formData.skills.splice(i,1); render(); }
+
+function showAuth() { STATE.authModal = "login"; render(); }
+function closeAuth() { STATE.authModal = false; render(); }
+
+async function doMagicLink() {
+  const email = document.getElementById("auth-email")?.value?.trim();
+  if (!email) { toast("Bitte E-Mail eingeben.", "err"); return; }
+  const btn = document.getElementById("auth-btn");
+  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Sende …`; }
+  try {
+    await sendMagicLink(email);
+    const msg = document.getElementById("auth-msg");
+    if (msg) { msg.style.display = "block"; msg.innerHTML = "✓ Magic Link gesendet! Prüfe dein E-Mail-Postfach."; }
+    if (btn) btn.style.display = "none";
+  } catch(e) {
+    toast("Fehler: " + e.message, "err");
+    if (btn) { btn.disabled = false; btn.innerHTML = "✉️ Magic Link senden"; }
+  }
+}
+
+async function previewDoc(id) {
+  try {
+    const doc = await api("/api/documents?id=" + id);
+    STATE.previewDoc = doc;
+    STATE.view = "preview";
+    render();
+  } catch(e) { toast("Dokument konnte nicht geladen werden.", "err"); }
+}
+
+function switchTab(tab) {
+  const cvEl = document.getElementById("tab-content-cv");
+  const lEl = document.getElementById("tab-content-letter");
+  const btnCv = document.getElementById("tab-cv");
+  const btnL = document.getElementById("tab-letter");
+  if (tab === "cv") {
+    if (cvEl) cvEl.style.display = "block";
+    if (lEl) lEl.style.display = "none";
+    if (btnCv) { btnCv.className = "btn btn-p btn-sm"; }
+    if (btnL) { btnL.className = "btn btn-s btn-sm"; }
+  } else {
+    if (cvEl) cvEl.style.display = "none";
+    if (lEl) lEl.style.display = "block";
+    if (btnCv) { btnCv.className = "btn btn-s btn-sm"; }
+    if (btnL) { btnL.className = "btn btn-p btn-sm"; }
+  }
+}
+
+function printCV() {
+  const doc = STATE.previewDoc;
+  if (!doc) return;
+  const w = window.open("", "_blank");
+  const html = buildCVHTML(doc.profile_data, doc.template);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Lebenslauf – ${doc.name||""}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Geist',sans-serif;color:#111;background:white}@page{size:A4;margin:0}@media print{body{margin:0}}</style>
+  </head><body>${html}</body></html>`);
+  w.document.close();
+  setTimeout(()=>{w.focus();w.print();}, 800);
+}
+
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// ── CHECK SUCCESS PAGE ──
+if (window.location.search.includes("session_id=")) {
+  toast("🎉 Zahlung erfolgreich! Premium ist jetzt aktiv.", "ok");
+  window.history.replaceState({}, "", "/");
+}
+
+// ── INIT ──
+initAuth().then(() => render());
+</script>
+</body>
+</html>

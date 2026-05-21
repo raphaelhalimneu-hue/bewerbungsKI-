@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "BewerbungsKI"
+version = "1.0.0"
+id = "artifacts/bewerbungski"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24163
+
+[services.development]
+run = "pnpm --filter @workspace/bewerbungski run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bewerbungski", "run", "build" ]
+publicDir = "artifacts/bewerbungski/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24163"
+BASE_PATH = "/"
