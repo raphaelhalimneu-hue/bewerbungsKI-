@@ -8,7 +8,7 @@ export default function Documents() {
   const { user, setShowAuthModal } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { data: docs = [], refetch } = useListDocuments({ query: { enabled: !!user } });
+  const { data: docs = [], refetch } = useListDocuments({ query: { enabled: !!user } as any });
   const deleteMutation = useDeleteDocument();
 
   async function handleDelete(id: string) {

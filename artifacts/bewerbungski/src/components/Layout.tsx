@@ -8,6 +8,7 @@ import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut } fro
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { user, profile, signOut, setShowAuthModal } = useAuth();
+  const p = profile as any;
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -25,9 +26,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {user ? (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-[var(--text2)] hidden sm:block">
-                {profile?.email || user.email}
+                {p?.email || user.email}
               </span>
-              {profile?.is_premium && (
+              {p?.is_premium && (
                 <span className="tag tag-ok shrink-0">Premium</span>
               )}
               <button onClick={signOut} className="btn-g flex items-center justify-center p-2 rounded-lg" title="Abmelden">
@@ -65,24 +66,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="mt-auto pt-4">
             <Link href="/pricing">
               <button className={`si ${location === "/pricing" ? "on" : ""}`}>
-                <FiStar size={18} className={profile?.is_premium ? "text-[var(--warn)]" : ""} /> 
-                {profile?.is_premium ? "Premium aktiv" : "Premium holen"}
+                <FiStar size={18} className={p?.is_premium ? "text-[var(--warn)]" : ""} /> 
+                {p?.is_premium ? "Premium aktiv" : "Premium holen"}
               </button>
             </Link>
             
-            {!profile?.is_premium && (
+            {!p?.is_premium && (
               <div className="mt-3 p-4 bg-[var(--bg3)] rounded-[12px] border border-[var(--border)]">
                 <div className="text-[13px] font-bold mb-1">Free-Plan</div>
                 <div className="text-[12px] text-[var(--muted)] mb-3">
-                  {profile?.documents_count || 0} / 1 Bewerbung
+                  {p?.documents_count || 0} / 1 Bewerbung
                 </div>
                 <div className="prog">
                   <div 
                     className="prog-fill" 
-                    style={{ width: `${Math.min(100, ((profile?.documents_count || 0) / 1) * 100)}%` }}
+                    style={{ width: `${Math.min(100, ((p?.documents_count || 0) / 1) * 100)}%` }}
                   />
                 </div>
-                {((profile?.documents_count || 0) >= 1) && (
+                {((p?.documents_count || 0) >= 1) && (
                   <Link href="/pricing">
                     <button className="btn btn-p btn-sm btn-full mt-3">Upgrade</button>
                   </Link>

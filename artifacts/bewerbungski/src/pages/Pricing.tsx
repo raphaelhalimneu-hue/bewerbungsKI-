@@ -12,7 +12,7 @@ export default function Pricing() {
     if (!user) { setShowAuthModal(true); return; }
     try {
       toast({ title: "Weiterleitung zu Stripe …" });
-      const res = await checkoutMutation.mutateAsync({});
+      const res = await checkoutMutation.mutateAsync({ data: { plan: "premium" } });
       if ((res as any).url) window.location.href = (res as any).url;
     } catch (e: any) {
       toast({ title: "Fehler", description: e.message, variant: "destructive" });
@@ -66,7 +66,7 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            {profile?.is_premium ? (
+            {(profile as any)?.is_premium ? (
               <div style={{ background: "#dcfce7", color: "var(--ok)", borderRadius: 10, padding: "12px 20px", textAlign: "center", fontWeight: 600, fontSize: 14 }}>
                 ✓ Premium aktiv
               </div>

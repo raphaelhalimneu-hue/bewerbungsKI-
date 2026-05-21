@@ -100,25 +100,25 @@ export default function Wizard() {
     setGenerating(true);
     try {
       setGenPhase("Lebenslauf wird generiert …");
-      const cvRes = await generateMutation.mutateAsync({
+      const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte nur mit HTML-Inhalt, kein Wrapper.",
         userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen.`,
-      });
+      } });
 
       let letterText = "";
       if (form.jobad.title || form.jobad.description) {
         setGenPhase("Anschreiben wird generiert …");
-        const letterRes = await generateMutation.mutateAsync({
+        const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe nur den Anschreiben-Text ohne HTML.",
           userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter.`,
-        });
+        } });
         letterText = letterRes.result;
       }
 
       setGenPhase("Dokument wird gespeichert …");
-      await createMutation.mutateAsync({
+      await createMutation.mutateAsync({ data: {
         name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
         template: form.template,
         profileData: form as unknown as Record<string, unknown>,
@@ -126,7 +126,7 @@ export default function Wizard() {
         coverLetter: letterText,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
-      });
+      } });
 
       toast({ title: "Bewerbung erfolgreich erstellt!" });
       navigate("/documents");
