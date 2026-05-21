@@ -1,44 +1,82 @@
-# [Project name]
+# BewerbungsKI
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+AI-powered German job application platform that generates professional CVs and cover letters in minutes, optimized for the German job market.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
+- `pnpm --filter @workspace/bewerbungski run dev` — run the React frontend (port 24163)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
+- Frontend: React + Vite (Tailwind CSS, wouter routing, TanStack Query)
+- API: Express 5 (port 8080, path `/api`)
 - DB: PostgreSQL + Drizzle ORM
+- Auth: Supabase magic-link (no password)
+- AI: Anthropic Claude (CV + cover letter generation)
+- Payments: Stripe checkout (€9.90 one-time lifetime premium)
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/bewerbungski/src/` — React frontend
+  - `pages/` — Home, Wizard, Documents, Preview, Pricing
+  - `context/` — AuthContext (Supabase), ThemeContext (dark/light)
+  - `components/Layout.tsx` — Nav + Sidebar shell
+  - `components/AuthModal.tsx` — Magic link sign-in dialog
+  - `lib/buildCVHTML.ts` — CV template renderer (modern/classic/creative)
+  - `lib/supabase.ts` — Supabase client
+- `artifacts/api-server/src/routes/` — Express routes: me, generate, documents, checkout, webhook/stripe
+- `artifacts/api-server/src/middlewares/auth.ts` — Supabase JWT verification
+- `lib/db/src/schema/documents.ts` — DB schema: `profiles`, `documents`
+- `lib/api-client-react/src/generated/api.ts` — Generated React Query hooks
+- `lib/api-spec/` — OpenAPI spec source of truth
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Contract-first API: OpenAPI spec → Orval codegen → typed React Query hooks
+- Supabase magic-link auth: no passwords, frontend obtains JWT, passes to API as Bearer token
+- Free plan: 1 document per user; Premium (€9.90 one-time) unlocks unlimited via Stripe checkout
+- CV templates rendered as raw HTML strings (injected via `dangerouslySetInnerHTML`) for exact print fidelity
+- All German UI text, optimized for DACH job market conventions (DIN-style CVs)
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+BewerbungsKI helps German job seekers create tailored CVs and cover letters using Claude AI. Users fill an 8-step wizard (personal data, experience, education, skills, languages, job ad, template, generate), the AI generates professional German documents, and they're saved to the user's account for viewing and printing.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- All UI text in German
+- Brand: `--brand: #1a56db` (blue), fonts: Geist (body) + Fraunces (display)
+- Dark mode supported via `data-theme="dark"` on `<html>`
+
+## Required env vars
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `DATABASE_URL` | shared | Postgres connection |
+| `SUPABASE_URL` | shared | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | secret | Verify JWTs server-side |
+| `VITE_SUPABASE_URL` | shared | Supabase URL for browser |
+| `VITE_SUPABASE_ANON_KEY` | shared | Supabase anon key for browser |
+| `ANTHROPIC_API_KEY` | secret | Claude AI generation |
+| `STRIPE_SECRET_KEY` | secret | Stripe checkout |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | shared | Stripe frontend |
+| `SESSION_SECRET` | secret | Express session |
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run `pnpm --filter @workspace/db run push` after any schema change
+- Run `pnpm --filter @workspace/api-spec run codegen` after editing the OpenAPI spec
+- The Vite dev server uses `PORT` env var — don't hardcode port in vite.config.ts
+- `setAuthTokenGetter` must be called in AuthContext after each session change to wire auth into API calls
 
 ## Pointers
 
