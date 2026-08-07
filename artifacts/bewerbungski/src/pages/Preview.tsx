@@ -2,10 +2,12 @@ import { useRef, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { Layout } from "../components/Layout";
 import { useGetDocument } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export default function Preview() {
+  const { t } = useTranslation();
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
@@ -66,7 +68,7 @@ export default function Preview() {
     <Layout>
       <div className="fade">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-          <button className="btn btn-g" onClick={() => navigate("/documents")}>← Zurück</button>
+          <button className="btn btn-g" onClick={() => navigate("/documents")}>{t("preview.back")}</button>
           {doc && (
             <>
               <h2 style={{ fontFamily: "var(--fd)", fontSize: 20, fontWeight: 700, flex: 1, minWidth: 0 }}>
@@ -74,7 +76,7 @@ export default function Preview() {
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                 <button className="btn btn-s btn-sm" onClick={() => window.print()}>
-                  🖨 Drucken
+                  {t("preview.print")}
                 </button>
                 <button
                   className="btn btn-p btn-sm"
@@ -83,9 +85,9 @@ export default function Preview() {
                   style={{ minWidth: 140 }}
                 >
                   {exporting ? (
-                    <><span className="spin" /> PDF wird erstellt …</>
+                    <><span className="spin" /> {t("preview.creatingPdf")}</>
                   ) : (
-                    <>⬇ PDF herunterladen</>
+                    <>{t("preview.downloadPdf")}</>
                   )}
                 </button>
               </div>
@@ -95,13 +97,13 @@ export default function Preview() {
 
         {isLoading && (
           <div style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>
-            <span className="spin" /> Lädt …
+            <span className="spin" /> {t("preview.loading")}
           </div>
         )}
 
         {error && (
           <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: 20, color: "var(--err)" }}>
-            Dokument konnte nicht geladen werden.
+            {t("preview.loadError")}
           </div>
         )}
 
@@ -109,7 +111,7 @@ export default function Preview() {
           <>
             <div style={{ marginBottom: 24 }}>
               <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700, marginBottom: 10 }}>
-                📋 Lebenslauf
+                {t("preview.cv")}
               </h3>
               <div className="cv-wrap">
                 <div
@@ -123,7 +125,7 @@ export default function Preview() {
             {(doc as any).cover_letter && (
               <div>
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700, marginBottom: 10 }}>
-                  ✉️ Anschreiben
+                  {t("preview.coverLetter")}
                 </h3>
                 <div
                   className="card"

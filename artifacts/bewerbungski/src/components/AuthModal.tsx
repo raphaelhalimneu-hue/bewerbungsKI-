@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation, Trans } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ export function AuthModal() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,13 +22,13 @@ export function AuthModal() {
       await signIn(email);
       setSent(true);
       toast({
-        title: "E-Mail wurde versendet ✓",
-        description: "Bitte überprüfe deinen Posteingang.",
+        title: t("auth.sentToast"),
+        description: t("auth.sentToastDesc"),
       });
     } catch (error: any) {
       toast({
-        title: "Fehler",
-        description: error.message || "Ein Fehler ist aufgetreten.",
+        title: t("auth.errorTitle"),
+        description: error.message || t("auth.errorGeneric"),
         variant: "destructive",
       });
     } finally {
@@ -38,23 +40,23 @@ export function AuthModal() {
     <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
       <DialogContent className="sm:max-w-[420px] bg-[var(--bg2)] border-[var(--border)] shadow-[var(--sh-lg)] rounded-[var(--r-lg)] p-8">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center mb-2">Anmelden / Registrieren</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center mb-2">{t("auth.title")}</DialogTitle>
           <DialogDescription className="text-center text-[var(--muted)] mb-6">
-            Logge dich mit deiner E-Mail-Adresse ein. Kein Passwort nötig.
+            {t("auth.description")}
           </DialogDescription>
         </DialogHeader>
 
         {sent ? (
           <div className="text-center p-6 bg-[var(--brand-l)] text-[var(--brand)] rounded-[var(--r)] mb-4 font-medium">
-            ✨ Magischer Link wurde an <strong>{email}</strong> gesendet.
+            <Trans i18nKey="auth.sentTo" values={{ email }} components={{ 1: <strong /> }} />
           </div>
         ) : (
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="field">
-              <Label className="label">E-Mail Adresse</Label>
+              <Label className="label">{t("auth.emailLabel")}</Label>
               <Input
                 type="email"
-                placeholder="max.mustermann@email.de"
+                placeholder={t("auth.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -67,7 +69,7 @@ export function AuthModal() {
               disabled={loading || !email}
             >
               {loading ? <span className="spin" /> : null}
-              {loading ? "Wird gesendet..." : "Magic Link senden"}
+              {loading ? t("auth.sending") : t("auth.send")}
             </button>
           </form>
         )}
