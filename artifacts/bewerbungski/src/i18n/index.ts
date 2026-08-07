@@ -11,16 +11,10 @@ import uk from "./locales/uk.json";
 import ru from "./locales/ru.json";
 import pl from "./locales/pl.json";
 
-export const LANGUAGES: { code: string; label: string; flag: string; rtl?: boolean }[] = [
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "tr", label: "Türkçe", flag: "🇹🇷" },
-  { code: "ar", label: "العربية", flag: "🇸🇦", rtl: true },
-  { code: "uk", label: "Українська", flag: "🇺🇦" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
-  { code: "pl", label: "Polski", flag: "🇵🇱" },
-];
+import { LANGUAGES } from "./languages";
+import { pathWithoutLang, pathForLang } from "../lib/basePath";
+
+export { LANGUAGES };
 
 i18n
   .use(LanguageDetector)
@@ -45,13 +39,66 @@ i18n
     },
   });
 
-function applyDirection(lng: string) {
+const CANONICAL_ORIGIN = "https://web-production-c5abc.up.railway.app";
+
+function upsertMeta(attr: "name" | "property", key: string, content: string) {
+  let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function applyLocaleHead(lng: string) {
   const rtl = LANGUAGES.find(l => l.code === lng)?.rtl === true;
   document.documentElement.dir = rtl ? "rtl" : "ltr";
   document.documentElement.lang = lng;
+
+  // Localized title + description
+  const title = i18n.t("seo.title");
+  const desc = i18n.t("seo.description");
+  document.title = title;
+  upsertMeta("name", "description", desc);
+  upsertMeta("property", "og:title", title);
+  upsertMeta("property", "og:description", desc);
+  upsertMeta("name", "twitter:title", title);
+  upsertMeta("name", "twitter:description", desc);
+
+  // hreflang alternates + canonical for the current page.
+  // German lives at the root; other languages under /<code>.
+  const rest = pathWithoutLang();
+
+  document.head.querySelectorAll('link[rel="alternate"][hreflang], link[rel="canonical"]').forEach(el => el.remove());
+
+  const urlFor = (code: string) => CANONICAL_ORIGIN + pathForLang(code, rest);
+
+  for (const l of LANGUAGES) {
+    const link = document.createElement("link");
+    link.rel = "alternate";
+    link.hreflang = l.code;
+    link.href = urlFor(l.code);
+    document.head.appendChild(link);
+  }
+  const xDefault = document.createElement("link");
+  xDefault.rel = "alternate";
+  xDefault.hreflang = "x-default";
+  xDefault.href = urlFor("de");
+  document.head.appendChild(xDefault);
+
+  const canonical = document.createElement("link");
+  canonical.rel = "canonical";
+  canonical.href = urlFor(lng);
+  document.head.appendChild(canonical);
 }
 
-applyDirection(i18n.resolvedLanguage || "de");
-i18n.on("languageChanged", applyDirection);
+/** Re-apply title/canonical/hreflang for the current URL and language. */
+export function updateLocaleHead() {
+  applyLocaleHead(i18n.resolvedLanguage || "de");
+}
+
+updateLocaleHead();
+i18n.on("languageChanged", applyLocaleHead);
 
 export default i18n;

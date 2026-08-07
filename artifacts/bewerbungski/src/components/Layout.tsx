@@ -5,11 +5,18 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { AuthModal } from "./AuthModal";
 import { LANGUAGES } from "../i18n";
+import { appBase, pathForLang } from "../lib/basePath";
 import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiGlobe } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
   const current = i18n.resolvedLanguage || "de";
+
+  function switchTo(code: string) {
+    try { localStorage.setItem("i18nextLng", code); } catch { /* private mode */ }
+    // Strip any existing language prefix, add the new one (German = root).
+    window.location.assign(appBase + pathForLang(code) + window.location.search);
+  }
   return (
     <div className="flex items-center gap-1.5" title={t("nav.language")}>
       <FiGlobe size={16} className="text-[var(--muted)] hidden sm:block" />
@@ -17,7 +24,7 @@ function LanguageSwitcher() {
         className="select"
         style={{ padding: "6px 8px", fontSize: 13, width: "auto", cursor: "pointer" }}
         value={current}
-        onChange={e => i18n.changeLanguage(e.target.value)}
+        onChange={e => switchTo(e.target.value)}
         aria-label={t("nav.language")}
       >
         {LANGUAGES.map(l => (

@@ -227,5 +227,9 @@
     "title": "404 – Sayfa bulunamadı",
     "text": "Bu sayfa mevcut değil. Ana sayfaya dön?",
     "home": "Ana sayfaya git"
+  },
+  "seo": {
+    "title": "BewerbungsKI – Almanya'da iş için yapay zekâ ile CV ve ön yazı",
+    "description": "Yapay zekâ ile 3 dakikada Almanca CV ve ön yazı oluştur – iş ilanına göre özel hazırlanır. Almanya'da iş başvurusu için ideal."
   }
 }

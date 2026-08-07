@@ -227,5 +227,9 @@
     "title": "404 – Page not found",
     "text": "This page doesn't exist. Back to the homepage?",
     "home": "Go to homepage"
+  },
+  "seo": {
+    "title": "BewerbungsKI – AI CV & Cover Letter for Jobs in Germany",
+    "description": "Create a professional German CV and cover letter in 3 minutes with AI – perfectly tailored to the job posting. Ideal for applying to jobs in Germany."
   }
 }

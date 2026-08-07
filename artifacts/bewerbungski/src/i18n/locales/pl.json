@@ -227,5 +227,9 @@
     "title": "404 – Nie znaleziono strony",
     "text": "Ta strona nie istnieje. Wrócić na stronę główną?",
     "home": "Przejdź na stronę główną"
+  },
+  "seo": {
+    "title": "BewerbungsKI – CV i list motywacyjny z AI do pracy w Niemczech",
+    "description": "Stwórz w 3 minuty profesjonalne niemieckie CV i list motywacyjny z pomocą AI – dopasowane do ogłoszenia o pracę. Idealne do aplikowania w Niemczech."
   }
 }

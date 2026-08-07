@@ -227,5 +227,9 @@
     "title": "404 – Seite nicht gefunden",
     "text": "Diese Seite existiert nicht. Zurück zur Startseite?",
     "home": "Zur Startseite"
+  },
+  "seo": {
+    "title": "BewerbungsKI – Lebenslauf & Anschreiben mit KI erstellen",
+    "description": "Erstelle in 3 Minuten professionelle deutsche Bewerbungen: Lebenslauf und Anschreiben mit KI, perfekt auf die Stellenanzeige zugeschnitten. DIN-gerecht & ATS-optimiert."
   }
 }
