@@ -12,6 +12,7 @@ export function AuthModal() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -20,6 +21,7 @@ export function AuthModal() {
     if (!email || !password) return;
     try {
       setLoading(true);
+      setErrorMsg(null);
       if (isSignUp) {
         await signUp(email, password);
         toast({ title: t("auth.successSignUp") });
@@ -29,17 +31,14 @@ export function AuthModal() {
       }
       setShowAuthModal(false);
     } catch (error: any) {
+      const raw = error.message || "";
       const msg =
-        error.message === "EMAIL_EXISTS"
+        raw === "EMAIL_EXISTS" || /already registered/i.test(raw)
           ? t("auth.emailExists")
-          : /invalid login credentials/i.test(error.message || "")
+          : /invalid login credentials/i.test(raw)
             ? t("auth.wrongCredentials")
-            : error.message || t("auth.errorGeneric");
-      toast({
-        title: t("auth.errorTitle"),
-        description: msg,
-        variant: "destructive",
-      });
+            : raw || t("auth.errorGeneric");
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -56,6 +55,12 @@ export function AuthModal() {
             {t("auth.description")}
           </DialogDescription>
         </DialogHeader>
+
+        {errorMsg && (
+          <div className="mb-4 rounded-[var(--r)] border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {errorMsg}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="field">
