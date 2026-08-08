@@ -43,7 +43,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.3-70b-versatile",
         max_tokens: 8192,
         messages: [
           { role: "system", content: systemPrompt },
