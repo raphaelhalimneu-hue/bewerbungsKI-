@@ -36,25 +36,42 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       return;
     }
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 8192,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+    const callGroq = () =>
+      fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          max_tokens: 4096,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      });
+
+    let response = await callGroq();
+
+    // Bei Rate-Limit (429): empfohlene Wartezeit lesen und einmal erneut versuchen
+    if (response.status === 429) {
+      const errText = await response.text();
+      const match = /try again in (\d+(?:\.\d+)?)s/i.exec(errText);
+      const waitSec = Math.min(match ? parseFloat(match[1]) + 1 : 25, 40);
+      req.log.warn({ waitSec }, "Groq rate limit, retrying once");
+      await new Promise((r) => setTimeout(r, waitSec * 1000));
+      response = await callGroq();
+    }
 
     if (!response.ok) {
       const errText = await response.text();
       req.log.error({ status: response.status, body: errText }, "Groq API error");
+      if (response.status === 429) {
+        res.status(503).json({ error: "busy_try_again" });
+        return;
+      }
       res.status(500).json({ error: "Generation failed" });
       return;
     }
