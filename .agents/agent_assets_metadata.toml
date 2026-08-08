@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "fuWwks0pa_vtCoIRvb179"
+uri = "file://attached_assets/BewerbungsKI_Wichtige_Daten.docx"
+type = "word_document"
+title = "BewerbungsKI – Wichtige Daten"
+description = "Alle wichtigen Infos zu deiner Webseite: Adresse, Login, Preis, Technik und Tipps – als Word-Dokument zum Herunterladen."
