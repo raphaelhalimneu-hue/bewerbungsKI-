@@ -1,0 +1,78 @@
+BEWERBUNGSKI – ALLE WICHTIGEN DATEN
+Stand: 8. August 2026
+====================================
+
+
+1. DEINE WEBSEITE
+-----------------
+Adresse (Link für Kunden):
+https://web-production-c5abc.up.railway.app
+
+Sprachversionen:
+- Englisch:    .../en
+- Türkisch:    .../tr
+- Arabisch:    .../ar
+- Ukrainisch:  .../uk
+- Russisch:    .../ru
+- Polnisch:    .../pl
+- Spanisch:    .../es
+
+
+2. DEIN TEST-LOGIN IN DER APP
+------------------------------
+E-Mail:   raphaelhalimneu+app@gmail.com
+Passwort: Bewerbung2026!
+
+ACHTUNG: raphaelhalimneu@gmail.com funktioniert NICHT
+(stammt aus dem alten Anmeldesystem).
+
+Neue Kunden registrieren sich mit E-Mail + Passwort –
+keine Bestätigungs-Mail nötig.
+
+
+3. PREIS UND BEZAHLUNG
+-----------------------
+Preis: 9,90 € einmalig (kein Abo)
+Zahlung über Stripe (Live-Modus – echtes Geld)
+Eingehende Zahlungen siehst du auf:
+→ dashboard.stripe.com
+→ oder in der Stripe-App
+
+Gratis: 1 Dokument speichern, danach kommt die Kaufaufforderung.
+
+
+4. TECHNIK (WO ALLES LÄUFT)
+-----------------------------
+Hosting:        railway.com         (Konto: dein Login)
+Kundendaten:    supabase.com        (Konto: raphaelhalimneu@gmail.com)
+KI (kostenlos): console.groq.com   (dein Konto dort)
+Bezahlung:      dashboard.stripe.com
+
+
+5. ⚠️ WICHTIG – JEDE WOCHE TUN
+---------------------------------
+Mindestens 1x pro Woche auf supabase.com einloggen!
+Sonst pausiert Supabase automatisch →
+dann funktionieren Anmeldung und Bezahlung auf deiner Seite NICHT.
+
+
+6. TIPPS FÜR DICH
+------------------
+- Zum Testen: Adresse direkt in Chrome eintippen, nicht im Facebook-Fenster öffnen.
+- In Chrome: drei Punkte oben rechts → „Zum Startbildschirm hinzufügen" 
+  → BewerbungsKI liegt dann wie eine App auf dem Handy.
+- Wenn ein Kunde Probleme mit der Zahlung hat: 
+  Seite in Chrome/Safari öffnen statt im Facebook-Browser.
+- Bewerbungs-Erstellung kann bis zu 1 Minute dauern – das ist normal.
+
+
+7. WENN ETWAS NICHT GEHT
+--------------------------
+- Rote Fehlermeldung? → Screenshot machen und mir schicken.
+- „KI ausgelastet"? → 1–2 Minuten warten, nochmal versuchen.
+- Kunden können sich nicht anmelden? → 
+  Prüfe ob Supabase noch aktiv ist (supabase.com einloggen).
+
+
+====================================
+Diese Datei gut speichern – alle wichtigen Infos auf einen Blick!

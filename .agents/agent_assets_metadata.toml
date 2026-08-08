@@ -7,3 +7,10 @@ uri = "file://attached_assets/BewerbungsKI_Wichtige_Daten.docx"
 type = "word_document"
 title = "BewerbungsKI – Wichtige Daten"
 description = "Alle wichtigen Infos zu deiner Webseite: Adresse, Login, Preis, Technik und Tipps – als Word-Dokument zum Herunterladen."
+
+[[outputs]]
+id = "QllEr7odYsU3uMhJdrxcO"
+uri = "file://attached_assets/BewerbungsKI_Wichtige_Daten.txt"
+type = "text"
+title = "BewerbungsKI – Wichtige Daten"
+description = "Alle wichtigen Infos: Adresse, Login, Preis, Technik und Tipps."
