@@ -49,7 +49,9 @@
     "successSignIn": "Welcome back! ✓",
     "successSignUp": "Account created! ✓",
     "errorTitle": "Error",
-    "errorGeneric": "An error occurred."
+    "errorGeneric": "An error occurred.",
+    "emailExists": "This email is already registered. Please sign in – or use a different email.",
+    "wrongCredentials": "Email or password is incorrect."
   },
   "pricing": {
     "title": "Simple, fair pricing",

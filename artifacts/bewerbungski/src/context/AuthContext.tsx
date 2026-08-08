@@ -69,8 +69,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+    if (!data.session) {
+      // E-Mail existiert bereits (Supabase liefert dann keinen Login) – Anmeldung versuchen
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        throw new Error("EMAIL_EXISTS");
+      }
+    }
   };
 
   const signOut = async () => {

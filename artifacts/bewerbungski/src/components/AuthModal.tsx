@@ -29,9 +29,15 @@ export function AuthModal() {
       }
       setShowAuthModal(false);
     } catch (error: any) {
+      const msg =
+        error.message === "EMAIL_EXISTS"
+          ? t("auth.emailExists")
+          : /invalid login credentials/i.test(error.message || "")
+            ? t("auth.wrongCredentials")
+            : error.message || t("auth.errorGeneric");
       toast({
         title: t("auth.errorTitle"),
-        description: error.message || t("auth.errorGeneric"),
+        description: msg,
         variant: "destructive",
       });
     } finally {

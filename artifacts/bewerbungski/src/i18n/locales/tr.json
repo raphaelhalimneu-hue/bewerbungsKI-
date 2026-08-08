@@ -49,7 +49,9 @@
     "successSignIn": "Tekrar hoş geldin! ✓",
     "successSignUp": "Hesap oluşturuldu! ✓",
     "errorTitle": "Hata",
-    "errorGeneric": "Bir hata oluştu."
+    "errorGeneric": "Bir hata oluştu.",
+    "emailExists": "Bu e-posta zaten kayıtlı. Lütfen giriş yap – veya başka bir e-posta kullan.",
+    "wrongCredentials": "E-posta veya şifre yanlış."
   },
   "pricing": {
     "title": "Basit ve adil fiyatlar",

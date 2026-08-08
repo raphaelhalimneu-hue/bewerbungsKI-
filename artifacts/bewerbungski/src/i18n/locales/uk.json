@@ -49,7 +49,9 @@
     "successSignIn": "З поверненням! ✓",
     "successSignUp": "Акаунт створено! ✓",
     "errorTitle": "Помилка",
-    "errorGeneric": "Сталася помилка."
+    "errorGeneric": "Сталася помилка.",
+    "emailExists": "Ця пошта вже зареєстрована. Увійди або використай іншу пошту.",
+    "wrongCredentials": "Невірна пошта або пароль."
   },
   "pricing": {
     "title": "Прості й чесні ціни",

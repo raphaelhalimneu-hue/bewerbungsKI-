@@ -49,7 +49,9 @@
     "successSignIn": "¡Bienvenido de nuevo! ✓",
     "successSignUp": "¡Cuenta creada! ✓",
     "errorTitle": "Error",
-    "errorGeneric": "Se ha producido un error."
+    "errorGeneric": "Se ha producido un error.",
+    "emailExists": "Este correo ya está registrado. Inicia sesión o usa otro correo.",
+    "wrongCredentials": "El correo o la contraseña son incorrectos."
   },
   "pricing": {
     "title": "Precios sencillos y justos",
