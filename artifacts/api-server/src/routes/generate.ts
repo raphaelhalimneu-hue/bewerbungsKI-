@@ -1,5 +1,4 @@
 import { Router } from "express";
-import Anthropic from "@anthropic-ai/sdk";
 import { db, profilesTable, documentsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
@@ -31,26 +30,40 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       }
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      res.status(503).json({ error: "AI generation not configured. Please set ANTHROPIC_API_KEY." });
+      res.status(503).json({ error: "AI generation not configured. Please set GROQ_API_KEY." });
       return;
     }
 
-    const client = new Anthropic({ apiKey });
-
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 8192,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-70b-versatile",
+        max_tokens: 8192,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
     });
 
-    const result = message.content
-      .filter((b) => b.type === "text")
-      .map((b) => (b as { type: "text"; text: string }).text)
-      .join("");
+    if (!response.ok) {
+      const errText = await response.text();
+      req.log.error({ status: response.status, body: errText }, "Groq API error");
+      res.status(500).json({ error: "Generation failed" });
+      return;
+    }
 
+    const data = await response.json() as {
+      choices: Array<{ message: { content: string } }>;
+    };
+
+    const result = data.choices?.[0]?.message?.content ?? "";
     res.json({ result });
   } catch (err) {
     req.log.error({ err }, "POST /generate error");
