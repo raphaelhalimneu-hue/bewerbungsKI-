@@ -1,30 +1,33 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 export function AuthModal() {
-  const { showAuthModal, setShowAuthModal, signIn } = useAuth();
+  const { showAuthModal, setShowAuthModal, signIn, signUp } = useAuth();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !password) return;
     try {
       setLoading(true);
-      await signIn(email);
-      setSent(true);
-      toast({
-        title: t("auth.sentToast"),
-        description: t("auth.sentToastDesc"),
-      });
+      if (isSignUp) {
+        await signUp(email, password);
+        toast({ title: t("auth.successSignUp") });
+      } else {
+        await signIn(email, password);
+        toast({ title: t("auth.successSignIn") });
+      }
+      setShowAuthModal(false);
     } catch (error: any) {
       toast({
         title: t("auth.errorTitle"),
@@ -40,39 +43,57 @@ export function AuthModal() {
     <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
       <DialogContent className="sm:max-w-[420px] bg-[var(--bg2)] border-[var(--border)] shadow-[var(--sh-lg)] rounded-[var(--r-lg)] p-8">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center mb-2">{t("auth.title")}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center mb-2">
+            {isSignUp ? t("auth.titleSignUp") : t("auth.titleSignIn")}
+          </DialogTitle>
           <DialogDescription className="text-center text-[var(--muted)] mb-6">
             {t("auth.description")}
           </DialogDescription>
         </DialogHeader>
 
-        {sent ? (
-          <div className="text-center p-6 bg-[var(--brand-l)] text-[var(--brand)] rounded-[var(--r)] mb-4 font-medium">
-            <Trans i18nKey="auth.sentTo" values={{ email }} components={{ 1: <strong /> }} />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="field">
+            <Label className="label">{t("auth.emailLabel")}</Label>
+            <Input
+              type="email"
+              placeholder={t("auth.emailPlaceholder")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="input"
+            />
           </div>
-        ) : (
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div className="field">
-              <Label className="label">{t("auth.emailLabel")}</Label>
-              <Input
-                type="email"
-                placeholder={t("auth.emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="input"
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-p btn-full"
-              disabled={loading || !email}
-            >
-              {loading ? <span className="spin" /> : null}
-              {loading ? t("auth.sending") : t("auth.send")}
-            </button>
-          </form>
-        )}
+          <div className="field">
+            <Label className="label">{t("auth.passwordLabel")}</Label>
+            <Input
+              type="password"
+              placeholder={t("auth.passwordPlaceholder")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="input"
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-p btn-full"
+            disabled={loading || !email || !password}
+          >
+            {loading ? <span className="spin" /> : null}
+            {loading
+              ? (isSignUp ? t("auth.signingUp") : t("auth.signingIn"))
+              : (isSignUp ? t("auth.signUp") : t("auth.signIn"))}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          className="w-full text-center text-sm text-[var(--muted)] mt-2 hover:text-[var(--brand)] transition-colors"
+          onClick={() => setIsSignUp(!isSignUp)}
+        >
+          {isSignUp ? t("auth.toggleToSignIn") : t("auth.toggleToSignUp")}
+        </button>
       </DialogContent>
     </Dialog>
   );

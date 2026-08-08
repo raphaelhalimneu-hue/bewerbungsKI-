@@ -8,7 +8,8 @@ interface AuthContextType {
   session: Session | null;
   profile: ReturnType<typeof useGetMe>["data"] | null;
   loading: boolean;
-  signIn: (email: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
@@ -22,7 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // We use the useGetMe hook conditionally
   const { data: profile, refetch: refetchProfile } = useGetMe({
     query: {
       enabled: !!session?.access_token,
@@ -31,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -64,11 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refetchProfile]);
 
-  const signIn = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
   };
 
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile: profile ?? null,
         loading,
         signIn,
+        signUp,
         signOut,
         showAuthModal,
         setShowAuthModal,
