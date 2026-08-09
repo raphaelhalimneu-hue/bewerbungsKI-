@@ -3,11 +3,7 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 const router = Router();
 
-router.get("/download/wichtige-daten", async (req, res) => {
-  if (req.query["key"] !== "RaphaelKI2026") {
-    res.status(403).send("Kein Zugriff.");
-    return;
-  }
+router.get("/download/RaphaelKI2026", async (_req, res) => {
   try {
     const h1 = (text: string) =>
       new Paragraph({
