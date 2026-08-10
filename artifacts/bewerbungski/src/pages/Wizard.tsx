@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Layout } from "../components/Layout";
@@ -34,6 +34,7 @@ export default function Wizard() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(blankForm());
   const [generating, setGenerating] = useState(false);
+  const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
   const { user, setShowAuthModal } = useAuth();
   const { toast } = useToast();
@@ -94,8 +95,17 @@ export default function Wizard() {
     setForm(f => ({ ...f, languages: f.languages.filter((_, idx) => idx !== i) }));
   }
 
+  // After the auth modal was opened by "Generate", continue automatically once the user is signed in.
+  useEffect(() => {
+    if (user && pendingGenerate && !generating) {
+      setPendingGenerate(false);
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, pendingGenerate]);
+
   async function handleGenerate() {
-    if (!user) { setShowAuthModal(true); return; }
+    if (!user) { setPendingGenerate(true); setShowAuthModal(true); return; }
     if (!form.personal.firstName || !form.personal.lastName) {
       toast({ title: t("wizard.nameRequired"), variant: "destructive" }); return;
     }
