@@ -239,5 +239,11 @@
   "seo": {
     "title": "BewerbungsKI – CV y carta de presentación con IA para trabajar en Alemania",
     "description": "Crea en 3 minutos un CV y una carta de presentación en alemán con IA, adaptados a la oferta de empleo. Perfecto para solicitar trabajo en Alemania."
+  },
+  "fbBrowser": {
+    "warning": "Consejo: Estás usando el navegador de Facebook. Para iniciar sesión y pagar, abre esta página en Chrome o Safari.",
+    "copy": "Copiar enlace",
+    "copied": "¡Copiado!",
+    "close": "Cerrar"
   }
 }

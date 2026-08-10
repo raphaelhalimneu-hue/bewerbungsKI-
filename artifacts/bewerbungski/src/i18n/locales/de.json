@@ -239,5 +239,11 @@
   "seo": {
     "title": "BewerbungsKI – Lebenslauf & Anschreiben mit KI erstellen",
     "description": "Erstelle in 3 Minuten professionelle deutsche Bewerbungen: Lebenslauf und Anschreiben mit KI, perfekt auf die Stellenanzeige zugeschnitten. DIN-gerecht & ATS-optimiert."
+  },
+  "fbBrowser": {
+    "warning": "Tipp: Du nutzt den Facebook-Browser. Für Anmeldung und Bezahlung öffne die Seite besser in Chrome oder Safari.",
+    "copy": "Link kopieren",
+    "copied": "Kopiert!",
+    "close": "Schließen"
   }
 }

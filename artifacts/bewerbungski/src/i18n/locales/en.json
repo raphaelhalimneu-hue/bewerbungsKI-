@@ -239,5 +239,11 @@
   "seo": {
     "title": "BewerbungsKI – AI CV & Cover Letter for Jobs in Germany",
     "description": "Create a professional German CV and cover letter in 3 minutes with AI – perfectly tailored to the job posting. Ideal for applying to jobs in Germany."
+  },
+  "fbBrowser": {
+    "warning": "Tip: You're using the Facebook browser. For sign-in and payment, please open this page in Chrome or Safari.",
+    "copy": "Copy link",
+    "copied": "Copied!",
+    "close": "Close"
   }
 }

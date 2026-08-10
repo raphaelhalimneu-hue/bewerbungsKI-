@@ -239,5 +239,11 @@
   "seo": {
     "title": "BewerbungsKI – Almanya'da iş için yapay zekâ ile CV ve ön yazı",
     "description": "Yapay zekâ ile 3 dakikada Almanca CV ve ön yazı oluştur – iş ilanına göre özel hazırlanır. Almanya'da iş başvurusu için ideal."
+  },
+  "fbBrowser": {
+    "warning": "İpucu: Facebook tarayıcısını kullanıyorsunuz. Giriş ve ödeme için sayfayı Chrome veya Safari'de açın.",
+    "copy": "Bağlantıyı kopyala",
+    "copied": "Kopyalandı!",
+    "close": "Kapat"
   }
 }
