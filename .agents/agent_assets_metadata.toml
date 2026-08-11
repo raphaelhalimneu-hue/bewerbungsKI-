@@ -21,3 +21,38 @@ uri = "file://attached_assets/testergebnisse_bewerbungski.html"
 type = "text"
 title = "BewerbungsKI – Testergebnisse"
 description = "3 Testprofile: Berufseinsteiger, Mehrere Stationen, Russisch – mit Lebenslauf & Anschreiben"
+
+[[outputs]]
+id = "FDLYSjtaE1ZsT30DjfUdV"
+uri = "file://attached_assets/Lena_Mueller_Lebenslauf.docx"
+type = "word_document"
+title = "Lena Müller – Lebenslauf"
+description = "Profil 1: Berufseinsteiger"
+
+[[outputs]]
+id = "8edRo6dKgaIVY-Cf_3J0S"
+uri = "file://attached_assets/Lena_Mueller_Anschreiben.docx"
+type = "word_document"
+title = "Lena Müller – Anschreiben"
+description = "Profil 1: Berufseinsteiger"
+
+[[outputs]]
+id = "n6SbszA4YoTO2FkZgnUsa"
+uri = "file://attached_assets/Ahmed_Yilmaz_Lebenslauf.docx"
+type = "word_document"
+title = "Ahmed Yilmaz – Lebenslauf"
+description = "Profil 2: Mehrere Stationen"
+
+[[outputs]]
+id = "OIm3aYhfvapRvVYxcduxN"
+uri = "file://attached_assets/Ahmed_Yilmaz_Anschreiben.docx"
+type = "word_document"
+title = "Ahmed Yilmaz – Anschreiben"
+description = "Profil 2: Mehrere Stationen"
+
+[[outputs]]
+id = "cU166EQSTPUgTl58aN1q4"
+uri = "file://attached_assets/Olena_Kovalenko_Lebenslauf_RU.docx"
+type = "word_document"
+title = "Olena Kovalenko – Lebenslauf (Russisch)"
+description = "Profil 3: Russischsprachig"
