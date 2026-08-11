@@ -81,7 +81,12 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       content: Array<{ type: string; text?: string }>;
     };
 
-    const result = data.content?.find((b) => b.type === "text")?.text ?? "";
+    let result = data.content?.find((b) => b.type === "text")?.text ?? "";
+    // Strip Markdown code fences the model sometimes emits despite instructions
+    result = result
+      .replace(/^```(?:html|xml)?\s*/i, "")
+      .replace(/\s*```\s*$/i, "")
+      .trim();
     res.json({ result });
   } catch (err) {
     req.log.error({ err }, "POST /generate error");
