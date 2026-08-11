@@ -112,18 +112,18 @@ export default function Wizard() {
     }
     setGenerating(true);
     try {
-      const DOC_LANGS: Record<string, { name: string; locale: string }> = {
-        de: { name: "Deutsch", locale: "de-DE" },
-        en: { name: "Englisch", locale: "en-GB" },
-        tr: { name: "Türkisch", locale: "tr-TR" },
-        ar: { name: "Arabisch", locale: "ar" },
-        es: { name: "Spanisch", locale: "es-ES" },
-        pl: { name: "Polnisch", locale: "pl-PL" },
-        ru: { name: "Russisch", locale: "ru-RU" },
-        uk: { name: "Ukrainisch", locale: "uk-UA" },
+      const DOC_LANGS: Record<string, { name: string; locale: string; conventions: string }> = {
+        de: { name: "Deutsch", locale: "de-DE", conventions: "Deutsche Bewerbungsstandards (DIN 5008, tabellarischer Lebenslauf)." },
+        en: { name: "Englisch", locale: "en-GB", conventions: "Britisch/internationale CV-Standards: KEIN Foto, KEIN Geburtsdatum, KEIN Familienstand, keine Unterschriftszeile im CV; 'Curriculum Vitae' bzw. 'Cover Letter'." },
+        tr: { name: "Türkisch", locale: "tr-TR", conventions: "Türkische Özgeçmiş-Standards." },
+        ar: { name: "Arabisch", locale: "ar", conventions: "Arabische Lebenslauf-Standards; Text in korrektem Hocharabisch, Layout rechtsläufig gedacht." },
+        es: { name: "Spanisch", locale: "es-ES", conventions: "Spanische CV-Standards (Currículum), kein Geburtsdatum nötig." },
+        pl: { name: "Polnisch", locale: "pl-PL", conventions: "Polnische CV-Standards; übliche RODO/DSGVO-Einwilligungsklausel am Ende des CV." },
+        ru: { name: "Russisch", locale: "ru-RU", conventions: "Russische Resume-Standards." },
+        uk: { name: "Ukrainisch", locale: "uk-UA", conventions: "Ukrainische Resume-Standards." },
       };
       const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
-      const langInstr = docLang === "de" ? "" : ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch).`;
+      const langInstr = docLang === "de" ? "" : ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch). Beachte die landestypischen Konventionen: ${lang.conventions}`;
       const today = new Date().toLocaleDateString(lang.locale, { day: "2-digit", month: "2-digit", year: "numeric" });
       setGenPhase(t("wizard.genCv"));
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
