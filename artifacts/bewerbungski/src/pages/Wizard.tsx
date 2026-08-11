@@ -116,7 +116,7 @@ export default function Wizard() {
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
-        systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte nur mit HTML-Inhalt, kein Wrapper.",
+        systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Schreibe so, wie ein Mensch seinen eigenen Lebenslauf schreiben würde: schlicht, konkret, ohne Übertreibungen und ohne typische KI-Floskeln (kein 'dynamisch', 'leidenschaftlich', 'stets bestrebt', keine Gedankenstriche als Stilmittel). Antworte nur mit HTML-Inhalt, kein Wrapper.",
         userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.`,
       } });
 
@@ -125,7 +125,7 @@ export default function Wizard() {
         setGenPhase(t("wizard.genLetter"));
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
-          systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe nur den Anschreiben-Text ohne HTML.",
+          systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, nicht wie eine KI: natürliche, unterschiedlich lange Sätze, konkrete Beispiele statt Floskeln, keine übertriebenen Adjektive, keine typischen KI-Phrasen (kein 'dynamisch', 'leidenschaftlich', 'ich bin überzeugt, dass ich', 'stets', 'zeitnah'), keine Aufzählungen mit Gedankenstrichen. Der Text darf kleine persönliche Formulierungen enthalten, muss aber formell korrekt bleiben. Schreibe nur den Anschreiben-Text ohne HTML.",
           userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.`,
         } });
         letterText = letterRes.result;
