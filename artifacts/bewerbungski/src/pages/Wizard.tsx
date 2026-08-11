@@ -160,6 +160,8 @@ export default function Wizard() {
     } catch (e: any) {
       if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {
         navigate("/pricing");
+      } else if (e?.data?.error === "premium_limit_reached" || e?.message?.includes("premium_limit_reached")) {
+        toast({ title: t("wizard.premiumLimit"), variant: "destructive" });
       } else {
         toast({ title: t("wizard.genError"), description: e.message || t("wizard.genErrorUnknown"), variant: "destructive" });
       }

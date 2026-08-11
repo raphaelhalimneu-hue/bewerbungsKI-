@@ -232,7 +232,8 @@
       "checkTemplate": "Szablon {{name}}",
       "check4": "Bezpiecznie zapisane na Twoim koncie",
       "docLang": "Język dokumentów"
-    }
+    },
+    "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej."
   },
   "notFound": {
     "title": "404 – Nie znaleziono strony",

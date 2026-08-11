@@ -232,7 +232,8 @@
       "checkTemplate": "{{name}} şablonu",
       "check4": "Hesabında güvenle saklanır",
       "docLang": "Başvuru dili"
-    }
+    },
+    "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın."
   },
   "notFound": {
     "title": "404 – Sayfa bulunamadı",

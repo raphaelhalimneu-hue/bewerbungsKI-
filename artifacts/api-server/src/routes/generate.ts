@@ -19,15 +19,18 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(profilesTable)
       .where(eq(profilesTable.userId, userId));
 
+    const [{ value }] = await db
+      .select({ value: count() })
+      .from(documentsTable)
+      .where(eq(documentsTable.userId, userId));
     if (!profile?.isPremium) {
-      const [{ value }] = await db
-        .select({ value: count() })
-        .from(documentsTable)
-        .where(eq(documentsTable.userId, userId));
       if (value >= 1) {
         res.status(403).json({ error: "free_limit_reached" });
         return;
       }
+    } else if (value >= 30) {
+      res.status(403).json({ error: "premium_limit_reached" });
+      return;
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

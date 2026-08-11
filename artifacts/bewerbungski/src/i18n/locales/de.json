@@ -232,7 +232,8 @@
       "checkTemplate": "{{name}}-Vorlage",
       "check4": "Sicher in deinem Account gespeichert",
       "docLang": "Sprache der Bewerbung"
-    }
+    },
+    "premiumLimit": "Limit erreicht: 30 Bewerbungen pro Kauf. Bitte kontaktiere uns für mehr."
   },
   "notFound": {
     "title": "404 – Seite nicht gefunden",

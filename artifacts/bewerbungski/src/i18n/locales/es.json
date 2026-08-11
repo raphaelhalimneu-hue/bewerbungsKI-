@@ -232,7 +232,8 @@
       "checkTemplate": "Plantilla {{name}}",
       "check4": "Guardado de forma segura en tu cuenta",
       "docLang": "Idioma de la solicitud"
-    }
+    },
+    "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más."
   },
   "notFound": {
     "title": "404 – Página no encontrada",

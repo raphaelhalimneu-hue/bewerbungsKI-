@@ -232,7 +232,8 @@
       "checkTemplate": "{{name}} template",
       "check4": "Stored securely in your account",
       "docLang": "Application language"
-    }
+    },
+    "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more."
   },
   "notFound": {
     "title": "404 – Page not found",
