@@ -21,7 +21,7 @@ export default function Preview() {
       const el = cvRef.current;
 
       const canvas = await html2canvas(el, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -51,6 +51,33 @@ export default function Preview() {
         pdf.addPage();
         pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
         heightLeft -= pageHeight;
+      }
+
+      // Anschreiben als echte Text-Seite(n) anhängen (gestochen scharf, markierbar)
+      const coverLetter = ((doc as any)?.cover_letter || "").trim();
+      if (coverLetter) {
+        const margin = 22;
+        const maxWidth = pageWidth - margin * 2;
+        const lineHeight = 6.2;
+        pdf.addPage();
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(15);
+        // Fester deutscher Titel: jsPDF-Standardschrift kann kein Arabisch/Kyrillisch
+        pdf.text("Anschreiben", margin, margin);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(11);
+        let y = margin + 12;
+        for (const para of coverLetter.split(/\n/)) {
+          const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
+          for (const line of lines) {
+            if (y > pageHeight - margin) {
+              pdf.addPage();
+              y = margin;
+            }
+            if (line !== "") pdf.text(line, margin, y);
+            y += lineHeight;
+          }
+        }
       }
 
       const fileName = (doc as any)?.name
