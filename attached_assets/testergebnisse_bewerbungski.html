@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>BewerbungsKI – Testergebnisse</title>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 30px; }
+  h1 { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .meta { color: #6b7280; font-size: 14px; margin-bottom: 32px; }
+  .profile { background: white; border-radius: 16px; padding: 28px; margin-bottom: 36px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .profile-title { font-size: 20px; font-weight: 700; border-bottom: 2px solid #1f2937; padding-bottom: 10px; margin-bottom: 18px; }
+  .checks { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .check { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 14px; font-size: 13px; }
+  .check.warn { background: #fef2f2; border-color: #fecaca; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #6b7280; margin: 20px 0 10px; }
+  .cv-box { background: #dde3f0; padding: 20px; border-radius: 12px; }
+  .letter-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; white-space: pre-wrap; font-size: 13.5px; line-height: 1.75; }
+  .badge-ok { color: #166534; font-weight: 600; }
+  .badge-warn { color: #991b1b; font-weight: 600; }
+  .summary { background: #1c2b4a; color: white; border-radius: 16px; padding: 24px; margin-bottom: 36px; }
+  .summary h2 { margin: 0 0 14px; font-size: 18px; }
+  .summary table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .summary td { padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .summary td:first-child { color: #9db4dd; width: 200px; }
+</style>
+</head>
+<body>
+<h1>BewerbungsKI – Testergebnisse</h1>
+<p class="meta">Erstellt: 12.08.2026 · 3 Testprofile · Live-API-Test</p>
+
+<div class="summary">
+  <h2>📊 Zusammenfassung</h2>
+  <table>
+    <tr><td>Profil 1 – Berufseinsteiger</td><td class="badge-ok">✅ Markdown-frei &nbsp;·&nbsp; ✅ Keine Floskeln &nbsp;·&nbsp; ✅ Berufserfahrung weggelassen</td></tr>
+    <tr><td>Profil 2 – Mehrere Stationen</td><td class="badge-ok">✅ Markdown-frei &nbsp;·&nbsp; ✅ Keine Floskeln &nbsp;·&nbsp; ✅ Motivation eingebaut</td></tr>
+    <tr><td>Profil 3 – Russisch</td><td class="badge-ok">✅ Markdown-frei &nbsp;·&nbsp; ✅ Echtes Russisch (kyrillisch)</td></tr>
+  </table>
+</div>
+
+<div class="profile">
+  <div class="profile-title">👤 Profil 1: Berufseinsteiger – Lena Müller, Verkäuferin bei Rewe</div>
+  <div class="checks">
+    <div class="check">✅ Kein Markdown</div>
+    <div class="check">✅ Keine KI-Floskeln</div>
+    <div class="check">✅ Berufserfahrung korrekt weggelassen</div>
+  </div>
+  <div class="section-label">Lebenslauf</div>
+  <div class="cv-box"><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebenslauf - Lena Müller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .header-line {
+            width: 100%;
+            height: 2px;
+            background-color: #333;
+            margin: 20px 0;
+        }
+        
+        section {
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+            font-weight: bold;
+        }
+        
+        .profile-text {
+            text-align: justify;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        
+        .education-item,
+        .skill-item,
+        .language-item {
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .education-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .education-title {
+            font-weight: bold;
+        }
+        
+        .education-date {
+            color: #666;
+        }
+        
+        .education-details {
+            color: #555;
+            margin-left: 0;
+        }
+        
+        .skill-row,
+        .language-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .skill-name,
+        .language-name {
+            font-weight: bold;
+        }
+        
+        .skill-level,
+        .language-level {
+            color: #666;
+        }
+        
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 13px;
+        }
+        
+        .signature-line {
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            width: 200px;
+            margin-left: auto;
+            padding-top: 5px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lena Müller</h1>
+        <div class="header-line"></div>
+    </header>
+    
+    <section>
+        <h2>Profil</h2>
+        <p class="profile-text">
+            Motivierte Einzelhandelskauffrau in Ausbildung mit fundierten Kenntnissen in Kassenführung und Kundenberatung. 
+            Ich zeichne mich durch eine hohe Kundenorientierung, Zuverlässigkeit und Teamfähigkeit aus. Meine Stärken 
+            liegen in der professionellen Beratung von Kunden sowie im sicheren Umgang mit Kassensystemen. Ich suche eine 
+            Position als Verkäuferin, in der ich meine erworbenen Fähigkeiten einbringen und weiter ausbauen kann.
+        </p>
+    </section>
+    
+    <section>
+        <h2>Ausbildung</h2>
+        <div class="education-item">
+            <div class="education-header">
+                <span class="education-title">Ausbildung zur Einzelhandelskauffrau</span>
+                <span class="education-date">09/2022 – 06/2025</span>
+            </div>
+            <div class="education-details">
+                Berufsschule Berlin
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h2>Kenntnisse</h2>
+        <div class="skill-item">
+            <div class="skill-row">
+                <span class="skill-name">MS Office</span>
+                <span class="skill-level">Sehr gut</span>
+            </div>
+            <div class="skill-row">
+                <span class="skill-name">Kassenführung</span>
+                <span class="skill-level">Experte</span>
+            </div>
+            <div class="skill-row">
+                <span class="skill-name">Kundenberatung</span>
+                <span class="skill-level">Sehr gut</span>
+            </div>
+        </div>
+    </section>
+    
+    <section>
+        <h2>Sprachen</h2>
+        <div class="language-item">
+            <div class="language-row">
+                <span class="language-name">Deutsch</span>
+                <span class="language-level">Muttersprache</span>
+            </div>
+            <div class="language-row">
+                <span class="language-name">Englisch</span>
+                <span class="language-level">B1</span>
+            </div>
+        </div>
+    </section>
+    
+    <div class="signature">
+        <p>Berlin, den 12.08.2026</p>
+        <div class="signature-line">Lena Müller</div>
+    </div>
+</body>
+</html>
+</div>
+  <div class="section-label">Anschreiben</div>
+  <div class="letter-box">Berlin, den 12.08.2026
+
+Betreff: Bewerbung als Verkäuferin
+
+
+Sehr geehrte Damen und Herren,
+
+mit großer Freude habe ich Ihre Stellenausschreibung für eine Verkäuferin in Ihrer Rewe-Filiale in Berlin gelesen. Als frisch ausgebildete Einzelhandelskauffrau bin ich auf der Suche nach einer Position, in der ich meine erworbenen Kenntnisse direkt in die Praxis umsetzen und mich als zuverlässiges Teammitglied einbringen kann. Die Möglichkeit, bei einem führenden Lebensmittelhändler wie Rewe zu arbeiten, entspricht genau meinen beruflichen Vorstellungen.
+
+Während meiner dreijährigen Ausbildung zur Einzelhandelskauffrau konnte ich umfassende Erfahrungen in allen wesentlichen Bereichen des Einzelhandels sammeln. Besonders die direkte Arbeit mit Kunden hat mir stets große Freude bereitet. Ich habe gelernt, auf unterschiedliche Kundenwünsche einzugehen, kompetent zu beraten und auch in stressigen Situationen freundlich und professionell zu bleiben. Die Warenpräsentation, das Kassieren sowie die Kontrolle von Warenbeständen gehörten ebenfalls zu meinen täglichen Aufgaben, die ich selbstständig und gewissenhaft ausgeführt habe.
+
+Mir ist bewusst, dass der Lebensmitteleinzelhandel ein dynamisches Arbeitsumfeld darstellt, das Flexibilität, Engagement und Teamgeist erfordert. Genau diese Eigenschaften bringe ich mit. Ich bin es gewohnt, auch zu unterschiedlichen Arbeitszeiten eingesetzt zu werden, und arbeite gerne im Team, wo jeder auf den anderen angewiesen ist. Meine Ausbilder haben mir stets bestätigt, dass ich zuverlässig bin und Verantwortung übernehme – Eigenschaften, die mir persönlich sehr wichtig sind.
+
+Was mich an Rewe besonders anspricht, ist die Kundenorientierung und die Wertschätzung gegenüber den Mitarbeitern. Ich möchte Teil eines Unternehmens sein, das Qualität und Service großschreibt und seinen Kunden ein positives Einkaufserlebnis bietet. Dabei möchte ich mich kontinuierlich weiterentwickeln und langfristig zum Erfolg Ihrer Filiale beitragen.
+
+Gerne überzeuge ich Sie in einem persönlichen Gespräch davon, dass ich die richtige Besetzung für Ihre ausgeschriebene Position bin. Ich freue mich sehr auf Ihre Rückmeldung und die Möglichkeit, mich Ihnen vorzustellen.
+
+Mit freundlichen Grüßen
+
+Lena Müller
+</div>
+</div>
+
+<div class="profile">
+  <div class="profile-title">💼 Profil 2: Mehrere Stationen – Ahmed Yilmaz, Senior IT-Administrator bei Bayern IT</div>
+  <div class="checks">
+    <div class="check">✅ Kein Markdown</div>
+    <div class="check">✅ Keine KI-Floskeln</div>
+    <div class="check">✅ Motivation & Erfolg eingebaut</div>
+    <div class="check">✅ Keine Zeitüberschneidungen</div>
+  </div>
+  <div class="section-label">Lebenslauf</div>
+  <div class="cv-box"><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebenslauf - Ahmed Yilmaz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 60px;
+            background-color: #fff;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+        
+        .header-line {
+            width: 100%;
+            height: 2px;
+            background-color: #333;
+            margin: 20px 0;
+        }
+        
+        .contact-info {
+            font-size: 11px;
+            color: #555;
+            margin-top: 15px;
+        }
+        
+        h2 {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .job, .education-item {
+            margin-bottom: 20px;
+        }
+        
+        .job-header, .education-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+        
+        .job-title, .degree {
+            font-weight: 700;
+            font-size: 13px;
+            color: #1a1a1a;
+        }
+        
+        .job-date, .education-date {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .company, .institution {
+            font-size: 12px;
+            color: #444;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .job-description {
+            font-size: 11px;
+            color: #555;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .profile-text {
+            font-size: 11px;
+            color: #555;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        
+        .skills-grid, .languages-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            font-size: 11px;
+        }
+        
+        .skill-item, .language-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        
+        .skill-name, .language-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .skill-level, .language-level {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 11px;
+            color: #555;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ahmed Yilmaz</h1>
+        <div class="header-line"></div>
+        <div class="contact-info">
+            IT-Systemadministrator
+        </div>
+    </header>
+
+    <div class="section">
+        <h2>Profil</h2>
+        <p class="profile-text">
+            Erfahrener IT-Administrator mit fundierter Expertise in der Server-Administration und Netzwerktechnik. Seit über vier Jahren in der IT-Branche tätig mit nachweislicher Kompetenz in Windows Server-Umgebungen, Active Directory sowie Linux-Systemen. Analytisches Denkvermögen kombiniert mit lösungsorientierter Arbeitsweise und ausgeprägter Serviceorientierung. Suche neue Herausforderung als Senior IT-Administrator, um meine technischen Fähigkeiten weiter auszubauen und komplexe IT-Infrastrukturen zu betreuen.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Berufserfahrung</h2>
+        
+        <div class="job">
+            <div class="job-header">
+                <span class="job-title">Systemadministrator</span>
+                <span class="job-date">09/2022 – heute</span>
+            </div>
+            <div class="company">Digitale Lösungen AG</div>
+            <div class="job-description">
+                Server-Administration und Wartung der IT-Infrastruktur • Netzwerksupport und Fehleranalyse • Verwaltung und Konfiguration von Active Directory • Implementierung von Sicherheitsrichtlinien • Technischer Support für interne Fachabteilungen • Dokumentation von Systemkonfigurationen und Prozessen
+            </div>
+        </div>
+        
+        <div class="job">
+            <div class="job-header">
+                <span class="job-title">IT-Support Techniker</span>
+                <span class="job-date">03/2020 – 08/2022</span>
+            </div>
+            <div class="company">TechCorp GmbH</div>
+            <div class="job-description">
+                First- und Second-Level-Support für über 150 Endanwender • Hardware-Wartung und -Reparatur von Workstations und Peripheriegeräten • Bearbeitung von Support-Tickets über Ticketsystem • Installation und Konfiguration von Software und Betriebssystemen • Benutzerbetreuung und Schulung • Dokumentation von Problembehebungen
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Ausbildung</h2>
+        
+        <div class="education-item">
+            <div class="education-header">
+                <span class="degree">Bachelor of Science – Informatik</span>
+                <span class="education-date">10/2016 – 02/2020</span>
+            </div>
+            <div class="institution">Fachhochschule München</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Kenntnisse</h2>
+        <div class="skills-grid">
+            <div class="skill-item">
+                <span class="skill-name">Windows Server</span>
+                <span class="skill-level">sehr gut</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Active Directory</span>
+                <span class="skill-level">sehr gut</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Linux</span>
+                <span class="skill-level">gut</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Netzwerktechnik</span>
+                <span class="skill-level">gut</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Sprachen</h2>
+        <div class="languages-grid">
+            <div class="language-item">
+                <span class="language-name">Türkisch</span>
+                <span class="language-level">Muttersprache</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Deutsch</span>
+                <span class="language-level">C1</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Englisch</span>
+                <span class="language-level">B2</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="signature">
+        München, den 12.08.2026
+    </div>
+</body>
+</html>
+</div>
+  <div class="section-label">Anschreiben</div>
+  <div class="letter-box">München, den 12.08.2026
+
+Bewerbung als Senior IT-Administrator
+
+Sehr geehrte Damen und Herren,
+
+Ihre Ausschreibung für die Position des Senior IT-Administrators hat mich sofort angesprochen. Bayern IT verfolge ich seit Jahren mit großem Interesse – insbesondere Ihre Innovationskultur und Ihr konsequenter Weg in Richtung zukunftsfähiger IT-Lösungen haben mich überzeugt, dass ich bei Ihnen den nächsten Schritt in meiner beruflichen Entwicklung gehen möchte.
+
+Als IT-Techniker und Systemadministrator mit mehrjähriger Erfahrung bringe ich sowohl technisches Fachwissen als auch die Fähigkeit mit, komplexe IT-Infrastrukturen strategisch weiterzuentwickeln. Bei der TechCorp GmbH habe ich im IT-Support die Grundlagen für meine heutige Expertise gelegt. Dort lernte ich, auch unter Zeitdruck strukturiert zu arbeiten und kundenorientierte Lösungen zu finden.
+
+Den entscheidenden Sprung in die Systemadministration machte ich bei der Digitale Lösungen AG. Dort verantwortete ich nicht nur den laufenden Betrieb unserer IT-Systeme, sondern trieb auch die dringend benötigte Modernisierung der gesamten IT-Infrastruktur voran. Durch die Implementierung neuer Monitoring-Tools, die Optimierung der Backup-Strategien und den gezielten Austausch veralteter Komponenten konnte ich die Ausfallzeiten um 40 Prozent reduzieren. Dieses Projekt zeigte mir, wie wichtig proaktives Handeln und eine durchdachte Systemarchitektur für den Geschäftserfolg sind.
+
+Meine Arbeitsweise zeichnet sich durch vorausschauendes Denken und pragmatische Lösungsansätze aus. Ich verstehe IT nicht als Selbstzweck, sondern als Enabler für die Geschäftsprozesse. Dabei behalte ich stets sowohl die technische Exzellenz als auch die wirtschaftlichen Rahmenbedingungen im Blick. Besonders schätze ich die Zusammenarbeit mit Fachabteilungen, um deren Anforderungen in tragfähige IT-Konzepte zu übersetzen.
+
+Was mich an der Position bei Bayern IT besonders reizt, ist die Möglichkeit, in einem innovativen Umfeld an anspruchsvollen Projekten mitzuwirken. Ihre Reputation als Vorreiter in der IT-Branche motiviert mich, meine Erfahrungen einzubringen und gleichzeitig von Ihrem Know-how zu profitieren.
+
+Gerne überzeuge ich Sie in einem persönlichen Gespräch davon, dass ich die richtige Besetzung für diese Position bin und freue mich darauf, gemeinsam mit Ihrem Team die IT-Landschaft von Bayern IT weiterzuentwickeln.
+
+Mit freundlichen Grüßen
+
+Ahmed Yilmaz
+</div>
+</div>
+
+<div class="profile">
+  <div class="profile-title">🇷🇺 Profil 3: Russischsprachig – Olena Kovalenko, Buchhalterin</div>
+  <div class="checks">
+    <div class="check">✅ Kein Markdown</div>
+    <div class="check">✅ Vollständig auf Russisch (kyrillisch)</div>
+    <div class="check">✅ Russische Resume-Konventionen</div>
+  </div>
+  <div class="section-label">Lebenslauf (auf Russisch)</div>
+  <div class="cv-box"><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Резюме - Олена Коваленко</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c3e50;
+        }
+        h1 {
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .contact-info {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #bdc3c7;
+            font-weight: 700;
+        }
+        .job, .education-item {
+            margin-bottom: 20px;
+        }
+        .job-header, .education-header {
+            margin-bottom: 8px;
+        }
+        .job-title, .degree {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .company, .university {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 15px;
+        }
+        .date {
+            color: #7f8c8d;
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 3px;
+        }
+        .job-description {
+            margin-top: 8px;
+            margin-left: 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .job-description ul {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        .job-description li {
+            margin-bottom: 4px;
+        }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .skill-item {
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .skill-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .skill-level {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+        .languages-list {
+            margin-top: 10px;
+        }
+        .language-item {
+            padding: 6px 0;
+            font-size: 14px;
+        }
+        .language-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .language-level {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+        footer {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        @media print {
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Олена Коваленко</h1>
+        <div class="contact-info">
+            Бухгалтер
+        </div>
+    </header>
+
+    <section>
+        <h2>Профиль</h2>
+        <p style="font-size: 14px; color: #555; line-height: 1.7;">
+            Квалифицированный бухгалтер с более чем 5-летним опытом работы в области кредиторской и дебиторской задолженности. 
+            Специализируюсь на работе с DATEV, подготовке ежемесячных отчетов и обеспечении точности финансовой документации. 
+            Ищу возможность применить свои знания и навыки в качестве бухгалтера в Hamburg Handel AG.
+        </p>
+    </section>
+
+    <section>
+        <h2>Опыт работы</h2>
+        <div class="job">
+            <div class="job-header">
+                <div class="job-title">Бухгалтер</div>
+                <div class="company">Handels GmbH</div>
+                <div class="date">05/2019 – настоящее время</div>
+            </div>
+            <div class="job-description">
+                <ul>
+                    <li>Ведение кредиторской и дебиторской бухгалтерии</li>
+                    <li>Работа с программным обеспечением DATEV для финансового учета</li>
+                    <li>Подготовка ежемесячных финансовых отчетов и закрытие месяца</li>
+                    <li>Контроль за своевременной оплатой счетов и управление платежами</li>
+                    <li>Сверка счетов и решение расхождений</li>
+                    <li>Коммуникация с поставщиками и клиентами по финансовым вопросам</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Образование</h2>
+        <div class="education-item">
+            <div class="education-header">
+                <div class="degree">Магистр экономических наук</div>
+                <div class="university">Киевский университет</div>
+                <div class="date">09/2012 – 06/2017</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Навыки</h2>
+        <div class="skills-grid">
+            <div class="skill-item">
+                <span class="skill-name">DATEV:</span>
+                <span class="skill-level">Очень хорошо</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Microsoft Excel:</span>
+                <span class="skill-level">Эксперт</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">SAP:</span>
+                <span class="skill-level">Хорошо</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Финансовая отчетность</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Кредиторская задолженность</span>
+            </div>
+            <div class="skill-item">
+                <span class="skill-name">Дебиторская задолженность</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Языки</h2>
+        <div class="languages-list">
+            <div class="language-item">
+                <span class="language-name">Украинский:</span>
+                <span class="language-level">Родной язык</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Русский:</span>
+                <span class="language-level">Родной язык</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Немецкий:</span>
+                <span class="language-level">B2</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Английский:</span>
+                <span class="language-level">B1</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        Гамбург, 12.08.2026
+    </footer>
+</body>
+</html>
+</div>
+</div>
+
+</body>
+</html>

@@ -14,3 +14,10 @@ uri = "file://attached_assets/BewerbungsKI_Wichtige_Daten.txt"
 type = "text"
 title = "BewerbungsKI – Wichtige Daten"
 description = "Alle wichtigen Infos: Adresse, Login, Preis, Technik und Tipps."
+
+[[outputs]]
+id = "7WMw03-_Hfezg3Y72s5yr"
+uri = "file://attached_assets/testergebnisse_bewerbungski.html"
+type = "text"
+title = "BewerbungsKI – Testergebnisse"
+description = "3 Testprofile: Berufseinsteiger, Mehrere Stationen, Russisch – mit Lebenslauf & Anschreiben"
