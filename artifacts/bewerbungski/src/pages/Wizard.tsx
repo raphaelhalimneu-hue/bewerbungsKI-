@@ -134,30 +134,28 @@ export default function Wizard() {
 
 DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalte einsetzen/wiederholen, Struktur und Styles nicht verändern)${docLang === "ar" ? ' und setze dir="rtl" auf das äußerste div' : ""}:
 
-<div style="font-family:Georgia,'Times New Roman',serif;color:#1a2333;">
-  <div style="background:#1c2b4a;color:#fff;padding:34px 44px 28px;">
-    <div style="font-size:31px;font-weight:700;letter-spacing:.5px;line-height:1.15;">VORNAME NACHNAME</div>
-    <div style="font-size:14px;color:#9db4dd;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>
-    <div style="font-size:12px;color:#c9d6ee;margin-top:14px;">Adresse &nbsp;·&nbsp; Telefon &nbsp;·&nbsp; E-Mail &nbsp;·&nbsp; ggf. Geburtsdatum/-ort</div>
+<div style="font-family:Helvetica,Arial,sans-serif;color:#1f2937;padding:38px 46px 42px;">
+  <div style="text-align:center;padding-bottom:18px;border-bottom:1.5px solid #1f2937;">
+    <div style="font-size:28px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.2;">VORNAME NACHNAME</div>
+    <div style="font-size:13px;color:#6b7280;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>
+    <div style="font-size:11.5px;color:#6b7280;margin-top:10px;">Adresse &nbsp;·&nbsp; Telefon &nbsp;·&nbsp; E-Mail &nbsp;·&nbsp; ggf. Geburtsdatum/-ort</div>
   </div>
-  <div style="padding:30px 44px 38px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#1c2b4a;border-bottom:2px solid #1c2b4a;padding-bottom:5px;margin:22px 0 12px;">SEKTIONSTITEL</div>
-    <p style="margin:0 0 8px;font-size:13px;line-height:1.65;">Profiltext …</p>
-    <!-- Berufserfahrung/Ausbildung: pro Station -->
-    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;"><tr>
-      <td style="vertical-align:top;padding:0;">
-        <div style="font-size:13.5px;font-weight:700;">Position</div>
-        <div style="font-size:12.5px;color:#5a6a85;font-style:italic;">Firma, Ort</div>
-        <ul style="margin:6px 0 0;padding-left:17px;font-size:12.5px;line-height:1.6;"><li>Tätigkeit/Erfolg</li></ul>
-      </td>
-      <td style="vertical-align:top;white-space:nowrap;text-align:right;font-size:12px;color:#5a6a85;padding:2px 0 0 14px;">MM/JJJJ – MM/JJJJ</td>
-    </tr></table>
-    <!-- Kenntnisse: als Chips -->
-    <div><span style="display:inline-block;border:1px solid #1c2b4a;border-radius:3px;padding:3px 10px;margin:0 6px 6px 0;font-size:12px;">Kenntnis</span></div>
-    <!-- Sprachen: eine Zeile pro Sprache -->
-    <div style="font-size:13px;margin-bottom:4px;"><strong>Sprache</strong> — Niveau</div>
-    <div style="margin-top:34px;font-size:13px;">Ort, den ${today}<br/><span style="color:#5a6a85;font-size:11.5px;">Vorname Nachname</span></div>
-  </div>
+  <div style="font-size:11.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1f2937;border-bottom:1px solid #d1d5db;padding-bottom:5px;margin:24px 0 12px;">SEKTIONSTITEL</div>
+  <p style="margin:0 0 8px;font-size:12.5px;line-height:1.65;">Profiltext …</p>
+  <!-- Berufserfahrung/Ausbildung: pro Station -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:12px;"><tr>
+    <td style="vertical-align:top;padding:0;">
+      <div style="font-size:13px;font-weight:700;">Position</div>
+      <div style="font-size:12px;color:#6b7280;">Firma, Ort</div>
+      <ul style="margin:6px 0 0;padding-left:17px;font-size:12px;line-height:1.6;"><li>Tätigkeit/Erfolg</li></ul>
+    </td>
+    <td style="vertical-align:top;white-space:nowrap;text-align:right;font-size:11.5px;color:#6b7280;padding:2px 0 0 14px;">MM/JJJJ – MM/JJJJ</td>
+  </tr></table>
+  <!-- Kenntnisse: dezente Chips -->
+  <div><span style="display:inline-block;background:#f3f4f6;border-radius:3px;padding:4px 11px;margin:0 6px 6px 0;font-size:11.5px;color:#374151;">Kenntnis</span></div>
+  <!-- Sprachen: eine Zeile pro Sprache -->
+  <div style="font-size:12.5px;margin-bottom:4px;"><strong>Sprache</strong> — Niveau</div>
+  <div style="margin-top:34px;font-size:12.5px;">Ort, den ${today}<br/><span style="color:#6b7280;font-size:11px;">Vorname Nachname</span></div>
 </div>`,
       } });
 

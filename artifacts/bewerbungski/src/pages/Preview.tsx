@@ -84,19 +84,19 @@ export default function Preview() {
       // Header: applicant name + rule, matching the CV design
       const applicantName = ((doc as any)?.name || "").split("–")[0].trim();
       if (applicantName) {
-        pdf.setTextColor(28, 43, 74);
-        pdf.setFont("times", "bold");
-        pdf.setFontSize(17);
-        pdf.text(applicantName.toUpperCase(), margin, y);
-        y += 3;
-        pdf.setDrawColor(28, 43, 74);
-        pdf.setLineWidth(0.6);
+        pdf.setTextColor(31, 41, 55);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(15);
+        pdf.text(applicantName.toUpperCase(), pageWidth / 2, y, { align: "center", charSpace: 0.8 });
+        y += 4;
+        pdf.setDrawColor(31, 41, 55);
+        pdf.setLineWidth(0.4);
         pdf.line(margin, y, pageWidth - margin, y);
         y += 12;
       }
-      pdf.setTextColor(26, 35, 51);
-      pdf.setFont("times", "normal");
-      pdf.setFontSize(11.5);
+      pdf.setTextColor(31, 41, 55);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
       for (const para of coverLetter.split(/\n/)) {
         const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
         for (const line of lines) {
