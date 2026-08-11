@@ -76,12 +76,27 @@ export default function Preview() {
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 22;
+      const margin = 24;
       const maxWidth = pageWidth - margin * 2;
-      const lineHeight = 6.2;
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(11);
+      const lineHeight = 6.4;
       let y = margin;
+
+      // Header: applicant name + rule, matching the CV design
+      const applicantName = ((doc as any)?.name || "").split("–")[0].trim();
+      if (applicantName) {
+        pdf.setTextColor(28, 43, 74);
+        pdf.setFont("times", "bold");
+        pdf.setFontSize(17);
+        pdf.text(applicantName.toUpperCase(), margin, y);
+        y += 3;
+        pdf.setDrawColor(28, 43, 74);
+        pdf.setLineWidth(0.6);
+        pdf.line(margin, y, pageWidth - margin, y);
+        y += 12;
+      }
+      pdf.setTextColor(26, 35, 51);
+      pdf.setFont("times", "normal");
+      pdf.setFontSize(11.5);
       for (const para of coverLetter.split(/\n/)) {
         const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
         for (const line of lines) {
