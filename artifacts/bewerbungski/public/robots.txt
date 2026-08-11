@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://web-production-c5abc.up.railway.app/sitemap.xml
+Sitemap: https://www.bewerbungski.com/sitemap.xml

@@ -39,7 +39,7 @@ i18n
     },
   });
 
-const CANONICAL_ORIGIN = "https://web-production-c5abc.up.railway.app";
+const CANONICAL_ORIGIN = "https://www.bewerbungski.com";
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
