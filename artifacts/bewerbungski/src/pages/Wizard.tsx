@@ -111,12 +111,13 @@ export default function Wizard() {
     }
     setGenerating(true);
     try {
+      const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
       setGenPhase(t("wizard.genCv"));
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte nur mit HTML-Inhalt, kein Wrapper.",
-        userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Ganz am Ende: Ort und heutiges Datum (${new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}) als Unterschriftszeile.`,
+        userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.`,
       } });
 
       let letterText = "";
@@ -125,7 +126,7 @@ export default function Wizard() {
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit einer Ort-Datum-Zeile rechtsbündig gedacht (z. B. "${(form.personal as any).city || "Ort"}, den ${new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}"), danach Betreffzeile und Anrede.`,
+          userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.`,
         } });
         letterText = letterRes.result;
       }
@@ -296,7 +297,6 @@ function StepEducation({ items, addEdu, updateEdu, delEdu }: { items: Education[
           </div>
           <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
             <div className="field"><label className="label">{t("wizard.edu.field")}</label><input className="input" value={e.field} onChange={ev => updateEdu(i, "field", ev.target.value)} placeholder={t("wizard.edu.fieldPh")} /></div>
-            <div className="field"><label className="label">{t("wizard.edu.grade")}</label><input className="input" value={e.grade} onChange={ev => updateEdu(i, "grade", ev.target.value)} placeholder={t("wizard.edu.gradePh")} /></div>
           </div>
           <div className="grid2" style={{ gap: 10 }}>
             <div className="field"><label className="label">{t("wizard.edu.from")}</label><input className="input" type="month" value={e.start} onChange={ev => updateEdu(i, "start", ev.target.value)} /></div>
