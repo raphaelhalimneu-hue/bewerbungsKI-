@@ -5,4 +5,4 @@
 - [BewerbungsKI i18n decisions](i18n-decisions.md) — UI in 8 languages incl. RTL Arabic; generated applications and AI prompts stay German by design.
 - [Railway deploy method](railway-deploy.md) — tar-ball upload via backboard GraphQL API; multipart and CLI do NOT work with the workspace token.
 - [Custom domain bewerbungski.com](custom-domain.md) — Strato CNAME only (no TXT); stuck Railway certs fixed by delete+recreate, which changes the CNAME target.
-- [Groq is the AI provider](groq-provider.md) — generation runs on free Groq (llama-3.3-70b-versatile), not Anthropic; watch for model decommissions.
+- [AI provider](groq-provider.md) — generation runs on Claude (claude-sonnet-4-5) since 2026-08-11; errors usually mean empty Anthropic credit.
