@@ -116,7 +116,7 @@ export default function Wizard() {
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte nur mit HTML-Inhalt, kein Wrapper.",
-        userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen.`,
+        userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Ganz am Ende: Ort und heutiges Datum (${new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}) als Unterschriftszeile.`,
       } });
 
       let letterText = "";
@@ -125,7 +125,7 @@ export default function Wizard() {
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter.`,
+          userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit einer Ort-Datum-Zeile rechtsbündig gedacht (z. B. "${(form.personal as any).city || "Ort"}, den ${new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}"), danach Betreffzeile und Anrede.`,
         } });
         letterText = letterRes.result;
       }
