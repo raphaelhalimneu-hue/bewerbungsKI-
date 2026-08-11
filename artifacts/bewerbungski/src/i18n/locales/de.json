@@ -230,7 +230,8 @@
       "check1": "Lebenslauf auf Deutsch",
       "check2": "Anschreiben zur Stelle",
       "checkTemplate": "{{name}}-Vorlage",
-      "check4": "Sicher in deinem Account gespeichert"
+      "check4": "Sicher in deinem Account gespeichert",
+      "docLang": "Sprache der Bewerbung"
     }
   },
   "notFound": {

@@ -230,7 +230,8 @@
       "check1": "Almanca özgeçmiş",
       "check2": "Pozisyona uygun ön yazı",
       "checkTemplate": "{{name}} şablonu",
-      "check4": "Hesabında güvenle saklanır"
+      "check4": "Hesabında güvenle saklanır",
+      "docLang": "Başvuru dili"
     }
   },
   "notFound": {

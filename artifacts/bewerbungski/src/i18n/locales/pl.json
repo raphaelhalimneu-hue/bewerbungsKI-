@@ -230,7 +230,8 @@
       "check1": "CV po niemiecku",
       "check2": "List motywacyjny do stanowiska",
       "checkTemplate": "Szablon {{name}}",
-      "check4": "Bezpiecznie zapisane na Twoim koncie"
+      "check4": "Bezpiecznie zapisane na Twoim koncie",
+      "docLang": "Język dokumentów"
     }
   },
   "notFound": {

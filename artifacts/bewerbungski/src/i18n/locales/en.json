@@ -230,7 +230,8 @@
       "check1": "CV in German",
       "check2": "Cover letter for the position",
       "checkTemplate": "{{name}} template",
-      "check4": "Stored securely in your account"
+      "check4": "Stored securely in your account",
+      "docLang": "Application language"
     }
   },
   "notFound": {

@@ -230,7 +230,8 @@
       "check1": "Currículum en alemán",
       "check2": "Carta de presentación para el puesto",
       "checkTemplate": "Plantilla {{name}}",
-      "check4": "Guardado de forma segura en tu cuenta"
+      "check4": "Guardado de forma segura en tu cuenta",
+      "docLang": "Idioma de la solicitud"
     }
   },
   "notFound": {

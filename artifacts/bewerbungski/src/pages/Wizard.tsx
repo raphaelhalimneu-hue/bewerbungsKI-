@@ -33,6 +33,7 @@ function blankForm(): FormData {
 export default function Wizard() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(blankForm());
+  const [docLang, setDocLang] = useState("de");
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
@@ -111,13 +112,25 @@ export default function Wizard() {
     }
     setGenerating(true);
     try {
-      const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+      const DOC_LANGS: Record<string, { name: string; locale: string }> = {
+        de: { name: "Deutsch", locale: "de-DE" },
+        en: { name: "Englisch", locale: "en-GB" },
+        tr: { name: "Türkisch", locale: "tr-TR" },
+        ar: { name: "Arabisch", locale: "ar" },
+        es: { name: "Spanisch", locale: "es-ES" },
+        pl: { name: "Polnisch", locale: "pl-PL" },
+        ru: { name: "Russisch", locale: "ru-RU" },
+        uk: { name: "Ukrainisch", locale: "uk-UA" },
+      };
+      const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
+      const langInstr = docLang === "de" ? "" : ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch).`;
+      const today = new Date().toLocaleDateString(lang.locale, { day: "2-digit", month: "2-digit", year: "numeric" });
       setGenPhase(t("wizard.genCv"));
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Schreibe so, wie ein Mensch seinen eigenen Lebenslauf schreiben würde: schlicht, konkret, ohne Übertreibungen und ohne typische KI-Floskeln (kein 'dynamisch', 'leidenschaftlich', 'stets bestrebt', keine Gedankenstriche als Stilmittel). Antworte nur mit HTML-Inhalt, kein Wrapper.",
-        userPrompt: `Erstelle professionellen deutschen Lebenslauf-Inhalt als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.`,
+        userPrompt: `Erstelle professionellen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.${langInstr}`,
       } });
 
       let letterText = "";
@@ -126,7 +139,7 @@ export default function Wizard() {
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, nicht wie eine KI: natürliche, unterschiedlich lange Sätze, konkrete Beispiele statt Floskeln, keine übertriebenen Adjektive, keine typischen KI-Phrasen (kein 'dynamisch', 'leidenschaftlich', 'ich bin überzeugt, dass ich', 'stets', 'zeitnah'), keine Aufzählungen mit Gedankenstrichen. Der Text darf kleine persönliche Formulierungen enthalten, muss aber formell korrekt bleiben. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles deutsches Anschreiben:\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.`,
+          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
         } });
         letterText = letterRes.result;
       }
@@ -208,7 +221,7 @@ export default function Wizard() {
           {step === 4 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 5 && <StepJobAd form={form} setJobad={setJobad} />}
           {step === 6 && <StepTemplate form={form} setTemplate={setTemplate} />}
-          {step === 7 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} />}
+          {step === 7 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} />}
         </div>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
@@ -423,8 +436,9 @@ function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: 
   );
 }
 
-function StepGenerate({ form, user, setShowAuthModal, handleGenerate }: {
+function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang }: {
   form: FormData; user: any; setShowAuthModal: (v: boolean) => void; handleGenerate: () => void;
+  docLang: string; setDocLang: (v: string) => void;
 }) {
   const hasName = !!form.personal.firstName;
   const { t } = useTranslation();
@@ -438,6 +452,19 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate }: {
       </p>
       {!hasName && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "#92400e" }}>{t("wizard.gen.fillFirst")}</div>}
       {!user && <div style={{ background: "var(--brand-l)", border: "1px solid #bfdbfe", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "var(--brand)" }}>{t("wizard.gen.loginFirst")}</div>}
+      <div className="field" style={{ maxWidth: 320, margin: "0 auto 20px", textAlign: "left" }}>
+        <label className="label">{t("wizard.gen.docLang")}</label>
+        <select className="select" value={docLang} onChange={e => setDocLang(e.target.value)}>
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+          <option value="tr">Türkçe</option>
+          <option value="ar">العربية</option>
+          <option value="es">Español</option>
+          <option value="pl">Polski</option>
+          <option value="ru">Русский</option>
+          <option value="uk">Українська</option>
+        </select>
+      </div>
       <button className="btn btn-p btn-lg" onClick={handleGenerate} disabled={!hasName}>{t("wizard.gen.generateNow")}</button>
       <div style={{ marginTop: 16 }}>
         {[t("wizard.gen.check1"), t("wizard.gen.check2"),
