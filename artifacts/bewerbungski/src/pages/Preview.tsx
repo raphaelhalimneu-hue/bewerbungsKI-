@@ -12,11 +12,18 @@ export default function Preview() {
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
   const cvRef = useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<"cv" | "letter" | null>(null);
 
-  async function handleDownloadPDF() {
+  function baseFileName(suffix: string) {
+    const name = (doc as any)?.name
+      ? (doc as any).name.replace(/[^a-zA-Z0-9\-_äöüÄÖÜß ]/g, "")
+      : "";
+    return `${name ? name + " – " : ""}${suffix}.pdf`;
+  }
+
+  async function handleDownloadCv() {
     if (!cvRef.current) return;
-    setExporting(true);
+    setExporting("cv");
     try {
       const el = cvRef.current;
 
@@ -53,41 +60,44 @@ export default function Preview() {
         heightLeft -= pageHeight;
       }
 
-      // Anschreiben als echte Text-Seite(n) anhängen (gestochen scharf, markierbar)
-      const coverLetter = ((doc as any)?.cover_letter || "").trim();
-      if (coverLetter) {
-        const margin = 22;
-        const maxWidth = pageWidth - margin * 2;
-        const lineHeight = 6.2;
-        pdf.addPage();
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(15);
-        // Fester deutscher Titel: jsPDF-Standardschrift kann kein Arabisch/Kyrillisch
-        pdf.text("Anschreiben", margin, margin);
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(11);
-        let y = margin + 12;
-        for (const para of coverLetter.split(/\n/)) {
-          const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
-          for (const line of lines) {
-            if (y > pageHeight - margin) {
-              pdf.addPage();
-              y = margin;
-            }
-            if (line !== "") pdf.text(line, margin, y);
-            y += lineHeight;
-          }
-        }
-      }
-
-      const fileName = (doc as any)?.name
-        ? `${(doc as any).name.replace(/[^a-zA-Z0-9\-_äöüÄÖÜß ]/g, "")}.pdf`
-        : "lebenslauf.pdf";
-      pdf.save(fileName);
+      pdf.save(baseFileName("Lebenslauf"));
     } catch (e) {
       console.error("PDF export failed", e);
     } finally {
-      setExporting(false);
+      setExporting(null);
+    }
+  }
+
+  function handleDownloadLetter() {
+    const coverLetter = ((doc as any)?.cover_letter || "").trim();
+    if (!coverLetter) return;
+    setExporting("letter");
+    try {
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 22;
+      const maxWidth = pageWidth - margin * 2;
+      const lineHeight = 6.2;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      let y = margin;
+      for (const para of coverLetter.split(/\n/)) {
+        const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
+        for (const line of lines) {
+          if (y > pageHeight - margin) {
+            pdf.addPage();
+            y = margin;
+          }
+          if (line !== "") pdf.text(line, margin, y);
+          y += lineHeight;
+        }
+      }
+      pdf.save(baseFileName("Anschreiben"));
+    } catch (e) {
+      console.error("PDF export failed", e);
+    } finally {
+      setExporting(null);
     }
   }
 
@@ -107,16 +117,30 @@ export default function Preview() {
                 </button>
                 <button
                   className="btn btn-p btn-sm"
-                  onClick={handleDownloadPDF}
-                  disabled={exporting}
+                  onClick={handleDownloadCv}
+                  disabled={exporting !== null}
                   style={{ minWidth: 140 }}
                 >
-                  {exporting ? (
+                  {exporting === "cv" ? (
                     <><span className="spin" /> {t("preview.creatingPdf")}</>
                   ) : (
-                    <>{t("preview.downloadPdf")}</>
+                    <>{t("preview.downloadCv")}</>
                   )}
                 </button>
+                {(doc as any)?.cover_letter && (
+                  <button
+                    className="btn btn-p btn-sm"
+                    onClick={handleDownloadLetter}
+                    disabled={exporting !== null}
+                    style={{ minWidth: 140 }}
+                  >
+                    {exporting === "letter" ? (
+                      <><span className="spin" /> {t("preview.creatingPdf")}</>
+                    ) : (
+                      <>{t("preview.downloadLetter")}</>
+                    )}
+                  </button>
+                )}
               </div>
             </>
           )}

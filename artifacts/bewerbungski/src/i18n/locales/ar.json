@@ -103,7 +103,9 @@
     "loading": "جارٍ التحميل …",
     "loadError": "تعذّر تحميل المستند.",
     "cv": "📋 السيرة الذاتية",
-    "coverLetter": "✉️ خطاب التقديم"
+    "coverLetter": "✉️ خطاب التقديم",
+    "downloadCv": "⬇ السيرة الذاتية (PDF)",
+    "downloadLetter": "⬇ خطاب التقديم (PDF)"
   },
   "wizard": {
     "steps": {

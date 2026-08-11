@@ -103,7 +103,9 @@
     "loading": "Yükleniyor …",
     "loadError": "Belge yüklenemedi.",
     "cv": "📋 Özgeçmiş",
-    "coverLetter": "✉️ Ön yazı"
+    "coverLetter": "✉️ Ön yazı",
+    "downloadCv": "⬇ Özgeçmiş (PDF)",
+    "downloadLetter": "⬇ Ön yazı (PDF)"
   },
   "wizard": {
     "steps": {

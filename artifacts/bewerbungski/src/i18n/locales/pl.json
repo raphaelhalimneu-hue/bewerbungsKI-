@@ -103,7 +103,9 @@
     "loading": "Ładowanie …",
     "loadError": "Nie udało się załadować dokumentu.",
     "cv": "📋 CV",
-    "coverLetter": "✉️ List motywacyjny"
+    "coverLetter": "✉️ List motywacyjny",
+    "downloadCv": "⬇ CV (PDF)",
+    "downloadLetter": "⬇ List motywacyjny (PDF)"
   },
   "wizard": {
     "steps": {

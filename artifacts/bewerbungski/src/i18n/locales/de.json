@@ -103,7 +103,9 @@
     "loading": "Lädt …",
     "loadError": "Dokument konnte nicht geladen werden.",
     "cv": "📋 Lebenslauf",
-    "coverLetter": "✉️ Anschreiben"
+    "coverLetter": "✉️ Anschreiben",
+    "downloadCv": "⬇ Lebenslauf (PDF)",
+    "downloadLetter": "⬇ Anschreiben (PDF)"
   },
   "wizard": {
     "steps": {

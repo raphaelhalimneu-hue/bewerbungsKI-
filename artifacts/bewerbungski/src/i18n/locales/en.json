@@ -103,7 +103,9 @@
     "loading": "Loading …",
     "loadError": "Document could not be loaded.",
     "cv": "📋 CV",
-    "coverLetter": "✉️ Cover letter"
+    "coverLetter": "✉️ Cover letter",
+    "downloadCv": "⬇ CV (PDF)",
+    "downloadLetter": "⬇ Cover letter (PDF)"
   },
   "wizard": {
     "steps": {

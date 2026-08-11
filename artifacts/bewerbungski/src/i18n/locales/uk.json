@@ -103,7 +103,9 @@
     "loading": "Завантаження …",
     "loadError": "Не вдалося завантажити документ.",
     "cv": "📋 Резюме",
-    "coverLetter": "✉️ Супровідний лист"
+    "coverLetter": "✉️ Супровідний лист",
+    "downloadCv": "⬇ Резюме (PDF)",
+    "downloadLetter": "⬇ Супровідний лист (PDF)"
   },
   "wizard": {
     "steps": {

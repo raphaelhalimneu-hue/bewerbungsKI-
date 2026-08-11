@@ -103,7 +103,9 @@
     "loading": "Cargando …",
     "loadError": "No se pudo cargar el documento.",
     "cv": "📋 Currículum",
-    "coverLetter": "✉️ Carta de presentación"
+    "coverLetter": "✉️ Carta de presentación",
+    "downloadCv": "⬇ Currículum (PDF)",
+    "downloadLetter": "⬇ Carta de presentación (PDF)"
   },
   "wizard": {
     "steps": {
