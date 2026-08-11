@@ -112,9 +112,6 @@ export default function Preview() {
                 {(doc as any).name}
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                <button className="btn btn-s btn-sm" onClick={() => window.print()}>
-                  {t("preview.print")}
-                </button>
                 <button
                   className="btn btn-p btn-sm"
                   onClick={handleDownloadCv}
