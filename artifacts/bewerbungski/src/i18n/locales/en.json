@@ -231,7 +231,13 @@
       "check2": "Cover letter for the position",
       "checkTemplate": "{{name}} template",
       "check4": "Stored securely in your account",
-      "docLang": "Application language"
+      "docLang": "Application language",
+      "boostTitle": "✨ Strengthen your application (optional)",
+      "boostHint": "These two questions help the AI write a more personal cover letter. You can also leave them blank.",
+      "motivationLabel": "Why do you want to work at this company?",
+      "motivationPh": "e.g. I heard about the company through a recommendation / I have been following their work for a long time …",
+      "achievementLabel": "What is your greatest achievement or strength?",
+      "achievementPh": "e.g. I reduced production costs by 20% in my last role …"
     },
     "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more."
   },

@@ -34,6 +34,8 @@ export default function Wizard() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(blankForm());
   const [docLang, setDocLang] = useState("de");
+  const [motivation, setMotivation] = useState("");
+  const [achievement, setAchievement] = useState("");
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
@@ -165,7 +167,7 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, nicht wie eine KI: natürliche, unterschiedlich lange Sätze, konkrete Beispiele statt Floskeln, keine übertriebenen Adjektive, keine typischen KI-Phrasen (kein 'dynamisch', 'leidenschaftlich', 'ich bin überzeugt, dass ich', 'stets', 'zeitnah'), keine Aufzählungen mit Gedankenstrichen. Der Text darf kleine persönliche Formulierungen enthalten, muss aber formell korrekt bleiben. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
+          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen): ${motivation}` : ""}${achievement ? `\nBesonderer Erfolg/Stärke (UNBEDINGT einbauen): ${achievement}` : ""}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
         } });
         letterText = letterRes.result;
       }
@@ -249,7 +251,7 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
           {step === 4 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 5 && <StepJobAd form={form} setJobad={setJobad} />}
           {step === 6 && <StepTemplate form={form} setTemplate={setTemplate} />}
-          {step === 7 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} />}
+          {step === 7 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} />}
         </div>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
@@ -464,23 +466,42 @@ function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: 
   );
 }
 
-function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang }: {
+function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang, motivation, setMotivation, achievement, setAchievement }: {
   form: FormData; user: any; setShowAuthModal: (v: boolean) => void; handleGenerate: () => void;
   docLang: string; setDocLang: (v: string) => void;
+  motivation: string; setMotivation: (v: string) => void;
+  achievement: string; setAchievement: (v: string) => void;
 }) {
   const hasName = !!form.personal.firstName;
   const { t } = useTranslation();
   const templateName = form.template === "modern" ? "Modern" : form.template === "classic" ? "Classic" : "Creative";
   return (
-    <div style={{ textAlign: "center", padding: "24px 0" }}>
-      <div style={{ fontSize: 52, marginBottom: 16 }}>✨</div>
-      <h3 style={{ fontFamily: "var(--fd)", fontSize: 22, marginBottom: 10 }}>{t("wizard.gen.ready")}</h3>
-      <p style={{ color: "var(--muted)", maxWidth: 400, margin: "0 auto 24px", fontSize: 14, lineHeight: 1.6 }}>
-        {t("wizard.gen.readyText", { letter: form.jobad.title ? t("wizard.gen.readyLetter") : "" })}
-      </p>
-      {!hasName && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "#92400e" }}>{t("wizard.gen.fillFirst")}</div>}
-      {!user && <div style={{ background: "var(--brand-l)", border: "1px solid #bfdbfe", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "var(--brand)" }}>{t("wizard.gen.loginFirst")}</div>}
-      <div className="field" style={{ maxWidth: 320, margin: "0 auto 20px", textAlign: "left" }}>
+    <div style={{ padding: "24px 0" }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>✨</div>
+        <h3 style={{ fontFamily: "var(--fd)", fontSize: 22, marginBottom: 10 }}>{t("wizard.gen.ready")}</h3>
+        <p style={{ color: "var(--muted)", maxWidth: 400, margin: "0 auto", fontSize: 14, lineHeight: 1.6 }}>
+          {t("wizard.gen.readyText", { letter: form.jobad.title ? t("wizard.gen.readyLetter") : "" })}
+        </p>
+      </div>
+
+      {/* Optional boost questions */}
+      {form.jobad.title && (
+        <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t("wizard.gen.boostTitle")}</div>
+          <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16, lineHeight: 1.5 }}>{t("wizard.gen.boostHint")}</div>
+          <div className="field" style={{ marginBottom: 14 }}>
+            <label className="label">{t("wizard.gen.motivationLabel")}</label>
+            <textarea className="textarea" value={motivation} onChange={e => setMotivation(e.target.value)} placeholder={t("wizard.gen.motivationPh")} style={{ minHeight: 72 }} />
+          </div>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label className="label">{t("wizard.gen.achievementLabel")}</label>
+            <textarea className="textarea" value={achievement} onChange={e => setAchievement(e.target.value)} placeholder={t("wizard.gen.achievementPh")} style={{ minHeight: 72 }} />
+          </div>
+        </div>
+      )}
+
+      <div className="field" style={{ maxWidth: 320, margin: "0 auto 20px" }}>
         <label className="label">{t("wizard.gen.docLang")}</label>
         <select className="select" value={docLang} onChange={e => setDocLang(e.target.value)}>
           <option value="de">Deutsch</option>
@@ -493,12 +514,18 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
           <option value="uk">Українська</option>
         </select>
       </div>
-      <button className="btn btn-p btn-lg" onClick={handleGenerate} disabled={!hasName}>{t("wizard.gen.generateNow")}</button>
-      <div style={{ marginTop: 16 }}>
-        {[t("wizard.gen.check1"), t("wizard.gen.check2"),
-          t("wizard.gen.checkTemplate", { name: templateName }),
-          t("wizard.gen.check4")
-        ].map(f => <div key={f} style={{ fontSize: 13, color: "var(--muted)", marginBottom: 3 }}>✓ {f}</div>)}
+
+      {!hasName && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "#92400e" }}>{t("wizard.gen.fillFirst")}</div>}
+      {!user && <div style={{ background: "var(--brand-l)", border: "1px solid #bfdbfe", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "var(--brand)" }}>{t("wizard.gen.loginFirst")}</div>}
+
+      <div style={{ textAlign: "center" }}>
+        <button className="btn btn-p btn-lg" onClick={handleGenerate} disabled={!hasName}>{t("wizard.gen.generateNow")}</button>
+        <div style={{ marginTop: 16 }}>
+          {[t("wizard.gen.check1"), t("wizard.gen.check2"),
+            t("wizard.gen.checkTemplate", { name: templateName }),
+            t("wizard.gen.check4")
+          ].map(f => <div key={f} style={{ fontSize: 13, color: "var(--muted)", marginBottom: 3 }}>✓ {f}</div>)}
+        </div>
       </div>
     </div>
   );

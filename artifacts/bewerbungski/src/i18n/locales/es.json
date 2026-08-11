@@ -231,7 +231,13 @@
       "check2": "Carta de presentación para el puesto",
       "checkTemplate": "Plantilla {{name}}",
       "check4": "Guardado de forma segura en tu cuenta",
-      "docLang": "Idioma de la solicitud"
+      "docLang": "Idioma de la solicitud",
+      "boostTitle": "✨ Refuerza tu solicitud (opcional)",
+      "boostHint": "Estas dos preguntas ayudan a la IA a escribir una carta de presentación más personal. También puedes dejarlas en blanco.",
+      "motivationLabel": "¿Por qué quieres trabajar en esta empresa?",
+      "motivationPh": "p. ej. me enteré de la empresa por una recomendación / llevo tiempo siguiendo su trabajo …",
+      "achievementLabel": "¿Cuál es tu mayor logro o punto fuerte?",
+      "achievementPh": "p. ej. reduje los costes de producción un 20% en mi último puesto …"
     },
     "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más."
   },

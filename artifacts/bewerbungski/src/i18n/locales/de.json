@@ -231,7 +231,13 @@
       "check2": "Anschreiben zur Stelle",
       "checkTemplate": "{{name}}-Vorlage",
       "check4": "Sicher in deinem Account gespeichert",
-      "docLang": "Sprache der Bewerbung"
+      "docLang": "Sprache der Bewerbung",
+      "boostTitle": "✨ Bewerbung stärken (optional)",
+      "boostHint": "Diese zwei Fragen helfen der KI, ein persönlicheres Anschreiben zu schreiben. Du kannst sie auch leer lassen.",
+      "motivationLabel": "Warum möchtest du bei diesem Unternehmen arbeiten?",
+      "motivationPh": "z. B. ich bin durch eine Empfehlung auf das Unternehmen aufmerksam geworden / ich verfolge die Entwicklung seit Langem …",
+      "achievementLabel": "Was ist dein größter Erfolg oder deine Stärke?",
+      "achievementPh": "z. B. ich habe in meiner letzten Stelle die Produktionskosten um 20 % gesenkt …"
     },
     "premiumLimit": "Limit erreicht: 30 Bewerbungen pro Kauf. Bitte kontaktiere uns für mehr."
   },

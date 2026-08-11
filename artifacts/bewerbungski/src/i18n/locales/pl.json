@@ -231,7 +231,13 @@
       "check2": "List motywacyjny do stanowiska",
       "checkTemplate": "Szablon {{name}}",
       "check4": "Bezpiecznie zapisane na Twoim koncie",
-      "docLang": "Język dokumentów"
+      "docLang": "Język dokumentów",
+      "boostTitle": "✨ Wzmocnij swoją aplikację (opcjonalnie)",
+      "boostHint": "Te dwa pytania pomagają AI napisać bardziej osobisty list motywacyjny. Możesz je też pominąć.",
+      "motivationLabel": "Dlaczego chcesz pracować w tej firmie?",
+      "motivationPh": "np. dowiedziałem/am się o firmie z polecenia / obserwuję ją od dłuższego czasu …",
+      "achievementLabel": "Jaki jest Twój największy sukces lub mocna strona?",
+      "achievementPh": "np. obniżyłem/am koszty produkcji o 20% na poprzednim stanowisku …"
     },
     "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej."
   },

@@ -231,7 +231,13 @@
       "check2": "Pozisyona uygun ön yazı",
       "checkTemplate": "{{name}} şablonu",
       "check4": "Hesabında güvenle saklanır",
-      "docLang": "Başvuru dili"
+      "docLang": "Başvuru dili",
+      "boostTitle": "✨ Başvuruyu güçlendir (isteğe bağlı)",
+      "boostHint": "Bu iki soru, yapay zekanın daha kişisel bir ön yazı yazmasına yardımcı olur. İstersen boş bırakabilirsin.",
+      "motivationLabel": "Bu şirkette neden çalışmak istiyorsun?",
+      "motivationPh": "ör. şirketi bir tavsiye üzerine öğrendim / uzun süredir takip ediyorum …",
+      "achievementLabel": "En büyük başarın veya güçlü yönün nedir?",
+      "achievementPh": "ör. son işimde üretim maliyetlerini %20 düşürdüm …"
     },
     "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın."
   },
