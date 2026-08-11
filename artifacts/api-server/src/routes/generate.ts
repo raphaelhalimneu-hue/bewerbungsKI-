@@ -30,45 +30,43 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       }
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      res.status(503).json({ error: "AI generation not configured. Please set GROQ_API_KEY." });
+      res.status(503).json({ error: "AI generation not configured. Please set ANTHROPIC_API_KEY." });
       return;
     }
 
-    const callGroq = () =>
-      fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const callClaude = () =>
+      fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: "claude-sonnet-4-5",
           max_tokens: 4096,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
         }),
       });
 
-    let response = await callGroq();
+    let response = await callClaude();
 
-    // Bei Rate-Limit (429): empfohlene Wartezeit lesen und einmal erneut versuchen
-    if (response.status === 429) {
-      const errText = await response.text();
-      const match = /try again in (\d+(?:\.\d+)?)s/i.exec(errText);
-      const waitSec = Math.min(match ? parseFloat(match[1]) + 1 : 25, 40);
-      req.log.warn({ waitSec }, "Groq rate limit, retrying once");
+    // Bei Rate-Limit oder Überlastung: kurz warten und einmal erneut versuchen
+    if (response.status === 429 || response.status === 529) {
+      const retryAfter = parseFloat(response.headers.get("retry-after") || "");
+      const waitSec = Math.min(Number.isFinite(retryAfter) ? retryAfter + 1 : 15, 40);
+      req.log.warn({ waitSec }, "Claude rate limit/overloaded, retrying once");
       await new Promise((r) => setTimeout(r, waitSec * 1000));
-      response = await callGroq();
+      response = await callClaude();
     }
 
     if (!response.ok) {
       const errText = await response.text();
-      req.log.error({ status: response.status, body: errText }, "Groq API error");
-      if (response.status === 429) {
+      req.log.error({ status: response.status, body: errText }, "Claude API error");
+      if (response.status === 429 || response.status === 529) {
         res.status(503).json({ error: "busy_try_again" });
         return;
       }
@@ -77,10 +75,10 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
     }
 
     const data = await response.json() as {
-      choices: Array<{ message: { content: string } }>;
+      content: Array<{ type: string; text?: string }>;
     };
 
-    const result = data.choices?.[0]?.message?.content ?? "";
+    const result = data.content?.find((b) => b.type === "text")?.text ?? "";
     res.json({ result });
   } catch (err) {
     req.log.error({ err }, "POST /generate error");
