@@ -5,6 +5,7 @@ import generateRouter from "./generate";
 import documentsRouter from "./documents";
 import checkoutRouter from "./checkout";
 import downloadRouter from "./download";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(generateRouter);
 router.use(documentsRouter);
 router.use(checkoutRouter);
 router.use(downloadRouter);
+router.use(adminRouter);
 
 export default router;

@@ -12,6 +12,7 @@ import Wizard from "@/pages/Wizard";
 import Documents from "@/pages/Documents";
 import Preview from "@/pages/Preview";
 import Pricing from "@/pages/Pricing";
+import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/documents" component={Documents} />
       <Route path="/preview/:id" component={Preview} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -23,9 +23,8 @@ export async function requireAuth(
   const token = authHeader.split(" ")[1];
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    req.log.warn("Supabase env vars not configured, using token as user ID");
-    req.userId = "mock-user";
-    next();
+    req.log.error("Supabase env vars not configured, refusing authentication");
+    res.status(503).json({ error: "Auth not configured" });
     return;
   }
 
