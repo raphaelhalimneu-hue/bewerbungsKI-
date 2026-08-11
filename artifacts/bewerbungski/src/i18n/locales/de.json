@@ -19,8 +19,8 @@
     "badge": "🚀 Lebenslauf + Anschreiben in 3 Minuten",
     "titlePre": "Deine Bewerbung –",
     "titleEm": "professionell & fertig.",
-    "subtitle": "Gib deine Daten ein, füge die Stellenanzeige ein – BewerbungsKI erstellt sofort deinen Lebenslauf und dein Anschreiben auf Deutsch. Individuell. Überzeugend.",
-    "feat1": "Lebenslauf auf Deutsch",
+    "subtitle": "Gib deine Daten ein, füge die Stellenanzeige ein – BewerbungsKI erstellt sofort deinen Lebenslauf und dein Anschreiben. Auf Deutsch oder in 7 weiteren Sprachen – du wählst.",
+    "feat1": "Lebenslauf in deiner Sprache",
     "feat2": "Passendes Anschreiben",
     "feat3": "Fertig in 3 Minuten",
     "cta": "Jetzt kostenlos ausprobieren",
@@ -30,7 +30,7 @@
     "step2Text": "Kopiere Jobtitel und Beschreibung rein – die KI passt alles darauf an.",
     "step3Title": "Lebenslauf & Anschreiben laden",
     "step3Text": "Beide Dokumente sind sofort fertig – professionell, individuell, bewerbungsfertig.",
-    "germanNote": "Alle Dokumente werden auf Deutsch erstellt – perfekt für den deutschen Arbeitsmarkt."
+    "germanNote": "Deine Bewerbung in 8 Sprachen – z. B. auf Deutsch, perfekt für den deutschen Arbeitsmarkt."
   },
   "auth": {
     "titleSignIn": "Anmelden",
@@ -222,12 +222,12 @@
     },
     "gen": {
       "ready": "Bereit zur Generierung",
-      "readyText": "Die KI erstellt deinen professionellen Lebenslauf{{letter}} für den deutschen Markt.",
+      "readyText": "Die KI erstellt deinen professionellen Lebenslauf{{letter}} – in der Sprache deiner Wahl.",
       "readyLetter": " und ein passendes Anschreiben",
       "fillFirst": "⚠️ Bitte zuerst persönliche Daten ausfüllen (Schritt 1).",
       "loginFirst": "🔒 Du musst angemeldet sein, um Bewerbungen zu erstellen.",
       "generateNow": "✨ Jetzt generieren",
-      "check1": "Lebenslauf auf Deutsch",
+      "check1": "Lebenslauf in deiner Wunschsprache",
       "check2": "Anschreiben zur Stelle",
       "checkTemplate": "{{name}}-Vorlage",
       "check4": "Sicher in deinem Account gespeichert",
@@ -241,8 +241,8 @@
     "home": "Zur Startseite"
   },
   "seo": {
-    "title": "BewerbungsKI – Lebenslauf & Anschreiben mit KI erstellen",
-    "description": "Erstelle in 3 Minuten professionelle deutsche Bewerbungen: Lebenslauf und Anschreiben mit KI, perfekt auf die Stellenanzeige zugeschnitten. DIN-gerecht & ATS-optimiert."
+    "title": "BewerbungsKI – KI-Lebenslauf & Anschreiben in 8 Sprachen",
+    "description": "Erstelle in 3 Minuten mit KI einen professionellen Lebenslauf und ein Anschreiben – perfekt auf die Stellenanzeige zugeschnitten, auf Deutsch oder in 7 weiteren Sprachen."
   },
   "fbBrowser": {
     "warning": "Tipp: Du nutzt den Facebook-Browser. Für Anmeldung und Bezahlung öffne die Seite besser in Chrome oder Safari.",

@@ -19,8 +19,8 @@
     "badge": "🚀 CV + ön yazı 3 dakikada",
     "titlePre": "Başvurun –",
     "titleEm": "profesyonel ve hazır.",
-    "subtitle": "Bilgilerini gir, iş ilanını yapıştır – BewerbungsKI hemen Almanca CV ve ön yazını oluşturur. Kişiselleştirilmiş. İkna edici.",
-    "feat1": "Almanca CV",
+    "subtitle": "Bilgilerini gir, iş ilanını yapıştır – BewerbungsKI anında CV'ni ve ön yazını oluşturur. Türkçe, Almanca veya 6 başka dilde – sen seçersin.",
+    "feat1": "Kendi dilinde CV",
     "feat2": "Uygun ön yazı",
     "feat3": "3 dakikada hazır",
     "cta": "Şimdi ücretsiz dene",
@@ -30,7 +30,7 @@
     "step2Text": "İş başlığını ve açıklamasını kopyala – AI her şeyi buna göre hazırlar.",
     "step3Title": "CV ve ön yazını indir",
     "step3Text": "Her iki belge anında hazır – profesyonel, kişisel, başvuruya hazır.",
-    "germanNote": "Tüm belgeler Almanca oluşturulur – Alman iş piyasası için mükemmel."
+    "germanNote": "Başvurun 8 dilde – örneğin Almanca, Alman iş piyasası için mükemmel."
   },
   "auth": {
     "titleSignIn": "Giriş yap",
@@ -222,12 +222,12 @@
     },
     "gen": {
       "ready": "Oluşturmaya hazır",
-      "readyText": "Yapay zekâ, Alman pazarı için profesyonel özgeçmişini{{letter}} oluşturur.",
+      "readyText": "Yapay zekâ profesyonel CV'ni{{letter}} oluşturur – seçtiğin dilde.",
       "readyLetter": " ve uygun bir ön yazı",
       "fillFirst": "⚠️ Lütfen önce kişisel bilgileri doldur (Adım 1).",
       "loginFirst": "🔒 Başvuru oluşturmak için giriş yapmış olman gerekir.",
       "generateNow": "✨ Şimdi oluştur",
-      "check1": "Almanca özgeçmiş",
+      "check1": "İstediğin dilde CV",
       "check2": "Pozisyona uygun ön yazı",
       "checkTemplate": "{{name}} şablonu",
       "check4": "Hesabında güvenle saklanır",
@@ -241,8 +241,8 @@
     "home": "Ana sayfaya git"
   },
   "seo": {
-    "title": "BewerbungsKI – Almanya'da iş için yapay zekâ ile CV ve ön yazı",
-    "description": "Yapay zekâ ile 3 dakikada Almanca CV ve ön yazı oluştur – iş ilanına göre özel hazırlanır. Almanya'da iş başvurusu için ideal."
+    "title": "BewerbungsKI – 8 Dilde Yapay Zekâ CV ve Ön Yazı",
+    "description": "Yapay zekâ ile 3 dakikada profesyonel CV ve ön yazı oluştur – iş ilanına tam uygun, Türkçe, Almanca veya 6 başka dilde."
   },
   "fbBrowser": {
     "warning": "İpucu: Facebook tarayıcısını kullanıyorsunuz. Giriş ve ödeme için sayfayı Chrome veya Safari'de açın.",

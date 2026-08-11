@@ -19,8 +19,8 @@
     "badge": "🚀 CV + list motywacyjny w 3 minuty",
     "titlePre": "Twoja aplikacja –",
     "titleEm": "profesjonalna i gotowa.",
-    "subtitle": "Wpisz dane, wklej ogłoszenie – BewerbungsKI natychmiast tworzy Twoje CV i list motywacyjny po niemiecku. Dopasowane. Przekonujące.",
-    "feat1": "CV po niemiecku",
+    "subtitle": "Wpisz swoje dane, wklej ogłoszenie – BewerbungsKI natychmiast tworzy Twoje CV i list motywacyjny. Po polsku, niemiecku lub w 6 innych językach – Ty wybierasz.",
+    "feat1": "CV w Twoim języku",
     "feat2": "Pasujący list motywacyjny",
     "feat3": "Gotowe w 3 minuty",
     "cta": "Wypróbuj za darmo teraz",
@@ -30,7 +30,7 @@
     "step2Text": "Skopiuj tytuł i opis stanowiska – AI dopasowuje wszystko.",
     "step3Title": "Pobierz CV i list",
     "step3Text": "Oba dokumenty gotowe natychmiast – profesjonalne i spersonalizowane.",
-    "germanNote": "Wszystkie dokumenty są tworzone po niemiecku – idealnie dla niemieckiego rynku pracy."
+    "germanNote": "Twoja aplikacja w 8 językach – np. po niemiecku, idealna na niemiecki rynek pracy."
   },
   "auth": {
     "titleSignIn": "Zaloguj się",
@@ -222,12 +222,12 @@
     },
     "gen": {
       "ready": "Gotowe do wygenerowania",
-      "readyText": "AI tworzy Twoje profesjonalne CV{{letter}} na rynek niemiecki.",
+      "readyText": "AI tworzy Twoje profesjonalne CV{{letter}} – w wybranym przez Ciebie języku.",
       "readyLetter": " oraz dopasowany list motywacyjny",
       "fillFirst": "⚠️ Najpierw wypełnij dane osobowe (krok 1).",
       "loginFirst": "🔒 Aby tworzyć aplikacje, musisz być zalogowany.",
       "generateNow": "✨ Generuj teraz",
-      "check1": "CV po niemiecku",
+      "check1": "CV w wybranym języku",
       "check2": "List motywacyjny do stanowiska",
       "checkTemplate": "Szablon {{name}}",
       "check4": "Bezpiecznie zapisane na Twoim koncie",
@@ -241,8 +241,8 @@
     "home": "Przejdź na stronę główną"
   },
   "seo": {
-    "title": "BewerbungsKI – CV i list motywacyjny z AI do pracy w Niemczech",
-    "description": "Stwórz w 3 minuty profesjonalne niemieckie CV i list motywacyjny z pomocą AI – dopasowane do ogłoszenia o pracę. Idealne do aplikowania w Niemczech."
+    "title": "BewerbungsKI – CV i list motywacyjny AI w 8 językach",
+    "description": "Stwórz w 3 minuty z AI profesjonalne CV i list motywacyjny – idealnie dopasowane do ogłoszenia, po polsku, niemiecku lub w 6 innych językach."
   },
   "fbBrowser": {
     "warning": "Wskazówka: Używasz przeglądarki Facebooka. Aby się zalogować i zapłacić, otwórz stronę w Chrome lub Safari.",

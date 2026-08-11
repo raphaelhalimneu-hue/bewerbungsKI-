@@ -19,8 +19,8 @@
     "badge": "🚀 CV + cover letter in 3 minutes",
     "titlePre": "Your application –",
     "titleEm": "professional & ready.",
-    "subtitle": "Enter your details, paste the job listing – BewerbungsKI instantly creates your CV and cover letter in German. Tailored. Convincing.",
-    "feat1": "CV in German",
+    "subtitle": "Enter your details, paste the job listing – BewerbungsKI instantly creates your CV and cover letter. In English, German or 6 other languages – you choose.",
+    "feat1": "CV in your language",
     "feat2": "Matching cover letter",
     "feat3": "Ready in 3 minutes",
     "cta": "Try it for free now",
@@ -30,7 +30,7 @@
     "step2Text": "Copy in the job title and description – the AI tailors everything to it.",
     "step3Title": "Download CV & cover letter",
     "step3Text": "Both documents are instantly ready – professional, tailored, application-ready.",
-    "germanNote": "All documents are created in German – perfect for the German job market."
+    "germanNote": "Your application in 8 languages – e.g. in German, perfect for the German job market."
   },
   "auth": {
     "titleSignIn": "Sign in",
@@ -222,12 +222,12 @@
     },
     "gen": {
       "ready": "Ready to generate",
-      "readyText": "The AI creates your professional CV{{letter}} for the German market.",
+      "readyText": "The AI creates your professional CV{{letter}} – in the language of your choice.",
       "readyLetter": " and a matching cover letter",
       "fillFirst": "⚠️ Please fill in your personal details first (Step 1).",
       "loginFirst": "🔒 You must be signed in to create applications.",
       "generateNow": "✨ Generate now",
-      "check1": "CV in German",
+      "check1": "CV in your chosen language",
       "check2": "Cover letter for the position",
       "checkTemplate": "{{name}} template",
       "check4": "Stored securely in your account",
@@ -241,8 +241,8 @@
     "home": "Go to homepage"
   },
   "seo": {
-    "title": "BewerbungsKI – AI CV & Cover Letter for Jobs in Germany",
-    "description": "Create a professional German CV and cover letter in 3 minutes with AI – perfectly tailored to the job posting. Ideal for applying to jobs in Germany."
+    "title": "BewerbungsKI – AI CV & Cover Letter in 8 Languages",
+    "description": "Create a professional CV and cover letter in 3 minutes with AI – perfectly tailored to the job posting, in English, German or 6 other languages."
   },
   "fbBrowser": {
     "warning": "Tip: You're using the Facebook browser. For sign-in and payment, please open this page in Chrome or Safari.",
