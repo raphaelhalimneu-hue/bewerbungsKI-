@@ -156,6 +156,7 @@
       "summaryPh": "2–3 frases sobre ti …"
     },
     "exp": {
+      "hint": "📋 Añade TODA tu experiencia – incluyendo trabajos cortos, a tiempo parcial o por cuenta propia. Las lagunas de más de un año llaman la atención de los reclutadores.",
       "empty": "Aún no hay experiencia laboral. Haz clic en «Añadir».",
       "item": "Puesto n.º {{num}}",
       "company": "Empresa",
@@ -170,6 +171,7 @@
       "add": "+ Añadir experiencia laboral"
     },
     "edu": {
+      "hint": "🎓 Empieza con tu título escolar (p. ej. Bachillerato 2003). Luego formación, universidad o cursos – del más antiguo al más reciente. Un historial educativo completo es obligatorio.",
       "empty": "Aún no se ha añadido ninguna formación.",
       "item": "Titulación n.º {{num}}",
       "school": "Universidad / centro",

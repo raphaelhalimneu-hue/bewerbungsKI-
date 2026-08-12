@@ -156,7 +156,8 @@
       "summaryPh": "2–3 sentences about you …"
     },
     "exp": {
-      "empty": "No work experience yet. Click “Add\".",
+      "hint": "📋 Add ALL work history – including short jobs, part-time work, or self-employment. Gaps of more than one year are immediately noticed by recruiters.",
+      "empty": "No work experience yet. Click \"Add\".",
       "item": "Position #{{num}}",
       "company": "Company",
       "companyPh": "Musterfirma GmbH",
@@ -170,6 +171,7 @@
       "add": "+ Add work experience"
     },
     "edu": {
+      "hint": "🎓 Start with your school-leaving certificate (e.g. A-levels 2003). Then add training, university, or courses – oldest first. A complete education history is expected.",
       "empty": "No education added yet.",
       "item": "Degree #{{num}}",
       "school": "University / school",

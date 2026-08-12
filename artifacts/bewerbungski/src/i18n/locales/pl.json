@@ -156,6 +156,7 @@
       "summaryPh": "2–3 zdania o sobie …"
     },
     "exp": {
+      "hint": "📋 Dodaj WSZYSTKIE doświadczenia – w tym krótkie prace, dorywcze lub samozatrudnienie. Luki dłuższe niż rok są natychmiast zauważane przez rekruterów.",
       "empty": "Brak doświadczenia zawodowego. Kliknij „Dodaj\".",
       "item": "Stanowisko #{{num}}",
       "company": "Firma",
@@ -170,6 +171,7 @@
       "add": "+ Dodaj doświadczenie zawodowe"
     },
     "edu": {
+      "hint": "🎓 Zacznij od ukończenia szkoły (np. matura 2003). Następnie szkolenie zawodowe, studia lub kursy – od najstarszych. Pełna historia edukacji jest wymagana.",
       "empty": "Nie dodano jeszcze wykształcenia.",
       "item": "Wykształcenie #{{num}}",
       "school": "Uczelnia / szkoła",

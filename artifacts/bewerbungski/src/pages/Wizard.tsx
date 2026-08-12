@@ -298,6 +298,7 @@ function StepExperience({ items, addExp, updateExp, delExp }: { items: Experienc
   const { t } = useTranslation();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ background: "var(--accent-light, #eff6ff)", border: "1px solid var(--accent-border, #bfdbfe)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "var(--accent-text, #1d4ed8)", lineHeight: 1.55 }}>{t("wizard.exp.hint")}</div>
       {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "24px 0", fontSize: 14 }}>{t("wizard.exp.empty")}</div>}
       {items.map((e, i) => (
         <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 18, position: "relative" }}>
@@ -329,6 +330,7 @@ function StepEducation({ items, addEdu, updateEdu, delEdu }: { items: Education[
   const { t } = useTranslation();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ background: "var(--accent-light, #eff6ff)", border: "1px solid var(--accent-border, #bfdbfe)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "var(--accent-text, #1d4ed8)", lineHeight: 1.55 }}>{t("wizard.edu.hint")}</div>
       {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "24px 0", fontSize: 14 }}>{t("wizard.edu.empty")}</div>}
       {items.map((e, i) => (
         <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 18, position: "relative" }}>

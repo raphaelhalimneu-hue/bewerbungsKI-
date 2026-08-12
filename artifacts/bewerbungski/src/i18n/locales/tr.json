@@ -156,6 +156,7 @@
       "summaryPh": "Kendinle ilgili 2–3 cümle …"
     },
     "exp": {
+      "hint": "📋 Kısa işler, yarı zamanlı veya serbest çalışma dahil TÜM iş geçmişini ekle. Bir yıldan uzun boşluklar işverenler tarafından hemen fark edilir.",
       "empty": "Henüz iş deneyimi yok. „Ekle\" düğmesine tıkla.",
       "item": "Pozisyon #{{num}}",
       "company": "Şirket",
@@ -170,6 +171,7 @@
       "add": "+ İş deneyimi ekle"
     },
     "edu": {
+      "hint": "🎓 Okul mezuniyetiyle başla (örn. lise 2003). Ardından meslek eğitimi, üniversite veya kurslar – eskiden yeniye. Eksiksiz eğitim geçmişi zorunludur.",
       "empty": "Henüz eğitim eklenmedi.",
       "item": "Derece #{{num}}",
       "school": "Üniversite / okul",

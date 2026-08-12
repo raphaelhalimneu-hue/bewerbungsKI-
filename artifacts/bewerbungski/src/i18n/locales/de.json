@@ -156,6 +156,7 @@
       "summaryPh": "2–3 Sätze über dich …"
     },
     "exp": {
+      "hint": "📋 Trage ALLE Berufsstationen ein – auch kurze Jobs, Minijobs oder Selbstständigkeit. Lücken von mehr als einem Jahr fallen Personalern sofort auf und müssen erklärt werden.",
       "empty": "Noch keine Berufserfahrung. Klicke auf „Hinzufügen\".",
       "item": "Stelle #{{num}}",
       "company": "Unternehmen",
@@ -170,6 +171,7 @@
       "add": "+ Berufserfahrung hinzufügen"
     },
     "edu": {
+      "hint": "🎓 Beginne mit deinem Schulabschluss (z.B. Realschule 2003, Abitur 2005). Dann alle Ausbildungen, Studium oder Kurse – von alt nach neu. Ein lückenloser Bildungsweg ist Pflicht.",
       "empty": "Noch keine Ausbildung eingetragen.",
       "item": "Abschluss #{{num}}",
       "school": "Hochschule / Schule",
