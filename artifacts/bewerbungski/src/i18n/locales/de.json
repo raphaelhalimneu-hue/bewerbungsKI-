@@ -105,7 +105,9 @@
     "cv": "📋 Lebenslauf",
     "coverLetter": "✉️ Anschreiben",
     "downloadCv": "⬇ Lebenslauf (PDF)",
-    "downloadLetter": "⬇ Anschreiben (PDF)"
+    "downloadLetter": "⬇ Anschreiben (PDF)",
+    "editLetterHint": "✏️ Direkt bearbeiten — Änderungen werden ins PDF & DOCX übernommen",
+    "editCvHint": "✏️ Klicke zum Bearbeiten"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Suchen",
       "noResults": "Keine Ergebnisse.",
       "close": "Schließen"
-    }
+    },
+    "profileLoaded": "✓ Profil geladen",
+    "savedProfileAvailable": "Gespeichertes Profil verfügbar",
+    "loadProfile": "Jetzt laden"
   },
   "notFound": {
     "title": "404 – Seite nicht gefunden",

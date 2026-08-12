@@ -6,6 +6,8 @@ import documentsRouter from "./documents";
 import checkoutRouter from "./checkout";
 import downloadRouter from "./download";
 import adminRouter from "./admin";
+import profileRouter from "./profile";
+import docxRouter from "./docx";
 
 const router: IRouter = Router();
 
@@ -16,5 +18,7 @@ router.use(documentsRouter);
 router.use(checkoutRouter);
 router.use(downloadRouter);
 router.use(adminRouter);
+router.use(profileRouter);
+router.use(docxRouter);
 
 export default router;

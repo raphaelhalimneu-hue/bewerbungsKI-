@@ -105,7 +105,9 @@
     "cv": "📋 Currículum",
     "coverLetter": "✉️ Carta de presentación",
     "downloadCv": "⬇ Currículum (PDF)",
-    "downloadLetter": "⬇ Carta de presentación (PDF)"
+    "downloadLetter": "⬇ Carta de presentación (PDF)",
+    "editLetterHint": "✏️ Editar directamente — cambios al PDF y DOCX",
+    "editCvHint": "✏️ Haz clic para editar"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Buscar",
       "noResults": "Sin resultados.",
       "close": "Cerrar"
-    }
+    },
+    "profileLoaded": "✓ Perfil cargado",
+    "savedProfileAvailable": "Perfil guardado disponible",
+    "loadProfile": "Cargar ahora"
   },
   "notFound": {
     "title": "404 – Página no encontrada",

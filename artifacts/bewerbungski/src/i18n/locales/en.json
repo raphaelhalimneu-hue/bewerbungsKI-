@@ -105,7 +105,9 @@
     "cv": "📋 CV",
     "coverLetter": "✉️ Cover letter",
     "downloadCv": "⬇ CV (PDF)",
-    "downloadLetter": "⬇ Cover letter (PDF)"
+    "downloadLetter": "⬇ Cover letter (PDF)",
+    "editLetterHint": "✏️ Edit directly — changes apply to PDF & DOCX",
+    "editCvHint": "✏️ Click to edit"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Search",
       "noResults": "No results found.",
       "close": "Close"
-    }
+    },
+    "profileLoaded": "✓ Profile loaded",
+    "savedProfileAvailable": "Saved profile available",
+    "loadProfile": "Load now"
   },
   "notFound": {
     "title": "404 – Page not found",

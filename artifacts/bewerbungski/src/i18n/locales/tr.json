@@ -105,7 +105,9 @@
     "cv": "📋 Özgeçmiş",
     "coverLetter": "✉️ Ön yazı",
     "downloadCv": "⬇ Özgeçmiş (PDF)",
-    "downloadLetter": "⬇ Ön yazı (PDF)"
+    "downloadLetter": "⬇ Ön yazı (PDF)",
+    "editLetterHint": "✏️ Doğrudan düzenle — PDF ve DOCX'e yansır",
+    "editCvHint": "✏️ Düzenlemek için tıkla"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Ara",
       "noResults": "Sonuç bulunamadı.",
       "close": "Kapat"
-    }
+    },
+    "profileLoaded": "✓ Profil yüklendi",
+    "savedProfileAvailable": "Kaydedilmiş profil mevcut",
+    "loadProfile": "Şimdi yükle"
   },
   "notFound": {
     "title": "404 – Sayfa bulunamadı",

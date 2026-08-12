@@ -105,7 +105,9 @@
     "cv": "📋 Резюме",
     "coverLetter": "✉️ Сопроводительное письмо",
     "downloadCv": "⬇ Резюме (PDF)",
-    "downloadLetter": "⬇ Сопроводительное письмо (PDF)"
+    "downloadLetter": "⬇ Сопроводительное письмо (PDF)",
+    "editLetterHint": "✏️ Редактировать — изменения в PDF и DOCX",
+    "editCvHint": "✏️ Нажмите для редактирования"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Поиск",
       "noResults": "Результатов нет.",
       "close": "Закрыть"
-    }
+    },
+    "profileLoaded": "✓ Профиль загружен",
+    "savedProfileAvailable": "Сохранённый профиль доступен",
+    "loadProfile": "Загрузить"
   },
   "notFound": {
     "title": "404 – Страница не найдена",

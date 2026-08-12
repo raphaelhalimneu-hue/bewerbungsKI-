@@ -105,7 +105,9 @@
     "cv": "📋 Резюме",
     "coverLetter": "✉️ Супровідний лист",
     "downloadCv": "⬇ Резюме (PDF)",
-    "downloadLetter": "⬇ Супровідний лист (PDF)"
+    "downloadLetter": "⬇ Супровідний лист (PDF)",
+    "editLetterHint": "✏️ Редагувати — зміни у PDF та DOCX",
+    "editCvHint": "✏️ Натисніть для редагування"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Пошук",
       "noResults": "Результатів немає.",
       "close": "Закрити"
-    }
+    },
+    "profileLoaded": "✓ Профіль завантажено",
+    "savedProfileAvailable": "Збережений профіль доступний",
+    "loadProfile": "Завантажити"
   },
   "notFound": {
     "title": "404 – Сторінку не знайдено",

@@ -105,7 +105,9 @@
     "cv": "📋 CV",
     "coverLetter": "✉️ List motywacyjny",
     "downloadCv": "⬇ CV (PDF)",
-    "downloadLetter": "⬇ List motywacyjny (PDF)"
+    "downloadLetter": "⬇ List motywacyjny (PDF)",
+    "editLetterHint": "✏️ Edytuj — zmiany trafią do PDF i DOCX",
+    "editCvHint": "✏️ Kliknij aby edytować"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "Szukaj",
       "noResults": "Brak wyników.",
       "close": "Zamknij"
-    }
+    },
+    "profileLoaded": "✓ Profil załadowany",
+    "savedProfileAvailable": "Dostępny zapisany profil",
+    "loadProfile": "Załaduj teraz"
   },
   "notFound": {
     "title": "404 – Nie znaleziono strony",

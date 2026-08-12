@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useGenerateDocument, useCreateDocument } from "@workspace/api-client-react";
+import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/api-client-react";
 import type { FormData, Experience, Education, Skill, Language } from "../lib/buildCVHTML";
 
 const STEPS = [
@@ -46,6 +46,28 @@ export default function Wizard() {
 
   const generateMutation = useGenerateDocument();
   const createMutation = useCreateDocument();
+  const [hasSavedProfile, setHasSavedProfile] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    customFetch<{ savedProfile: unknown }>("/api/saved-profile")
+      .then(d => { if (d.savedProfile) setHasSavedProfile(true); })
+      .catch(() => {});
+  }, [user?.id]);
+
+  async function loadProfile() {
+    setProfileLoading(true);
+    try {
+      const d = await customFetch<{ savedProfile: Record<string, unknown> | null }>("/api/saved-profile");
+      if (d.savedProfile) {
+        setForm(f => ({ ...(d.savedProfile as any), jobad: f.jobad, template: f.template }));
+        setHasSavedProfile(false);
+        toast({ title: t("wizard.profileLoaded") });
+      }
+    } catch { toast({ title: t("wizard.genError"), variant: "destructive" }); }
+    finally { setProfileLoading(false); }
+  }
 
   function setPersonal(key: string, value: string) {
     setForm(f => ({ ...f, personal: { ...f.personal, [key]: value } }));
@@ -183,6 +205,13 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
         jobCompany: form.jobad.company,
       } });
 
+      // Auto-save profile for next time (silently)
+      try {
+        await customFetch("/api/saved-profile", {
+          method: "PUT",
+          body: JSON.stringify({ savedProfile: { personal: form.personal, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
+        });
+      } catch { /* ignore */ }
       toast({ title: t("wizard.success") });
       navigate("/documents");
     } catch (e: any) {
@@ -244,6 +273,14 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
         </div>
 
         <div className="card" style={{ marginBottom: 20 }}>
+          {hasSavedProfile && step === 0 && (
+            <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "12px 16px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <span style={{ fontSize: 14 }}>💾 {t("wizard.savedProfileAvailable")}</span>
+              <button className="btn btn-s" onClick={loadProfile} disabled={profileLoading} style={{ flexShrink: 0, fontSize: 13 }}>
+                {profileLoading ? "…" : t("wizard.loadProfile")}
+              </button>
+            </div>
+          )}
           {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} />}
           {step === 1 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
           {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}

@@ -105,7 +105,9 @@
     "cv": "📋 السيرة الذاتية",
     "coverLetter": "✉️ خطاب التقديم",
     "downloadCv": "⬇ السيرة الذاتية (PDF)",
-    "downloadLetter": "⬇ خطاب التقديم (PDF)"
+    "downloadLetter": "⬇ خطاب التقديم (PDF)",
+    "editLetterHint": "✏️ تعديل مباشر — التغييرات تنتقل إلى PDF و DOCX",
+    "editCvHint": "✏️ انقر للتعديل"
   },
   "wizard": {
     "steps": {
@@ -252,7 +254,10 @@
       "search": "بحث",
       "noResults": "لا توجد نتائج.",
       "close": "إغلاق"
-    }
+    },
+    "profileLoaded": "✓ تم تحميل الملف",
+    "savedProfileAvailable": "الملف الشخصي المحفوظ متاح",
+    "loadProfile": "تحميل الآن"
   },
   "notFound": {
     "title": "404 – الصفحة غير موجودة",

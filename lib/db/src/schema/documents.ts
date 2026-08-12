@@ -8,6 +8,7 @@ export const profilesTable = pgTable("profiles", {
   email: text("email").notNull(),
   isPremium: boolean("is_premium").notNull().default(false),
   stripeCustomerId: text("stripe_customer_id"),
+  savedProfile: jsonb("saved_profile"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

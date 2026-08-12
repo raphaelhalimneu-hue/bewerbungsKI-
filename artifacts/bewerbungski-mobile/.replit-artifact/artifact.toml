@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/bewerbungski-mobile/"
+title = "BewerbungsKI Mobile"
+description = "Native mobile companion for BewerbungsKI — lets users create professional CVs and cover letters from their smartphone using the same Railway backend API. Targets migrants and job seekers who primarily use mobile devices."
+version = "1.0.0"
+id = "artifacts/bewerbungski-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/bewerbungski-mobile/" ]
+localPort = 19311
+
+[services.development]
+run = "pnpm --filter @workspace/bewerbungski-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bewerbungski-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/bewerbungski-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "19311"
+BASE_PATH = "/bewerbungski-mobile/"
