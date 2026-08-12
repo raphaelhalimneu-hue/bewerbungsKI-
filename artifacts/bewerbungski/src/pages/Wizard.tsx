@@ -5,7 +5,8 @@ import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/api-client-react";
-import type { FormData, Experience, Education, Skill, Language, TemplateId } from "../lib/buildCVHTML";
+import type { FormData, Experience, Education, Skill, Language, TemplateId, CVContent } from "../lib/buildCVHTML";
+import { renderCVContent } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
 
 const STEPS = [
@@ -171,65 +172,50 @@ export default function Wizard() {
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
-        systemPrompt: `Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte NUR mit HTML-Inhalt — kein Markdown, kein Wrapper, keine Erklärungen.
+        systemPrompt: `Du bist ein professioneller Bewerbungsexperte. Antworte NUR mit validem JSON — kein Markdown, kein Wrapper, keine Erklärungen.
 
-SCHREIBSTIL: Schreibe wie ein echter Mensch: konkret, schlicht, ohne KI-Floskeln (kein „dynamisch", „leidenschaftlich", „stets bestrebt", keine Gedankenstriche als Stilmittel).
+Gib exakt dieses JSON-Schema zurück:
+{
+  "name": "Vorname Nachname",
+  "title": "Berufsbezeichnung",
+  "contact": "Straße Nr, PLZ Stadt · Telefon · E-Mail · ggf. LinkedIn",
+  "profile": "3–5 Sätze Profiltext",
+  "experience": [
+    {"position":"","company":"","location":"","period":"MM/JJJJ – MM/JJJJ","bullets":["Tätigkeit 1","Tätigkeit 2"]}
+  ],
+  "education": [
+    {"degree":"","institution":"","location":"","period":"MM/JJJJ – MM/JJJJ","note":""}
+  ],
+  "skills": ["Kenntnis1","Kenntnis2"],
+  "languages": [{"name":"Sprache","level":"Niveau"}],
+  "signature": "Ort, den TT.MM.JJJJ"
+}
 
-PFLICHTREGELN — alle ohne Ausnahme einhalten:
-1. LÜCKENLOSIGKEIT: Berechne für JEDEN Zeitraum zwischen Einträgen die Lücke in Monaten. Jede Lücke > 6 Monate MUSS als eigener Eintrag erscheinen. Mögliche neutrale Formulierungen: „Berufliche Neuorientierung", „Selbstständige Projekte", „Familienphase", „Elternzeit", „Weiterbildung und Selbststudium", „Freiberufliche Tätigkeit". Erfinde keine Details. Eine Lücke von 20 Jahren ergibt z.B. MEHRERE solcher Einträge mit konkreten Jahreszahlen.
-2. SCHULABSCHLUSS IMMER: Wenn in den Daten kein Schulabschluss vorhanden ist, füge IMMER den folgenden Platzhalter-Eintrag als ERSTEN Eintrag in der Ausbildungssektion ein: „Schulabschluss — Bitte ergänzen" mit Zeitraum „Bitte ergänzen".
-3. BERUFSERFAHRUNG vollständig: Gib JEDEN übergebenen Erfahrungs-Eintrag aus. Fehlende Zeiträume zwischen Stationen als Lücken-Einträge auffüllen (s. Regel 1).
-4. KENNTNISSE-SEKTION immer: Erzeuge immer eine Kenntnisse-Sektion. Wenn keine Skills übergeben wurden, leite aus Berufserfahrung und Stellenanzeige passende Kenntnisse ab (mindestens 6 Stück).
-5. SPRACHEN-SEKTION immer: Mindestens die Muttersprache (Deutsch oder aus dem Kontext) eintragen, wenn keine Sprachen übergeben wurden.
-6. PROFIL-SEKTION immer: Schreibe immer einen Profil-Abschnitt (3–5 Sätze), auch wenn keine Zusammenfassung übergeben wurde.
-7. UNTERSCHRIFT: Ganz am Ende Ort und Datum als Unterschriftszeile, EXAKT das übergebene Datum verwenden.`,
-        userPrompt: `Erstelle vollständigen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.
-
-CHECKLISTE — prüfe vor der Ausgabe jeden Punkt:
-☑ Profil-Sektion vorhanden (3–5 Sätze)
-☑ Jede Berufsstelle aus den Daten erscheint im Lebenslauf
-☑ Jede Lücke > 6 Monate zwischen Einträgen ist mit einem neutralen Eintrag gefüllt (mit exakten Jahreszahlen, z.B. „Berufliche Neuorientierung, 01/2003 – 08/2023")
-☑ Schulabschluss-Eintrag vorhanden (als erster Ausbildungseintrag falls nicht angegeben: Platzhalter „Schulabschluss — Bitte ergänzen")
-☑ Alle weiteren Ausbildungs-Einträge aus den Daten vorhanden
-☑ Kenntnisse-Sektion mit mindestens 6 Einträgen (aus Skills oder aus Kontext abgeleitet)
-☑ Sprachen-Sektion vorhanden
-☑ Unterschriftszeile am Ende mit EXAKT diesem Datum: ${today}
-
-Keine Noten angeben. Schreibe niemals Lücken einfach weg.${langInstr}
-
-DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalte einsetzen/wiederholen, Struktur und Styles nicht verändern)${docLang === "ar" ? ' und setze dir="rtl" auf das äußerste div' : ""}${usePhoto ? '. WICHTIG: Übernimm den <img>-Tag mit src="__FOTO__" EXAKT unverändert (src nicht ersetzen!)' : ""}:
-
-<div style="font-family:${ts.font};color:#1f2937;padding:${sz(38)}px ${sz(46)}px ${sz(42)}px;">
-  <div style="${ts.headerBg !== "transparent" ? `background:${ts.headerBg};padding:${sz(20)}px ${sz(24)}px;` : `padding-bottom:${sz(18)}px;border-bottom:1.5px solid ${ts.accent};`}${usePhoto ? "display:table;width:100%;" : "text-align:center;"}">
-    ${usePhoto ? `<div style="display:table-cell;width:${sz(96)}px;vertical-align:middle;"><img src="__FOTO__" style="width:${sz(86)}px;height:${sz(108)}px;object-fit:cover;border-radius:5px;" /></div><div style="display:table-cell;vertical-align:middle;text-align:left;padding-left:${sz(18)}px;">` : ""}
-    <div style="font-size:${sz(28)}px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.2;color:${ts.headerText};">VORNAME NACHNAME</div>
-    <div style="font-size:${sz(13)}px;color:${ts.subColor};margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>
-    <div style="font-size:${sz(11.5)}px;color:${ts.subColor};margin-top:10px;">Adresse &nbsp;·&nbsp; Telefon &nbsp;·&nbsp; E-Mail &nbsp;·&nbsp; ggf. Geburtsdatum/-ort</div>
-    ${usePhoto ? "</div>" : ""}
-  </div>
-  <div style="font-size:${sz(11.5)}px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${ts.accent === "#9ca3af" ? "#111827" : ts.accent};border-bottom:1px solid ${ts.accent === "#9ca3af" ? "#e5e7eb" : "#d1d5db"};padding-bottom:5px;margin:${sz(24)}px 0 ${sz(12)}px;">SEKTIONSTITEL</div>
-  <p style="margin:0 0 8px;font-size:${sz(12.5)}px;line-height:1.65;">Profiltext …</p>
-  <!-- Berufserfahrung/Ausbildung: pro Station -->
-  <table style="width:100%;border-collapse:collapse;margin-bottom:${sz(12)}px;"><tr>
-    <td style="vertical-align:top;padding:0;">
-      <div style="font-size:${sz(13)}px;font-weight:700;">Position</div>
-      <div style="font-size:${sz(12)}px;color:#6b7280;">Firma, Ort</div>
-      <ul style="margin:6px 0 0;padding-left:17px;font-size:${sz(12)}px;line-height:1.6;"><li>Tätigkeit/Erfolg</li></ul>
-    </td>
-    <td style="vertical-align:top;white-space:nowrap;text-align:right;font-size:${sz(11.5)}px;color:#6b7280;padding:2px 0 0 14px;">MM/JJJJ – MM/JJJJ</td>
-  </tr></table>
-  <!-- Kenntnisse: dezente Chips -->
-  <div><span style="display:inline-block;background:${ts.chipBg};${ts.chipBg === "transparent" ? "border:1px solid #e5e7eb;" : ""}border-radius:3px;padding:4px 11px;margin:0 6px 6px 0;font-size:${sz(11.5)}px;color:${ts.chipText};">Kenntnis</span></div>
-  <!-- Sprachen: eine Zeile pro Sprache -->
-  <div style="font-size:${sz(12.5)}px;margin-bottom:4px;"><strong>Sprache</strong> — Niveau</div>
-  <div style="margin-top:${sz(34)}px;font-size:${sz(12.5)}px;">Ort, den ${today}<br/><span style="color:#6b7280;font-size:${sz(11)}px;">Vorname Nachname</span></div>
-</div>`,
+PFLICHTREGELN:
+1. LÜCKENLOSIGKEIT: Jede Lücke > 6 Monate zwischen Einträgen als eigenen experience-Eintrag einfügen (z.B. "Berufliche Neuorientierung", "Familienphase", period: "01/2003 – 08/2023"). Lücken von Jahrzehnten → mehrere Einträge mit echten Jahreszahlen.
+2. SCHULABSCHLUSS: Wenn kein Schulabschluss in den Daten → ersten education-Eintrag setzen: degree "Schulabschluss — Bitte ergänzen", period "Bitte ergänzen".
+3. SKILLS: Mindestens 6 Einträge im skills-Array. Wenn keine Skills übergeben → aus Berufserfahrung und Stelle ableiten.
+4. SPRACHEN: Mindestens 1 Eintrag. Wenn keine → Deutsch Muttersprache eintragen.
+5. PROFIL: Immer 3–5 Sätze, konkret, keine KI-Floskeln.
+6. BULLETS: Jede experience-Station hat 2–4 bullets mit konkreten Tätigkeiten/Erfolgen.
+7. DATUM: signature-Feld EXAKT mit dem übergebenen Datum befüllen.
+8. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".`,
+        userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.\nsignature-Feld: "${(form.personal as any).city || "Ort"}, den ${today}"\n\nAlle Lücken > 6 Monate füllen. Schulabschluss-Eintrag immer vorhanden. Mindestens 6 Skills.${langInstr}`,
       } });
 
-      let cvHtml = cvRes.result;
-      if (usePhoto && form.personal.photo) {
-        cvHtml = cvHtml.replace(/__FOTO__/g, form.personal.photo);
+      // Parse structured JSON and render with fixed professional template
+      let cvContent: CVContent;
+      try {
+        const raw = cvRes.result.replace(/^```(?:json)?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
+        cvContent = JSON.parse(raw) as CVContent;
+      } catch {
+        // Fallback: try to extract JSON from partial response
+        const match = cvRes.result.match(/\{[\s\S]*\}/);
+        if (match) { cvContent = JSON.parse(match[0]) as CVContent; }
+        else { throw new Error("CV-Generierung fehlgeschlagen. Bitte erneut versuchen."); }
       }
+      if (usePhoto && form.personal.photo) cvContent.photo = form.personal.photo;
+      const cvHtml = renderCVContent(cvContent, form.template);
       const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
