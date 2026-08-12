@@ -312,6 +312,17 @@
       "success": "Profil zaimportowany! Sprawdź dane.",
       "error": "Import nie powiódł się. Spróbuj ponownie.",
       "cancel": "Anuluj"
+    },
+    "school": {
+      "title": "Świadectwo szkolne",
+      "type": "Rodzaj świadectwa",
+      "typePh": "np. Matura, Świadectwo ukończenia szkoły",
+      "name": "Nazwa szkoły",
+      "namePh": "np. Liceum Ogólnokształcące",
+      "city": "Miasto",
+      "cityPh": "np. Warszawa",
+      "year": "Rok ukończenia",
+      "yearPh": "np. 2015"
     }
   },
   "notFound": {

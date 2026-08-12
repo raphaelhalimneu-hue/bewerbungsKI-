@@ -8,8 +8,9 @@ export type Education = { institution: string; city: string; degree: string; fie
 export type Skill = { name: string; level: number; };
 export type Language = { language: string; level: string; };
 export type TemplateId = "modern" | "classic" | "creative" | "executive" | "minimal" | "elegant" | "bold" | "compact";
+export type School = { type: string; name: string; city: string; year: string; };
 export type FormData = {
-  personal: PersonalData; experience: Experience[]; education: Education[];
+  personal: PersonalData; school: School; experience: Experience[]; education: Education[];
   skills: Skill[]; languages: Language[];
   jobad: { title: string; company: string; address: string; description: string };
   template: TemplateId;

@@ -312,6 +312,17 @@
       "success": "Profil importiert! Bitte prüfe die Angaben.",
       "error": "Import fehlgeschlagen. Bitte versuche es erneut.",
       "cancel": "Abbrechen"
+    },
+    "school": {
+      "title": "Schulabschluss",
+      "type": "Art des Abschlusses",
+      "typePh": "z.B. Abitur, Realschulabschluss, Hauptschulabschluss",
+      "name": "Name der Schule",
+      "namePh": "z.B. Gymnasium Musterstadt",
+      "city": "Stadt",
+      "cityPh": "z.B. Berlin",
+      "year": "Abschlussjahr",
+      "yearPh": "z.B. 2015"
     }
   },
   "notFound": {

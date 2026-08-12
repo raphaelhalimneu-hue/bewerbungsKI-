@@ -35,6 +35,7 @@ const TEMPLATE_STYLES: Record<TemplateId, { font: string; accent: string; header
 function blankForm(): FormData {
   return {
     personal: { firstName: "", lastName: "", title: "", email: "", phone: "", address: "", zip: "", city: "", linkedin: "", website: "", summary: "" },
+    school: { type: "", name: "", city: "", year: "" },
     experience: [],
     education: [],
     skills: [],
@@ -85,6 +86,9 @@ export default function Wizard() {
 
   function setPersonal(key: string, value: string) {
     setForm(f => ({ ...f, personal: { ...f.personal, [key]: value } }));
+  }
+  function setSchool(key: string, value: string) {
+    setForm(f => ({ ...f, school: { ...f.school, [key]: value } }));
   }
   function setJobad(key: string, value: string) {
     setForm(f => ({ ...f, jobad: { ...f.jobad, [key]: value } }));
@@ -200,7 +204,7 @@ PFLICHTREGELN:
 6. BULLETS: Jede experience-Station hat 2–4 bullets mit konkreten Tätigkeiten/Erfolgen.
 7. DATUM: signature-Feld EXAKT mit dem übergebenen Datum befüllen.
 8. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".`,
-        userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.\nsignature-Feld: "${(form.personal as any).city || "Ort"}, den ${today}"\n\nAlle Lücken > 6 Monate füllen. Schulabschluss-Eintrag immer vorhanden. Mindestens 6 Skills.${langInstr}`,
+        userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.\nsignature-Feld: "${(form.personal as any).city || "Ort"}, den ${today}"\n${form.school?.type || form.school?.name ? `\nSchulabschluss des Bewerbers (MUSS als erster education-Eintrag erscheinen): ${[form.school.type, form.school.name && `an ${form.school.name}`, form.school.city, form.school.year].filter(Boolean).join(", ")}` : "\nKein Schulabschluss angegeben → ersten education-Eintrag als 'Schulabschluss — Bitte ergänzen' anlegen."}\nAlle Lücken > 6 Monate füllen. Mindestens 6 Skills.${langInstr}`,
       } });
 
       // Parse structured JSON and render with fixed professional template
@@ -352,8 +356,8 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
             </div>
           )}
           {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
-          {step === 1 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
-          {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
+          {step === 1 && <StepEducation school={form.school} setSchool={setSchool} items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
+          {step === 2 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
           {step === 3 && <StepSkills items={form.skills} skillInput={skillInput} setSkillInput={setSkillInput} skillLevel={skillLevel} setSkillLevel={setSkillLevel} addSkill={addSkill} delSkill={delSkill} />}
           {step === 4 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 5 && <StepJobAd form={form} setJobad={setJobad} />}
@@ -601,12 +605,49 @@ function StepExperience({ items, addExp, updateExp, delExp }: { items: Experienc
   );
 }
 
-function StepEducation({ items, addEdu, updateEdu, delEdu }: { items: Education[]; addEdu: () => void; updateEdu: (i: number, k: string, v: string) => void; delEdu: (i: number) => void }) {
+function StepEducation({ school, setSchool, items, addEdu, updateEdu, delEdu }: {
+  school: import("../lib/buildCVHTML").School;
+  setSchool: (k: string, v: string) => void;
+  items: Education[]; addEdu: () => void; updateEdu: (i: number, k: string, v: string) => void; delEdu: (i: number) => void;
+}) {
   const { t } = useTranslation();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ background: "var(--accent-light, #eff6ff)", border: "1px solid var(--accent-border, #bfdbfe)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "var(--accent-text, #1d4ed8)", lineHeight: 1.55 }}>{t("wizard.edu.hint")}</div>
-      {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "24px 0", fontSize: 14 }}>{t("wizard.edu.empty")}</div>}
+      {/* ── Schulabschluss (fixed block) ── */}
+      <div style={{ border: "2px solid var(--brand)", borderRadius: 12, padding: 18, background: "var(--brand-l)" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--brand)", marginBottom: 14 }}>
+          🎓 {t("wizard.school.title")}
+        </div>
+        <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
+          <div className="field">
+            <label className="label">{t("wizard.school.type")}</label>
+            <input className="input" value={school.type} onChange={ev => setSchool("type", ev.target.value)} placeholder={t("wizard.school.typePh")} list="school-types" />
+            <datalist id="school-types">
+              {["Abitur", "Fachabitur", "Realschulabschluss", "Mittlere Reife", "Hauptschulabschluss", "Berufsschule", "High School Diploma", "Baccalauréat"].map(o => <option key={o} value={o} />)}
+            </datalist>
+          </div>
+          <div className="field">
+            <label className="label">{t("wizard.school.year")}</label>
+            <input className="input" value={school.year} onChange={ev => setSchool("year", ev.target.value)} placeholder={t("wizard.school.yearPh")} maxLength={4} inputMode="numeric" />
+          </div>
+        </div>
+        <div className="grid2" style={{ gap: 10 }}>
+          <div className="field">
+            <label className="label">{t("wizard.school.name")}</label>
+            <input className="input" value={school.name} onChange={ev => setSchool("name", ev.target.value)} placeholder={t("wizard.school.namePh")} />
+          </div>
+          <div className="field">
+            <label className="label">{t("wizard.school.city")}</label>
+            <input className="input" value={school.city} onChange={ev => setSchool("city", ev.target.value)} placeholder={t("wizard.school.cityPh")} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Ausbildung / Studium ── */}
+      <div style={{ fontSize: 13, color: "var(--muted)", background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
+        {t("wizard.edu.hint")}
+      </div>
+      {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "12px 0", fontSize: 14 }}>{t("wizard.edu.empty")}</div>}
       {items.map((e, i) => (
         <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 18, position: "relative" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--muted)", marginBottom: 12 }}>{t("wizard.edu.item", { num: i + 1 })}</div>

@@ -312,6 +312,17 @@
       "success": "Profile imported! Please review the details.",
       "error": "Import failed. Please try again.",
       "cancel": "Cancel"
+    },
+    "school": {
+      "title": "School Leaving Certificate",
+      "type": "Type of qualification",
+      "typePh": "e.g. A-Levels, GCSE, High School Diploma",
+      "name": "Name of school",
+      "namePh": "e.g. City Grammar School",
+      "city": "City",
+      "cityPh": "e.g. London",
+      "year": "Year of graduation",
+      "yearPh": "e.g. 2015"
     }
   },
   "notFound": {

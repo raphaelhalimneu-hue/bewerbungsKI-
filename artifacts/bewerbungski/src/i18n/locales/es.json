@@ -312,6 +312,17 @@
       "success": "¡Perfil importado! Revisa los datos.",
       "error": "Error al importar. Inténtalo de nuevo.",
       "cancel": "Cancelar"
+    },
+    "school": {
+      "title": "Título escolar",
+      "type": "Tipo de titulación",
+      "typePh": "p. ej. Bachillerato, ESO, Formación Profesional",
+      "name": "Nombre del centro educativo",
+      "namePh": "p. ej. IES Ciudad Ejemplo",
+      "city": "Ciudad",
+      "cityPh": "p. ej. Madrid",
+      "year": "Año de graduación",
+      "yearPh": "p. ej. 2015"
     }
   },
   "notFound": {
