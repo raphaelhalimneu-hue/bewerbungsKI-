@@ -540,8 +540,9 @@ function PlaceLookup({ query, onSelect }: { query: string; onSelect: (city: stri
         <div style={{ position: "absolute", top: "110%", left: 0, zIndex: 200, minWidth: 260, maxWidth: 360, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, boxShadow: "0 6px 20px rgba(0,0,0,.15)", overflow: "hidden" }}>
           {results.length === 0 && <div style={{ padding: "10px 14px", fontSize: 12, color: "var(--muted)" }}>{t("wizard.lookup.noResults")}</div>}
           {results.map((r, idx) => (
-            <div key={idx} style={{ padding: "9px 14px", cursor: "pointer", fontSize: 12, lineHeight: 1.45, borderBottom: idx < results.length - 1 ? "1px solid var(--border)" : "none" }}
+            <div key={idx} style={{ padding: "12px 14px", cursor: "pointer", fontSize: 12, lineHeight: 1.45, borderBottom: idx < results.length - 1 ? "1px solid var(--border)" : "none", WebkitTapHighlightColor: "rgba(37,99,235,.15)", userSelect: "none" }}
               onClick={() => pick(r)}
+              onTouchEnd={e => { e.preventDefault(); pick(r); }}
               onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-light,#eff6ff)")}
               onMouseLeave={e => (e.currentTarget.style.background = "")}>
               {r.display_name}
