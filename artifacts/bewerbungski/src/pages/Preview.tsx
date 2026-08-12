@@ -14,7 +14,7 @@ export default function Preview() {
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
   const cvRef = useRef<HTMLDivElement>(null);
   const cvWrapRef = useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = useState<"cv" | "letter" | "cv-docx" | "letter-docx" | null>(null);
+  const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
 
   // Initialise cover letter textarea from loaded doc
@@ -33,11 +33,10 @@ export default function Preview() {
   useEffect(() => {
     function applyScale() {
       if (!cvWrapRef.current) return;
-      const available = cvWrapRef.current.clientWidth - 24; // minus padding
+      const available = cvWrapRef.current.clientWidth - 24;
       const cvWidth = 760;
       const scale = available < cvWidth ? available / cvWidth : 1;
       cvWrapRef.current.style.setProperty("--cv-scale", String(scale));
-      // also shrink the wrap height to match scaled content
       if (cvRef.current) {
         cvWrapRef.current.style.minHeight = scale < 1
           ? `${cvRef.current.offsetHeight * scale + 24}px`
@@ -56,9 +55,10 @@ export default function Preview() {
     return `${name ? name + " – " : ""}${suffix}`;
   }
 
-  async function handleDownloadCv() {
+  // CV PDF: client-side via html2canvas so contentEditable edits are captured
+  async function handleDownloadCvPdf() {
     if (!cvRef.current) return;
-    setExporting("cv");
+    setExporting("cv-pdf");
     try {
       const el = cvRef.current;
       const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false, windowWidth: 794 });
@@ -79,41 +79,26 @@ export default function Preview() {
         heightLeft -= pageHeight;
       }
       pdf.save(baseFileName("Lebenslauf") + ".pdf");
-    } catch (e) { console.error("PDF export failed", e); }
+    } catch (e) { console.error("CV PDF export failed", e); }
     finally { setExporting(null); }
   }
 
-  function handleDownloadLetter() {
-    if (!editedLetter.trim()) return;
-    setExporting("letter");
+  // Cover letter PDF: server-side so edited text is forwarded correctly
+  async function handleDownloadLetterPdf() {
+    setExporting("letter-pdf");
     try {
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 24;
-      const maxWidth = pageWidth - margin * 2;
-      const lineHeight = 6.4;
-      let y = margin;
-      const applicantName = ((doc as any)?.name || "").split("–")[0].trim();
-      if (applicantName) {
-        pdf.setTextColor(31, 41, 55); pdf.setFont("helvetica", "bold"); pdf.setFontSize(15);
-        pdf.text(applicantName.toUpperCase(), pageWidth / 2, y, { align: "center", charSpace: 0.8 });
-        y += 4;
-        pdf.setDrawColor(31, 41, 55); pdf.setLineWidth(0.4);
-        pdf.line(margin, y, pageWidth - margin, y);
-        y += 12;
-      }
-      pdf.setTextColor(31, 41, 55); pdf.setFont("helvetica", "normal"); pdf.setFontSize(11);
-      for (const para of editedLetter.split(/\n/)) {
-        const lines: string[] = para.trim() === "" ? [""] : pdf.splitTextToSize(para, maxWidth);
-        for (const line of lines) {
-          if (y > pageHeight - margin) { pdf.addPage(); y = margin; }
-          if (line !== "") pdf.text(line, margin, y);
-          y += lineHeight;
-        }
-      }
-      pdf.save(baseFileName("Anschreiben") + ".pdf");
-    } catch (e) { console.error("PDF export failed", e); }
+      let url = `/api/documents/${params.id}/download/cover-letter.pdf`;
+      if (editedLetter) url += "?text=" + encodeURIComponent(editedLetter);
+      const blob = await customFetch<Blob>(url, { responseType: "blob" });
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = baseFileName("Anschreiben") + ".pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objUrl);
+    } catch (e) { console.error("Letter PDF download failed", e); }
     finally { setExporting(null); }
   }
 
@@ -141,7 +126,6 @@ export default function Preview() {
   return (
     <Layout>
       <div className="fade">
-        {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <button className="btn btn-g" onClick={() => navigate("/documents")}>{t("preview.back")}</button>
           {doc && (
@@ -150,18 +134,16 @@ export default function Preview() {
                 {(doc as any).name}
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
-                {/* CV downloads */}
-                <button className="btn btn-p btn-sm" onClick={handleDownloadCv} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                  {exporting === "cv" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
+                <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
+                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
                 </button>
                 <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
                   {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>⬇ CV .docx</>}
                 </button>
-                {/* Letter downloads */}
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
-                    <button className="btn btn-p btn-sm" onClick={handleDownloadLetter} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                      {exporting === "letter" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
+                    <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
+                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
                       {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>⬇ Anschreiben .docx</>}
@@ -211,7 +193,6 @@ export default function Preview() {
 
         {doc && (
           <>
-            {/* CV — contentEditable so user can fine-tune before PDF export */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.cv")}</h3>
@@ -230,7 +211,6 @@ export default function Preview() {
               </div>
             </div>
 
-            {/* Cover letter — editable textarea */}
             {((doc as any)?.cover_letter || editedLetter) && (
               <div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>

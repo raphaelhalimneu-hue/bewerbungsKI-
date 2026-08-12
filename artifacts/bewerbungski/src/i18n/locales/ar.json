@@ -156,7 +156,12 @@
     "delete": "× حذف",
     "confirmDelete": "هل تريد حقاً حذف المستند؟",
     "deleted": "تم حذف المستند.",
-    "deleteError": "خطأ أثناء الحذف"
+    "deleteError": "خطأ أثناء الحذف",
+    "downloadCvPdf": "تحميل السيرة الذاتية PDF",
+    "downloadCvDocx": "تحميل السيرة الذاتية Word",
+    "downloadLetterPdf": "تحميل خطاب التقديم PDF",
+    "downloadLetterDocx": "تحميل خطاب التقديم Word",
+    "downloadError": "فشل التحميل"
   },
   "preview": {
     "back": "← رجوع",

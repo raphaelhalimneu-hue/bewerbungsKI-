@@ -156,7 +156,12 @@
     "delete": "× Usuń",
     "confirmDelete": "Na pewno usunąć dokument?",
     "deleted": "Dokument usunięty.",
-    "deleteError": "Błąd podczas usuwania"
+    "deleteError": "Błąd podczas usuwania",
+    "downloadCvPdf": "Pobierz CV jako PDF",
+    "downloadCvDocx": "Pobierz CV jako Word",
+    "downloadLetterPdf": "Pobierz list jako PDF",
+    "downloadLetterDocx": "Pobierz list jako Word",
+    "downloadError": "Blad pobierania"
   },
   "preview": {
     "back": "← Wstecz",

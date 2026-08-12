@@ -156,7 +156,12 @@
     "delete": "× Удалить",
     "confirmDelete": "Действительно удалить документ?",
     "deleted": "Документ удалён.",
-    "deleteError": "Ошибка при удалении"
+    "deleteError": "Ошибка при удалении",
+    "downloadCvPdf": "Скачать резюме PDF",
+    "downloadCvDocx": "Скачать резюме Word",
+    "downloadLetterPdf": "Скачать письмо PDF",
+    "downloadLetterDocx": "Скачать письмо Word",
+    "downloadError": "Ошибка загрузки"
   },
   "preview": {
     "back": "← Назад",

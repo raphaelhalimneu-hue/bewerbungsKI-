@@ -156,7 +156,12 @@
     "delete": "× Sil",
     "confirmDelete": "Belge gerçekten silinsin mi?",
     "deleted": "Belge silindi.",
-    "deleteError": "Silme sırasında hata"
+    "deleteError": "Silme sırasında hata",
+    "downloadCvPdf": "CV PDF olarak indir",
+    "downloadCvDocx": "CV Word olarak indir",
+    "downloadLetterPdf": "On yaziyi PDF olarak indir",
+    "downloadLetterDocx": "On yaziyi Word olarak indir",
+    "downloadError": "Indirme basarisiz"
   },
   "preview": {
     "back": "← Geri",

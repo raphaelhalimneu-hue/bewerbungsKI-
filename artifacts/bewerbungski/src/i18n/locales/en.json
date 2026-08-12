@@ -156,7 +156,12 @@
     "delete": "× Delete",
     "confirmDelete": "Really delete this document?",
     "deleted": "Document deleted.",
-    "deleteError": "Error while deleting"
+    "deleteError": "Error while deleting",
+    "downloadCvPdf": "Download CV as PDF",
+    "downloadCvDocx": "Download CV as Word",
+    "downloadLetterPdf": "Download cover letter as PDF",
+    "downloadLetterDocx": "Download cover letter as Word",
+    "downloadError": "Download failed"
   },
   "preview": {
     "back": "← Back",

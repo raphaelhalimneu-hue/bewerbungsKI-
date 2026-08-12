@@ -16,6 +16,7 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
         job_company: documentsTable.jobCompany,
         created_at: documentsTable.createdAt,
         ats_score: sql`${documentsTable.profileData}->'atsScore'`,
+        has_cover_letter: sql<boolean>`(${documentsTable.coverLetter} IS NOT NULL AND ${documentsTable.coverLetter} != '')`,
       })
       .from(documentsTable)
       .where(eq(documentsTable.userId, req.userId!))

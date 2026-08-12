@@ -156,7 +156,12 @@
     "delete": "× Eliminar",
     "confirmDelete": "¿Seguro que quieres eliminar el documento?",
     "deleted": "Documento eliminado.",
-    "deleteError": "Error al eliminar"
+    "deleteError": "Error al eliminar",
+    "downloadCvPdf": "Descargar CV en PDF",
+    "downloadCvDocx": "Descargar CV en Word",
+    "downloadLetterPdf": "Descargar carta en PDF",
+    "downloadLetterDocx": "Descargar carta en Word",
+    "downloadError": "Error al descargar"
   },
   "preview": {
     "back": "← Atrás",

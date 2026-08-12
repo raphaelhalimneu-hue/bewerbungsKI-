@@ -156,7 +156,12 @@
     "delete": "× Löschen",
     "confirmDelete": "Dokument wirklich löschen?",
     "deleted": "Dokument gelöscht.",
-    "deleteError": "Fehler beim Löschen"
+    "deleteError": "Fehler beim Löschen",
+    "downloadCvPdf": "Lebenslauf als PDF herunterladen",
+    "downloadCvDocx": "Lebenslauf als Word herunterladen",
+    "downloadLetterPdf": "Anschreiben als PDF herunterladen",
+    "downloadLetterDocx": "Anschreiben als Word herunterladen",
+    "downloadError": "Fehler beim Herunterladen"
   },
   "preview": {
     "back": "← Zurück",
