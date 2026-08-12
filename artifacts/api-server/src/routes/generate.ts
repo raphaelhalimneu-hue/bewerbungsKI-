@@ -24,7 +24,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
     if (!profile?.isPremium) {
-      if (value >= 1) {
+      if (value >= 3) {
         res.status(403).json({ error: "free_limit_reached" });
         return;
       }
