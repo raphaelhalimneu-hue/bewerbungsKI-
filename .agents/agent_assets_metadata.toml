@@ -77,3 +77,10 @@ uri = "file://attached_assets/BewerbungsKI_Testdateien.zip"
 type = "unspecified"
 title = "BewerbungsKI-Testdateien herunterladen (.zip)"
 description = "Ein ZIP-Download mit dem Test-Lebenslauf und dem Test-Anschreiben. Auf dem Handy nach dem Download entpacken."
+
+[[outputs]]
+id = "suyhk19Czl5ks_PBzfC-R"
+uri = "file://attached_assets/BewerbungsKI_Download.html"
+type = "text"
+title = "📥 Testdateien herunterladen – hier klicken"
+description = "Seite öffnen → zwei Download-Buttons → Lebenslauf und Anschreiben als Word-Datei speichern."
