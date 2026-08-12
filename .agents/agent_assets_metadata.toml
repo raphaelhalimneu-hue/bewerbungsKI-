@@ -61,12 +61,19 @@ description = "Profil 3: Russischsprachig"
 id = "9UZIqSi53igv-qpWlhVg2"
 uri = "file://attached_assets/Max_Mustermann_Lebenslauf.docx"
 type = "word_document"
-title = "Max Mustermann – Lebenslauf.docx"
-description = "Test-Lebenslauf als Word-Datei (.docx)"
+title = "Test-Lebenslauf herunterladen (.docx)"
+description = "Gültige Word-Datei, direkt als DOCX."
 
 [[outputs]]
 id = "09K3nnMtDTcJX1Q2SJGXP"
 uri = "file://attached_assets/Max_Mustermann_Anschreiben.docx"
 type = "word_document"
-title = "Max Mustermann – Anschreiben.docx"
-description = "Test-Anschreiben als Word-Datei (.docx)"
+title = "Test-Anschreiben herunterladen (.docx)"
+description = "Gültige Word-Datei, direkt als DOCX."
+
+[[outputs]]
+id = "dSnDP9cd7auqEGa5oRhso"
+uri = "file://attached_assets/BewerbungsKI_Testdateien.zip"
+type = "unspecified"
+title = "BewerbungsKI-Testdateien herunterladen (.zip)"
+description = "Ein ZIP-Download mit dem Test-Lebenslauf und dem Test-Anschreiben. Auf dem Handy nach dem Download entpacken."
