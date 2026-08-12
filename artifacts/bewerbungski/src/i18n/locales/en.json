@@ -248,7 +248,7 @@
       "cityPh": "e.g. Munich"
     },
     "edu": {
-      "hint": "🎓 Start with your school-leaving certificate (e.g. A-levels 2003). Then add training, university, or courses – oldest first. A complete education history is expected.",
+      "hint": "🎓 Add your university degrees, vocational training, and further education here – oldest first. Your school qualification was already entered in the previous step.",
       "empty": "No education added yet.",
       "item": "Degree #{{num}}",
       "school": "University / school",

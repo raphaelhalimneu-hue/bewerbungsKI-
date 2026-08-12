@@ -248,7 +248,7 @@
       "cityPh": "np. Monachium"
     },
     "edu": {
-      "hint": "🎓 Zacznij od ukończenia szkoły (np. matura 2003). Następnie szkolenie zawodowe, studia lub kursy – od najstarszych. Pełna historia edukacji jest wymagana.",
+      "hint": "🎓 Dodaj tutaj studia, szkolenie zawodowe i kursy – od najstarszych do najnowszych. Świadectwo szkolne zostało już wprowadzone w poprzednim kroku.",
       "empty": "Nie dodano jeszcze wykształcenia.",
       "item": "Wykształcenie #{{num}}",
       "school": "Uczelnia / szkoła",

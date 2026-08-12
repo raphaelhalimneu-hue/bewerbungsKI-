@@ -248,7 +248,7 @@
       "cityPh": "z.B. München"
     },
     "edu": {
-      "hint": "🎓 Beginne mit deinem Schulabschluss (z.B. Realschule 2003, Abitur 2005). Dann alle Ausbildungen, Studium oder Kurse – von alt nach neu. Ein lückenloser Bildungsweg ist Pflicht.",
+      "hint": "🎓 Trage hier Studium, Ausbildung und Weiterbildungen ein – von alt nach neu. Deinen Schulabschluss hast du bereits im vorherigen Schritt eingetragen.",
       "empty": "Noch keine Ausbildung eingetragen.",
       "item": "Abschluss #{{num}}",
       "school": "Hochschule / Schule",

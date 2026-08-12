@@ -248,7 +248,7 @@
       "cityPh": "örn. Münih"
     },
     "edu": {
-      "hint": "🎓 Okul mezuniyetiyle başla (örn. lise 2003). Ardından meslek eğitimi, üniversite veya kurslar – eskiden yeniye. Eksiksiz eğitim geçmişi zorunludur.",
+      "hint": "🎓 Burada üniversite, mesleki eğitim ve kursları ekle – eskiden yeniye. Okul diplomanı zaten önceki adımda girdin.",
       "empty": "Henüz eğitim eklenmedi.",
       "item": "Derece #{{num}}",
       "school": "Üniversite / okul",

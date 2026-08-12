@@ -248,7 +248,7 @@
       "cityPh": "p. ej. Múnich"
     },
     "edu": {
-      "hint": "🎓 Empieza con tu título escolar (p. ej. Bachillerato 2003). Luego formación, universidad o cursos – del más antiguo al más reciente. Un historial educativo completo es obligatorio.",
+      "hint": "🎓 Añade aquí universidad, formación profesional y cursos – del más antiguo al más reciente. Tu título escolar ya se introdujo en el paso anterior.",
       "empty": "Aún no se ha añadido ninguna formación.",
       "item": "Titulación n.º {{num}}",
       "school": "Universidad / centro",
