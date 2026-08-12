@@ -223,8 +223,43 @@ PFLICHTREGELN:
         setGenPhase(t("wizard.genLetter"));
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
-          systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, nicht wie eine KI: natürliche, unterschiedlich lange Sätze, konkrete Beispiele statt Floskeln, keine übertriebenen Adjektive, keine typischen KI-Phrasen (kein 'dynamisch', 'leidenschaftlich', 'ich bin überzeugt, dass ich', 'stets', 'zeitnah'), keine Aufzählungen mit Gedankenstrichen. Der Text darf kleine persönliche Formulierungen enthalten, muss aber formell korrekt bleiben. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}${(form.jobad as any).address ? `\nAnschrift des Unternehmens (MUSS als Empfängeradresse oben links im Brief erscheinen, VOR dem Datum): ${(form.jobad as any).address}` : ""}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen): ${motivation}` : ""}${achievement ? `\nBesonderer Erfolg/Stärke (UNBEDINGT einbauen): ${achievement}` : ""}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
+          systemPrompt: `Du bist Experte für Bewerbungsanschreiben. Schreibe wie ein echter, gut ausgebildeter Mensch — nicht wie eine KI.
+
+STIL:
+- Natürliche, unterschiedlich lange Sätze. Keine Schachtelsätze.
+- Konkrete Formulierungen statt Floskeln. Kein „dynamisch", „leidenschaftlich", „stets", „zeitnah", „ich bin überzeugt, dass ich", „ich freue mich sehr".
+- Keine Aufzählungen, keine Gedankenstriche als Stilmittel.
+- Aktive Sprache: „Ich entwickelte" statt „Es wurde entwickelt".
+- Eröffnung NICHT mit „Hiermit bewerbe ich mich" — stattdessen direkt mit einem konkreten Bezug zur Stelle oder zum Unternehmen beginnen.
+
+STRUKTUR (DIN 5008):
+1. Empfängeradresse des Unternehmens (linke Seite)
+2. Datum-Zeile (rechte Seite oder unter der Adresse)
+3. Betreffzeile (fett, ohne „Betreff:")
+4. Anrede (z.B. „Sehr geehrte Damen und Herren," oder personalisiert falls bekannt)
+5. Einleitungsabsatz: Bezug zur Stelle / zum Unternehmen
+6. Hauptteil: Relevante Erfahrung + konkreter Mehrwert für das Unternehmen
+7. Motivationsabsatz: Warum genau dieses Unternehmen
+8. Schluss: Einladung zum Gespräch, Verfügbarkeit, keine Floskeln
+9. „Mit freundlichen Grüßen" + Name
+
+Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen. 350–420 Wörter.`,
+          userPrompt: `Schreibe Anschreiben (Sprache: ${lang.name}):
+
+Bewerber: ${form.personal.firstName} ${form.personal.lastName}${form.personal.title ? ", " + form.personal.title : ""}
+Adresse Bewerber: ${[form.personal.address, `${form.personal.zip} ${form.personal.city}`.trim()].filter(Boolean).join(", ")}
+Stelle: ${form.jobad.title} bei ${form.jobad.company}${(form.jobad as any).address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${(form.jobad as any).address}` : ""}
+Stellenbeschreibung: ${form.jobad.description || "nicht angegeben"}
+
+Erfahrung (aktuellste zuerst):
+${form.experience.slice(0, 4).map(e => `• ${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}${e.start ? " (" + e.start.slice(0,7) + " – " + (e.current ? "heute" : (e.end?.slice(0,7)||"")) + ")" : ""}${e.description ? ": " + e.description.slice(0,120) : ""}`).join("\n")}
+
+Kernkompetenzen: ${form.skills.slice(0, 10).map(s => s.name).join(", ") || "aus Erfahrung ableiten"}
+${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen, WÖRTLICH verwenden): ${motivation}` : ""}
+${achievement ? `\nBesonderer Erfolg (UNBEDINGT konkret nennen): ${achievement}` : ""}
+
+Datum-Zeile EXAKT: "${(form.personal as any).city || "Ort"}, den ${today}"
+Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         } });
         letterText = letterRes.result;
       }
@@ -693,15 +728,174 @@ function StepJobAd({ form, setJobad }: { form: FormData; setJobad: (k: string, v
   );
 }
 
+// ── Mini CV previews (SVG layout sketches) ──────────────────────────────────
+function PreviewModern() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="0" y="0" width="80" height="22" fill="#fff" />
+      <line x1="8" y1="21" x2="72" y2="21" stroke="#2563eb" strokeWidth="1.5" />
+      <rect x="20" y="5" width="40" height="4" rx="1" fill="#111" />
+      <rect x="26" y="11" width="28" height="2.5" rx="1" fill="#2563eb" opacity=".7" />
+      <rect x="15" y="16" width="50" height="1.5" rx="1" fill="#aaa" />
+      {[27,33,40,47,54,61,68,75,82,89].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width="30" height="1.5" rx="1" fill={i===0||i===3||i===5?"#374151":"#ccc"} opacity={i===0||i===3||i===5?1:.7} />
+          {(i===1||i===2||i===4)&&<rect x="8" y={y} width="20" height="1.5" rx="1" fill="#ccc" />}
+          {(i===1||i===2||i===4)&&<rect x="50" y={y} width="22" height="1.5" rx="1" fill="#eee" />}
+        </g>
+      ))}
+      <rect x="8" y="93" width="14" height="4" rx="2" fill="#dbeafe" />
+      <rect x="24" y="93" width="14" height="4" rx="2" fill="#dbeafe" />
+      <rect x="40" y="93" width="10" height="4" rx="2" fill="#dbeafe" />
+    </svg>
+  );
+}
+function PreviewClassic() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="5" width="44" height="5" rx="1" fill="#0f172a" />
+      <rect x="8" y="12" width="30" height="2.5" rx="1" fill="#6b7280" />
+      <line x1="8" y1="18" x2="72" y2="18" stroke="#0f172a" strokeWidth="2" />
+      {[23,33,43,53,63,73,83].map((y,i) => i < 6 && (
+        <g key={y}>
+          <rect x="8" y={y} width="14" height="1.5" rx="1" fill={i%3===0?"#374151":"#ccc"} />
+          <rect x="26" y={y} width="34" height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} opacity={i%3===0?1:.8} />
+          {i%3!==0 && <rect x="26" y={y+3} width="24" height="1.5" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+function PreviewCreative() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="0" y="0" width="26" height="108" fill="#1e3a5f" />
+      <circle cx="13" cy="18" r="8" fill="#3b82f6" opacity=".4" />
+      <rect x="3" y="30" width="20" height="2" rx="1" fill="#3b82f6" opacity=".6" />
+      {[36,41,46,51,56,62,68,74].map((y,i) => <rect key={y} x="3" y={y} width={i%3===0?20:14} height="1.5" rx="1" fill={i%3===0?"#94a3b8":"#475569"} />)}
+      {[28,36,44,52,60,68,76,84].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="30" y={y} width={i%4===0?36:28} height="1.5" rx="1" fill={i%4===0?"#111":"#ccc"} />
+          {i%4!==0&&<rect x="30" y={y+3} width="20" height="1.5" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+function PreviewExecutive() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="4" width="64" height="1.5" fill="#1e3a8a" />
+      <rect x="20" y="7" width="40" height="5" rx="1" fill="#1e3a8a" />
+      <rect x="26" y="14" width="28" height="2" rx="1" fill="#475569" />
+      <rect x="18" y="18" width="44" height="1.2" rx="1" fill="#94a3b8" />
+      <rect x="8" y="21" width="64" height="1.5" fill="#1e3a8a" />
+      {[26,33,40,47,54,62,70,78].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#1e3a8a":"#ccc"} opacity={i%3===0?1:.9} />
+          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.5" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <rect x="8" y="93" width="28" height="4" rx="2" fill="#eff6ff" />
+      <rect x="40" y="93" width="18" height="4" rx="2" fill="#eff6ff" />
+    </svg>
+  );
+}
+function PreviewMinimal() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="12" y="8" width="36" height="5" rx="1" fill="#111" />
+      <rect x="12" y="15" width="24" height="2" rx="1" fill="#9ca3af" />
+      <rect x="12" y="19" width="50" height="1.2" rx="1" fill="#e5e7eb" />
+      {[25,32,39,46,53,60,67,74,81].map((y,i) => i < 8 && (
+        <g key={y}>
+          <rect x="12" y={y} width={i===0||i===3||i===6?8:5} height="1.5" rx="1" fill="#9ca3af" />
+          <rect x="24" y={y} width={i%3===0?38:28} height="1.5" rx="1" fill={i%3===0?"#374151":"#d1d5db"} />
+          {i%3===1&&<rect x="24" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <line x1="12" y1="88" x2="68" y2="88" stroke="#f3f4f6" strokeWidth="1" />
+      <rect x="12" y="91" width="50" height="1.5" rx="1" fill="#e5e7eb" />
+    </svg>
+  );
+}
+function PreviewElegant() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="22" y="5" width="36" height="5" rx="1" fill="#1c1917" />
+      <rect x="26" y="12" width="28" height="2.5" rx="1" fill="#92400e" opacity=".8" />
+      <rect x="16" y="17" width="48" height="1.2" rx="1" fill="#d97706" opacity=".5" />
+      <line x1="8" y1="20" x2="72" y2="20" stroke="#92400e" strokeWidth=".8" />
+      <rect x="8" y="23" width="64" height="6" rx="1" fill="#fffbeb" />
+      <rect x="10" y="25" width="50" height="1.5" rx="1" fill="#92400e" opacity=".4" />
+      {[33,40,47,54,61,68,75,82].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#92400e":"#d1d5db"} opacity={i%3===0?.9:1} />
+          {i%3!==0&&<rect x="8" y={y+3} width="18" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+function PreviewBold() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="0" y="0" width="80" height="26" fill="#0f172a" />
+      <rect x="8" y="5" width="40" height="5" rx="1" fill="#f8fafc" />
+      <rect x="8" y="12" width="28" height="2.5" rx="1" fill="#94a3b8" />
+      <rect x="8" y="17" width="50" height="1.5" rx="1" fill="#475569" />
+      {[31,38,45,52,59,66,73,80].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#0f172a":"#d1d5db"} />
+          {i%3===0&&<rect x="50" y={y} width="18" height="1.5" rx="1" fill="#e2e8f0" />}
+          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <rect x="8" y="90" width="14" height="4" rx="2" fill="#f1f5f9" />
+      <rect x="24" y="90" width="14" height="4" rx="2" fill="#f1f5f9" />
+    </svg>
+  );
+}
+function PreviewCompact() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="5" width="32" height="4" rx="1" fill="#111" />
+      <rect x="8" y="11" width="60" height="1.2" rx="1" fill="#9ca3af" />
+      <line x1="8" y1="14" x2="72" y2="14" stroke="#1f2937" strokeWidth="1" />
+      {Array.from({length: 12}, (_,i) => (
+        <g key={i}>
+          <rect x="8" y={17 + i * 7} width={8} height="1.2" rx="1" fill="#9ca3af" />
+          <rect x="18" y={17 + i * 7} width={i%4===0?45:i%4===1?35:i%4===2?28:40} height="1.2" rx="1" fill={i%4===0?"#111":"#ccc"} />
+          {i%4!==0&&<rect x="18" y={17 + i*7 + 3} width="22" height="1" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+const TEMPLATE_PREVIEWS: Record<string, () => JSX.Element> = {
+  modern: PreviewModern, classic: PreviewClassic, creative: PreviewCreative,
+  executive: PreviewExecutive, minimal: PreviewMinimal, elegant: PreviewElegant,
+  bold: PreviewBold, compact: PreviewCompact,
+};
+
 const TEMPLATES = [
-  { id: "modern" as const, name: "Modern", descKey: "wizard.template.modernDesc", e: "🔵" },
-  { id: "classic" as const, name: "Classic", descKey: "wizard.template.classicDesc", e: "⚫" },
-  { id: "creative" as const, name: "Creative", descKey: "wizard.template.creativeDesc", e: "🎨" },
-  { id: "executive" as const, name: "Executive", descKey: "wizard.template.executiveDesc", e: "💼" },
-  { id: "minimal" as const, name: "Minimal", descKey: "wizard.template.minimalDesc", e: "◻️" },
-  { id: "elegant" as const, name: "Elegant", descKey: "wizard.template.elegantDesc", e: "✒️" },
-  { id: "bold" as const, name: "Bold", descKey: "wizard.template.boldDesc", e: "⬛" },
-  { id: "compact" as const, name: "Compact", descKey: "wizard.template.compactDesc", e: "📄" },
+  { id: "modern" as const, name: "Modern", descKey: "wizard.template.modernDesc" },
+  { id: "classic" as const, name: "Classic", descKey: "wizard.template.classicDesc" },
+  { id: "creative" as const, name: "Creative", descKey: "wizard.template.creativeDesc" },
+  { id: "executive" as const, name: "Executive", descKey: "wizard.template.executiveDesc" },
+  { id: "minimal" as const, name: "Minimal", descKey: "wizard.template.minimalDesc" },
+  { id: "elegant" as const, name: "Elegant", descKey: "wizard.template.elegantDesc" },
+  { id: "bold" as const, name: "Bold", descKey: "wizard.template.boldDesc" },
+  { id: "compact" as const, name: "Compact", descKey: "wizard.template.compactDesc" },
 ];
 
 function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: TemplateId) => void }) {
@@ -709,20 +903,30 @@ function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: 
   return (
     <div>
       <p style={{ color: "var(--muted)", marginBottom: 20, fontSize: 14 }}>{t("wizard.template.choose")}</p>
-      <div className="grid3">
-        {TEMPLATES.map(tp => (
-          <div key={tp.id} onClick={() => setTemplate(tp.id)} style={{
-            border: `2px solid ${form.template === tp.id ? "var(--brand)" : "var(--border)"}`,
-            borderRadius: 14, padding: 20, cursor: "pointer",
-            background: form.template === tp.id ? "var(--brand-l)" : "var(--bg2)",
-            transition: "all .15s", textAlign: "center"
-          }}>
-            <div style={{ fontSize: 32, marginBottom: 10 }}>{tp.e}</div>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>{tp.name}</div>
-            <div style={{ fontSize: 12, color: "var(--muted)" }}>{t(tp.descKey)}</div>
-            {form.template === tp.id && <span className="tag" style={{ marginTop: 10 }}>{t("wizard.template.selected")}</span>}
-          </div>
-        ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14 }}>
+        {TEMPLATES.map(tp => {
+          const Preview = TEMPLATE_PREVIEWS[tp.id];
+          const selected = form.template === tp.id;
+          return (
+            <div key={tp.id} onClick={() => setTemplate(tp.id)} style={{
+              border: `2px solid ${selected ? "var(--brand)" : "var(--border)"}`,
+              borderRadius: 12, padding: 10, cursor: "pointer",
+              background: selected ? "var(--brand-l)" : "var(--bg2)",
+              transition: "all .15s",
+            }}>
+              <div style={{
+                background: "#f8fafc", borderRadius: 6, overflow: "hidden",
+                marginBottom: 8, border: "1px solid #e5e7eb",
+                boxShadow: "0 1px 4px rgba(0,0,0,.06)",
+              }}>
+                <Preview />
+              </div>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{tp.name}</div>
+              <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.4 }}>{t(tp.descKey)}</div>
+              {selected && <div style={{ marginTop: 6, fontSize: 11, color: "var(--brand)", fontWeight: 700 }}>✓ {t("wizard.template.selected")}</div>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
