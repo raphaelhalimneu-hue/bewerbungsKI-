@@ -297,6 +297,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         coverLetter: letterText,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
+        language: docLang,
       } });
 
       // Auto-save profile for next time (silently)

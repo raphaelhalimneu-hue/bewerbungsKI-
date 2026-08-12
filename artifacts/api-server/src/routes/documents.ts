@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { sendEmail } from "../lib/email";
+import { buildDocumentEmail } from "../lib/emailTemplates";
 
 const router = Router();
 
@@ -65,7 +67,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
 
 router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany } = req.body;
+    const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany, language } = req.body;
 
     const [doc] = await db
       .insert(documentsTable)
@@ -82,6 +84,24 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
       .returning();
 
     res.status(201).json(doc);
+
+    // Fire-and-forget: send confirmation email with download links
+    const userEmail = req.userEmail;
+    if (userEmail) {
+      const appUrl = (process.env.APP_URL || "https://bewerbungski.com").replace(/\/$/, "");
+      const { subject, html } = buildDocumentEmail({
+        documentId: doc.id,
+        documentName: name || "Bewerbungsunterlagen",
+        jobTitle: jobTitle || undefined,
+        jobCompany: jobCompany || undefined,
+        hasCoverLetter: Boolean(coverLetter),
+        appUrl,
+        language: language || "de",
+      });
+      sendEmail({ to: userEmail, subject, html }).catch((err) => {
+        req.log.error({ err }, "Failed to send document confirmation email");
+      });
+    }
   } catch (err) {
     req.log.error({ err }, "POST /documents error");
     res.status(500).json({ error: "Server error" });
