@@ -11,8 +11,8 @@ import { computeAtsScore } from "../lib/atsScore";
 
 const STEPS = [
   { id: "personal", icon: "👤" },
-  { id: "experience", icon: "💼" },
   { id: "education", icon: "🎓" },
+  { id: "experience", icon: "💼" },
   { id: "skills", icon: "⚡" },
   { id: "languages", icon: "🌍" },
   { id: "jobad", icon: "📋" },
