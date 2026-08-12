@@ -168,7 +168,9 @@
       "current": "Puesto actual",
       "tasks": "Tareas y logros",
       "tasksPh": "Tareas principales …",
-      "add": "+ Añadir experiencia laboral"
+      "add": "+ Añadir experiencia laboral",
+      "city": "Ciudad",
+      "cityPh": "p. ej. Múnich"
     },
     "edu": {
       "hint": "🎓 Empieza con tu título escolar (p. ej. Bachillerato 2003). Luego formación, universidad o cursos – del más antiguo al más reciente. Un historial educativo completo es obligatorio.",
@@ -184,7 +186,9 @@
       "gradePh": "1,8",
       "from": "Desde",
       "to": "Hasta",
-      "add": "+ Añadir formación"
+      "add": "+ Añadir formación",
+      "city": "Ciudad",
+      "cityPh": "p. ej. Berlín"
     },
     "skills": {
       "skill": "Habilidad",
@@ -213,7 +217,9 @@
       "company": "Empresa",
       "companyPh": "Muster AG",
       "description": "Descripción del puesto",
-      "descriptionPh": "Pega aquí la oferta de empleo …"
+      "descriptionPh": "Pega aquí la oferta de empleo …",
+      "address": "Dirección del empleador",
+      "addressPh": "Calle nº, CP Ciudad – o busca arriba"
     },
     "template": {
       "choose": "Elige el diseño de tu currículum:",
@@ -241,7 +247,12 @@
       "achievementLabel": "¿Cuál es tu mayor logro o punto fuerte?",
       "achievementPh": "p. ej. reduje los costes de producción un 20% en mi último puesto …"
     },
-    "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más."
+    "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más.",
+    "lookup": {
+      "search": "Buscar",
+      "noResults": "Sin resultados.",
+      "close": "Cerrar"
+    }
   },
   "notFound": {
     "title": "404 – Página no encontrada",

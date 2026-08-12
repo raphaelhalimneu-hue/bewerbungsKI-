@@ -168,7 +168,9 @@
       "current": "Mevcut pozisyon",
       "tasks": "Görevler ve başarılar",
       "tasksPh": "Başlıca görevler …",
-      "add": "+ İş deneyimi ekle"
+      "add": "+ İş deneyimi ekle",
+      "city": "Şehir",
+      "cityPh": "örn. Münih"
     },
     "edu": {
       "hint": "🎓 Okul mezuniyetiyle başla (örn. lise 2003). Ardından meslek eğitimi, üniversite veya kurslar – eskiden yeniye. Eksiksiz eğitim geçmişi zorunludur.",
@@ -184,7 +186,9 @@
       "gradePh": "1,8",
       "from": "Başlangıç",
       "to": "Bitiş",
-      "add": "+ Eğitim ekle"
+      "add": "+ Eğitim ekle",
+      "city": "Şehir",
+      "cityPh": "örn. Berlin"
     },
     "skills": {
       "skill": "Beceri",
@@ -213,7 +217,9 @@
       "company": "Şirket",
       "companyPh": "Muster AG",
       "description": "İş tanımı",
-      "descriptionPh": "İş ilanını buraya yapıştır …"
+      "descriptionPh": "İş ilanını buraya yapıştır …",
+      "address": "İşverenin adresi",
+      "addressPh": "Sokak No, Posta Kodu Şehir – veya yukarıdan arayın"
     },
     "template": {
       "choose": "Özgeçmişin için tasarımı seç:",
@@ -241,7 +247,12 @@
       "achievementLabel": "En büyük başarın veya güçlü yönün nedir?",
       "achievementPh": "ör. son işimde üretim maliyetlerini %20 düşürdüm …"
     },
-    "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın."
+    "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın.",
+    "lookup": {
+      "search": "Ara",
+      "noResults": "Sonuç bulunamadı.",
+      "close": "Kapat"
+    }
   },
   "notFound": {
     "title": "404 – Sayfa bulunamadı",

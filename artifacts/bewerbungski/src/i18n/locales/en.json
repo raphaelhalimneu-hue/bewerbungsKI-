@@ -168,7 +168,9 @@
       "current": "Current position",
       "tasks": "Tasks & achievements",
       "tasksPh": "Main tasks …",
-      "add": "+ Add work experience"
+      "add": "+ Add work experience",
+      "city": "City",
+      "cityPh": "e.g. Munich"
     },
     "edu": {
       "hint": "🎓 Start with your school-leaving certificate (e.g. A-levels 2003). Then add training, university, or courses – oldest first. A complete education history is expected.",
@@ -184,7 +186,9 @@
       "gradePh": "1,8",
       "from": "From",
       "to": "To",
-      "add": "+ Add education"
+      "add": "+ Add education",
+      "city": "City",
+      "cityPh": "e.g. Berlin"
     },
     "skills": {
       "skill": "Skill",
@@ -213,7 +217,9 @@
       "company": "Company",
       "companyPh": "Muster AG",
       "description": "Job description",
-      "descriptionPh": "Paste the job posting here …"
+      "descriptionPh": "Paste the job posting here …",
+      "address": "Employer's address",
+      "addressPh": "Street No, Postcode City – or search above"
     },
     "template": {
       "choose": "Choose the design for your CV:",
@@ -241,7 +247,12 @@
       "achievementLabel": "What is your greatest achievement or strength?",
       "achievementPh": "e.g. I reduced production costs by 20% in my last role …"
     },
-    "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more."
+    "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more.",
+    "lookup": {
+      "search": "Search",
+      "noResults": "No results found.",
+      "close": "Close"
+    }
   },
   "notFound": {
     "title": "404 – Page not found",

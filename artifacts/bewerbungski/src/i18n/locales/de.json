@@ -168,7 +168,9 @@
       "current": "Aktuelle Stelle",
       "tasks": "Aufgaben & Erfolge",
       "tasksPh": "Hauptaufgaben …",
-      "add": "+ Berufserfahrung hinzufügen"
+      "add": "+ Berufserfahrung hinzufügen",
+      "city": "Ort",
+      "cityPh": "z.B. München"
     },
     "edu": {
       "hint": "🎓 Beginne mit deinem Schulabschluss (z.B. Realschule 2003, Abitur 2005). Dann alle Ausbildungen, Studium oder Kurse – von alt nach neu. Ein lückenloser Bildungsweg ist Pflicht.",
@@ -184,7 +186,9 @@
       "gradePh": "1,8",
       "from": "Von",
       "to": "Bis",
-      "add": "+ Ausbildung hinzufügen"
+      "add": "+ Ausbildung hinzufügen",
+      "city": "Ort",
+      "cityPh": "z.B. Berlin"
     },
     "skills": {
       "skill": "Skill",
@@ -213,7 +217,9 @@
       "company": "Unternehmen",
       "companyPh": "Muster AG",
       "description": "Stellenbeschreibung",
-      "descriptionPh": "Füge hier die Stellenanzeige ein …"
+      "descriptionPh": "Füge hier die Stellenanzeige ein …",
+      "address": "Anschrift des Arbeitgebers",
+      "addressPh": "Straße Nr, PLZ Stadt – oder oben suchen"
     },
     "template": {
       "choose": "Wähle das Design für deinen Lebenslauf:",
@@ -241,7 +247,12 @@
       "achievementLabel": "Was ist dein größter Erfolg oder deine Stärke?",
       "achievementPh": "z. B. ich habe in meiner letzten Stelle die Produktionskosten um 20 % gesenkt …"
     },
-    "premiumLimit": "Limit erreicht: 30 Bewerbungen pro Kauf. Bitte kontaktiere uns für mehr."
+    "premiumLimit": "Limit erreicht: 30 Bewerbungen pro Kauf. Bitte kontaktiere uns für mehr.",
+    "lookup": {
+      "search": "Suchen",
+      "noResults": "Keine Ergebnisse.",
+      "close": "Schließen"
+    }
   },
   "notFound": {
     "title": "404 – Seite nicht gefunden",

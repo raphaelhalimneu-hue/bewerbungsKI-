@@ -14,6 +14,7 @@ export type PersonalData = {
 
 export type Experience = {
   company: string;
+  city: string;
   position: string;
   start: string;
   end: string;
@@ -23,6 +24,7 @@ export type Experience = {
 
 export type Education = {
   institution: string;
+  city: string;
   degree: string;
   field: string;
   grade: string;
@@ -46,7 +48,7 @@ export type FormData = {
   education: Education[];
   skills: Skill[];
   languages: Language[];
-  jobad: { title: string; company: string; description: string };
+  jobad: { title: string; company: string; address: string; description: string };
   template: "modern" | "classic" | "creative";
 };
 

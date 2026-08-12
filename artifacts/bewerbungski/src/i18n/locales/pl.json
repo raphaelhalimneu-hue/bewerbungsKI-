@@ -168,7 +168,9 @@
       "current": "Obecne stanowisko",
       "tasks": "Zadania i osiągnięcia",
       "tasksPh": "Główne zadania …",
-      "add": "+ Dodaj doświadczenie zawodowe"
+      "add": "+ Dodaj doświadczenie zawodowe",
+      "city": "Miasto",
+      "cityPh": "np. Monachium"
     },
     "edu": {
       "hint": "🎓 Zacznij od ukończenia szkoły (np. matura 2003). Następnie szkolenie zawodowe, studia lub kursy – od najstarszych. Pełna historia edukacji jest wymagana.",
@@ -184,7 +186,9 @@
       "gradePh": "1,8",
       "from": "Od",
       "to": "Do",
-      "add": "+ Dodaj wykształcenie"
+      "add": "+ Dodaj wykształcenie",
+      "city": "Miasto",
+      "cityPh": "np. Berlin"
     },
     "skills": {
       "skill": "Umiejętność",
@@ -213,7 +217,9 @@
       "company": "Firma",
       "companyPh": "Muster AG",
       "description": "Opis stanowiska",
-      "descriptionPh": "Wklej tutaj ogłoszenie o pracę …"
+      "descriptionPh": "Wklej tutaj ogłoszenie o pracę …",
+      "address": "Adres pracodawcy",
+      "addressPh": "Ulica nr, Kod Miasto – lub wyszukaj powyżej"
     },
     "template": {
       "choose": "Wybierz projekt swojego CV:",
@@ -241,7 +247,12 @@
       "achievementLabel": "Jaki jest Twój największy sukces lub mocna strona?",
       "achievementPh": "np. obniżyłem/am koszty produkcji o 20% na poprzednim stanowisku …"
     },
-    "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej."
+    "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej.",
+    "lookup": {
+      "search": "Szukaj",
+      "noResults": "Brak wyników.",
+      "close": "Zamknij"
+    }
   },
   "notFound": {
     "title": "404 – Nie znaleziono strony",

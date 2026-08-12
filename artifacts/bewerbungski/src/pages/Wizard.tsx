@@ -25,7 +25,7 @@ function blankForm(): FormData {
     education: [],
     skills: [],
     languages: [],
-    jobad: { title: "", company: "", description: "" },
+    jobad: { title: "", company: "", address: "", description: "" },
     template: "modern",
   };
 }
@@ -58,7 +58,7 @@ export default function Wizard() {
   }
 
   function addExp() {
-    setForm(f => ({ ...f, experience: [...f.experience, { company: "", position: "", start: "", end: "", current: false, description: "" }] }));
+    setForm(f => ({ ...f, experience: [...f.experience, { company: "", city: "", position: "", start: "", end: "", current: false, description: "" }] }));
   }
   function updateExp(i: number, key: string, value: string | boolean) {
     setForm(f => { const e = [...f.experience]; e[i] = { ...e[i], [key]: value }; return { ...f, experience: e }; });
@@ -68,7 +68,7 @@ export default function Wizard() {
   }
 
   function addEdu() {
-    setForm(f => ({ ...f, education: [...f.education, { institution: "", degree: "", field: "", grade: "", start: "", end: "" }] }));
+    setForm(f => ({ ...f, education: [...f.education, { institution: "", city: "", degree: "", field: "", grade: "", start: "", end: "" }] }));
   }
   function updateEdu(i: number, key: string, value: string) {
     setForm(f => { const e = [...f.education]; e[i] = { ...e[i], [key]: value }; return { ...f, education: e }; });
@@ -167,7 +167,7 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           systemPrompt: "Du bist Experte für deutsche Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, nicht wie eine KI: natürliche, unterschiedlich lange Sätze, konkrete Beispiele statt Floskeln, keine übertriebenen Adjektive, keine typischen KI-Phrasen (kein 'dynamisch', 'leidenschaftlich', 'ich bin überzeugt, dass ich', 'stets', 'zeitnah'), keine Aufzählungen mit Gedankenstrichen. Der Text darf kleine persönliche Formulierungen enthalten, muss aber formell korrekt bleiben. Schreibe nur den Anschreiben-Text ohne HTML.",
-          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen): ${motivation}` : ""}${achievement ? `\nBesonderer Erfolg/Stärke (UNBEDINGT einbauen): ${achievement}` : ""}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
+          userPrompt: `Schreibe professionelles Anschreiben (Sprache: ${lang.name}):\nBewerber: ${form.personal.firstName} ${form.personal.lastName}, ${form.personal.title || ""}\nStelle: ${form.jobad.title} bei ${form.jobad.company}${(form.jobad as any).address ? `\nAnschrift des Unternehmens (MUSS als Empfängeradresse oben links im Brief erscheinen, VOR dem Datum): ${(form.jobad as any).address}` : ""}\nStellenbeschreibung: ${form.jobad.description || "nicht angegeben"}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}`).join("; ")}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(", ")}${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen): ${motivation}` : ""}${achievement ? `\nBesonderer Erfolg/Stärke (UNBEDINGT einbauen): ${achievement}` : ""}\n\n350-400 Wörter, formell, überzeugend, keine Platzhalter. Beginne mit genau dieser Ort-Datum-Zeile: "${(form.personal as any).city || "Ort"}, den ${today}" — verwende EXAKT dieses Datum, erfinde kein anderes. Danach Betreffzeile und Anrede.${langInstr}`,
         } });
         letterText = letterRes.result;
       }
@@ -294,6 +294,67 @@ function StepPersonal({ form, setPersonal }: { form: FormData; setPersonal: (k: 
   );
 }
 
+// ── Nominatim place lookup ──────────────────────────────────────────────────
+type NominatimResult = { display_name: string; address: Record<string, string> };
+
+function PlaceLookup({ query, onSelect }: { query: string; onSelect: (city: string, fullAddress: string) => void }) {
+  const { t } = useTranslation();
+  const [results, setResults] = useState<NominatimResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  async function search() {
+    if (!query.trim() || query.length < 3) return;
+    setLoading(true); setOpen(true); setResults([]);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=de`,
+        { headers: { "User-Agent": "BewerbungsKI/1.0 contact@bewerbungski.de" } }
+      );
+      const data: NominatimResult[] = await res.json();
+      setResults(data);
+    } catch { setResults([]); }
+    setLoading(false);
+  }
+
+  function pick(r: NominatimResult) {
+    const a = r.address;
+    const city = a.city || a.town || a.village || a.municipality || a.county || a.state || "";
+    const road = a.road ? `${a.road}${a.house_number ? " " + a.house_number : ""}` : "";
+    const postcode = a.postcode || "";
+    const full = [road, `${postcode} ${city}`.trim()].filter(Boolean).join(", ");
+    onSelect(city, full);
+    setOpen(false); setResults([]);
+  }
+
+  return (
+    <div style={{ position: "relative", display: "inline-block", marginTop: 5 }}>
+      <button type="button" className="btn btn-s" style={{ fontSize: 12, padding: "4px 10px" }}
+        onClick={search} disabled={!query || query.length < 3 || loading}>
+        {loading ? "⏳" : "🔍"} {t("wizard.lookup.search")}
+      </button>
+      {open && (results.length > 0 || !loading) && (
+        <div style={{ position: "absolute", top: "110%", left: 0, zIndex: 200, minWidth: 260, maxWidth: 360, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10, boxShadow: "0 6px 20px rgba(0,0,0,.15)", overflow: "hidden" }}>
+          {results.length === 0 && <div style={{ padding: "10px 14px", fontSize: 12, color: "var(--muted)" }}>{t("wizard.lookup.noResults")}</div>}
+          {results.map((r, idx) => (
+            <div key={idx} style={{ padding: "9px 14px", cursor: "pointer", fontSize: 12, lineHeight: 1.45, borderBottom: idx < results.length - 1 ? "1px solid var(--border)" : "none" }}
+              onClick={() => pick(r)}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--accent-light,#eff6ff)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "")}>
+              {r.display_name}
+            </div>
+          ))}
+          <div style={{ padding: "5px 14px", fontSize: 10, color: "var(--muted)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
+            <span>© OpenStreetMap</span>
+            <span style={{ cursor: "pointer" }} onClick={() => setOpen(false)}>✕ {t("wizard.lookup.close")}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+// ───────────────────────────────────────────────────────────────────────────
+
 function StepExperience({ items, addExp, updateExp, delExp }: { items: Experience[]; addExp: () => void; updateExp: (i: number, k: string, v: string | boolean) => void; delExp: (i: number) => void }) {
   const { t } = useTranslation();
   return (
@@ -305,7 +366,17 @@ function StepExperience({ items, addExp, updateExp, delExp }: { items: Experienc
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--muted)", marginBottom: 12 }}>{t("wizard.exp.item", { num: i + 1 })}</div>
           <button className="btn btn-d btn-sm" style={{ position: "absolute", top: 12, insetInlineEnd: 12 }} onClick={() => delExp(i)}>×</button>
           <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
-            <div className="field"><label className="label">{t("wizard.exp.company")}</label><input className="input" value={e.company} onChange={ev => updateExp(i, "company", ev.target.value)} placeholder={t("wizard.exp.companyPh")} /></div>
+            <div className="field">
+              <label className="label">{t("wizard.exp.company")}</label>
+              <input className="input" value={e.company} onChange={ev => updateExp(i, "company", ev.target.value)} placeholder={t("wizard.exp.companyPh")} />
+              <PlaceLookup query={e.company} onSelect={(city) => updateExp(i, "city", city)} />
+            </div>
+            <div className="field">
+              <label className="label">{t("wizard.exp.city")}</label>
+              <input className="input" value={e.city || ""} onChange={ev => updateExp(i, "city", ev.target.value)} placeholder={t("wizard.exp.cityPh")} />
+            </div>
+          </div>
+          <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
             <div className="field"><label className="label">{t("wizard.exp.position")}</label><input className="input" value={e.position} onChange={ev => updateExp(i, "position", ev.target.value)} placeholder={t("wizard.exp.positionPh")} /></div>
           </div>
           <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
@@ -337,10 +408,18 @@ function StepEducation({ items, addEdu, updateEdu, delEdu }: { items: Education[
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--muted)", marginBottom: 12 }}>{t("wizard.edu.item", { num: i + 1 })}</div>
           <button className="btn btn-d btn-sm" style={{ position: "absolute", top: 12, insetInlineEnd: 12 }} onClick={() => delEdu(i)}>×</button>
           <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
-            <div className="field"><label className="label">{t("wizard.edu.school")}</label><input className="input" value={e.institution} onChange={ev => updateEdu(i, "institution", ev.target.value)} placeholder={t("wizard.edu.schoolPh")} /></div>
-            <div className="field"><label className="label">{t("wizard.edu.degree")}</label><input className="input" value={e.degree} onChange={ev => updateEdu(i, "degree", ev.target.value)} placeholder={t("wizard.edu.degreePh")} /></div>
+            <div className="field">
+              <label className="label">{t("wizard.edu.school")}</label>
+              <input className="input" value={e.institution} onChange={ev => updateEdu(i, "institution", ev.target.value)} placeholder={t("wizard.edu.schoolPh")} />
+              <PlaceLookup query={e.institution} onSelect={(city) => updateEdu(i, "city", city)} />
+            </div>
+            <div className="field">
+              <label className="label">{t("wizard.edu.city")}</label>
+              <input className="input" value={e.city || ""} onChange={ev => updateEdu(i, "city", ev.target.value)} placeholder={t("wizard.edu.cityPh")} />
+            </div>
           </div>
           <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
+            <div className="field"><label className="label">{t("wizard.edu.degree")}</label><input className="input" value={e.degree} onChange={ev => updateEdu(i, "degree", ev.target.value)} placeholder={t("wizard.edu.degreePh")} /></div>
             <div className="field"><label className="label">{t("wizard.edu.field")}</label><input className="input" value={e.field} onChange={ev => updateEdu(i, "field", ev.target.value)} placeholder={t("wizard.edu.fieldPh")} /></div>
           </div>
           <div className="grid2" style={{ gap: 10 }}>
@@ -431,7 +510,15 @@ function StepJobAd({ form, setJobad }: { form: FormData; setJobad: (k: string, v
       </div>
       <div className="grid2">
         <div className="field"><label className="label">{t("wizard.jobad.position")}</label><input className="input" value={j.title} onChange={e => setJobad("title", e.target.value)} placeholder={t("wizard.jobad.positionPh")} /></div>
-        <div className="field"><label className="label">{t("wizard.jobad.company")}</label><input className="input" value={j.company} onChange={e => setJobad("company", e.target.value)} placeholder={t("wizard.jobad.companyPh")} /></div>
+        <div className="field">
+          <label className="label">{t("wizard.jobad.company")}</label>
+          <input className="input" value={j.company} onChange={e => setJobad("company", e.target.value)} placeholder={t("wizard.jobad.companyPh")} />
+          <PlaceLookup query={j.company} onSelect={(_city, full) => setJobad("address", full)} />
+        </div>
+      </div>
+      <div className="field">
+        <label className="label">{t("wizard.jobad.address")}</label>
+        <input className="input" value={(j as any).address || ""} onChange={e => setJobad("address", e.target.value)} placeholder={t("wizard.jobad.addressPh")} />
       </div>
       <div className="field"><label className="label">{t("wizard.jobad.description")}</label><textarea className="textarea" value={j.description} onChange={e => setJobad("description", e.target.value)} placeholder={t("wizard.jobad.descriptionPh")} style={{ minHeight: 160 }} /></div>
     </div>
