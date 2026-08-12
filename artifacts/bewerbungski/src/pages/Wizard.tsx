@@ -171,8 +171,31 @@ export default function Wizard() {
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
-        systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Schreibe so, wie ein Mensch seinen eigenen Lebenslauf schreiben würde: schlicht, konkret, ohne Übertreibungen und ohne typische KI-Floskeln (kein 'dynamisch', 'leidenschaftlich', 'stets bestrebt', keine Gedankenstriche als Stilmittel). Antworte nur mit HTML-Inhalt, kein Wrapper, kein Markdown, keine Erklärungen. PFLICHT: Prüfe den zeitlichen Werdegang auf Lücken von mehr als 12 Monaten. Schließe jede solche Lücke mit einem neutralen Eintrag (z.B. 'Berufliche Neuorientierung', 'Selbstständige Tätigkeit', 'Familienphase' oder 'Verschiedene Tätigkeiten') mit dem entsprechenden Zeitraum – erfinde keine Details, bleibe neutral. Füge außerdem immer einen Schulabschluss-Eintrag in der Ausbildungssektion ein, wenn kein Schulabschluss angegeben ist (Platzhalter: 'Schulabschluss — Bitte ergänzen'). Ein lückenloser Lebenslauf ist in Deutschland Pflicht.",
-        userPrompt: `Erstelle professionellen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). WICHTIG: Prüfe alle Zeiträume auf Lücken > 12 Monate und füge neutrale Einträge ein (z.B. 'Berufliche Neuorientierung 2005–2023'). Schreibe niemals Lücken einfach weg. Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.${langInstr}
+        systemPrompt: `Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Antworte NUR mit HTML-Inhalt — kein Markdown, kein Wrapper, keine Erklärungen.
+
+SCHREIBSTIL: Schreibe wie ein echter Mensch: konkret, schlicht, ohne KI-Floskeln (kein „dynamisch", „leidenschaftlich", „stets bestrebt", keine Gedankenstriche als Stilmittel).
+
+PFLICHTREGELN — alle ohne Ausnahme einhalten:
+1. LÜCKENLOSIGKEIT: Berechne für JEDEN Zeitraum zwischen Einträgen die Lücke in Monaten. Jede Lücke > 6 Monate MUSS als eigener Eintrag erscheinen. Mögliche neutrale Formulierungen: „Berufliche Neuorientierung", „Selbstständige Projekte", „Familienphase", „Elternzeit", „Weiterbildung und Selbststudium", „Freiberufliche Tätigkeit". Erfinde keine Details. Eine Lücke von 20 Jahren ergibt z.B. MEHRERE solcher Einträge mit konkreten Jahreszahlen.
+2. SCHULABSCHLUSS IMMER: Wenn in den Daten kein Schulabschluss vorhanden ist, füge IMMER den folgenden Platzhalter-Eintrag als ERSTEN Eintrag in der Ausbildungssektion ein: „Schulabschluss — Bitte ergänzen" mit Zeitraum „Bitte ergänzen".
+3. BERUFSERFAHRUNG vollständig: Gib JEDEN übergebenen Erfahrungs-Eintrag aus. Fehlende Zeiträume zwischen Stationen als Lücken-Einträge auffüllen (s. Regel 1).
+4. KENNTNISSE-SEKTION immer: Erzeuge immer eine Kenntnisse-Sektion. Wenn keine Skills übergeben wurden, leite aus Berufserfahrung und Stellenanzeige passende Kenntnisse ab (mindestens 6 Stück).
+5. SPRACHEN-SEKTION immer: Mindestens die Muttersprache (Deutsch oder aus dem Kontext) eintragen, wenn keine Sprachen übergeben wurden.
+6. PROFIL-SEKTION immer: Schreibe immer einen Profil-Abschnitt (3–5 Sätze), auch wenn keine Zusammenfassung übergeben wurde.
+7. UNTERSCHRIFT: Ganz am Ende Ort und Datum als Unterschriftszeile, EXAKT das übergebene Datum verwenden.`,
+        userPrompt: `Erstelle vollständigen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.
+
+CHECKLISTE — prüfe vor der Ausgabe jeden Punkt:
+☑ Profil-Sektion vorhanden (3–5 Sätze)
+☑ Jede Berufsstelle aus den Daten erscheint im Lebenslauf
+☑ Jede Lücke > 6 Monate zwischen Einträgen ist mit einem neutralen Eintrag gefüllt (mit exakten Jahreszahlen, z.B. „Berufliche Neuorientierung, 01/2003 – 08/2023")
+☑ Schulabschluss-Eintrag vorhanden (als erster Ausbildungseintrag falls nicht angegeben: Platzhalter „Schulabschluss — Bitte ergänzen")
+☑ Alle weiteren Ausbildungs-Einträge aus den Daten vorhanden
+☑ Kenntnisse-Sektion mit mindestens 6 Einträgen (aus Skills oder aus Kontext abgeleitet)
+☑ Sprachen-Sektion vorhanden
+☑ Unterschriftszeile am Ende mit EXAKT diesem Datum: ${today}
+
+Keine Noten angeben. Schreibe niemals Lücken einfach weg.${langInstr}
 
 DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalte einsetzen/wiederholen, Struktur und Styles nicht verändern)${docLang === "ar" ? ' und setze dir="rtl" auf das äußerste div' : ""}${usePhoto ? '. WICHTIG: Übernimm den <img>-Tag mit src="__FOTO__" EXAKT unverändert (src nicht ersetzen!)' : ""}:
 
