@@ -324,11 +324,7 @@
   }
   @media (max-width: 860px) {
     .cv-wrap { padding: 12px; }
-    .cv-sheet {
-      transform-origin: top left;
-      transform: scale(var(--cv-scale, 1));
-      margin: 0;
-    }
+    .cv-sheet { margin: 0; }
   }
 
   /* ── Animations ── */

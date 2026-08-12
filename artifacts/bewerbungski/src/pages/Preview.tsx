@@ -29,19 +29,17 @@ export default function Preview() {
     }
   }, [(doc as any)?.id]);
 
-  // Scale cv-sheet to fit narrow mobile viewports
+  // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets)
   useEffect(() => {
     function applyScale() {
-      if (!cvWrapRef.current) return;
+      if (!cvWrapRef.current || !cvRef.current) return;
       const available = cvWrapRef.current.clientWidth - 24;
       const cvWidth = 760;
       const scale = available < cvWidth ? available / cvWidth : 1;
-      cvWrapRef.current.style.setProperty("--cv-scale", String(scale));
-      if (cvRef.current) {
-        cvWrapRef.current.style.minHeight = scale < 1
-          ? `${cvRef.current.offsetHeight * scale + 24}px`
-          : "";
-      }
+      cvRef.current.style.zoom = String(scale);
+      cvWrapRef.current.style.minHeight = scale < 1
+        ? `${cvRef.current.offsetHeight * scale + 24}px`
+        : "";
     }
     applyScale();
     window.addEventListener("resize", applyScale);
