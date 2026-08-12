@@ -306,7 +306,13 @@
       "minimalDesc": "Reducido, mucho espacio en blanco",
       "elegantDesc": "Serifas, tono dorado cálido",
       "boldDesc": "Cabecera oscura, llamativo",
-      "compactDesc": "Ahorra espacio, más contenido"
+      "compactDesc": "Ahorra espacio, más contenido",
+      "swissDesc": "Claridad suiza, acento rojo, estructurado",
+      "nordicDesc": "Escandinavo, verde azulado, espacioso",
+      "corporateDesc": "Barra lateral verde, doble columna, muy formal",
+      "timelineDesc": "Diseño de línea de tiempo, naranja, moderno",
+      "slateDesc": "Banda de encabezado oscura, estructura limpia",
+      "terraDesc": "Tonos tierra cálidos, serif, elegante"
     },
     "gen": {
       "ready": "Listo para generar",

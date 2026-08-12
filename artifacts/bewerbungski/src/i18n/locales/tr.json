@@ -306,7 +306,13 @@
       "minimalDesc": "Sade, bol beyaz alan",
       "elegantDesc": "Serifli, sıcak altın tonu",
       "boldDesc": "Koyu başlık, dikkat çekici",
-      "compactDesc": "Yer tasarrufu, daha çok içerik"
+      "compactDesc": "Yer tasarrufu, daha çok içerik",
+      "swissDesc": "İsviçre netliği, kırmızı vurgu, yapılandırılmış",
+      "nordicDesc": "İskandinav, turkuaz, ferah",
+      "corporateDesc": "Yeşil kenar çubuğu, iki sütunlu, çok resmi",
+      "timelineDesc": "Zaman çizelgesi düzeni, turuncu, modern",
+      "slateDesc": "Koyu başlık bandı, temiz yapı",
+      "terraDesc": "Sıcak toprak tonları, serif, zarif"
     },
     "gen": {
       "ready": "Oluşturmaya hazır",

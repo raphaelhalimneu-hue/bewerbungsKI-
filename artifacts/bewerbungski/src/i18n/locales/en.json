@@ -306,7 +306,13 @@
       "minimalDesc": "Reduced, lots of white space",
       "elegantDesc": "Serifs, warm gold tone",
       "boldDesc": "Dark header, striking",
-      "compactDesc": "Space-saving, more content"
+      "compactDesc": "Space-saving, more content",
+      "swissDesc": "Swiss clarity, red accent, structured",
+      "nordicDesc": "Scandinavian, teal, airy",
+      "corporateDesc": "Green sidebar, two-column, very formal",
+      "timelineDesc": "Timeline layout, orange, modern",
+      "slateDesc": "Dark header band, clean structure",
+      "terraDesc": "Warm earth tones, serif, elegant"
     },
     "gen": {
       "ready": "Ready to generate",

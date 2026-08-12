@@ -306,7 +306,13 @@
       "minimalDesc": "Oszczędny, dużo bieli",
       "elegantDesc": "Szeryfy, ciepły złoty ton",
       "boldDesc": "Ciemny nagłówek, wyrazisty",
-      "compactDesc": "Oszczędza miejsce, więcej treści"
+      "compactDesc": "Oszczędza miejsce, więcej treści",
+      "swissDesc": "Szwajcarska klarowność, czerwony akcent",
+      "nordicDesc": "Skandynawski, turkus, dużo przestrzeni",
+      "corporateDesc": "Zielony pasek boczny, dwukolumnowy",
+      "timelineDesc": "Oś czasu, pomarańcz, nowoczesny",
+      "slateDesc": "Ciemna górna belka, czysta struktura",
+      "terraDesc": "Ciepłe kolory ziemi, serif, elegancki"
     },
     "gen": {
       "ready": "Gotowe do wygenerowania",

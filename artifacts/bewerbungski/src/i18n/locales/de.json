@@ -306,7 +306,13 @@
       "minimalDesc": "Reduziert, viel Weißraum",
       "elegantDesc": "Serifen, warmer Goldton",
       "boldDesc": "Dunkler Header, markant",
-      "compactDesc": "Platzsparend, mehr Inhalt"
+      "compactDesc": "Platzsparend, mehr Inhalt",
+      "swissDesc": "Schweizer Klarheit, Rot-Akzent, strukturiert",
+      "nordicDesc": "Skandinavisch, Türkis, viel Luft",
+      "corporateDesc": "Grüne Sidebar, zweispaltig, sehr seriös",
+      "timelineDesc": "Zeitstrahl-Optik, Orange, modern",
+      "slateDesc": "Dunkles Header-Band, klare Struktur",
+      "terraDesc": "Warme Erdtöne, Serif, edel"
     },
     "gen": {
       "ready": "Bereit zur Generierung",

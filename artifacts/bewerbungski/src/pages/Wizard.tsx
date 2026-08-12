@@ -31,6 +31,12 @@ const TEMPLATE_STYLES: Record<TemplateId, { font: string; accent: string; header
   elegant:   { font: "Georgia,'Times New Roman',serif", accent: "#92400e", headerBg: "transparent", headerText: "#1f2937", subColor: "#92400e", chipBg: "#fffbeb", chipText: "#92400e", scale: 1 },
   bold:      { font: "Helvetica,Arial,sans-serif", accent: "#0f172a", headerBg: "#0f172a", headerText: "#ffffff", subColor: "#cbd5e1", chipBg: "#e2e8f0", chipText: "#0f172a", scale: 1 },
   compact:   { font: "Helvetica,Arial,sans-serif", accent: "#1f2937", headerBg: "transparent", headerText: "#1f2937", subColor: "#6b7280", chipBg: "#f3f4f6", chipText: "#374151", scale: 0.88 },
+  swiss:     { font: "Helvetica,Arial,sans-serif", accent: "#dc2626", headerBg: "transparent", headerText: "#111111", subColor: "#dc2626", chipBg: "#fef2f2", chipText: "#dc2626", scale: 1 },
+  nordic:    { font: "Helvetica,Arial,sans-serif", accent: "#0d9488", headerBg: "transparent", headerText: "#111827", subColor: "#0d9488", chipBg: "#f0fdfa", chipText: "#0d9488", scale: 1 },
+  corporate: { font: "Helvetica,Arial,sans-serif", accent: "#065f46", headerBg: "#065f46", headerText: "#ffffff", subColor: "#10b981", chipBg: "#ecfdf5", chipText: "#065f46", scale: 1 },
+  timeline:  { font: "Helvetica,Arial,sans-serif", accent: "#ea580c", headerBg: "transparent", headerText: "#111827", subColor: "#ea580c", chipBg: "#fff7ed", chipText: "#ea580c", scale: 1 },
+  slate:     { font: "Helvetica,Arial,sans-serif", accent: "#334155", headerBg: "#334155", headerText: "#ffffff", subColor: "#64748b", chipBg: "#f8fafc", chipText: "#334155", scale: 1 },
+  terra:     { font: "Georgia,'Times New Roman',serif", accent: "#c2410c", headerBg: "transparent", headerText: "#7c2d12", subColor: "#c2410c", chipBg: "#fff7ed", chipText: "#c2410c", scale: 1 },
 };
 
 function blankForm(): FormData {
@@ -942,21 +948,148 @@ function PreviewCompact() {
   );
 }
 
+function PreviewSwiss() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="14" width="64" height="3" fill="#dc2626" />
+      <rect x="8" y="5" width="38" height="5" rx="1" fill="#111" />
+      <rect x="8" y="11" width="22" height="2" rx="1" fill="#555" />
+      <rect x="8" y="19" width="60" height="1.2" rx="1" fill="#ddd" />
+      {[24,31,38,45,52,60,68,76].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width="14" height="1.5" rx="1" fill="#ccc" />
+          <rect x="26" y={y} width={i%3===0?38:28} height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} />
+          {i%3!==0&&<rect x="26" y={y+3} width="20" height="1.2" rx="1" fill="#eee" />}
+        </g>
+      ))}
+      <rect x="8" y="88" width="12" height="4" rx="2" fill="#fef2f2" style={{ outline: "1px solid #fecaca" }} />
+      <rect x="22" y="88" width="12" height="4" rx="2" fill="#fef2f2" />
+    </svg>
+  );
+}
+function PreviewNordic() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="5" width="40" height="5.5" rx="1" fill="#111827" />
+      <rect x="8" y="12" width="26" height="2.5" rx="1" fill="#0d9488" />
+      <rect x="8" y="17" width="55" height="1.2" rx="1" fill="#9ca3af" />
+      <rect x="8" y="22" width="64" height="7" rx="3" fill="#f0fdfa" />
+      {[33,40,47,55,63,71,79].map((y,i) => i < 6 && (
+        <g key={y}>
+          <rect x="10" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} />
+          {i%3===0&&<rect x="10" y={y} width="2" height="8" rx="1" fill="#0d9488" opacity=".3" />}
+          {i%3!==0&&<rect x="10" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <rect x="8" y="92" width="12" height="4" rx="10" fill="#f0fdfa" />
+      <rect x="22" y="92" width="14" height="4" rx="10" fill="#f0fdfa" />
+      <rect x="38" y="92" width="10" height="4" rx="10" fill="#f0fdfa" />
+    </svg>
+  );
+}
+function PreviewCorporate() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="0" y="0" width="24" height="108" fill="#065f46" />
+      <circle cx="12" cy="14" r="7" fill="#10b981" opacity=".35" />
+      <rect x="3" y="25" width="18" height="1.8" rx="1" fill="#10b981" opacity=".7" />
+      {[31,37,43,49,55,61,67,73,79,85,91].map((y,i) => <rect key={y} x="3" y={y} width={i%3===0?18:13} height="1.3" rx="1" fill={i%3===0?"#d1fae5":"#6ee7b7"} opacity={i%3===0?.9:.5} />)}
+      {[15,23,31,39,47,55,63,71,79].map((y,i) => i < 8 && (
+        <g key={y}>
+          <rect x="28" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#065f46":"#ccc"} />
+          {i%3!==0&&<rect x="28" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+function PreviewTimeline() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="8" y="5" width="36" height="5" rx="1" fill="#111" />
+      <rect x="8" y="12" width="24" height="2.5" rx="1" fill="#ea580c" />
+      <rect x="8" y="16" width="50" height="1.2" rx="1" fill="#9ca3af" />
+      <rect x="8" y="19" width="64" height="1" rx="1" fill="#ea580c" />
+      <line x1="20" y1="24" x2="20" y2="100" stroke="#fed7aa" strokeWidth="1.5" />
+      {[25,36,47,58,69,80].map((y,i) => (
+        <g key={y}>
+          <circle cx="20" cy={y+2} r="3" fill={i===0?"#ea580c":"#fed7aa"} />
+          <rect x="27" y={y} width={i%2===0?38:28} height="2" rx="1" fill={i%2===0?"#111":"#ccc"} />
+          {i%2===0&&<rect x="27" y={y+4} width="22" height="1.5" rx="1" fill="#e5e7eb" />}
+          {i%2===0&&<rect x="27" y={y+7} width="30" height="1.2" rx="1" fill="#f5f5f5" />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+function PreviewSlate() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fff" />
+      <rect x="0" y="0" width="80" height="24" fill="#334155" />
+      <rect x="8" y="5" width="38" height="5" rx="1" fill="#f1f5f9" />
+      <rect x="8" y="12" width="26" height="2" rx="1" fill="#94a3b8" />
+      <rect x="8" y="16" width="46" height="1.5" rx="1" fill="#475569" />
+      {[29,37,45,53,61,69,77,85].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width="14" height="1.5" rx="1" fill="#94a3b8" />
+          <rect x="26" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#334155":"#ccc"} />
+          {i%3!==0&&<rect x="26" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <rect x="8" y="90" width="14" height="4" rx="2" fill="#f8fafc" />
+      <rect x="24" y="90" width="14" height="4" rx="2" fill="#f8fafc" />
+    </svg>
+  );
+}
+function PreviewTerra() {
+  return (
+    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
+      <rect width="80" height="108" fill="#fffbf7" />
+      <rect x="22" y="5" width="36" height="5.5" rx="1" fill="#7c2d12" />
+      <rect x="28" y="12" width="24" height="2.5" rx="1" fill="#c2410c" />
+      <rect x="14" y="17" width="52" height="1" rx="1" fill="#fed7aa" />
+      <rect x="8" y="22" width="64" height="6" rx="2" fill="#fff7ed" />
+      <rect x="10" y="24" width="50" height="1.5" rx="1" fill="#fed7aa" />
+      {[32,39,46,53,60,68,76,84].map((y,i) => i < 7 && (
+        <g key={y}>
+          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#7c2d12":"#d1d5db"} opacity={i%3===0?.9:1} />
+          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
+        </g>
+      ))}
+      <rect x="8" y="90" width="14" height="4" rx="2" fill="#fff7ed" />
+      <rect x="24" y="90" width="14" height="4" rx="2" fill="#fff7ed" />
+    </svg>
+  );
+}
+
 const TEMPLATE_PREVIEWS: Record<string, () => JSX.Element> = {
   modern: PreviewModern, classic: PreviewClassic, creative: PreviewCreative,
   executive: PreviewExecutive, minimal: PreviewMinimal, elegant: PreviewElegant,
   bold: PreviewBold, compact: PreviewCompact,
+  swiss: PreviewSwiss, nordic: PreviewNordic, corporate: PreviewCorporate,
+  timeline: PreviewTimeline, slate: PreviewSlate, terra: PreviewTerra,
 };
 
 const TEMPLATES = [
-  { id: "modern" as const, name: "Modern", descKey: "wizard.template.modernDesc" },
-  { id: "classic" as const, name: "Classic", descKey: "wizard.template.classicDesc" },
-  { id: "creative" as const, name: "Creative", descKey: "wizard.template.creativeDesc" },
+  { id: "modern" as const,    name: "Modern",    descKey: "wizard.template.modernDesc" },
+  { id: "classic" as const,   name: "Classic",   descKey: "wizard.template.classicDesc" },
+  { id: "creative" as const,  name: "Creative",  descKey: "wizard.template.creativeDesc" },
   { id: "executive" as const, name: "Executive", descKey: "wizard.template.executiveDesc" },
-  { id: "minimal" as const, name: "Minimal", descKey: "wizard.template.minimalDesc" },
-  { id: "elegant" as const, name: "Elegant", descKey: "wizard.template.elegantDesc" },
-  { id: "bold" as const, name: "Bold", descKey: "wizard.template.boldDesc" },
-  { id: "compact" as const, name: "Compact", descKey: "wizard.template.compactDesc" },
+  { id: "minimal" as const,   name: "Minimal",   descKey: "wizard.template.minimalDesc" },
+  { id: "elegant" as const,   name: "Elegant",   descKey: "wizard.template.elegantDesc" },
+  { id: "bold" as const,      name: "Bold",      descKey: "wizard.template.boldDesc" },
+  { id: "compact" as const,   name: "Compact",   descKey: "wizard.template.compactDesc" },
+  { id: "swiss" as const,     name: "Swiss",     descKey: "wizard.template.swissDesc" },
+  { id: "nordic" as const,    name: "Nordic",    descKey: "wizard.template.nordicDesc" },
+  { id: "corporate" as const, name: "Corporate", descKey: "wizard.template.corporateDesc" },
+  { id: "timeline" as const,  name: "Timeline",  descKey: "wizard.template.timelineDesc" },
+  { id: "slate" as const,     name: "Slate",     descKey: "wizard.template.slateDesc" },
+  { id: "terra" as const,     name: "Terra",     descKey: "wizard.template.terraDesc" },
 ];
 
 function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: TemplateId) => void }) {
