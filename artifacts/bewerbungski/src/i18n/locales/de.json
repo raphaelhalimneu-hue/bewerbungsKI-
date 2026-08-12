@@ -107,7 +107,13 @@
     "downloadCv": "⬇ Lebenslauf (PDF)",
     "downloadLetter": "⬇ Anschreiben (PDF)",
     "editLetterHint": "✏️ Direkt bearbeiten — Änderungen werden ins PDF & DOCX übernommen",
-    "editCvHint": "✏️ Klicke zum Bearbeiten"
+    "editCvHint": "✏️ Klicke zum Bearbeiten",
+    "ats": {
+      "title": "ATS-Score – Passung zur Stellenanzeige",
+      "keywords": "Keywords",
+      "structure": "Struktur",
+      "missing": "Fehlende Keywords"
+    }
   },
   "wizard": {
     "steps": {
@@ -155,7 +161,10 @@
       "website": "Website",
       "websitePh": "www.beispiel.de",
       "summary": "Kurzprofil",
-      "summaryPh": "2–3 Sätze über dich …"
+      "summaryPh": "2–3 Sätze über dich …",
+      "photoUpload": "Foto hochladen",
+      "photoRemove": "Entfernen",
+      "photoHint": "Optional. Wird bei englischen Bewerbungen automatisch weggelassen."
     },
     "exp": {
       "hint": "📋 Trage ALLE Berufsstationen ein – auch kurze Jobs, Minijobs oder Selbstständigkeit. Lücken von mehr als einem Jahr fallen Personalern sofort auf und müssen erklärt werden.",
@@ -228,7 +237,12 @@
       "modernDesc": "Zweispaltig, farbiger Header",
       "classicDesc": "Zeitlos, diskret, elegant",
       "creativeDesc": "Dunkel, mutig, auffällig",
-      "selected": "✓ Ausgewählt"
+      "selected": "✓ Ausgewählt",
+      "executiveDesc": "Seriös, Navy, seriföse Typo",
+      "minimalDesc": "Reduziert, viel Weißraum",
+      "elegantDesc": "Serifen, warmer Goldton",
+      "boldDesc": "Dunkler Header, markant",
+      "compactDesc": "Platzsparend, mehr Inhalt"
     },
     "gen": {
       "ready": "Bereit zur Generierung",
@@ -257,7 +271,17 @@
     },
     "profileLoaded": "✓ Profil geladen",
     "savedProfileAvailable": "Gespeichertes Profil verfügbar",
-    "loadProfile": "Jetzt laden"
+    "loadProfile": "Jetzt laden",
+    "linkedin": {
+      "button": "Aus LinkedIn importieren",
+      "hint": "Öffne dein LinkedIn-Profil, markiere den gesamten Text (Strg+A bzw. alles auswählen), kopiere ihn und füge ihn hier ein. Die KI übernimmt deine Daten automatisch.",
+      "placeholder": "LinkedIn-Profiltext hier einfügen …",
+      "import": "Importieren",
+      "importing": "Importiere …",
+      "success": "Profil importiert! Bitte prüfe die Angaben.",
+      "error": "Import fehlgeschlagen. Bitte versuche es erneut.",
+      "cancel": "Abbrechen"
+    }
   },
   "notFound": {
     "title": "404 – Seite nicht gefunden",

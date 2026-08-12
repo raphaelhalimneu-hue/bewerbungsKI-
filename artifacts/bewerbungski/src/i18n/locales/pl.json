@@ -107,7 +107,13 @@
     "downloadCv": "⬇ CV (PDF)",
     "downloadLetter": "⬇ List motywacyjny (PDF)",
     "editLetterHint": "✏️ Edytuj — zmiany trafią do PDF i DOCX",
-    "editCvHint": "✏️ Kliknij aby edytować"
+    "editCvHint": "✏️ Kliknij aby edytować",
+    "ats": {
+      "title": "Wynik ATS – dopasowanie do ogłoszenia",
+      "keywords": "Słowa kluczowe",
+      "structure": "Struktura",
+      "missing": "Brakujące słowa kluczowe"
+    }
   },
   "wizard": {
     "steps": {
@@ -155,7 +161,10 @@
       "website": "Strona internetowa",
       "websitePh": "www.beispiel.de",
       "summary": "Krótki profil",
-      "summaryPh": "2–3 zdania o sobie …"
+      "summaryPh": "2–3 zdania o sobie …",
+      "photoUpload": "Dodaj zdjęcie",
+      "photoRemove": "Usuń",
+      "photoHint": "Opcjonalne. W aplikacjach po angielsku pomijane automatycznie."
     },
     "exp": {
       "hint": "📋 Dodaj WSZYSTKIE doświadczenia – w tym krótkie prace, dorywcze lub samozatrudnienie. Luki dłuższe niż rok są natychmiast zauważane przez rekruterów.",
@@ -228,7 +237,12 @@
       "modernDesc": "Dwie kolumny, kolorowy nagłówek",
       "classicDesc": "Ponadczasowy, dyskretny, elegancki",
       "creativeDesc": "Ciemny, odważny, przyciągający wzrok",
-      "selected": "✓ Wybrany"
+      "selected": "✓ Wybrany",
+      "executiveDesc": "Poważny, granatowy, szeryfowa typografia",
+      "minimalDesc": "Oszczędny, dużo bieli",
+      "elegantDesc": "Szeryfy, ciepły złoty ton",
+      "boldDesc": "Ciemny nagłówek, wyrazisty",
+      "compactDesc": "Oszczędza miejsce, więcej treści"
     },
     "gen": {
       "ready": "Gotowe do wygenerowania",
@@ -257,7 +271,17 @@
     },
     "profileLoaded": "✓ Profil załadowany",
     "savedProfileAvailable": "Dostępny zapisany profil",
-    "loadProfile": "Załaduj teraz"
+    "loadProfile": "Załaduj teraz",
+    "linkedin": {
+      "button": "Importuj z LinkedIn",
+      "hint": "Otwórz swój profil LinkedIn, zaznacz cały tekst (Ctrl+A), skopiuj i wklej tutaj. AI automatycznie uzupełni dane.",
+      "placeholder": "Wklej tutaj tekst profilu LinkedIn …",
+      "import": "Importuj",
+      "importing": "Importowanie …",
+      "success": "Profil zaimportowany! Sprawdź dane.",
+      "error": "Import nie powiódł się. Spróbuj ponownie.",
+      "cancel": "Anuluj"
+    }
   },
   "notFound": {
     "title": "404 – Nie znaleziono strony",

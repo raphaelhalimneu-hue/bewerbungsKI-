@@ -107,7 +107,13 @@
     "downloadCv": "⬇ Currículum (PDF)",
     "downloadLetter": "⬇ Carta de presentación (PDF)",
     "editLetterHint": "✏️ Editar directamente — cambios al PDF y DOCX",
-    "editCvHint": "✏️ Haz clic para editar"
+    "editCvHint": "✏️ Haz clic para editar",
+    "ats": {
+      "title": "Puntuación ATS – ajuste con la oferta",
+      "keywords": "Palabras clave",
+      "structure": "Estructura",
+      "missing": "Palabras clave que faltan"
+    }
   },
   "wizard": {
     "steps": {
@@ -155,7 +161,10 @@
       "website": "Sitio web",
       "websitePh": "www.beispiel.de",
       "summary": "Perfil breve",
-      "summaryPh": "2–3 frases sobre ti …"
+      "summaryPh": "2–3 frases sobre ti …",
+      "photoUpload": "Subir foto",
+      "photoRemove": "Quitar",
+      "photoHint": "Opcional. Se omite automáticamente en candidaturas en inglés."
     },
     "exp": {
       "hint": "📋 Añade TODA tu experiencia – incluyendo trabajos cortos, a tiempo parcial o por cuenta propia. Las lagunas de más de un año llaman la atención de los reclutadores.",
@@ -228,7 +237,12 @@
       "modernDesc": "Dos columnas, encabezado con color",
       "classicDesc": "Atemporal, discreto, elegante",
       "creativeDesc": "Oscuro, atrevido, llamativo",
-      "selected": "✓ Seleccionado"
+      "selected": "✓ Seleccionado",
+      "executiveDesc": "Serio, azul marino, tipografía serif",
+      "minimalDesc": "Reducido, mucho espacio en blanco",
+      "elegantDesc": "Serifas, tono dorado cálido",
+      "boldDesc": "Cabecera oscura, llamativo",
+      "compactDesc": "Ahorra espacio, más contenido"
     },
     "gen": {
       "ready": "Listo para generar",
@@ -257,7 +271,17 @@
     },
     "profileLoaded": "✓ Perfil cargado",
     "savedProfileAvailable": "Perfil guardado disponible",
-    "loadProfile": "Cargar ahora"
+    "loadProfile": "Cargar ahora",
+    "linkedin": {
+      "button": "Importar desde LinkedIn",
+      "hint": "Abre tu perfil de LinkedIn, selecciona todo el texto (Ctrl+A), cópialo y pégalo aquí. La IA rellenará tus datos automáticamente.",
+      "placeholder": "Pega aquí el texto de tu perfil de LinkedIn …",
+      "import": "Importar",
+      "importing": "Importando …",
+      "success": "¡Perfil importado! Revisa los datos.",
+      "error": "Error al importar. Inténtalo de nuevo.",
+      "cancel": "Cancelar"
+    }
   },
   "notFound": {
     "title": "404 – Página no encontrada",

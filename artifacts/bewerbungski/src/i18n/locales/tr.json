@@ -107,7 +107,13 @@
     "downloadCv": "⬇ Özgeçmiş (PDF)",
     "downloadLetter": "⬇ Ön yazı (PDF)",
     "editLetterHint": "✏️ Doğrudan düzenle — PDF ve DOCX'e yansır",
-    "editCvHint": "✏️ Düzenlemek için tıkla"
+    "editCvHint": "✏️ Düzenlemek için tıkla",
+    "ats": {
+      "title": "ATS puanı – ilana uygunluk",
+      "keywords": "Anahtar kelimeler",
+      "structure": "Yapı",
+      "missing": "Eksik anahtar kelimeler"
+    }
   },
   "wizard": {
     "steps": {
@@ -155,7 +161,10 @@
       "website": "Web sitesi",
       "websitePh": "www.beispiel.de",
       "summary": "Kısa profil",
-      "summaryPh": "Kendinle ilgili 2–3 cümle …"
+      "summaryPh": "Kendinle ilgili 2–3 cümle …",
+      "photoUpload": "Fotoğraf yükle",
+      "photoRemove": "Kaldır",
+      "photoHint": "İsteğe bağlı. İngilizce başvurularda otomatik olarak çıkarılır."
     },
     "exp": {
       "hint": "📋 Kısa işler, yarı zamanlı veya serbest çalışma dahil TÜM iş geçmişini ekle. Bir yıldan uzun boşluklar işverenler tarafından hemen fark edilir.",
@@ -228,7 +237,12 @@
       "modernDesc": "İki sütunlu, renkli başlık",
       "classicDesc": "Zamansız, sade, zarif",
       "creativeDesc": "Koyu, cesur, dikkat çekici",
-      "selected": "✓ Seçildi"
+      "selected": "✓ Seçildi",
+      "executiveDesc": "Ciddi, lacivert, serifli yazı",
+      "minimalDesc": "Sade, bol beyaz alan",
+      "elegantDesc": "Serifli, sıcak altın tonu",
+      "boldDesc": "Koyu başlık, dikkat çekici",
+      "compactDesc": "Yer tasarrufu, daha çok içerik"
     },
     "gen": {
       "ready": "Oluşturmaya hazır",
@@ -257,7 +271,17 @@
     },
     "profileLoaded": "✓ Profil yüklendi",
     "savedProfileAvailable": "Kaydedilmiş profil mevcut",
-    "loadProfile": "Şimdi yükle"
+    "loadProfile": "Şimdi yükle",
+    "linkedin": {
+      "button": "LinkedIn'den içe aktar",
+      "hint": "LinkedIn profilini aç, tüm metni seç (Ctrl+A), kopyala ve buraya yapıştır. Yapay zekâ verilerini otomatik doldurur.",
+      "placeholder": "LinkedIn profil metnini buraya yapıştır …",
+      "import": "İçe aktar",
+      "importing": "İçe aktarılıyor …",
+      "success": "Profil içe aktarıldı! Lütfen bilgileri kontrol et.",
+      "error": "İçe aktarma başarısız. Lütfen tekrar dene.",
+      "cancel": "İptal"
+    }
   },
   "notFound": {
     "title": "404 – Sayfa bulunamadı",

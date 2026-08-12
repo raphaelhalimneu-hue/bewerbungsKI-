@@ -5,7 +5,8 @@ import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/api-client-react";
-import type { FormData, Experience, Education, Skill, Language } from "../lib/buildCVHTML";
+import type { FormData, Experience, Education, Skill, Language, TemplateId } from "../lib/buildCVHTML";
+import { computeAtsScore } from "../lib/atsScore";
 
 const STEPS = [
   { id: "personal", icon: "👤" },
@@ -17,6 +18,18 @@ const STEPS = [
   { id: "template", icon: "🎨" },
   { id: "generate", icon: "✨" },
 ];
+
+// Visual identity per template — injected into the AI prompt skeleton.
+const TEMPLATE_STYLES: Record<TemplateId, { font: string; accent: string; headerBg: string; headerText: string; subColor: string; chipBg: string; chipText: string; scale: number }> = {
+  modern:    { font: "Helvetica,Arial,sans-serif", accent: "#1f2937", headerBg: "transparent", headerText: "#1f2937", subColor: "#6b7280", chipBg: "#f3f4f6", chipText: "#374151", scale: 1 },
+  classic:   { font: "Georgia,'Times New Roman',serif", accent: "#111827", headerBg: "transparent", headerText: "#111827", subColor: "#4b5563", chipBg: "#f3f4f6", chipText: "#374151", scale: 1 },
+  creative:  { font: "Helvetica,Arial,sans-serif", accent: "#7c3aed", headerBg: "transparent", headerText: "#1f2937", subColor: "#7c3aed", chipBg: "#f5f3ff", chipText: "#5b21b6", scale: 1 },
+  executive: { font: "Georgia,'Times New Roman',serif", accent: "#1e3a8a", headerBg: "transparent", headerText: "#1e3a8a", subColor: "#475569", chipBg: "#eff6ff", chipText: "#1e40af", scale: 1 },
+  minimal:   { font: "Helvetica,Arial,sans-serif", accent: "#9ca3af", headerBg: "transparent", headerText: "#111827", subColor: "#9ca3af", chipBg: "transparent", chipText: "#374151", scale: 1 },
+  elegant:   { font: "Georgia,'Times New Roman',serif", accent: "#92400e", headerBg: "transparent", headerText: "#1f2937", subColor: "#92400e", chipBg: "#fffbeb", chipText: "#92400e", scale: 1 },
+  bold:      { font: "Helvetica,Arial,sans-serif", accent: "#0f172a", headerBg: "#0f172a", headerText: "#ffffff", subColor: "#cbd5e1", chipBg: "#e2e8f0", chipText: "#0f172a", scale: 1 },
+  compact:   { font: "Helvetica,Arial,sans-serif", accent: "#1f2937", headerBg: "transparent", headerText: "#1f2937", subColor: "#6b7280", chipBg: "#f3f4f6", chipText: "#374151", scale: 0.88 },
+};
 
 function blankForm(): FormData {
   return {
@@ -75,7 +88,7 @@ export default function Wizard() {
   function setJobad(key: string, value: string) {
     setForm(f => ({ ...f, jobad: { ...f.jobad, [key]: value } }));
   }
-  function setTemplate(t: "modern" | "classic" | "creative") {
+  function setTemplate(t: TemplateId) {
     setForm(f => ({ ...f, template: t }));
   }
 
@@ -147,6 +160,11 @@ export default function Wizard() {
         uk: { name: "Ukrainisch", locale: "uk-UA", conventions: "Ukrainische Resume-Standards." },
       };
       const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
+      const ts = TEMPLATE_STYLES[form.template] || TEMPLATE_STYLES.modern;
+      const sz = (n: number) => Math.round(n * ts.scale * 10) / 10;
+      const usePhoto = !!form.personal.photo && docLang !== "en";
+      // Never send the base64 photo through the AI prompt — use a placeholder instead.
+      const promptForm = { ...form, personal: { ...form.personal, photo: undefined } };
       const langInstr = docLang === "de" ? "" : ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch). Beachte die landestypischen Konventionen: ${lang.conventions}`;
       const today = new Date().toLocaleDateString(lang.locale, { day: "2-digit", month: "2-digit", year: "numeric" });
       setGenPhase(t("wizard.genCv"));
@@ -154,34 +172,42 @@ export default function Wizard() {
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         systemPrompt: "Du bist ein professioneller Bewerbungsexperte für den deutschsprachigen Markt. Schreibe so, wie ein Mensch seinen eigenen Lebenslauf schreiben würde: schlicht, konkret, ohne Übertreibungen und ohne typische KI-Floskeln (kein 'dynamisch', 'leidenschaftlich', 'stets bestrebt', keine Gedankenstriche als Stilmittel). Antworte nur mit HTML-Inhalt, kein Wrapper, kein Markdown, keine Erklärungen. PFLICHT: Prüfe den zeitlichen Werdegang auf Lücken von mehr als 12 Monaten. Schließe jede solche Lücke mit einem neutralen Eintrag (z.B. 'Berufliche Neuorientierung', 'Selbstständige Tätigkeit', 'Familienphase' oder 'Verschiedene Tätigkeiten') mit dem entsprechenden Zeitraum – erfinde keine Details, bleibe neutral. Füge außerdem immer einen Schulabschluss-Eintrag in der Ausbildungssektion ein, wenn kein Schulabschluss angegeben ist (Platzhalter: 'Schulabschluss — Bitte ergänzen'). Ein lückenloser Lebenslauf ist in Deutschland Pflicht.",
-        userPrompt: `Erstelle professionellen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(form, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). WICHTIG: Prüfe alle Zeiträume auf Lücken > 12 Monate und füge neutrale Einträge ein (z.B. 'Berufliche Neuorientierung 2005–2023'). Schreibe niemals Lücken einfach weg. Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.${langInstr}
+        userPrompt: `Erstelle professionellen Lebenslauf-Inhalt (Sprache: ${lang.name}) als HTML für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}. Sektionen: Profil, Berufserfahrung, Ausbildung, Kenntnisse, Sprachen. Keine Noten angeben (Noten stehen im Zeugnis). WICHTIG: Prüfe alle Zeiträume auf Lücken > 12 Monate und füge neutrale Einträge ein (z.B. 'Berufliche Neuorientierung 2005–2023'). Schreibe niemals Lücken einfach weg. Ganz am Ende: Ort und Datum als Unterschriftszeile. Verwende dabei EXAKT dieses Datum: ${today} — erfinde kein anderes Datum.${langInstr}
 
-DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalte einsetzen/wiederholen, Struktur und Styles nicht verändern)${docLang === "ar" ? ' und setze dir="rtl" auf das äußerste div' : ""}:
+DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalte einsetzen/wiederholen, Struktur und Styles nicht verändern)${docLang === "ar" ? ' und setze dir="rtl" auf das äußerste div' : ""}${usePhoto ? '. WICHTIG: Übernimm den <img>-Tag mit src="__FOTO__" EXAKT unverändert (src nicht ersetzen!)' : ""}:
 
-<div style="font-family:Helvetica,Arial,sans-serif;color:#1f2937;padding:38px 46px 42px;">
-  <div style="text-align:center;padding-bottom:18px;border-bottom:1.5px solid #1f2937;">
-    <div style="font-size:28px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.2;">VORNAME NACHNAME</div>
-    <div style="font-size:13px;color:#6b7280;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>
-    <div style="font-size:11.5px;color:#6b7280;margin-top:10px;">Adresse &nbsp;·&nbsp; Telefon &nbsp;·&nbsp; E-Mail &nbsp;·&nbsp; ggf. Geburtsdatum/-ort</div>
+<div style="font-family:${ts.font};color:#1f2937;padding:${sz(38)}px ${sz(46)}px ${sz(42)}px;">
+  <div style="${ts.headerBg !== "transparent" ? `background:${ts.headerBg};padding:${sz(20)}px ${sz(24)}px;` : `padding-bottom:${sz(18)}px;border-bottom:1.5px solid ${ts.accent};`}${usePhoto ? "display:table;width:100%;" : "text-align:center;"}">
+    ${usePhoto ? `<div style="display:table-cell;width:${sz(96)}px;vertical-align:middle;"><img src="__FOTO__" style="width:${sz(86)}px;height:${sz(108)}px;object-fit:cover;border-radius:5px;" /></div><div style="display:table-cell;vertical-align:middle;text-align:left;padding-left:${sz(18)}px;">` : ""}
+    <div style="font-size:${sz(28)}px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.2;color:${ts.headerText};">VORNAME NACHNAME</div>
+    <div style="font-size:${sz(13)}px;color:${ts.subColor};margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>
+    <div style="font-size:${sz(11.5)}px;color:${ts.subColor};margin-top:10px;">Adresse &nbsp;·&nbsp; Telefon &nbsp;·&nbsp; E-Mail &nbsp;·&nbsp; ggf. Geburtsdatum/-ort</div>
+    ${usePhoto ? "</div>" : ""}
   </div>
-  <div style="font-size:11.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1f2937;border-bottom:1px solid #d1d5db;padding-bottom:5px;margin:24px 0 12px;">SEKTIONSTITEL</div>
-  <p style="margin:0 0 8px;font-size:12.5px;line-height:1.65;">Profiltext …</p>
+  <div style="font-size:${sz(11.5)}px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${ts.accent === "#9ca3af" ? "#111827" : ts.accent};border-bottom:1px solid ${ts.accent === "#9ca3af" ? "#e5e7eb" : "#d1d5db"};padding-bottom:5px;margin:${sz(24)}px 0 ${sz(12)}px;">SEKTIONSTITEL</div>
+  <p style="margin:0 0 8px;font-size:${sz(12.5)}px;line-height:1.65;">Profiltext …</p>
   <!-- Berufserfahrung/Ausbildung: pro Station -->
-  <table style="width:100%;border-collapse:collapse;margin-bottom:12px;"><tr>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:${sz(12)}px;"><tr>
     <td style="vertical-align:top;padding:0;">
-      <div style="font-size:13px;font-weight:700;">Position</div>
-      <div style="font-size:12px;color:#6b7280;">Firma, Ort</div>
-      <ul style="margin:6px 0 0;padding-left:17px;font-size:12px;line-height:1.6;"><li>Tätigkeit/Erfolg</li></ul>
+      <div style="font-size:${sz(13)}px;font-weight:700;">Position</div>
+      <div style="font-size:${sz(12)}px;color:#6b7280;">Firma, Ort</div>
+      <ul style="margin:6px 0 0;padding-left:17px;font-size:${sz(12)}px;line-height:1.6;"><li>Tätigkeit/Erfolg</li></ul>
     </td>
-    <td style="vertical-align:top;white-space:nowrap;text-align:right;font-size:11.5px;color:#6b7280;padding:2px 0 0 14px;">MM/JJJJ – MM/JJJJ</td>
+    <td style="vertical-align:top;white-space:nowrap;text-align:right;font-size:${sz(11.5)}px;color:#6b7280;padding:2px 0 0 14px;">MM/JJJJ – MM/JJJJ</td>
   </tr></table>
   <!-- Kenntnisse: dezente Chips -->
-  <div><span style="display:inline-block;background:#f3f4f6;border-radius:3px;padding:4px 11px;margin:0 6px 6px 0;font-size:11.5px;color:#374151;">Kenntnis</span></div>
+  <div><span style="display:inline-block;background:${ts.chipBg};${ts.chipBg === "transparent" ? "border:1px solid #e5e7eb;" : ""}border-radius:3px;padding:4px 11px;margin:0 6px 6px 0;font-size:${sz(11.5)}px;color:${ts.chipText};">Kenntnis</span></div>
   <!-- Sprachen: eine Zeile pro Sprache -->
-  <div style="font-size:12.5px;margin-bottom:4px;"><strong>Sprache</strong> — Niveau</div>
-  <div style="margin-top:34px;font-size:12.5px;">Ort, den ${today}<br/><span style="color:#6b7280;font-size:11px;">Vorname Nachname</span></div>
+  <div style="font-size:${sz(12.5)}px;margin-bottom:4px;"><strong>Sprache</strong> — Niveau</div>
+  <div style="margin-top:${sz(34)}px;font-size:${sz(12.5)}px;">Ort, den ${today}<br/><span style="color:#6b7280;font-size:${sz(11)}px;">Vorname Nachname</span></div>
 </div>`,
       } });
+
+      let cvHtml = cvRes.result;
+      if (usePhoto && form.personal.photo) {
+        cvHtml = cvHtml.replace(/__FOTO__/g, form.personal.photo);
+      }
+      const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
       if (form.jobad.title || form.jobad.description) {
@@ -198,8 +224,8 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
       await createMutation.mutateAsync({ data: {
         name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
         template: form.template,
-        profileData: form as unknown as Record<string, unknown>,
-        cvHtml: cvRes.result,
+        profileData: { ...form, atsScore: ats } as unknown as Record<string, unknown>,
+        cvHtml,
         coverLetter: letterText,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
@@ -281,7 +307,7 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
               </button>
             </div>
           )}
-          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} />}
+          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
           {step === 1 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
           {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
           {step === 3 && <StepSkills items={form.skills} skillInput={skillInput} setSkillInput={setSkillInput} skillLevel={skillLevel} setSkillLevel={setSkillLevel} addSkill={addSkill} delSkill={delSkill} />}
@@ -303,11 +329,107 @@ DESIGN — halte dich EXAKT an dieses HTML-Gerüst mit Inline-Styles (nur Inhalt
   );
 }
 
-function StepPersonal({ form, setPersonal }: { form: FormData; setPersonal: (k: string, v: string) => void }) {
+function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }: {
+  form: FormData; setPersonal: (k: string, v: string) => void;
+  applyImport: (d: Partial<FormData>) => void;
+  user: any; setShowAuthModal: (v: boolean) => void;
+}) {
   const p = form.personal;
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [liOpen, setLiOpen] = useState(false);
+  const [liText, setLiText] = useState("");
+  const [liLoading, setLiLoading] = useState(false);
+
+  function handlePhoto(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+      toast({ title: t("wizard.linkedin.error"), variant: "destructive" });
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        // Resize to fit 300×400 (both dimensions bounded), JPEG — keeps base64 small
+        const ratio = Math.min(1, 300 / img.width, 400 / img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * ratio));
+        canvas.height = Math.max(1, Math.round(img.height * ratio));
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setPersonal("photo", canvas.toDataURL("image/jpeg", 0.85));
+      } catch {
+        toast({ title: t("wizard.linkedin.error"), variant: "destructive" });
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast({ title: t("wizard.linkedin.error"), variant: "destructive" });
+    };
+    img.src = url;
+  }
+
+  async function importLinkedIn() {
+    if (!user) { setShowAuthModal(true); return; }
+    if (liText.trim().length < 50) return;
+    setLiLoading(true);
+    try {
+      const res = await customFetch<{ data: Partial<FormData> }>("/api/parse-linkedin", {
+        method: "POST",
+        body: JSON.stringify({ text: liText }),
+      });
+      applyImport(res.data);
+      setLiOpen(false); setLiText("");
+      toast({ title: t("wizard.linkedin.success") });
+    } catch {
+      toast({ title: t("wizard.linkedin.error"), variant: "destructive" });
+    } finally { setLiLoading(false); }
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {/* LinkedIn import */}
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button type="button" className="btn btn-s" style={{ fontSize: 13 }} onClick={() => setLiOpen(o => !o)}>
+          🔗 {t("wizard.linkedin.button")}
+        </button>
+      </div>
+      {liOpen && (
+        <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
+          <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10, lineHeight: 1.5 }}>{t("wizard.linkedin.hint")}</div>
+          <textarea className="textarea" value={liText} onChange={e => setLiText(e.target.value)} placeholder={t("wizard.linkedin.placeholder")} style={{ minHeight: 130, marginBottom: 10 }} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" className="btn btn-p btn-sm" onClick={importLinkedIn} disabled={liLoading || liText.trim().length < 50}>
+              {liLoading ? <><span className="spin" /> {t("wizard.linkedin.importing")}</> : t("wizard.linkedin.import")}
+            </button>
+            <button type="button" className="btn btn-g btn-sm" onClick={() => setLiOpen(false)}>{t("wizard.linkedin.cancel")}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Photo upload */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {p.photo ? (
+          <img src={p.photo} alt="" style={{ width: 64, height: 80, objectFit: "cover", borderRadius: 6, border: "1px solid var(--border)" }} />
+        ) : (
+          <div style={{ width: 64, height: 80, borderRadius: 6, border: "1.5px dashed var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "var(--muted)" }}>📷</div>
+        )}
+        <div>
+          <label className="btn btn-s btn-sm" style={{ cursor: "pointer", display: "inline-block" }}>
+            {t("wizard.personal.photoUpload")}
+            <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(e.target.files?.[0])} />
+          </label>
+          {p.photo && (
+            <button type="button" className="btn btn-g btn-sm" style={{ marginInlineStart: 8 }} onClick={() => setPersonal("photo", "")}>
+              {t("wizard.personal.photoRemove")}
+            </button>
+          )}
+          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>{t("wizard.personal.photoHint")}</div>
+        </div>
+      </div>
+
       <div className="grid2">
         <div className="field"><label className="label">{t("wizard.personal.firstName")}</label><input className="input" value={p.firstName} onChange={e => setPersonal("firstName", e.target.value)} placeholder={t("wizard.personal.firstNamePh")} /></div>
         <div className="field"><label className="label">{t("wizard.personal.lastName")}</label><input className="input" value={p.lastName} onChange={e => setPersonal("lastName", e.target.value)} placeholder={t("wizard.personal.lastNamePh")} /></div>
@@ -566,9 +688,14 @@ const TEMPLATES = [
   { id: "modern" as const, name: "Modern", descKey: "wizard.template.modernDesc", e: "🔵" },
   { id: "classic" as const, name: "Classic", descKey: "wizard.template.classicDesc", e: "⚫" },
   { id: "creative" as const, name: "Creative", descKey: "wizard.template.creativeDesc", e: "🎨" },
+  { id: "executive" as const, name: "Executive", descKey: "wizard.template.executiveDesc", e: "💼" },
+  { id: "minimal" as const, name: "Minimal", descKey: "wizard.template.minimalDesc", e: "◻️" },
+  { id: "elegant" as const, name: "Elegant", descKey: "wizard.template.elegantDesc", e: "✒️" },
+  { id: "bold" as const, name: "Bold", descKey: "wizard.template.boldDesc", e: "⬛" },
+  { id: "compact" as const, name: "Compact", descKey: "wizard.template.compactDesc", e: "📄" },
 ];
 
-function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: "modern" | "classic" | "creative") => void }) {
+function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: TemplateId) => void }) {
   const { t } = useTranslation();
   return (
     <div>
@@ -600,7 +727,7 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
 }) {
   const hasName = !!form.personal.firstName;
   const { t } = useTranslation();
-  const templateName = form.template === "modern" ? "Modern" : form.template === "classic" ? "Classic" : "Creative";
+  const templateName = form.template.charAt(0).toUpperCase() + form.template.slice(1);
   return (
     <div style={{ padding: "24px 0" }}>
       <div style={{ textAlign: "center", marginBottom: 24 }}>

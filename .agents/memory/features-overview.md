@@ -32,3 +32,8 @@ description: Durable decisions for the 3 major features added in Aug 2026
 
 ## Windows
 - No separate app needed: bewerbungski.com works in any Windows browser (Chrome, Edge, Firefox)
+
+## Aug 12, 2026
+- 8 CV templates (modern/classic/creative/executive/minimal/elegant/bold/compact) via TEMPLATE_STYLES prompt-skeleton parameterization; photo upload (base64, client-resized 300x400, __FOTO__ placeholder, omitted for EN docs).
+- ATS score computed client-side (keyword 60% + sections 40%) in profileData.atsScore; list route exposes ats_score via jsonb extraction.
+- LinkedIn text-paste import: POST /api/parse-linkedin (Claude→JSON, server-side normalization, 5/15min per-user in-memory rate limit).

@@ -163,6 +163,31 @@ export default function Preview() {
           </div>
         )}
 
+        {doc && (doc as any).profile_data?.atsScore?.score != null && (() => {
+          const ats = (doc as any).profile_data.atsScore;
+          const col = ats.score >= 70 ? "#059669" : ats.score >= 45 ? "#d97706" : "#dc2626";
+          return (
+            <div className="card" style={{ marginBottom: 24, display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ width: 68, height: 68, borderRadius: "50%", border: `5px solid ${col}`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 19, color: col, flexShrink: 0 }}>
+                {ats.score}%
+              </div>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>🎯 {t("preview.ats.title")}</div>
+                <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.55 }}>
+                  {t("preview.ats.keywords")}: <b style={{ color: "var(--text2)" }}>{ats.keywordScore}%</b> · {t("preview.ats.structure")}: <b style={{ color: "var(--text2)" }}>{ats.sectionScore}%</b>
+                  {ats.missing?.length > 0 && (
+                    <div style={{ marginTop: 6 }}>
+                      {t("preview.ats.missing")}: {ats.missing.map((m: string) => (
+                        <span key={m} style={{ display: "inline-block", background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 12, padding: "1px 9px", margin: "2px 4px 0 0", fontSize: 12 }}>{m}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {doc && (
           <>
             {/* CV — contentEditable so user can fine-tune before PDF export */}

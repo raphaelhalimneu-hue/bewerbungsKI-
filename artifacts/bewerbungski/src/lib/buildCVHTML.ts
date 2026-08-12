@@ -10,7 +10,10 @@ export type PersonalData = {
   linkedin: string;
   website: string;
   summary: string;
+  photo?: string; // base64 data URL, optional
 };
+
+export type TemplateId = "modern" | "classic" | "creative" | "executive" | "minimal" | "elegant" | "bold" | "compact";
 
 export type Experience = {
   company: string;
@@ -49,7 +52,7 @@ export type FormData = {
   skills: Skill[];
   languages: Language[];
   jobad: { title: string; company: string; address: string; description: string };
-  template: "modern" | "classic" | "creative";
+  template: TemplateId;
 };
 
 export function buildCVHTML(profile: FormData, template: string): string {

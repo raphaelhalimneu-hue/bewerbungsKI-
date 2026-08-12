@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router = Router();
@@ -15,6 +15,7 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
         job_title: documentsTable.jobTitle,
         job_company: documentsTable.jobCompany,
         created_at: documentsTable.createdAt,
+        ats_score: sql`${documentsTable.profileData}->'atsScore'`,
       })
       .from(documentsTable)
       .where(eq(documentsTable.userId, req.userId!))

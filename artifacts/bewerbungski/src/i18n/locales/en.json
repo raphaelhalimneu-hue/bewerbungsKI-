@@ -107,7 +107,13 @@
     "downloadCv": "⬇ CV (PDF)",
     "downloadLetter": "⬇ Cover letter (PDF)",
     "editLetterHint": "✏️ Edit directly — changes apply to PDF & DOCX",
-    "editCvHint": "✏️ Click to edit"
+    "editCvHint": "✏️ Click to edit",
+    "ats": {
+      "title": "ATS score – match with the job ad",
+      "keywords": "Keywords",
+      "structure": "Structure",
+      "missing": "Missing keywords"
+    }
   },
   "wizard": {
     "steps": {
@@ -155,7 +161,10 @@
       "website": "Website",
       "websitePh": "www.beispiel.de",
       "summary": "Short profile",
-      "summaryPh": "2–3 sentences about you …"
+      "summaryPh": "2–3 sentences about you …",
+      "photoUpload": "Upload photo",
+      "photoRemove": "Remove",
+      "photoHint": "Optional. Automatically omitted for English applications."
     },
     "exp": {
       "hint": "📋 Add ALL work history – including short jobs, part-time work, or self-employment. Gaps of more than one year are immediately noticed by recruiters.",
@@ -228,7 +237,12 @@
       "modernDesc": "Two columns, colored header",
       "classicDesc": "Timeless, discreet, elegant",
       "creativeDesc": "Dark, bold, eye-catching",
-      "selected": "✓ Selected"
+      "selected": "✓ Selected",
+      "executiveDesc": "Serious, navy, serif type",
+      "minimalDesc": "Reduced, lots of white space",
+      "elegantDesc": "Serifs, warm gold tone",
+      "boldDesc": "Dark header, striking",
+      "compactDesc": "Space-saving, more content"
     },
     "gen": {
       "ready": "Ready to generate",
@@ -257,7 +271,17 @@
     },
     "profileLoaded": "✓ Profile loaded",
     "savedProfileAvailable": "Saved profile available",
-    "loadProfile": "Load now"
+    "loadProfile": "Load now",
+    "linkedin": {
+      "button": "Import from LinkedIn",
+      "hint": "Open your LinkedIn profile, select all text (Ctrl+A), copy it and paste it here. The AI will fill in your data automatically.",
+      "placeholder": "Paste your LinkedIn profile text here …",
+      "import": "Import",
+      "importing": "Importing …",
+      "success": "Profile imported! Please review the details.",
+      "error": "Import failed. Please try again.",
+      "cancel": "Cancel"
+    }
   },
   "notFound": {
     "title": "404 – Page not found",

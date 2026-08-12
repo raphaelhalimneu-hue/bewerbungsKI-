@@ -24,7 +24,8 @@ export default function Documents() {
     }
   }
 
-  const templateIcon = (tpl: string) => tpl === "classic" ? "⚫" : tpl === "creative" ? "🎨" : "🔵";
+  const templateIcon = (tpl: string) => ({ classic: "⚫", creative: "🎨", executive: "💼", minimal: "◻️", elegant: "✒️", bold: "⬛", compact: "📄" } as Record<string, string>)[tpl] || "🔵";
+  const atsColor = (s: number) => s >= 70 ? "#059669" : s >= 45 ? "#d97706" : "#dc2626";
 
   return (
     <Layout>
@@ -59,6 +60,11 @@ export default function Documents() {
                     <span>📅 {new Date(doc.created_at).toLocaleDateString(i18n.resolvedLanguage || "de")}</span>
                     <span>🎨 {doc.template || "Modern"}</span>
                     {doc.job_title && <span>💼 {doc.job_title}</span>}
+                    {doc.ats_score?.score != null && (
+                      <span style={{ color: atsColor(doc.ats_score.score), fontWeight: 700 }}>
+                        🎯 ATS {doc.ats_score.score}%
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
