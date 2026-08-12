@@ -13,6 +13,7 @@ export default function Preview() {
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
   const cvRef = useRef<HTMLDivElement>(null);
+  const cvWrapRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState<"cv" | "letter" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
 
@@ -26,6 +27,26 @@ export default function Preview() {
     if (cvRef.current && (doc as any)?.cv_html) {
       cvRef.current.innerHTML = (doc as any).cv_html;
     }
+  }, [(doc as any)?.id]);
+
+  // Scale cv-sheet to fit narrow mobile viewports
+  useEffect(() => {
+    function applyScale() {
+      if (!cvWrapRef.current) return;
+      const available = cvWrapRef.current.clientWidth - 24; // minus padding
+      const cvWidth = 760;
+      const scale = available < cvWidth ? available / cvWidth : 1;
+      cvWrapRef.current.style.setProperty("--cv-scale", String(scale));
+      // also shrink the wrap height to match scaled content
+      if (cvRef.current) {
+        cvWrapRef.current.style.minHeight = scale < 1
+          ? `${cvRef.current.offsetHeight * scale + 24}px`
+          : "";
+      }
+    }
+    applyScale();
+    window.addEventListener("resize", applyScale);
+    return () => window.removeEventListener("resize", applyScale);
   }, [(doc as any)?.id]);
 
   function baseFileName(suffix: string) {
@@ -198,7 +219,7 @@ export default function Preview() {
                   {t("preview.editCvHint")}
                 </span>
               </div>
-              <div className="cv-wrap">
+              <div className="cv-wrap" ref={cvWrapRef}>
                 <div
                   ref={cvRef}
                   className="cv-sheet"
