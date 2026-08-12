@@ -187,7 +187,8 @@
       "languages": "Idiomas",
       "jobad": "Oferta de empleo",
       "template": "Plantilla",
-      "generate": "Generar"
+      "generate": "Generar",
+      "school": "Estudios escolares"
     },
     "stepCount": "Paso {{current}} / {{total}}",
     "back": "← Atrás",
@@ -354,7 +355,8 @@
       "city": "Ciudad",
       "cityPh": "p. ej. Madrid",
       "year": "Año de graduación",
-      "yearPh": "p. ej. 2015"
+      "yearPh": "p. ej. 2015",
+      "hint": "Introduce aquí tu titulación escolar más alta."
     }
   },
   "notFound": {

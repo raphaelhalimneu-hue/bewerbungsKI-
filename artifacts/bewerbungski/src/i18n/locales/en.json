@@ -187,7 +187,8 @@
       "languages": "Languages",
       "jobad": "Job posting",
       "template": "Template",
-      "generate": "Generate"
+      "generate": "Generate",
+      "school": "School"
     },
     "stepCount": "Step {{current}} / {{total}}",
     "back": "← Back",
@@ -354,7 +355,8 @@
       "city": "City",
       "cityPh": "e.g. London",
       "year": "Year of graduation",
-      "yearPh": "e.g. 2015"
+      "yearPh": "e.g. 2015",
+      "hint": "Enter your highest school leaving qualification here."
     }
   },
   "notFound": {

@@ -187,7 +187,8 @@
       "languages": "Diller",
       "jobad": "İş ilanı",
       "template": "Şablon",
-      "generate": "Oluştur"
+      "generate": "Oluştur",
+      "school": "Okul"
     },
     "stepCount": "Adım {{current}} / {{total}}",
     "back": "← Geri",
@@ -354,7 +355,8 @@
       "city": "Şehir",
       "cityPh": "örn. İstanbul",
       "year": "Mezuniyet yılı",
-      "yearPh": "örn. 2015"
+      "yearPh": "örn. 2015",
+      "hint": "En yüksek okul diplomanı buraya gir."
     }
   },
   "notFound": {

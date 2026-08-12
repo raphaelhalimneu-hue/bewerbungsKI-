@@ -10,14 +10,15 @@ import { renderCVContent } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
 
 const STEPS = [
-  { id: "personal", icon: "👤" },
-  { id: "education", icon: "🎓" },
+  { id: "personal",   icon: "👤" },
+  { id: "school",     icon: "🏫" },
+  { id: "education",  icon: "🎓" },
   { id: "experience", icon: "💼" },
-  { id: "skills", icon: "⚡" },
-  { id: "languages", icon: "🌍" },
-  { id: "jobad", icon: "📋" },
-  { id: "template", icon: "🎨" },
-  { id: "generate", icon: "✨" },
+  { id: "skills",     icon: "⚡" },
+  { id: "languages",  icon: "🌍" },
+  { id: "jobad",      icon: "📋" },
+  { id: "template",   icon: "🎨" },
+  { id: "generate",   icon: "✨" },
 ];
 
 // Visual identity per template — injected into the AI prompt skeleton.
@@ -356,13 +357,14 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
             </div>
           )}
           {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
-          {step === 1 && <StepEducation school={form.school} setSchool={setSchool} items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
-          {step === 2 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
-          {step === 3 && <StepSkills items={form.skills} skillInput={skillInput} setSkillInput={setSkillInput} skillLevel={skillLevel} setSkillLevel={setSkillLevel} addSkill={addSkill} delSkill={delSkill} />}
-          {step === 4 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
-          {step === 5 && <StepJobAd form={form} setJobad={setJobad} />}
-          {step === 6 && <StepTemplate form={form} setTemplate={setTemplate} />}
-          {step === 7 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} />}
+          {step === 1 && <StepSchool school={form.school} setSchool={setSchool} />}
+          {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
+          {step === 3 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
+          {step === 4 && <StepSkills items={form.skills} skillInput={skillInput} setSkillInput={setSkillInput} skillLevel={skillLevel} setSkillLevel={setSkillLevel} addSkill={addSkill} delSkill={delSkill} />}
+          {step === 5 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
+          {step === 6 && <StepJobAd form={form} setJobad={setJobad} />}
+          {step === 7 && <StepTemplate form={form} setTemplate={setTemplate} />}
+          {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} />}
         </div>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
@@ -605,49 +607,53 @@ function StepExperience({ items, addExp, updateExp, delExp }: { items: Experienc
   );
 }
 
-function StepEducation({ school, setSchool, items, addEdu, updateEdu, delEdu }: {
+function StepSchool({ school, setSchool }: {
   school: import("../lib/buildCVHTML").School;
   setSchool: (k: string, v: string) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ fontSize: 13, color: "var(--muted)", background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
+        🏫 {t("wizard.school.hint")}
+      </div>
+      <div className="grid2" style={{ gap: 10 }}>
+        <div className="field">
+          <label className="label">{t("wizard.school.type")}</label>
+          <input className="input" value={school.type} onChange={ev => setSchool("type", ev.target.value)} placeholder={t("wizard.school.typePh")} list="school-types" />
+          <datalist id="school-types">
+            {["Abitur", "Fachabitur", "Realschulabschluss", "Mittlere Reife", "Hauptschulabschluss", "Berufsschule", "High School Diploma", "Baccalauréat"].map(o => <option key={o} value={o} />)}
+          </datalist>
+        </div>
+        <div className="field">
+          <label className="label">{t("wizard.school.year")}</label>
+          <input className="input" value={school.year} onChange={ev => setSchool("year", ev.target.value)} placeholder={t("wizard.school.yearPh")} maxLength={4} inputMode="numeric" />
+        </div>
+      </div>
+      <div className="grid2" style={{ gap: 10 }}>
+        <div className="field">
+          <label className="label">{t("wizard.school.name")}</label>
+          <input className="input" value={school.name} onChange={ev => setSchool("name", ev.target.value)} placeholder={t("wizard.school.namePh")} />
+        </div>
+        <div className="field">
+          <label className="label">{t("wizard.school.city")}</label>
+          <input className="input" value={school.city} onChange={ev => setSchool("city", ev.target.value)} placeholder={t("wizard.school.cityPh")} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepEducation({ items, addEdu, updateEdu, delEdu }: {
   items: Education[]; addEdu: () => void; updateEdu: (i: number, k: string, v: string) => void; delEdu: (i: number) => void;
 }) {
   const { t } = useTranslation();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {/* ── Schulabschluss (fixed block) ── */}
-      <div style={{ border: "2px solid var(--brand)", borderRadius: 12, padding: 18, background: "var(--brand-l)" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--brand)", marginBottom: 14 }}>
-          🎓 {t("wizard.school.title")}
-        </div>
-        <div className="grid2" style={{ gap: 10, marginBottom: 10 }}>
-          <div className="field">
-            <label className="label">{t("wizard.school.type")}</label>
-            <input className="input" value={school.type} onChange={ev => setSchool("type", ev.target.value)} placeholder={t("wizard.school.typePh")} list="school-types" />
-            <datalist id="school-types">
-              {["Abitur", "Fachabitur", "Realschulabschluss", "Mittlere Reife", "Hauptschulabschluss", "Berufsschule", "High School Diploma", "Baccalauréat"].map(o => <option key={o} value={o} />)}
-            </datalist>
-          </div>
-          <div className="field">
-            <label className="label">{t("wizard.school.year")}</label>
-            <input className="input" value={school.year} onChange={ev => setSchool("year", ev.target.value)} placeholder={t("wizard.school.yearPh")} maxLength={4} inputMode="numeric" />
-          </div>
-        </div>
-        <div className="grid2" style={{ gap: 10 }}>
-          <div className="field">
-            <label className="label">{t("wizard.school.name")}</label>
-            <input className="input" value={school.name} onChange={ev => setSchool("name", ev.target.value)} placeholder={t("wizard.school.namePh")} />
-          </div>
-          <div className="field">
-            <label className="label">{t("wizard.school.city")}</label>
-            <input className="input" value={school.city} onChange={ev => setSchool("city", ev.target.value)} placeholder={t("wizard.school.cityPh")} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Ausbildung / Studium ── */}
       <div style={{ fontSize: 13, color: "var(--muted)", background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
         {t("wizard.edu.hint")}
       </div>
-      {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "12px 0", fontSize: 14 }}>{t("wizard.edu.empty")}</div>}
+      {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "24px 0", fontSize: 14 }}>{t("wizard.edu.empty")}</div>}
       {items.map((e, i) => (
         <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 18, position: "relative" }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--muted)", marginBottom: 12 }}>{t("wizard.edu.item", { num: i + 1 })}</div>

@@ -187,7 +187,8 @@
       "languages": "Języki",
       "jobad": "Ogłoszenie o pracę",
       "template": "Szablon",
-      "generate": "Generuj"
+      "generate": "Generuj",
+      "school": "Szkoła"
     },
     "stepCount": "Krok {{current}} / {{total}}",
     "back": "← Wstecz",
@@ -354,7 +355,8 @@
       "city": "Miasto",
       "cityPh": "np. Warszawa",
       "year": "Rok ukończenia",
-      "yearPh": "np. 2015"
+      "yearPh": "np. 2015",
+      "hint": "Wpisz tutaj swoje najwyższe świadectwo szkolne."
     }
   },
   "notFound": {

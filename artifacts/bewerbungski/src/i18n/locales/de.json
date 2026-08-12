@@ -187,7 +187,8 @@
       "languages": "Sprachen",
       "jobad": "Stellenanzeige",
       "template": "Vorlage",
-      "generate": "Generieren"
+      "generate": "Generieren",
+      "school": "Schulabschluss"
     },
     "stepCount": "Schritt {{current}} / {{total}}",
     "back": "← Zurück",
@@ -354,7 +355,8 @@
       "city": "Stadt",
       "cityPh": "z.B. Berlin",
       "year": "Abschlussjahr",
-      "yearPh": "z.B. 2015"
+      "yearPh": "z.B. 2015",
+      "hint": "Trage hier deinen höchsten Schulabschluss ein."
     }
   },
   "notFound": {
