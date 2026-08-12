@@ -56,3 +56,17 @@ uri = "file://attached_assets/Olena_Kovalenko_Lebenslauf_RU.docx"
 type = "word_document"
 title = "Olena Kovalenko – Lebenslauf (Russisch)"
 description = "Profil 3: Russischsprachig"
+
+[[outputs]]
+id = "9UZIqSi53igv-qpWlhVg2"
+uri = "file://attached_assets/Max_Mustermann_Lebenslauf.docx"
+type = "word_document"
+title = "Max Mustermann – Lebenslauf.docx"
+description = "Test-Lebenslauf als Word-Datei (.docx)"
+
+[[outputs]]
+id = "09K3nnMtDTcJX1Q2SJGXP"
+uri = "file://attached_assets/Max_Mustermann_Anschreiben.docx"
+type = "word_document"
+title = "Max Mustermann – Anschreiben.docx"
+description = "Test-Anschreiben als Word-Datei (.docx)"
