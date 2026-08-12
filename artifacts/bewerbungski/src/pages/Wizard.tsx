@@ -52,6 +52,7 @@ export default function Wizard() {
   const [docLang, setDocLang] = useState("de");
   const [motivation, setMotivation] = useState("");
   const [achievement, setAchievement] = useState("");
+  const [tone, setTone] = useState<"formell" | "modern" | "kreativ">("formell");
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
@@ -77,7 +78,13 @@ export default function Wizard() {
     try {
       const d = await customFetch<{ savedProfile: Record<string, unknown> | null }>("/api/saved-profile");
       if (d.savedProfile) {
-        setForm(f => ({ ...(d.savedProfile as any), jobad: f.jobad, template: f.template }));
+        const saved = d.savedProfile as any;
+        setForm(f => ({
+          ...saved,
+          school: saved.school ?? { type: "", name: "", city: "", year: "" },
+          jobad: f.jobad,
+          template: f.template,
+        }));
         setHasSavedProfile(false);
         toast({ title: t("wizard.profileLoaded") });
       }
@@ -230,22 +237,28 @@ PFLICHTREGELN:
           type: "letter",
           systemPrompt: `Du bist Experte für Bewerbungsanschreiben. Schreibe wie ein echter, gut ausgebildeter Mensch — nicht wie eine KI.
 
-STIL:
-- Natürliche, unterschiedlich lange Sätze. Keine Schachtelsätze.
-- Konkrete Formulierungen statt Floskeln. Kein „dynamisch", „leidenschaftlich", „stets", „zeitnah", „ich bin überzeugt, dass ich", „ich freue mich sehr".
-- Keine Aufzählungen, keine Gedankenstriche als Stilmittel.
+TON: ${tone === "formell"
+  ? "FORMELL - klassisches Geschaeftsdeutsch, 'Sehr geehrte Damen und Herren', serioese Sprache, keine persoenlichen Anekdoten. Praezise, sachlich, professionell."
+  : tone === "modern"
+  ? "MODERN - klar, direkt, auf den Punkt. Kein unnoetiges Fuellwort. 'Guten Tag' als Anrede ist erlaubt. Aktive Sprache, kurze Saetze, kein Fachjargon ohne Grund. Wirkt kompetent ohne steif zu klingen."
+  : "KREATIV - beginne mit einem persoenlichen, konkreten Einstieg (einer Beobachtung, einer kurzen Anekdote oder einem unerwarteten Gedanken zur Stelle/zum Unternehmen). Erzaehlerisch, individuell, mit Persoenlichkeit - aber immer noch professionell. Kein Klamauk."
+}
+
+REGELN FÜR ALLE TÖNE:
+- Keine KI-Phrasen: kein „dynamisch", „leidenschaftlich", „stets", „zeitnah", „ich bin überzeugt, dass ich", „ich freue mich sehr".
+- Keine Aufzählungen mit Gedankenstrichen im Fließtext.
 - Aktive Sprache: „Ich entwickelte" statt „Es wurde entwickelt".
-- Eröffnung NICHT mit „Hiermit bewerbe ich mich" — stattdessen direkt mit einem konkreten Bezug zur Stelle oder zum Unternehmen beginnen.
+- Eröffnung NICHT mit „Hiermit bewerbe ich mich".
 
 STRUKTUR (DIN 5008):
 1. Empfängeradresse des Unternehmens (linke Seite)
-2. Datum-Zeile (rechte Seite oder unter der Adresse)
-3. Betreffzeile (fett, ohne „Betreff:")
-4. Anrede (z.B. „Sehr geehrte Damen und Herren," oder personalisiert falls bekannt)
-5. Einleitungsabsatz: Bezug zur Stelle / zum Unternehmen
-6. Hauptteil: Relevante Erfahrung + konkreter Mehrwert für das Unternehmen
-7. Motivationsabsatz: Warum genau dieses Unternehmen
-8. Schluss: Einladung zum Gespräch, Verfügbarkeit, keine Floskeln
+2. Datum-Zeile
+3. Betreffzeile (ohne „Betreff:")
+4. Anrede
+5. Einleitung: konkreter Bezug zur Stelle / zum Unternehmen
+6. Hauptteil: Erfahrung + Mehrwert
+7. Motivationsabsatz
+8. Schluss: Gesprächseinladung, keine Floskeln
 9. „Mit freundlichen Grüßen" + Name
 
 Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen. 350–420 Wörter.`,
@@ -364,7 +377,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
           {step === 5 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 6 && <StepJobAd form={form} setJobad={setJobad} />}
           {step === 7 && <StepTemplate form={form} setTemplate={setTemplate} />}
-          {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} />}
+          {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} tone={tone} setTone={setTone} />}
         </div>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
@@ -980,11 +993,12 @@ function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: 
   );
 }
 
-function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang, motivation, setMotivation, achievement, setAchievement }: {
+function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang, motivation, setMotivation, achievement, setAchievement, tone, setTone }: {
   form: FormData; user: any; setShowAuthModal: (v: boolean) => void; handleGenerate: () => void;
   docLang: string; setDocLang: (v: string) => void;
   motivation: string; setMotivation: (v: string) => void;
   achievement: string; setAchievement: (v: string) => void;
+  tone: "formell" | "modern" | "kreativ"; setTone: (v: "formell" | "modern" | "kreativ") => void;
 }) {
   const hasName = !!form.personal.firstName;
   const { t } = useTranslation();
@@ -998,6 +1012,30 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
           {t("wizard.gen.readyText", { letter: form.jobad.title ? t("wizard.gen.readyLetter") : "" })}
         </p>
       </div>
+
+      {/* Tone selector */}
+      {form.jobad.title && (
+        <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, marginBottom: 16 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t("wizard.gen.toneLabel")}</div>
+          <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+            {(["formell", "modern", "kreativ"] as const).map(v => (
+              <div key={v} onClick={() => setTone(v)} style={{
+                flex: 1, minWidth: 100, border: `2px solid ${tone === v ? "var(--brand)" : "var(--border)"}`,
+                borderRadius: 10, padding: "10px 12px", cursor: "pointer",
+                background: tone === v ? "var(--brand-l)" : "var(--bg3)",
+                transition: "all .15s",
+              }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: tone === v ? "var(--brand)" : "var(--text)", marginBottom: 2 }}>
+                  {t(`wizard.gen.tone${v.charAt(0).toUpperCase() + v.slice(1)}`)}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.4 }}>
+                  {t(`wizard.gen.tone${v.charAt(0).toUpperCase() + v.slice(1)}Desc`)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Optional boost questions */}
       {form.jobad.title && (

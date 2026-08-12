@@ -325,7 +325,14 @@
       "motivationLabel": "Why do you want to work at this company?",
       "motivationPh": "e.g. I heard about the company through a recommendation / I have been following their work for a long time …",
       "achievementLabel": "What is your greatest achievement or strength?",
-      "achievementPh": "e.g. I reduced production costs by 20% in my last role …"
+      "achievementPh": "e.g. I reduced production costs by 20% in my last role …",
+      "toneLabel": "Cover letter tone",
+      "toneFormell": "Formal",
+      "toneModern": "Modern",
+      "toneKreativ": "Creative",
+      "toneFormellDesc": "Classic, professional, traditional",
+      "toneModernDesc": "Clear, direct, no filler phrases",
+      "toneKreativDesc": "Personal, storytelling, individual"
     },
     "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more.",
     "lookup": {

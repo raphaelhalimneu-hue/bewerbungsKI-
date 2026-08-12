@@ -325,7 +325,14 @@
       "motivationLabel": "Warum möchtest du bei diesem Unternehmen arbeiten?",
       "motivationPh": "z. B. ich bin durch eine Empfehlung auf das Unternehmen aufmerksam geworden / ich verfolge die Entwicklung seit Langem …",
       "achievementLabel": "Was ist dein größter Erfolg oder deine Stärke?",
-      "achievementPh": "z. B. ich habe in meiner letzten Stelle die Produktionskosten um 20 % gesenkt …"
+      "achievementPh": "z. B. ich habe in meiner letzten Stelle die Produktionskosten um 20 % gesenkt …",
+      "toneLabel": "Ton des Anschreibens",
+      "toneFormell": "Formell",
+      "toneModern": "Modern",
+      "toneKreativ": "Kreativ",
+      "toneFormellDesc": "Klassisch, DIN 5008, seriös",
+      "toneModernDesc": "Klar, direkt, ohne Floskeln",
+      "toneKreativDesc": "Persönlich, erzählerisch, individuell"
     },
     "premiumLimit": "Limit erreicht: 30 Bewerbungen pro Kauf. Bitte kontaktiere uns für mehr.",
     "lookup": {

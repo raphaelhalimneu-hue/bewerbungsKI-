@@ -325,7 +325,14 @@
       "motivationLabel": "¿Por qué quieres trabajar en esta empresa?",
       "motivationPh": "p. ej. me enteré de la empresa por una recomendación / llevo tiempo siguiendo su trabajo …",
       "achievementLabel": "¿Cuál es tu mayor logro o punto fuerte?",
-      "achievementPh": "p. ej. reduje los costes de producción un 20% en mi último puesto …"
+      "achievementPh": "p. ej. reduje los costes de producción un 20% en mi último puesto …",
+      "toneLabel": "Tono de la carta",
+      "toneFormell": "Formal",
+      "toneModern": "Moderno",
+      "toneKreativ": "Creativo",
+      "toneFormellDesc": "Clásico, profesional, tradicional",
+      "toneModernDesc": "Claro, directo, sin frases vacías",
+      "toneKreativDesc": "Personal, narrativo, individual"
     },
     "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más.",
     "lookup": {

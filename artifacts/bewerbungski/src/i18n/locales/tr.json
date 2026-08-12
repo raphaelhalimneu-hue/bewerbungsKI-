@@ -325,7 +325,14 @@
       "motivationLabel": "Bu şirkette neden çalışmak istiyorsun?",
       "motivationPh": "ör. şirketi bir tavsiye üzerine öğrendim / uzun süredir takip ediyorum …",
       "achievementLabel": "En büyük başarın veya güçlü yönün nedir?",
-      "achievementPh": "ör. son işimde üretim maliyetlerini %20 düşürdüm …"
+      "achievementPh": "ör. son işimde üretim maliyetlerini %20 düşürdüm …",
+      "toneLabel": "Mektup tonu",
+      "toneFormell": "Resmi",
+      "toneModern": "Modern",
+      "toneKreativ": "Yaratıcı",
+      "toneFormellDesc": "Klasik, profesyonel",
+      "toneModernDesc": "Net, doğrudan",
+      "toneKreativDesc": "Kişisel, anlatısal"
     },
     "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın.",
     "lookup": {

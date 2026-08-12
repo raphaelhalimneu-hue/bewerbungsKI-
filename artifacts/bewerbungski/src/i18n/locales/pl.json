@@ -325,7 +325,14 @@
       "motivationLabel": "Dlaczego chcesz pracować w tej firmie?",
       "motivationPh": "np. dowiedziałem/am się o firmie z polecenia / obserwuję ją od dłuższego czasu …",
       "achievementLabel": "Jaki jest Twój największy sukces lub mocna strona?",
-      "achievementPh": "np. obniżyłem/am koszty produkcji o 20% na poprzednim stanowisku …"
+      "achievementPh": "np. obniżyłem/am koszty produkcji o 20% na poprzednim stanowisku …",
+      "toneLabel": "Ton listu",
+      "toneFormell": "Formalny",
+      "toneModern": "Nowoczesny",
+      "toneKreativ": "Kreatywny",
+      "toneFormellDesc": "Klasyczny, profesjonalny",
+      "toneModernDesc": "Jasny, bezpośredni",
+      "toneKreativDesc": "Osobisty, narracyjny"
     },
     "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej.",
     "lookup": {
