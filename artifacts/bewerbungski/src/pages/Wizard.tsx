@@ -238,7 +238,8 @@ PFLICHTREGELN:
       const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
-      if (form.jobad.title || form.jobad.description) {
+      {
+        const hasJobad = !!(form.jobad.title || form.jobad.description || form.jobad.company);
         setGenPhase(t("wizard.genLetter"));
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
@@ -273,7 +274,7 @@ Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen. 350–420 Wör
 
 Bewerber: ${form.personal.firstName} ${form.personal.lastName}${form.personal.title ? ", " + form.personal.title : ""}
 Adresse Bewerber: ${[form.personal.address, `${form.personal.zip} ${form.personal.city}`.trim()].filter(Boolean).join(", ")}
-Stelle: ${form.jobad.title} bei ${form.jobad.company}${(form.jobad as any).address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${(form.jobad as any).address}` : ""}
+Stelle: ${hasJobad ? `${form.jobad.title || "Initiativbewerbung"} bei ${form.jobad.company || "dem Unternehmen"}` : `Initiativbewerbung als ${form.experience[0]?.position || form.personal.title || "Fachkraft"} (keine konkrete Stellenanzeige — schreibe ein überzeugendes Initiativ-Anschreiben passend zum Werdegang, Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${(form.jobad as any).address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${(form.jobad as any).address}` : ""}
 Stellenbeschreibung: ${form.jobad.description || "nicht angegeben"}
 
 Erfahrung (aktuellste zuerst):
