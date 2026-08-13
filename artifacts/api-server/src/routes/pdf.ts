@@ -135,7 +135,7 @@ function wrapHtml(fragment: string): string {
   if (cleaned.trimStart().startsWith("<!DOCTYPE") || cleaned.includes("<html")) {
     return cleaned;
   }
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;}body{margin:0;padding:0;}</style></head><body style="margin:0;padding:0;background:#fff;">${cleaned}</body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;}body{margin:0;padding:0;}a{color:inherit!important;text-decoration:none!important;}</style></head><body style="margin:0;padding:0;background:#fff;">${cleaned}</body></html>`;
 }
 
 // ── Error helper ──────────────────────────────────────────────────────────────
@@ -233,6 +233,7 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
   }
   p { margin-bottom: 0; text-align: justify; }
   p.gap { margin-bottom: 8px; }
+  a { color: inherit !important; text-decoration: none !important; }
 </style>
 </head>
 <body>

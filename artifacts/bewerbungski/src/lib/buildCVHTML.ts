@@ -43,13 +43,13 @@ function sectionTitle(label: string, color: string, border: string): string {
 
 // ─── MODERN ─────────────────────────────────────────────────────────────────
 function tplModern(cv: CVContent): string {
-  const acc = "#2563eb";
+  const acc = "#111827";
   return `<style>${GF}*{box-sizing:border-box;margin:0;padding:0;}body,div,p,li,span{font-family:'Inter',sans-serif;}ul{list-style:disc;}</style>
 <div style="background:#fff;color:#111827;padding:46px 52px 48px;max-width:794px;">
-  <div style="border-bottom:2.5px solid ${acc};padding-bottom:18px;margin-bottom:0;">
+  <div style="border-bottom:2.5px solid #111827;padding-bottom:18px;margin-bottom:0;">
     ${cv.photo ? `<img src="${cv.photo}" style="float:right;width:82px;height:104px;object-fit:cover;border-radius:4px;margin-left:18px;" />` : ""}
     <div style="font-family:'Inter',sans-serif;font-size:28px;font-weight:700;letter-spacing:.5px;color:#111827;">${cv.name}</div>
-    <div style="font-size:13px;color:${acc};font-weight:600;letter-spacing:.5px;margin-top:4px;">${cv.title}</div>
+    <div style="font-size:13px;color:#374151;font-weight:600;letter-spacing:.5px;margin-top:4px;">${cv.title}</div>
     <div style="font-size:11px;color:#6b7280;margin-top:8px;">${cv.contact}</div>
     <div style="clear:both;"></div>
   </div>
@@ -68,7 +68,7 @@ function tplModern(cv: CVContent): string {
       <div><div style="font-size:13px;font-weight:700;color:#111827;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
       <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
     </div>`).join("")}` : ""}
-  ${cv.skills.length ? `${sectionTitle("Kenntnisse","#374151","1px solid #e5e7eb")}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:#eff6ff;color:#1d4ed8;border-radius:4px;padding:4px 11px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div>` : ""}
+  ${cv.skills.length ? `${sectionTitle("Kenntnisse","#374151","1px solid #e5e7eb")}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:4px 11px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div>` : ""}
   ${cv.languages.length ? `${sectionTitle("Sprachen","#374151","1px solid #e5e7eb")}${cv.languages.map(l=>`<div style="font-size:12.5px;margin-bottom:4px;"><strong>${l.name}</strong> <span style="color:#6b7280;">— ${l.level}</span></div>`).join("")}` : ""}
   <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
 </div>`;
@@ -101,7 +101,7 @@ function tplClassic(cv: CVContent): string {
 
 // ─── CREATIVE ────────────────────────────────────────────────────────────────
 function tplCreative(cv: CVContent): string {
-  const side = "#1e3a5f"; const acc = "#3b82f6";
+  const side = "#1e3a5f"; const acc = "#e2e8f0";
   const sideTitle = (t:string) => `<div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:${acc};border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:4px;margin:18px 0 8px;">${t}</div>`;
   return `<style>${GF}*{box-sizing:border-box;margin:0;padding:0;}ul{list-style:disc;}</style>
 <div style="display:flex;background:#fff;max-width:794px;min-height:1000px;font-family:'Inter',sans-serif;">
@@ -141,7 +141,7 @@ function tplCreative(cv: CVContent): string {
 
 // ─── EXECUTIVE ───────────────────────────────────────────────────────────────
 function tplExecutive(cv: CVContent): string {
-  const navy = "#1e3a8a";
+  const navy = "#1f2937";
   return `<style>${GF}*{box-sizing:border-box;margin:0;padding:0;}ul{list-style:disc;}</style>
 <div style="background:#fff;color:#1f2937;padding:46px 56px 52px;max-width:794px;font-family:'Playfair Display',serif;">
   <div style="border-top:4px solid ${navy};border-bottom:1.5px solid ${navy};padding:16px 0;margin-bottom:0;text-align:center;">
@@ -167,7 +167,7 @@ function tplExecutive(cv: CVContent): string {
       <div style="font-family:'Inter',sans-serif;font-size:11px;color:#94a3b8;white-space:nowrap;padding-left:14px;">${e.period}</div>
     </div>`).join("")}` : ""}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px;">
-    ${cv.skills.length ? `<div>${sectionTitle("Kenntnisse",navy,"1px solid #cbd5e1")}<div style="font-family:'Inter',sans-serif;display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:#eff6ff;color:${navy};border-radius:3px;padding:3px 10px;font-size:11px;">${s}</span>`).join("")}</div></div>` : ""}
+    ${cv.skills.length ? `<div>${sectionTitle("Kenntnisse",navy,"1px solid #cbd5e1")}<div style="font-family:'Inter',sans-serif;display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:#f3f4f6;color:#374151;border-radius:3px;padding:3px 10px;font-size:11px;">${s}</span>`).join("")}</div></div>` : ""}
     ${cv.languages.length ? `<div>${sectionTitle("Sprachen",navy,"1px solid #cbd5e1")}${cv.languages.map(l=>`<div style="font-family:'Inter',sans-serif;font-size:12.5px;margin-bottom:4px;display:flex;justify-content:space-between;"><strong>${l.name}</strong><span style="color:#6b7280;">${l.level}</span></div>`).join("")}</div>` : ""}
   </div>
   <div style="margin-top:38px;font-family:'Inter',sans-serif;font-size:12px;color:#374151;">${cv.signature}</div>
