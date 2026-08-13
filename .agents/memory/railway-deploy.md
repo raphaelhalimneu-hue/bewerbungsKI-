@@ -8,3 +8,5 @@ description: How to deploy this project to Railway (the only production environm
 - Deploy: create tar.gz excluding .git, node_modules, dist, .local, .agents, attached_assets, .cache, .pythonlibs; POST body as `application/gzip` to `backboard.railway.com/project/{proj}/environment/{env}/up?serviceId={svc}`; poll status via GraphQL `deployment(id:...)`. Multipart upload hangs in INITIALIZING — don't use it.
 - `railway.json` startCommand overrides nixpacks [start]; drizzle push runs at start with `--force`.
 - **Why:** repeated painful discovery; user is mobile-only and non-technical, so deploys must be done by the agent.
+
+**2026-08-13:** Uploads können bei Railway stundenlang in INITIALIZING hängen (deploymentEvents zeigt nur SNAPSHOT_CODE, kein Build startet); ältere hängende Deploys kippen später auf FAILED ("no associated build"). Plattformseitig — erneutes Hochladen hilft nicht sofort; warten oder später neu deployen.

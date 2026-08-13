@@ -279,7 +279,7 @@ export default function CreateScreen() {
       } });
 
       let letterText = '';
-      if (form.jobad.title) {
+      {
         setGenPhase('Anschreiben wird erstellt …');
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: 'letter',
