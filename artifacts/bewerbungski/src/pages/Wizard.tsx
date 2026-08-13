@@ -305,7 +305,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
       try {
         await customFetch("/api/saved-profile", {
           method: "PUT",
-          body: JSON.stringify({ savedProfile: { personal: form.personal, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
+          body: JSON.stringify({ savedProfile: { personal: form.personal, school: form.school, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
         });
       } catch { /* ignore */ }
       toast({ title: t("wizard.success") });
