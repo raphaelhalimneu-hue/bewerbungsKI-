@@ -6,6 +6,7 @@ import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { DECO } from "../lib/buildCVHTML";
 
 export default function Preview() {
   const { t } = useTranslation();
@@ -241,17 +242,31 @@ export default function Preview() {
                     {t("preview.editLetterHint")}
                   </span>
                 </div>
-                <textarea
+                <div
                   className="card"
-                  value={editedLetter}
-                  onChange={e => setEditedLetter(e.target.value)}
                   style={{
-                    whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
-                    width: "100%", border: "1px solid var(--border)", resize: "vertical",
-                    minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
-                    borderRadius: 14, background: "var(--card)", display: "block", boxSizing: "border-box",
+                    position: "relative", zIndex: 0, overflow: "hidden",
+                    borderRadius: 14, border: "1px solid var(--border)",
+                    background: "#fff", padding: 0,
                   }}
-                />
+                >
+                  {/* Deko-Layer passend zur gewählten CV-Vorlage (statische, sichere Konstanten) */}
+                  <div
+                    aria-hidden
+                    dangerouslySetInnerHTML={{ __html: DECO[(doc as any).template as keyof typeof DECO] ?? "" }}
+                  />
+                  <textarea
+                    value={editedLetter}
+                    onChange={e => setEditedLetter(e.target.value)}
+                    style={{
+                      whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
+                      width: "100%", border: "none", outline: "none", resize: "vertical",
+                      minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
+                      background: "transparent", display: "block", boxSizing: "border-box",
+                      position: "relative", zIndex: 1,
+                    }}
+                  />
+                </div>
               </div>
             )}
           </>

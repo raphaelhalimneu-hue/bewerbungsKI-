@@ -98,7 +98,7 @@ function sectionTitle(label: string, color: string, border: string): string {
 
 // ─── DECORATIVE LAYERS (html2canvas-safe: nur divs, Gradients, border-radius) ─
 const DA = "position:absolute;z-index:-1;pointer-events:none;";
-const DECO = {
+export const DECO = {
   modern: `<div style="${DA}top:0;left:0;right:0;height:10px;background:linear-gradient(90deg,#111827 0%,#374151 55%,#9ca3af 100%);"></div><div style="${DA}top:-110px;right:-110px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(17,24,39,.06),rgba(17,24,39,0) 70%);"></div>`,
   classic: `<div style="${DA}top:-90px;right:-90px;width:260px;height:260px;border-radius:50%;border:30px solid #f1f5f9;"></div><div style="${DA}bottom:-70px;left:-70px;width:180px;height:180px;border-radius:50%;border:20px solid #f8fafc;"></div>`,
   creative: `<div style="${DA}top:-80px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,95,.09),rgba(30,58,95,0) 70%);"></div>`,

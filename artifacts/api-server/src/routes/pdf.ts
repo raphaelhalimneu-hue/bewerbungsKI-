@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
+import { coverLetterDeco } from "../lib/coverLetterDeco";
 
 const router = Router();
 
@@ -203,6 +204,9 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
       )
       .join("");
 
+    // Deko-Layer passend zur gewählten CV-Vorlage (dezent, hinter dem Text)
+    const deco = coverLetterDeco(doc.template);
+
     // All styles are inline — no external requests needed
     const html = `<!DOCTYPE html>
 <html>
@@ -214,9 +218,16 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     font-family: Helvetica, Arial, sans-serif;
     background: #fff;
     color: #1f2937;
-    padding: 56px 68px;
     font-size: 12px;
     line-height: 1.8;
+  }
+  .sheet {
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+    min-height: 297mm;
+    padding: 56px 68px;
+    background: #fff;
   }
   .name {
     font-size: 17px;
@@ -237,8 +248,11 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
 </style>
 </head>
 <body>
+<div class="sheet">
+${deco}
 ${fullName ? `<div class="name">${escHtml(fullName)}</div><hr class="divider">` : ""}
 ${paragraphs}
+</div>
 </body>
 </html>`;
 
