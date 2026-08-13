@@ -9,5 +9,7 @@
 export interface UserProfile {
   email: string;
   is_premium: boolean;
+  credits: number;
+  document_limit: number;
   documents_count: number;
 }

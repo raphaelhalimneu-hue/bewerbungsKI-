@@ -141,7 +141,9 @@
     "loading": "Yükleniyor …",
     "redirect": "Stripe'a yönlendiriliyor …",
     "errorTitle": "Hata",
-    "questions": "Sorun mu var? Bize yaz: support@bewerbungski.de"
+    "questions": "Sorun mu var? Bize yaz: support@bewerbungski.de",
+    "buyMore": "30 başvuru daha satın al →",
+    "limitReachedHint": "Tüm başvurularını kullandın. 30 başvuruluk yeni bir paket satın al."
   },
   "docs": {
     "title": "📄 Belgelerim",
@@ -347,7 +349,7 @@
       "toneModernDesc": "Net, doğrudan",
       "toneKreativDesc": "Kişisel, anlatısal"
     },
-    "premiumLimit": "Sınıra ulaşıldı: satın alma başına 30 başvuru. Daha fazlası için bize ulaşın.",
+    "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 30'luk paket satın al.",
     "lookup": {
       "search": "Ara",
       "noResults": "Sonuç bulunamadı.",

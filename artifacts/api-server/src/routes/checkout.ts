@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Stripe from "stripe";
-import { db, profilesTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, profilesTable, stripeEventsTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router = Router();
@@ -83,10 +83,24 @@ router.post("/webhook/stripe", async (req, res) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
       if (userId) {
-        await db
-          .update(profilesTable)
-          .set({ isPremium: true })
-          .where(eq(profilesTable.userId, userId));
+        // Each completed checkout grants 30 more applications (stackable packages).
+        // Idempotent: record the Stripe event id first; if it was already
+        // processed (redelivery), the insert is a no-op and no credits are added.
+        await db.transaction(async (tx) => {
+          const inserted = await tx
+            .insert(stripeEventsTable)
+            .values({ id: event.id, userId })
+            .onConflictDoNothing()
+            .returning();
+          if (inserted.length === 0) return; // duplicate delivery
+          await tx
+            .update(profilesTable)
+            .set({
+              isPremium: true,
+              credits: sql`${profilesTable.credits} + 30`,
+            })
+            .where(eq(profilesTable.userId, userId));
+        });
       }
     }
 

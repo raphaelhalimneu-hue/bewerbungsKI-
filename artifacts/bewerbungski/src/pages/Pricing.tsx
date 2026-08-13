@@ -65,20 +65,43 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            {(profile as any)?.is_premium ? (
-              <div style={{ background: "#dcfce7", color: "var(--ok)", borderRadius: 10, padding: "12px 20px", textAlign: "center", fontWeight: 600, fontSize: 14 }}>
-                {t("pricing.premiumActive")}
-              </div>
-            ) : (
-              <button
-                className="btn btn-p btn-full btn-lg"
-                onClick={handleUpgrade}
-                disabled={checkoutMutation.isPending}
-              >
-                {checkoutMutation.isPending ? <span className="spin" /> : null}
-                {checkoutMutation.isPending ? t("pricing.loading") : t("pricing.upgradeNow")}
-              </button>
-            )}
+            {(() => {
+              const p = profile as any;
+              const isPremium = !!p?.is_premium;
+              const atLimit =
+                isPremium &&
+                typeof p?.documents_count === "number" &&
+                typeof p?.document_limit === "number" &&
+                p.documents_count >= p.document_limit;
+              if (isPremium && !atLimit) {
+                return (
+                  <div style={{ background: "#dcfce7", color: "var(--ok)", borderRadius: 10, padding: "12px 20px", textAlign: "center", fontWeight: 600, fontSize: 14 }}>
+                    {t("pricing.premiumActive")}
+                  </div>
+                );
+              }
+              return (
+                <>
+                  {atLimit && (
+                    <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 12, textAlign: "center" }}>
+                      {t("pricing.limitReachedHint")}
+                    </p>
+                  )}
+                  <button
+                    className="btn btn-p btn-full btn-lg"
+                    onClick={handleUpgrade}
+                    disabled={checkoutMutation.isPending}
+                  >
+                    {checkoutMutation.isPending ? <span className="spin" /> : null}
+                    {checkoutMutation.isPending
+                      ? t("pricing.loading")
+                      : atLimit
+                        ? t("pricing.buyMore")
+                        : t("pricing.upgradeNow")}
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </div>
 

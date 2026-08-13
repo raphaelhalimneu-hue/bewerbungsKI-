@@ -316,6 +316,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         navigate("/pricing");
       } else if (e?.data?.error === "premium_limit_reached" || e?.message?.includes("premium_limit_reached")) {
         toast({ title: t("wizard.premiumLimit"), variant: "destructive" });
+        navigate("/pricing");
       } else {
         toast({ title: t("wizard.genError"), description: e.message || t("wizard.genErrorUnknown"), variant: "destructive" });
       }

@@ -141,7 +141,9 @@
     "loading": "Cargando …",
     "redirect": "Redirigiendo a Stripe …",
     "errorTitle": "Error",
-    "questions": "¿Preguntas? Escríbenos: support@bewerbungski.de"
+    "questions": "¿Preguntas? Escríbenos: support@bewerbungski.de",
+    "buyMore": "Comprar 30 solicitudes más →",
+    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 30 solicitudes."
   },
   "docs": {
     "title": "📄 Mis documentos",
@@ -347,7 +349,7 @@
       "toneModernDesc": "Claro, directo, sin frases vacías",
       "toneKreativDesc": "Personal, narrativo, individual"
     },
-    "premiumLimit": "Límite alcanzado: 30 solicitudes por compra. Contáctanos para más.",
+    "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 30 en la página de precios.",
     "lookup": {
       "search": "Buscar",
       "noResults": "Sin resultados.",

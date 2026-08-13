@@ -1,10 +1,11 @@
 ---
 name: Pricing model
-description: BewerbungsKI pricing since 2026-08-13 — free/premium limits and where they are enforced
+description: BewerbungsKI pricing since 2026-08-13 — credits model, limits, and where they are enforced
 ---
 
-- Modell: 3 Bewerbungen kostenlos, danach 9,99 € einmalig (Stripe one-time, inline price_data, keine Price-ID) für 30 WEITERE Bewerbungen.
-- Enforcement serverseitig: Nicht-Premium ≥3 Dokumente → free_limit_reached; Premium ≥33 Gesamt-Dokumente → premium_limit_reached (33 = 3 gratis + 30 gekauft, damit Käufer wirklich 30 bekommen).
-- **Why:** Nutzer wollte hartes Limit statt "unbegrenzt/Lifetime"; Review fand die 27-statt-30-Falle beim Gesamtzähler.
-- **How to apply:** Bei Preis-/Limit-Änderungen alle Stellen synchron halten: checkout.ts (unit_amount + Beschreibung), generate.ts (Limits), 8 i18n-Dateien (premiumPrice/oneTime/premFeat1/faq1A), index.html (Meta + JSON-LD), Mobile-App (noch alt, siehe Task), download.ts-Infodokument.
-- Offene Sackgasse: Premium-Nutzer am 33er-Limit können kein weiteres Paket kaufen (Follow-up-Task vorhanden).
+- Modell: 3 Bewerbungen kostenlos, danach 9,99 € einmalig (Stripe one-time, inline price_data, keine Price-ID) pro Paket mit 30 WEITEREN Bewerbungen. Pakete sind stapelbar (Nachkauf am Limit möglich).
+- Guthaben-Modell (seit 2026-08-13): `credits`-Spalte in profiles; Limit = 3 + credits. Webhook checkout.session.completed: +30 credits, idempotent über stripe_events-Tabelle (Event-ID als PK, Insert-first in Transaktion). is_premium bleibt als Anzeige-Flag.
+- Enforcement serverseitig in generate.ts: docCount ≥ Limit → `premium_limit_reached` wenn credits>0, sonst `free_limit_reached`.
+- Schema-Änderungen shippen als idempotente Startup-Migration im API-Server (lib/migrate.ts läuft vor listen), weil drizzle push nur die Dev-DB trifft; Backfill: legacy is_premium mit credits=0 → 30.
+- **Why:** Nutzer wollte hartes Limit statt "unbegrenzt/Lifetime"; Review verlangte Idempotenz (Stripe redelivert Events) und Erhalt der Alt-Käufer-Ansprüche beim Modellwechsel.
+- **How to apply:** Bei Preis-/Limit-Änderungen alle Stellen synchron halten: checkout.ts (unit_amount + Beschreibung), generate.ts (Limit-Formel), me.ts (credits/document_limit), openapi.yaml + orval codegen, 8 i18n-Dateien (premiumPrice/oneTime/buyMore/limitReachedHint), index.html (Meta + JSON-LD), Mobile-App (noch alt, siehe Task).

@@ -141,7 +141,9 @@
     "loading": "Loading …",
     "redirect": "Redirecting to Stripe …",
     "errorTitle": "Error",
-    "questions": "Questions? Write to us: support@bewerbungski.de"
+    "questions": "Questions? Write to us: support@bewerbungski.de",
+    "buyMore": "Buy 30 more applications →",
+    "limitReachedHint": "You've used all your applications. Buy another package of 30 applications."
   },
   "docs": {
     "title": "📄 My documents",
@@ -390,7 +392,7 @@
       "toneModernDesc": "Clear, direct, no filler phrases",
       "toneKreativDesc": "Personal, storytelling, individual"
     },
-    "premiumLimit": "Limit reached: 30 applications per purchase. Please contact us for more.",
+    "premiumLimit": "Limit reached: all applications used. Buy another 30-pack on the pricing page.",
     "lookup": {
       "search": "Search",
       "noResults": "No results found.",

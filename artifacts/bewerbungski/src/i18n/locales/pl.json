@@ -141,7 +141,9 @@
     "loading": "Ładowanie …",
     "redirect": "Przekierowanie do Stripe …",
     "errorTitle": "Błąd",
-    "questions": "Masz pytania? Napisz do nas: support@bewerbungski.de"
+    "questions": "Masz pytania? Napisz do nas: support@bewerbungski.de",
+    "buyMore": "Kup kolejne 30 aplikacji →",
+    "limitReachedHint": "Wykorzystałeś wszystkie aplikacje. Kup kolejny pakiet 30 aplikacji."
   },
   "docs": {
     "title": "📄 Moje dokumenty",
@@ -347,7 +349,7 @@
       "toneModernDesc": "Jasny, bezpośredni",
       "toneKreativDesc": "Osobisty, narracyjny"
     },
-    "premiumLimit": "Osiągnięto limit: 30 aplikacji na zakup. Skontaktuj się z nami po więcej.",
+    "premiumLimit": "Limit osiągnięty: wszystkie aplikacje wykorzystane. Kup kolejny pakiet 30 na stronie cennika.",
     "lookup": {
       "search": "Szukaj",
       "noResults": "Brak wyników.",

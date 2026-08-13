@@ -22,6 +22,8 @@ export const HealthCheckResponse = zod.object({
 export const GetMeResponse = zod.object({
   "email": zod.string(),
   "is_premium": zod.boolean(),
+  "credits": zod.number(),
+  "document_limit": zod.number(),
   "documents_count": zod.number()
 })
 

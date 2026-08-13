@@ -23,13 +23,10 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .select({ value: count() })
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
-    if (!profile?.isPremium) {
-      if (value >= 3) {
-        res.status(403).json({ error: "free_limit_reached" });
-        return;
-      }
-    } else if (value >= 33) {
-      res.status(403).json({ error: "premium_limit_reached" });
+    const credits = profile?.credits ?? 0;
+    const limit = 3 + credits; // 3 free + 30 per purchased package
+    if (value >= limit) {
+      res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
       return;
     }
 

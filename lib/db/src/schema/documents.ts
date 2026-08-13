@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, jsonb, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, jsonb, uuid, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -7,6 +7,7 @@ export const profilesTable = pgTable("profiles", {
   userId: text("user_id").notNull().unique(),
   email: text("email").notNull(),
   isPremium: boolean("is_premium").notNull().default(false),
+  credits: integer("credits").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id"),
   savedProfile: jsonb("saved_profile"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -23,6 +24,14 @@ export const documentsTable = pgTable("documents", {
   profileData: jsonb("profile_data"),
   jobTitle: text("job_title"),
   jobCompany: text("job_company"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Processed Stripe events — guarantees each checkout.session.completed
+// grants credits exactly once, even if Stripe redelivers the event.
+export const stripeEventsTable = pgTable("stripe_events", {
+  id: text("id").primaryKey(), // Stripe event id
+  userId: text("user_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -141,7 +141,9 @@
     "loading": "جارٍ التحميل …",
     "redirect": "جارٍ التحويل إلى Stripe …",
     "errorTitle": "خطأ",
-    "questions": "لديك أسئلة؟ راسلنا: support@bewerbungski.de"
+    "questions": "لديك أسئلة؟ راسلنا: support@bewerbungski.de",
+    "buyMore": "← اشترِ 30 طلبًا إضافيًا",
+    "limitReachedHint": "لقد استخدمت كل طلباتك. اشترِ حزمة أخرى من 30 طلبًا."
   },
   "docs": {
     "title": "📄 مستنداتي",
@@ -347,7 +349,7 @@
       "toneModernDesc": "واضح، مباشر",
       "toneKreativDesc": "شخصي، سردي"
     },
-    "premiumLimit": "تم بلوغ الحد: 30 طلباً لكل عملية شراء. تواصل معنا للمزيد.",
+    "premiumLimit": "تم بلوغ الحد: استُخدمت كل الطلبات. اشترِ حزمة 30 أخرى من صفحة الأسعار.",
     "lookup": {
       "search": "بحث",
       "noResults": "لا توجد نتائج.",
