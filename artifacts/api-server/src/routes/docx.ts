@@ -234,6 +234,171 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
   }
 });
 
+const VALID_TEMPLATE_IDS = new Set([
+  "modern","classic","creative","executive","minimal","elegant",
+  "bold","compact","swiss","nordic","corporate","timeline","slate","terra",
+]);
+
+function isValidCvJson(cv: unknown): boolean {
+  if (typeof cv !== "object" || Array.isArray(cv) || !cv) return false;
+  const o = cv as Record<string, unknown>;
+  for (const field of ["name","title","contact","profile","signature"]) {
+    if (o[field] !== undefined && typeof o[field] !== "string") return false;
+  }
+  for (const field of ["experience","education","skills","languages"]) {
+    if (o[field] !== undefined && !Array.isArray(o[field])) return false;
+  }
+  return true;
+}
+
+// ── CV DOCX from editor (cv_json) ────────────────────────────────────────────
+router.post("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const [doc] = await db
+      .select()
+      .from(documentsTable)
+      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+
+    if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+
+    const cv = req.body?.cv_json || (doc.profileData as any)?.cv_json;
+    if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
+    if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
+
+    const children: any[] = [];
+
+    // Header
+    children.push(new Paragraph({
+      children: [new TextRun({ text: (cv.name || "").toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40 })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+    }));
+    if (cv.title) {
+      children.push(new Paragraph({
+        children: [muted(cv.title, 22)],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 80 },
+      }));
+    }
+    if (cv.contact) {
+      children.push(new Paragraph({
+        children: [muted(cv.contact.replace(/·/g, "  ·  "), 18)],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 40 },
+      }));
+    }
+    children.push(hr());
+
+    // Profil
+    if (cv.profile) {
+      children.push(sectionHeading("Profil"));
+      children.push(new Paragraph({ children: [normal(cv.profile, 21)], spacing: { after: 80 }, alignment: AlignmentType.JUSTIFIED }));
+    }
+
+    // Ausbildung
+    if (cv.education?.length) {
+      children.push(sectionHeading("Ausbildung"));
+      for (const edu of cv.education) {
+        children.push(new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: NO_BORDERS_TABLE,
+          rows: [new TableRow({ children: [
+            new TableCell({
+              width: { size: 78, type: WidthType.PERCENTAGE },
+              borders: NO_BORDERS_CELL,
+              children: [
+                new Paragraph({ children: [bold(edu.degree || "", 22)], spacing: { before: 140, after: 30 } }),
+                new Paragraph({ children: [muted([edu.institution, edu.location, edu.note].filter(Boolean).join("  ·  "), 20)], spacing: { after: 80 } }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 22, type: WidthType.PERCENTAGE },
+              borders: NO_BORDERS_CELL,
+              children: [new Paragraph({ children: [muted(edu.period || "", 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } })],
+            }),
+          ] })],
+        }));
+      }
+    }
+
+    // Berufserfahrung
+    if (cv.experience?.length) {
+      children.push(sectionHeading("Berufserfahrung"));
+      for (const exp of cv.experience) {
+        const companyLine = [exp.company, exp.location].filter(Boolean).join(", ");
+        const bullets: string[] = Array.isArray(exp.bullets) ? exp.bullets : [];
+        children.push(new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: NO_BORDERS_TABLE,
+          rows: [new TableRow({ children: [
+            new TableCell({
+              width: { size: 78, type: WidthType.PERCENTAGE },
+              borders: NO_BORDERS_CELL,
+              children: [
+                new Paragraph({ children: [bold(exp.position || "", 22)], spacing: { before: 140, after: 30 } }),
+                new Paragraph({ children: [muted(companyLine, 20)], spacing: { after: 50 } }),
+                ...bullets.map((line: string) =>
+                  new Paragraph({
+                    children: [normal("• " + line.replace(/^[-•·]\s*/, ""), 20)],
+                    spacing: { after: 30 },
+                    indent: { left: 120 },
+                  })
+                ),
+              ],
+            }),
+            new TableCell({
+              width: { size: 22, type: WidthType.PERCENTAGE },
+              borders: NO_BORDERS_CELL,
+              children: [new Paragraph({ children: [muted(exp.period || "", 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } })],
+            }),
+          ] })],
+        }));
+      }
+    }
+
+    // Kenntnisse
+    if (cv.skills?.length) {
+      children.push(sectionHeading("Kenntnisse"));
+      children.push(new Paragraph({
+        children: cv.skills.map((s: string, i: number) => [
+          i > 0 ? new TextRun({ text: "   |   ", size: 20, font: FONT, color: "9CA3AF" }) : null,
+          new TextRun({ text: typeof s === "string" ? s : (s as any).name || "", size: 20, font: FONT }),
+        ]).flat().filter(Boolean) as TextRun[],
+        spacing: { after: 100 },
+      }));
+    }
+
+    // Sprachen
+    if (cv.languages?.length) {
+      children.push(sectionHeading("Sprachen"));
+      for (const lang of cv.languages) {
+        children.push(new Paragraph({
+          children: [bold(lang.name || "", 21), normal(`  —  ${lang.level || ""}`, 21)],
+          spacing: { after: 60 },
+        }));
+      }
+    }
+
+    // Signature
+    if (cv.signature) {
+      children.push(new Paragraph({ children: [normal(cv.signature, 20)], spacing: { before: 400, after: 0 } }));
+    }
+
+    const wordDoc = new Document({
+      sections: [{ properties: { page: { margin: { top: 720, right: 900, bottom: 720, left: 900 } } }, children }],
+    });
+    const buffer = await Packer.toBuffer(wordDoc);
+    const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    const asciiName = `${safeName} - Lebenslauf.docx`.replace(/[^\x20-\x7E]/g, "_");
+    res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
+    res.send(buffer);
+  } catch (err: any) {
+    req.log.error({ err }, "CV DOCX (cv_json) error");
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // ── Cover Letter DOCX ─────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {

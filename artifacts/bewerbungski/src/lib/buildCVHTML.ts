@@ -33,11 +33,66 @@ export type CVContent = {
 // ─── helpers ────────────────────────────────────────────────────────────────
 const GF = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');`;
 
+/** HTML-escape a user-supplied string so it cannot inject markup. */
+function esc(s: unknown): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Sanitise a photo URL: only allow data:image/… blobs and http(s) origins.
+ * All other schemes (javascript:, vbscript:, data:text/html…) are dropped.
+ */
+function safePhotoUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (/^data:image\//i.test(url)) return url; // base64 image blob — safe
+  if (/^https?:\/\//i.test(url)) return esc(url); // remote URL — escape quotes
+  return undefined; // reject everything else
+}
+
+/**
+ * Return a new CVContent whose every user-controlled string has been
+ * HTML-escaped. All template functions receive this safe copy, so they never
+ * need to call esc() themselves.
+ */
+function escapeCVContent(cv: CVContent): CVContent {
+  return {
+    name:      esc(cv.name),
+    title:     esc(cv.title),
+    contact:   esc(cv.contact),
+    profile:   esc(cv.profile),
+    signature: esc(cv.signature),
+    photo:     safePhotoUrl(cv.photo),
+    experience: (cv.experience || []).map(e => ({
+      position: esc(e.position),
+      company:  esc(e.company),
+      location: esc(e.location),
+      period:   esc(e.period),
+      bullets:  (e.bullets || []).map(b => esc(b)),
+    })),
+    education: (cv.education || []).map(e => ({
+      degree:      esc(e.degree),
+      institution: esc(e.institution),
+      location:    esc(e.location),
+      period:      esc(e.period),
+      note:        esc(e.note),
+    })),
+    skills: (cv.skills || []).map(s => typeof s === "string" ? esc(s) : esc((s as any).name ?? "")),
+    languages: (cv.languages || []).map(l => ({ name: esc(l.name), level: esc(l.level) })),
+  };
+}
+
 function bullets(arr: string[]): string {
   if (!arr || arr.length === 0) return "";
+  // Values are already esc()-ed by escapeCVContent before reaching here
   return `<ul style="margin:5px 0 0;padding-left:16px;">${arr.map(b => `<li style="margin-bottom:3px;">${b}</li>`).join("")}</ul>`;
 }
 function sectionTitle(label: string, color: string, border: string): string {
+  // label is always a static string literal; color/border are static hex constants
   return `<div style="font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${color};border-bottom:${border};padding-bottom:4px;margin:20px 0 10px;">${label}</div>`;
 }
 
@@ -534,21 +589,23 @@ function tplTerra(cv: CVContent): string {
 
 // ─── ROUTER ───────────────────────────────────────────────────────────────────
 export function renderCVContent(cv: CVContent, template: TemplateId): string {
+  // Escape all user-controlled fields once before any template sees them.
+  const safe = escapeCVContent(cv);
   switch (template) {
-    case "classic":    return tplClassic(cv);
-    case "creative":   return tplCreative(cv);
-    case "executive":  return tplExecutive(cv);
-    case "minimal":    return tplMinimal(cv);
-    case "elegant":    return tplElegant(cv);
-    case "bold":       return tplBold(cv);
-    case "compact":    return tplCompact(cv);
-    case "swiss":      return tplSwiss(cv);
-    case "nordic":     return tplNordic(cv);
-    case "corporate":  return tplCorporate(cv);
-    case "timeline":   return tplTimeline(cv);
-    case "slate":      return tplSlate(cv);
-    case "terra":      return tplTerra(cv);
-    default:           return tplModern(cv);
+    case "classic":    return tplClassic(safe);
+    case "creative":   return tplCreative(safe);
+    case "executive":  return tplExecutive(safe);
+    case "minimal":    return tplMinimal(safe);
+    case "elegant":    return tplElegant(safe);
+    case "bold":       return tplBold(safe);
+    case "compact":    return tplCompact(safe);
+    case "swiss":      return tplSwiss(safe);
+    case "nordic":     return tplNordic(safe);
+    case "corporate":  return tplCorporate(safe);
+    case "timeline":   return tplTimeline(safe);
+    case "slate":      return tplSlate(safe);
+    case "terra":      return tplTerra(safe);
+    default:           return tplModern(safe);
   }
 }
 

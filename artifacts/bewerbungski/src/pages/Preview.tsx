@@ -142,6 +142,11 @@ export default function Preview() {
       <div className="fade">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <button className="btn btn-g" onClick={() => navigate("/documents")}>{t("preview.back")}</button>
+          {doc && (doc as any).cv_json && (
+            <button className="btn btn-p btn-sm" onClick={() => navigate(`/documents/${params.id}/edit`)}>
+              ✏️ {t("editor.editInEditor") || "Live-Editor"}
+            </button>
+          )}
           {doc && (
             <>
               <h2 style={{ fontFamily: "var(--fd)", fontSize: 20, fontWeight: 700, flex: 1, minWidth: 0 }}>

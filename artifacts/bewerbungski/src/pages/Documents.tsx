@@ -140,9 +140,10 @@ export default function Documents() {
                       )}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                    <button className="btn btn-s btn-sm" onClick={() => navigate(`/preview/${doc.id}`)}>{t("docs.view")}</button>
-                    <button className="btn btn-d btn-sm" onClick={() => handleDelete(doc.id)}>{t("docs.delete")}</button>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0, flexDirection: "column" }}>
+                    <button className="btn btn-p btn-sm" onClick={() => navigate(`/documents/${doc.id}/edit`)} style={{ justifyContent: "center" }}>✏️ {t("docs.edit") || "Bearbeiten"}</button>
+                    <button className="btn btn-s btn-sm" onClick={() => navigate(`/preview/${doc.id}`)} style={{ justifyContent: "center" }}>{t("docs.view")}</button>
+                    <button className="btn btn-d btn-sm" onClick={() => handleDelete(doc.id)} style={{ justifyContent: "center" }}>{t("docs.delete")}</button>
                   </div>
                 </div>
               );

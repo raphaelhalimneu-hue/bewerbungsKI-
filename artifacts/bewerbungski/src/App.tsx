@@ -11,6 +11,7 @@ import Home from "@/pages/Home";
 import Wizard from "@/pages/Wizard";
 import Documents from "@/pages/Documents";
 import Preview from "@/pages/Preview";
+import CVEditor from "@/pages/CVEditor";
 import Pricing from "@/pages/Pricing";
 import Admin from "@/pages/Admin";
 
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/wizard" component={Wizard} />
       <Route path="/documents" component={Documents} />
       <Route path="/preview/:id" component={Preview} />
+      <Route path="/documents/:id/edit" component={CVEditor} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />

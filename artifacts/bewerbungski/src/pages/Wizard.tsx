@@ -293,7 +293,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
       await createMutation.mutateAsync({ data: {
         name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
         template: form.template,
-        profileData: { ...form, atsScore: ats } as unknown as Record<string, unknown>,
+        profileData: { ...form, atsScore: ats, cv_json: cvContent } as unknown as Record<string, unknown>,
         cvHtml,
         coverLetter: letterText,
         jobTitle: form.jobad.title,
