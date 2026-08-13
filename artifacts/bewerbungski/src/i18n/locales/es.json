@@ -380,8 +380,8 @@
     },
     "freetext": {
       "button": "Escritura rápida",
-      "hint": "Describe tu trayectoria con tus propias palabras: la IA ordena todo automáticamente en los campos correctos.",
-      "placeholder": "Simplemente escribe: ¿Quién eres? ¿Dónde has trabajado? ¿Qué sabes hacer?",
+      "hint": "Describe tu trayectoria con tus propias palabras, preferiblemente en orden cronológico, empezando por la escuela. Ejemplo: «Soy Max Müller de Berlín. Terminé la secundaria en 2010, luego formación como mecánico en ACME, desde 2018 en Bosch…» Puedes describir todo de una vez o solo partes, como prefieras. La IA solo rellena los campos sobre los que escribas.",
+      "placeholder": "Simplemente escribe, preferiblemente en orden: escuela, formación, trabajo. ¿Qué sabes hacer?",
       "import": "Dejar que la IA lo complete",
       "importing": "La IA está analizando…",
       "success": "¡Datos aplicados! Revisa los campos.",

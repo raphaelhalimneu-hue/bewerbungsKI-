@@ -380,8 +380,8 @@
     },
     "freetext": {
       "button": "Quick type-in",
-      "hint": "Describe your career in your own words – the AI automatically sorts everything into the right fields. Example: \"I'm Max Miller from Berlin, worked 5 years at Bosch as a mechanic, before that apprenticeship at ACME…\"",
-      "placeholder": "Just start writing: Who are you? Where have you worked? What are your skills?",
+      "hint": "Describe your career in your own words – ideally in chronological order, starting with school. The AI sorts everything into the right fields. Example: \"I'm Max Miller from Berlin. Finished secondary school in 2010, then apprenticeship as a mechanic at ACME, at Bosch since 2018…\" You can describe everything at once or just parts – it's up to you. The AI only fills in the fields you write about.",
+      "placeholder": "Just start writing – ideally in order: school, training, work. What are your skills?",
       "import": "Let AI fill it in",
       "importing": "AI is analyzing…",
       "success": "Data applied! Please review the fields.",

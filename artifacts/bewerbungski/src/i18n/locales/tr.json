@@ -380,8 +380,8 @@
     },
     "freetext": {
       "button": "Hızlı yazım",
-      "hint": "Kariyerinizi kendi kelimelerinizle anlatın – yapay zeka her şeyi otomatik olarak doğru alanlara yerleştirir.",
-      "placeholder": "Yazmaya başlayın: Kimsiniz? Nerede çalıştınız? Neler yapabilirsiniz?",
+      "hint": "Kariyerinizi kendi kelimelerinizle anlatın – tercihen kronolojik sırayla, okuldan başlayarak. Örnek: \"Ben Berlin'den Max Müller. 2010'da okulu bitirdim, sonra ACME'de makine teknisyenliği eğitimi, 2018'den beri Bosch'tayım…\" Her şeyi bir kerede veya sadece bir kısmını anlatabilirsiniz – nasıl isterseniz. Yapay zeka yalnızca yazdığınız alanları doldurur.",
+      "placeholder": "Yazmaya başlayın – tercihen sırayla: okul, eğitim, iş. Neler yapabilirsiniz?",
       "import": "Yapay zeka doldursun",
       "importing": "Yapay zeka analiz ediyor…",
       "success": "Veriler uygulandı! Lütfen alanları kontrol edin.",

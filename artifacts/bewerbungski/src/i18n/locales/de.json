@@ -380,8 +380,8 @@
     },
     "freetext": {
       "button": "Schnell eintippen",
-      "hint": "Beschreibe deinen Werdegang einfach in eigenen Worten – die KI sortiert alles automatisch in die richtigen Felder. Beispiel: „Ich bin Max Müller aus Berlin, habe 5 Jahre bei Bosch als Mechaniker gearbeitet, davor Ausbildung bei ACME…\"",
-      "placeholder": "Erzähl einfach drauflos: Wer bist du? Wo hast du gearbeitet? Was kannst du?",
+      "hint": "Beschreibe deinen Werdegang einfach in eigenen Worten – am besten chronologisch, mit der Schule beginnend. Die KI sortiert alles automatisch in die richtigen Felder. Beispiel: „Ich bin Max Müller aus Berlin. 2010 Realschulabschluss, danach Ausbildung zum Mechaniker bei ACME, seit 2018 bei Bosch…\" Du kannst alles auf einmal beschreiben oder nur einzelne Teile – ganz wie du willst. Die KI füllt nur die Felder aus, zu denen du etwas schreibst.",
+      "placeholder": "Erzähl einfach drauflos – am besten der Reihe nach: Schule, Ausbildung, Beruf. Was kannst du?",
       "import": "KI ausfüllen lassen",
       "importing": "KI analysiert…",
       "success": "Daten übernommen! Bitte prüfe die Felder.",

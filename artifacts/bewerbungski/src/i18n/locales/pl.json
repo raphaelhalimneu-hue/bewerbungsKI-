@@ -380,8 +380,8 @@
     },
     "freetext": {
       "button": "Szybkie wpisywanie",
-      "hint": "Opisz swoją karierę własnymi słowami – AI automatycznie uporządkuje wszystko w odpowiednich polach.",
-      "placeholder": "Po prostu pisz: Kim jesteś? Gdzie pracowałeś? Co potrafisz?",
+      "hint": "Opisz swoją karierę własnymi słowami – najlepiej chronologicznie, zaczynając od szkoły. Przykład: „Jestem Max Müller z Berlina. W 2010 ukończyłem szkołę, potem nauka zawodu mechanika w ACME, od 2018 w Bosch…\" Możesz opisać wszystko naraz lub tylko część – jak wolisz. AI wypełni tylko te pola, o których napiszesz.",
+      "placeholder": "Po prostu pisz – najlepiej po kolei: szkoła, nauka zawodu, praca. Co potrafisz?",
       "import": "Niech AI wypełni pola",
       "importing": "AI analizuje…",
       "success": "Dane zastosowane! Sprawdź pola.",
