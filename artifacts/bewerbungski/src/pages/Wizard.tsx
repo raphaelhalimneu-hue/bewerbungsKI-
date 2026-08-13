@@ -377,7 +377,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
               </button>
             </div>
           )}
-          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
+          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: (d as any).jobad ? { ...f.jobad, ...(d as any).jobad } : f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
           {step === 1 && <StepSchool school={form.school} setSchool={setSchool} />}
           {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
           {step === 3 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}

@@ -57,9 +57,12 @@ function normalize(raw: any) {
         const e = schoolEntries[0];
         school = { type: e.degree, name: e.institution, city: e.city, year: e.end.slice(0, 4) || e.start.slice(0, 4) };
       }
+      const ja = raw?.jobad ?? {};
+      const jobad = { title: str(ja?.title, 160), company: str(ja?.company, 160), address: str(ja?.address, 240), description: str(ja?.description, 4000) };
       return {
         education: edu.filter(e => !isSchool(e.degree)),
         ...(school.type || school.name ? { school } : {}),
+        ...(jobad.title || jobad.company ? { jobad } : {}),
       };
     })(),
   };
@@ -93,8 +96,9 @@ router.post("/parse-linkedin", requireAuth, async (req: AuthenticatedRequest, re
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
         max_tokens: 4096,
+        temperature: 0,
         system:
-          'Du extrahierst Lebenslaufdaten aus kopiertem LinkedIn-Profiltext. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}],"school":{"type":"","name":"","city":"","year":"JJJJ"}}. Regeln: Der allgemeinbildende Schulabschluss (Hauptschulabschluss, Realschulabschluss/Mittlere Reife, Abitur, Fachabitur o.ä.) gehört in "school" (type=Abschlussart, name=Schulname, year=Abschlussjahr) und NICHT in "education"; "education" ist nur für Berufsausbildung/Studium/Weiterbildung. Eine Berufsausbildung/Lehre MUSS immer als education-Eintrag erscheinen (degree z.B. "Ausbildung zum KFZ-Mechatroniker") und NICHT stattdessen nur unter experience. Fehlende Felder als leerer String. Daten im Format JJJJ-MM (bei nur Jahr: JJJJ-01). Bei aktueller Stelle current=true und end="". Sprachniveau als A1-C2 oder "Muttersprache". Beschreibungen kurz zusammenfassen. Behalte die Originalsprache der Inhalte bei.',
+          'Du extrahierst Lebenslaufdaten aus kopiertem LinkedIn-Profiltext. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}],"school":{"type":"","name":"","city":"","year":"JJJJ"},"jobad":{"title":"","company":"","address":"","description":""}}. Regeln: Wenn der Text eine angestrebte Stelle/Bewerbung erwähnt (z.B. "ich bewerbe mich als X bei Y"), fülle "jobad" (title=Stelle, company=Unternehmen, address=Adresse des Unternehmens falls genannt, description=Details zur Stelle); sonst alle jobad-Felder leer lassen. Der allgemeinbildende Schulabschluss (Hauptschulabschluss, Realschulabschluss/Mittlere Reife, Abitur, Fachabitur o.ä.) gehört in "school" (type=Abschlussart, name=Schulname, year=Abschlussjahr) und NICHT in "education"; "education" ist nur für Berufsausbildung/Studium/Weiterbildung. Eine Berufsausbildung/Lehre MUSS immer als education-Eintrag erscheinen (degree z.B. "Ausbildung zum KFZ-Mechatroniker") und NICHT stattdessen nur unter experience. Fehlende Felder als leerer String. Daten im Format JJJJ-MM (bei nur Jahr: JJJJ-01). Bei aktueller Stelle current=true und end="". Sprachniveau als A1-C2 oder "Muttersprache". Beschreibungen kurz zusammenfassen. Behalte die Originalsprache der Inhalte bei.',
         messages: [{ role: "user", content: `Extrahiere die Lebenslaufdaten aus diesem LinkedIn-Profiltext:\n\n${text.slice(0, 20000)}` }],
       }),
     });
@@ -154,9 +158,10 @@ router.post("/parse-freetext", requireAuth, async (req: AuthenticatedRequest, re
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
         max_tokens: 4096,
+        temperature: 0,
         system:
           'Ein Bewerber beschreibt seinen Werdegang in eigenen Worten (formlos, umgangssprachlich, unvollständig). Extrahiere und strukturiere die Lebenslaufdaten. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}]}. Regeln: Fehlende Felder als leerer String — NIEMALS Daten erfinden. Ungefähre Zeitangaben ("vor 5 Jahren", "seit 2020") in JJJJ-MM umrechnen (heute ist ' + new Date().toISOString().slice(0, 7) + '). Bei nur Jahr: JJJJ-01. Bei aktueller Stelle current=true und end="". Formulierungen professionalisieren (z.B. "hab bei Bosch geschraubt" → position "Mechaniker", description professionell). Skills aus dem Text ableiten (auch implizite: wer als Mechaniker arbeitete hat "Wartung & Instandhaltung"). Sprachniveau als A1-C2 oder "Muttersprache". Behalte die Sprache des Bewerbertextes bei.',
-        messages: [{ role: "user", content: `Strukturiere diesen formlosen Werdegang zu Lebenslaufdaten:\n\n${text.slice(0, 20000)}` }],
+        messages: [{ role: "user", content: `Strukturiere diesen formlosen Werdegang zu Lebenslaufdaten. WICHTIG: Fülle ALLE passenden Bereiche — school (Schulabschluss), education (Berufsausbildung/Studium als eigene Einträge), experience, skills, languages und jobad (falls eine angestrebte Stelle/Firma erwähnt wird):\n\n${text.slice(0, 20000)}` }],
       }),
     });
 
