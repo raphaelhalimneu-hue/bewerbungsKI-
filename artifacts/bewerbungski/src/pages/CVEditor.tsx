@@ -226,7 +226,7 @@ export default function CVEditor() {
     try {
       const blob = await customFetch<Blob>(`/api/documents/${params.id}/download/cv.docx`, {
         method: "POST",
-        body: JSON.stringify({ cv_json: cvState }),
+        body: JSON.stringify({ cv_json: cvState, template }),
         responseType: "blob",
       });
       const objUrl = URL.createObjectURL(blob);

@@ -25,18 +25,52 @@ function normal(text: string, size = 22) {
 function muted(text: string, size = 20) {
   return new TextRun({ text, size, color: "6B7280", font: FONT });
 }
-function hr() {
+// ── Template themes ──────────────────────────────────────────────────────────
+// Accent colors mirror the HTML templates in bewerbungski/src/lib/buildCVHTML.ts
+// so the Word download picks up the same Vorlagen-Optik (colored top bar,
+// section-heading color, rule colors). Word can't reproduce the decorative
+// gradients/circles, but the color identity of each template carries over.
+type DocxTheme = { accent: string; rule: string };
+const TEMPLATE_THEMES: Record<string, DocxTheme> = {
+  modern:    { accent: "111827", rule: "E5E7EB" }, // header border #111827, section rules #e5e7eb
+  classic:   { accent: "0F172A", rule: "0F172A" }, // 3px header + 2px section rules in #0f172a
+  creative:  { accent: "1E3A5F", rule: "E5E7EB" }, // sidebar navy #1e3a5f, section rules #e5e7eb
+  executive: { accent: "1F2937", rule: "CBD5E1" }, // navy #1f2937, rules #cbd5e1
+  minimal:   { accent: "111827", rule: "F3F4F6" }, // near-black text, hairline rules #f3f4f6
+  elegant:   { accent: "92400E", rule: "92400E" }, // gold #92400e headings + rules
+  bold:      { accent: "0F172A", rule: "0F172A" }, // dark header block + 2px rules #0f172a
+  compact:   { accent: "1F2937", rule: "E5E7EB" }, // headings #1f2937, rules #e5e7eb
+  swiss:     { accent: "DC2626", rule: "E5E7EB" }, // red bar/headings #dc2626, dividers #e5e7eb
+  nordic:    { accent: "0D9488", rule: "0D9488" }, // teal #0d9488 headings + 2px rules
+  corporate: { accent: "065F46", rule: "065F46" }, // green #065f46 headings + 2px rules
+  timeline:  { accent: "EA580C", rule: "EA580C" }, // orange #ea580c headings, 3px header border
+  slate:     { accent: "334155", rule: "334155" }, // slate #334155 headings + 2px rules
+  terra:     { accent: "C2410C", rule: "FED7AA" }, // terracotta #c2410c headings, rules #fed7aa
+};
+const DEFAULT_THEME: DocxTheme = { accent: "1F2937", rule: "D1D5DB" };
+function themeFor(template: unknown): DocxTheme {
+  return TEMPLATE_THEMES[String(template || "")] || DEFAULT_THEME;
+}
+/** Thick colored bar at the very top of the page, matching the template accent. */
+function topBar(theme: DocxTheme) {
   return new Paragraph({
-    border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: "1F2937" } },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 28, color: theme.accent } },
+    spacing: { before: 0, after: 200 },
+    children: [],
+  });
+}
+function hr(theme: DocxTheme = DEFAULT_THEME) {
+  return new Paragraph({
+    border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: theme.accent } },
     spacing: { before: 160, after: 160 },
     children: [],
   });
 }
-function sectionHeading(title: string) {
+function sectionHeading(title: string, theme: DocxTheme = DEFAULT_THEME) {
   return new Paragraph({
-    children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 19, font: FONT, color: "1F2937" })],
+    children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 19, font: FONT, color: theme.accent })],
     spacing: { before: 280, after: 80 },
-    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "D1D5DB" } },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: theme.rule } },
   });
 }
 function formatPeriod(start?: string, end?: string, current?: boolean): string {
@@ -68,6 +102,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     const skills: any[] = pd.skills || [];
     const languages: any[] = pd.languages || [];
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Name";
+    const theme = themeFor(doc.template);
 
     // Contact line: address | phone | email | linkedin
     const contactParts = [
@@ -78,10 +113,11 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     ].filter(Boolean);
 
     const children: any[] = [];
+    children.push(topBar(theme));
 
     // ── Header ──
     children.push(new Paragraph({
-      children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40 })],
+      children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
     }));
@@ -99,11 +135,11 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
         spacing: { after: 40 },
       }));
     }
-    children.push(hr());
+    children.push(hr(theme));
 
     // ── Profil ──
     if (p.summary) {
-      children.push(sectionHeading("Profil"));
+      children.push(sectionHeading("Profil", theme));
       children.push(new Paragraph({
         children: [normal(p.summary, 21)],
         spacing: { after: 80 },
@@ -113,7 +149,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
     // ── Berufserfahrung ──
     if (experience.length) {
-      children.push(sectionHeading("Berufserfahrung"));
+      children.push(sectionHeading("Berufserfahrung", theme));
       for (const exp of experience) {
         const period = formatPeriod(exp.start, exp.end, exp.current);
         const companyLine = [exp.company, exp.city].filter(Boolean).join(", ");
@@ -154,7 +190,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
     // ── Ausbildung ──
     if (education.length) {
-      children.push(sectionHeading("Ausbildung"));
+      children.push(sectionHeading("Ausbildung", theme));
       for (const edu of education) {
         const period = formatPeriod(edu.start, edu.end);
         // institution field (not school)
@@ -187,7 +223,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
     // ── Kenntnisse ──
     if (skills.length) {
-      children.push(sectionHeading("Kenntnisse"));
+      children.push(sectionHeading("Kenntnisse", theme));
       // Each skill as an inline chip (plain text, comma-separated — reliable across all Word versions)
       children.push(new Paragraph({
         children: skills.map((s: any, i: number) => [
@@ -200,7 +236,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
     // ── Sprachen ──
     if (languages.length) {
-      children.push(sectionHeading("Sprachen"));
+      children.push(sectionHeading("Sprachen", theme));
       for (const lang of languages) {
         children.push(new Paragraph({
           children: [bold(lang.language || "", 21), normal(`  —  ${lang.level || ""}`, 21)],
@@ -265,11 +301,13 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
     if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
 
+    const theme = themeFor(req.body?.template && VALID_TEMPLATE_IDS.has(req.body.template) ? req.body.template : doc.template);
     const children: any[] = [];
+    children.push(topBar(theme));
 
     // Header
     children.push(new Paragraph({
-      children: [new TextRun({ text: (cv.name || "").toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40 })],
+      children: [new TextRun({ text: (cv.name || "").toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
     }));
@@ -287,17 +325,17 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
         spacing: { after: 40 },
       }));
     }
-    children.push(hr());
+    children.push(hr(theme));
 
     // Profil
     if (cv.profile) {
-      children.push(sectionHeading("Profil"));
+      children.push(sectionHeading("Profil", theme));
       children.push(new Paragraph({ children: [normal(cv.profile, 21)], spacing: { after: 80 }, alignment: AlignmentType.JUSTIFIED }));
     }
 
     // Ausbildung
     if (cv.education?.length) {
-      children.push(sectionHeading("Ausbildung"));
+      children.push(sectionHeading("Ausbildung", theme));
       for (const edu of cv.education) {
         children.push(new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
@@ -323,7 +361,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 
     // Berufserfahrung
     if (cv.experience?.length) {
-      children.push(sectionHeading("Berufserfahrung"));
+      children.push(sectionHeading("Berufserfahrung", theme));
       for (const exp of cv.experience) {
         const companyLine = [exp.company, exp.location].filter(Boolean).join(", ");
         const bullets: string[] = Array.isArray(exp.bullets) ? exp.bullets : [];
@@ -358,7 +396,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 
     // Kenntnisse
     if (cv.skills?.length) {
-      children.push(sectionHeading("Kenntnisse"));
+      children.push(sectionHeading("Kenntnisse", theme));
       children.push(new Paragraph({
         children: cv.skills.map((s: string, i: number) => [
           i > 0 ? new TextRun({ text: "   |   ", size: 20, font: FONT, color: "9CA3AF" }) : null,
@@ -370,7 +408,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 
     // Sprachen
     if (cv.languages?.length) {
-      children.push(sectionHeading("Sprachen"));
+      children.push(sectionHeading("Sprachen", theme));
       for (const lang of cv.languages) {
         children.push(new Paragraph({
           children: [bold(lang.name || "", 21), normal(`  —  ${lang.level || ""}`, 21)],
@@ -412,20 +450,22 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "";
+    const theme = themeFor(doc.template);
 
     // Use edited text if provided via query param (client sends updated text), else stored text
     const letterText: string = (req.query.text as string) || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
     const children: any[] = [];
+    children.push(topBar(theme));
 
     if (fullName) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 32, font: "Helvetica", characterSpacing: 60 })],
+        children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 32, font: FONT, characterSpacing: 60, color: theme.accent })],
         alignment: AlignmentType.CENTER,
         spacing: { after: 80 },
       }));
-      children.push(hr());
+      children.push(hr(theme));
       children.push(new Paragraph({ children: [], spacing: { after: 200 } }));
     }
 
@@ -433,7 +473,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const lines = letterText.split(/\n/);
     for (const line of lines) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: line, size: 22, font: "Helvetica" })],
+        children: [new TextRun({ text: line, size: 22, font: FONT })],
         spacing: { after: line.trim() === "" ? 80 : 120 },
         alignment: AlignmentType.JUSTIFIED,
       }));
