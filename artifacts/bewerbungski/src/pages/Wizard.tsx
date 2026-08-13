@@ -370,9 +370,13 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
 
         <div className="card" style={{ marginBottom: 20 }}>
           {hasSavedProfile && step === 0 && (
-            <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "12px 16px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div
+              onClick={() => !profileLoading && loadProfile()}
+              role="button"
+              style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "12px 16px", marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", cursor: "pointer" }}
+            >
               <span style={{ fontSize: 14 }}>💾 {t("wizard.savedProfileAvailable")}</span>
-              <button className="btn btn-s" onClick={loadProfile} disabled={profileLoading} style={{ flexShrink: 0, fontSize: 13 }}>
+              <button className="btn btn-s" onClick={(e) => { e.stopPropagation(); loadProfile(); }} disabled={profileLoading} style={{ flexShrink: 0, fontSize: 13 }}>
                 {profileLoading ? "…" : t("wizard.loadProfile")}
               </button>
             </div>
