@@ -10,3 +10,5 @@ description: How to deploy this project to Railway (the only production environm
 - **Why:** repeated painful discovery; user is mobile-only and non-technical, so deploys must be done by the agent.
 
 **2026-08-13:** Uploads können bei Railway stundenlang in INITIALIZING hängen (deploymentEvents zeigt nur SNAPSHOT_CODE, kein Build startet); ältere hängende Deploys kippen später auf FAILED ("no associated build"). Plattformseitig — erneutes Hochladen hilft nicht sofort; warten oder später neu deployen.
+
+- 2026-08-13 evening: platform-wide Railway incident — deploys stuck in INITIALIZING for hours (only SNAPSHOT_CODE event, no build). deploymentCancel of queued deploys + fresh upload does NOT help; only waiting for Railway recovery works. Old version keeps serving meanwhile.
