@@ -2,7 +2,8 @@ import { Layout } from "../components/Layout";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload, FiCamera } from "react-icons/fi";
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -47,51 +48,56 @@ function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: stri
   );
 }
 
-// ── Before/After card ─────────────────────────────────────────────────────────
-interface ExampleCard {
-  role: string;
-  company: string;
-  beforeLines: string[];
-  afterLines: string[];
-}
+// ── Example CV showcase (rendered with a real template) ──────────────────────
+const EXAMPLE_CV: CVContent = {
+  name: "Laura Sommer",
+  title: "Examinierte Pflegefachkraft",
+  contact: "Lindenstraße 24, 30159 Hannover · +49 170 1234567 · laura.sommer@mail.de",
+  profile: "Examinierte Pflegefachkraft mit acht Jahren Erfahrung in der stationären Alten- und Langzeitpflege. Sicher in Grund- und Behandlungspflege, Pflegeplanung und Dokumentation nach aktuellen Standards. Übernimmt Verantwortung für Auszubildende und arbeitet eng mit Ärzten und Angehörigen zusammen. Ruhig und zugewandt, auch in fordernden Situationen.",
+  experience: [
+    { position: "Auszubildende Altenpflege", company: "Seniorenheim am Park", location: "Hannover", period: "08/2015 – 07/2018", bullets: ["Erlernen der Grund- und Behandlungspflege unter Anleitung erfahrener Fachkräfte", "Unterstützung bei Mobilisation, Aktivierung und Alltagsbegleitung der Bewohner", "Mitwirkung an Pflegedokumentation und Übergaben im Drei-Schicht-System"] },
+    { position: "Examinierte Pflegefachkraft", company: "Seniorenheim am Park", location: "Hannover", period: "08/2018 – 06/2022", bullets: ["Eigenverantwortliche Pflege und Betreuung von 24 Bewohnern in allen Pflegegraden", "Erstellung und Aktualisierung von Pflegeplanungen sowie lückenlose Pflegedokumentation", "Durchführung von Medikamentengabe und Vitalzeichenkontrollen nach ärztlicher Verordnung", "Enge Zusammenarbeit mit Ärzten, Therapeuten und Angehörigen"] },
+    { position: "Pflegefachkraft & Praxisanleiterin", company: "AWO Pflegezentrum", location: "Hannover", period: "07/2022 – heute", bullets: ["Fachliche Anleitung und Bewertung von jährlich bis zu 6 Auszubildenden", "Einarbeitung neuer Kolleginnen und Kollegen sowie Mitgestaltung der Dienstplanung", "Wundmanagement und Umsetzung aktueller Expertenstandards auf der Station", "Ansprechpartnerin für Qualitätsprüfungen des MDK — Station zuletzt mit Note 1,2 bewertet"] },
+  ],
+  education: [
+    { degree: "Realschulabschluss", institution: "Realschule Hannover-Mitte", location: "Hannover", period: "2015", note: "Abschlussnote 2,1" },
+    { degree: "Ausbildung zur examinierten Altenpflegerin", institution: "Pflegeschule Hannover", location: "Hannover", period: "08/2015 – 07/2018", note: "Theoretische Ausbildung parallel zur praktischen Tätigkeit, Abschlussnote 1,8" },
+    { degree: "Weiterbildung Praxisanleitung (300 Std.)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Hannover", period: "01/2022 – 06/2022", note: "Berufsbegleitend, mit Zertifikat abgeschlossen" },
+  ],
+  skills: ["Grund- und Behandlungspflege", "Pflegedokumentation & Pflegeplanung", "Medikamentenmanagement", "Wundversorgung & Expertenstandards", "Praxisanleitung von Auszubildenden", "Mobilisation & Lagerungstechniken", "Umgang mit demenziell erkrankten Menschen", "Hygiene- und Infektionsschutz"],
+  languages: [{ name: "Deutsch", level: "Muttersprache" }, { name: "Englisch", level: "Gut in Wort und Schrift" }, { name: "Polnisch", level: "Grundkenntnisse" }],
+  signature: "Hannover, den 13.08.2026",
+};
 
-function BeforeAfterCard({ ex, labelBefore, labelAfter }: {
-  ex: ExampleCard;
-  labelBefore: string;
-  labelAfter: string;
-}) {
+function ExampleCVShowcase() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const cvRef = useRef<HTMLDivElement>(null);
+  const html = useMemo(() => renderCVContent(EXAMPLE_CV, "elegant"), []);
+
+  useEffect(() => {
+    function fit() {
+      if (!wrapRef.current || !cvRef.current) return;
+      const available = wrapRef.current.clientWidth;
+      const scale = available < 794 ? available / 794 : 1;
+      (cvRef.current.style as any).zoom = String(scale);
+    }
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+
   return (
-    <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-        {/* Before */}
-        <div style={{ padding: "14px 16px", borderRight: "1px solid var(--border)" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
-            {labelBefore}
-          </div>
-          {ex.beforeLines.map((line, i) => (
-            <div key={i} style={{ fontSize: 11, color: "var(--text2)", lineHeight: 1.5, opacity: 0.65, textDecoration: "line-through", marginBottom: 4 }}>
-              {line}
-            </div>
-          ))}
-        </div>
-        {/* After */}
-        <div style={{ padding: "14px 16px", background: "var(--brand-l)" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
-            {labelAfter} ✨
-          </div>
-          {ex.afterLines.map((line, i) => (
-            <div key={i} style={{ fontSize: 11, lineHeight: 1.5, fontWeight: i === 0 ? 700 : 400, color: i === 0 ? "var(--text)" : "var(--text2)", marginBottom: 4 }}>
-              {line}
-            </div>
-          ))}
-        </div>
+    <div ref={wrapRef} style={{ maxWidth: 794, margin: "0 auto" }}>
+      <div style={{
+        borderRadius: 14, overflow: "hidden", border: "1px solid var(--border)",
+        boxShadow: "0 18px 50px rgba(15,23,42,.14)", background: "#fff",
+      }}>
+        <div ref={cvRef} style={{ width: 794, background: "#fff", pointerEvents: "none", userSelect: "none" }}
+          dangerouslySetInnerHTML={{ __html: html }} />
       </div>
-      <div style={{ padding: "8px 14px", background: "var(--bg3)", display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--muted)", borderTop: "1px solid var(--border)" }}>
-        <FiCheck style={{ color: "var(--ok)", flexShrink: 0 }} />
-        <span style={{ fontWeight: 600, color: "var(--text2)" }}>{ex.role}</span>
-        <span>·</span>
-        <span>{ex.company}</span>
-      </div>
+      <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+        <span aria-hidden>✨</span> Erstellt mit <strong style={{ color: "var(--brand)" }}>bewerbungski.com</strong> — Vorlage „Elegant“
+      </p>
     </div>
   );
 }
@@ -109,26 +115,6 @@ export default function Home() {
     { icon: <FiCamera />,  title: t("home.feat6Title"), desc: t("home.feat6Desc") },
   ];
 
-  const examples: ExampleCard[] = [
-    {
-      role: t("home.ba.ex1Role"),
-      company: t("home.ba.ex1Company"),
-      beforeLines: [t("home.ba.ex1b1"), t("home.ba.ex1b2"), t("home.ba.ex1b3")],
-      afterLines:  [t("home.ba.ex1a1"), t("home.ba.ex1a2"), t("home.ba.ex1a3")],
-    },
-    {
-      role: t("home.ba.ex2Role"),
-      company: t("home.ba.ex2Company"),
-      beforeLines: [t("home.ba.ex2b1"), t("home.ba.ex2b2"), t("home.ba.ex2b3")],
-      afterLines:  [t("home.ba.ex2a1"), t("home.ba.ex2a2"), t("home.ba.ex2a3")],
-    },
-    {
-      role: t("home.ba.ex3Role"),
-      company: t("home.ba.ex3Company"),
-      beforeLines: [t("home.ba.ex3b1"), t("home.ba.ex3b2"), t("home.ba.ex3b3")],
-      afterLines:  [t("home.ba.ex3a1"), t("home.ba.ex3a2"), t("home.ba.ex3a3")],
-    },
-  ];
 
   const faqs = [1, 2, 3, 4, 5].map(n => ({ q: t(`home.faq${n}Q`), a: t(`home.faq${n}A`) }));
 
@@ -233,16 +219,7 @@ export default function Home() {
         <p style={{ textAlign: "center", color: "var(--muted)", fontSize: 14, marginBottom: 28 }}>
           {t("home.ba.subtitle")}
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-          {examples.map((ex, i) => (
-            <BeforeAfterCard
-              key={i}
-              ex={ex}
-              labelBefore={t("home.ba.labelBefore")}
-              labelAfter={t("home.ba.labelAfter")}
-            />
-          ))}
-        </div>
+        <ExampleCVShowcase />
       </section>
 
       {/* ── FAQ ── */}
