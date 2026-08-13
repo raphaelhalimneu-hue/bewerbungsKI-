@@ -54,6 +54,11 @@ function tplModern(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `${sectionTitle("Profil","#374151","1px solid #e5e7eb")}<p style="font-size:12.5px;line-height:1.7;color:#374151;">${cv.profile}</p>` : ""}
+  ${cv.education.length ? `${sectionTitle("Ausbildung","#374151","1px solid #e5e7eb")}${cv.education.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+      <div><div style="font-size:13px;font-weight:700;color:#111827;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
+    </div>`).join("")}` : ""}
   ${cv.experience.length ? `${sectionTitle("Berufserfahrung","#374151","1px solid #e5e7eb")}${cv.experience.map(e=>`
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
       <div style="flex:1;">
@@ -61,11 +66,6 @@ function tplModern(cv: CVContent): string {
         <div style="font-size:11.5px;color:#6b7280;margin-top:1px;">${e.company}${e.location ? " · "+e.location : ""}</div>
         <div style="font-size:12px;color:#374151;line-height:1.6;margin-top:4px;">${bullets(e.bullets)}</div>
       </div>
-      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
-    </div>`).join("")}` : ""}
-  ${cv.education.length ? `${sectionTitle("Ausbildung","#374151","1px solid #e5e7eb")}${cv.education.map(e=>`
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-      <div><div style="font-size:13px;font-weight:700;color:#111827;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
       <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
     </div>`).join("")}` : ""}
   ${cv.skills.length ? `${sectionTitle("Kenntnisse","#374151","1px solid #e5e7eb")}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:#f3f4f6;color:#374151;border-radius:4px;padding:4px 11px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div>` : ""}
@@ -91,8 +91,8 @@ function tplClassic(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `${sectionTitle("Profil","#0f172a","2px solid #0f172a")}<p style="font-size:12.5px;line-height:1.7;color:#374151;">${cv.profile}</p>` : ""}
-  ${cv.experience.length ? `${sectionTitle("Berufserfahrung","#0f172a","2px solid #0f172a")}${cv.experience.map(e=>row(e.period,`<div style="font-size:13px;font-weight:700;">${e.position}</div><div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>${bullets(e.bullets)}`)).join("")}` : ""}
   ${cv.education.length ? `${sectionTitle("Ausbildung","#0f172a","2px solid #0f172a")}${cv.education.map(e=>row(e.period,`<div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>`)).join("")}` : ""}
+  ${cv.experience.length ? `${sectionTitle("Berufserfahrung","#0f172a","2px solid #0f172a")}${cv.experience.map(e=>row(e.period,`<div style="font-size:13px;font-weight:700;">${e.position}</div><div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>${bullets(e.bullets)}`)).join("")}` : ""}
   ${cv.skills.length ? `${sectionTitle("Kenntnisse","#0f172a","2px solid #0f172a")}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:#f1f5f9;border-radius:4px;padding:4px 10px;font-size:11.5px;">${s}</span>`).join("")}</div>` : ""}
   ${cv.languages.length ? `${sectionTitle("Sprachen","#0f172a","2px solid #0f172a")}${cv.languages.map(l=>`<div style="font-size:12.5px;margin-bottom:4px;display:flex;justify-content:space-between;"><strong>${l.name}</strong><span style="color:#6b7280;">${l.level}</span></div>`).join("")}` : ""}
   <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
@@ -117,6 +117,14 @@ function tplCreative(cv: CVContent): string {
   </div>
   <div style="flex:1;padding:36px 32px 40px;color:#1f2937;">
     ${cv.profile ? `<div style="font-size:12.5px;line-height:1.7;color:#374151;margin-bottom:4px;">${cv.profile}</div>` : ""}
+    ${cv.education.length ? `${sectionTitle("Ausbildung",side,"1.5px solid #e5e7eb")}${cv.education.map(e=>`
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;">${e.degree}</div>
+          <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
+        </div>
+        <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+      </div>`).join("")}` : ""}
     ${cv.experience.length ? `${sectionTitle("Berufserfahrung",side,"1.5px solid #e5e7eb")}${cv.experience.map(e=>`
       <div style="margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -125,14 +133,6 @@ function tplCreative(cv: CVContent): string {
         </div>
         <div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>
         <div style="font-size:12px;margin-top:3px;">${bullets(e.bullets)}</div>
-      </div>`).join("")}` : ""}
-    ${cv.education.length ? `${sectionTitle("Ausbildung",side,"1.5px solid #e5e7eb")}${cv.education.map(e=>`
-      <div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;">
-          <div style="font-size:13px;font-weight:700;">${e.degree}</div>
-          <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
-        </div>
-        <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
       </div>`).join("")}` : ""}
     <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
   </div>
@@ -152,6 +152,11 @@ function tplExecutive(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `${sectionTitle("Profil",navy,"1px solid #cbd5e1")}<p style="font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.75;color:#374151;">${cv.profile}</p>` : ""}
+  ${cv.education.length ? `${sectionTitle("Ausbildung",navy,"1px solid #cbd5e1")}${cv.education.map(e=>`
+    <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
+      <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#6b7280;font-style:italic;">${e.institution}${e.location?" — "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      <div style="font-family:'Inter',sans-serif;font-size:11px;color:#94a3b8;white-space:nowrap;padding-left:14px;">${e.period}</div>
+    </div>`).join("")}` : ""}
   ${cv.experience.length ? `${sectionTitle("Berufliche Laufbahn",navy,"1px solid #cbd5e1")}${cv.experience.map(e=>`
     <div style="margin-bottom:13px;">
       <div style="display:flex;justify-content:space-between;">
@@ -160,11 +165,6 @@ function tplExecutive(cv: CVContent): string {
       </div>
       <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#6b7280;font-style:italic;">${e.company}${e.location?" — "+e.location:""}</div>
       <div style="font-family:'Inter',sans-serif;font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div>
-    </div>`).join("")}` : ""}
-  ${cv.education.length ? `${sectionTitle("Ausbildung",navy,"1px solid #cbd5e1")}${cv.education.map(e=>`
-    <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
-      <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#6b7280;font-style:italic;">${e.institution}${e.location?" — "+e.location:""}${e.note?" · "+e.note:""}</div></div>
-      <div style="font-family:'Inter',sans-serif;font-size:11px;color:#94a3b8;white-space:nowrap;padding-left:14px;">${e.period}</div>
     </div>`).join("")}` : ""}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px;">
     ${cv.skills.length ? `<div>${sectionTitle("Kenntnisse",navy,"1px solid #cbd5e1")}<div style="font-family:'Inter',sans-serif;display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:#f3f4f6;color:#374151;border-radius:3px;padding:3px 10px;font-size:11px;">${s}</span>`).join("")}</div></div>` : ""}
@@ -186,15 +186,15 @@ function tplMinimal(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `<p style="font-size:12.5px;line-height:1.75;color:#374151;margin-bottom:28px;padding-top:20px;border-top:1px solid #f3f4f6;">${cv.profile}</p>` : ""}
-  ${cv.experience.length ? `<div style="border-top:1px solid #f3f4f6;padding-top:20px;margin-bottom:0;">${cv.experience.map(e=>`
-    <div style="display:flex;gap:20px;margin-bottom:16px;">
-      <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-top:2px;min-width:90px;">${e.period}</div>
-      <div><div style="font-size:13px;font-weight:600;">${e.position}</div><div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div><div style="font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div></div>
-    </div>`).join("")}</div>` : ""}
   ${cv.education.length ? `<div style="border-top:1px solid #f3f4f6;padding-top:20px;margin-top:8px;">${cv.education.map(e=>`
     <div style="display:flex;gap:20px;margin-bottom:12px;">
       <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-top:2px;min-width:90px;">${e.period}</div>
       <div><div style="font-size:13px;font-weight:600;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+    </div>`).join("")}</div>` : ""}
+  ${cv.experience.length ? `<div style="border-top:1px solid #f3f4f6;padding-top:20px;margin-bottom:0;">${cv.experience.map(e=>`
+    <div style="display:flex;gap:20px;margin-bottom:16px;">
+      <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-top:2px;min-width:90px;">${e.period}</div>
+      <div><div style="font-size:13px;font-weight:600;">${e.position}</div><div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div><div style="font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div></div>
     </div>`).join("")}</div>` : ""}
   ${cv.skills.length ? `<div style="border-top:1px solid #f3f4f6;padding-top:20px;margin-top:8px;"><div style="font-size:10.5px;color:#9ca3af;margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase;">Kenntnisse</div><div style="font-size:12px;color:#374151;">${cv.skills.join(" · ")}</div></div>` : ""}
   ${cv.languages.length ? `<div style="border-top:1px solid #f3f4f6;padding-top:20px;margin-top:8px;"><div style="font-size:10.5px;color:#9ca3af;margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase;">Sprachen</div>${cv.languages.map(l=>`<span style="font-size:12px;margin-right:16px;"><strong>${l.name}</strong> <span style="color:#9ca3af;">${l.level}</span></span>`).join("")}</div>` : ""}
@@ -215,6 +215,11 @@ function tplElegant(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `<div style="background:${goldL};border-left:3px solid ${gold};padding:12px 16px;margin:18px 0 0;font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.75;color:#374151;">${cv.profile}</div>` : ""}
+  ${cv.education.length ? `${sectionTitle("Ausbildung",gold,`1px solid ${gold}`)}${cv.education.map(e=>`
+    <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
+      <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      <div style="font-family:'Inter',sans-serif;font-size:10.5px;color:#a8a29e;white-space:nowrap;padding-left:12px;">${e.period}</div>
+    </div>`).join("")}` : ""}
   ${cv.experience.length ? `${sectionTitle("Berufserfahrung",gold,`1px solid ${gold}`)}${cv.experience.map(e=>`
     <div style="margin-bottom:13px;">
       <div style="display:flex;justify-content:space-between;">
@@ -223,11 +228,6 @@ function tplElegant(cv: CVContent): string {
       </div>
       <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.company}${e.location?" · "+e.location:""}</div>
       <div style="font-family:'Inter',sans-serif;font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div>
-    </div>`).join("")}` : ""}
-  ${cv.education.length ? `${sectionTitle("Ausbildung",gold,`1px solid ${gold}`)}${cv.education.map(e=>`
-    <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
-      <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
-      <div style="font-family:'Inter',sans-serif;font-size:10.5px;color:#a8a29e;white-space:nowrap;padding-left:12px;">${e.period}</div>
     </div>`).join("")}` : ""}
   ${cv.skills.length ? `${sectionTitle("Kenntnisse",gold,`1px solid ${gold}`)}<div style="font-family:'Inter',sans-serif;display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:${goldL};color:${gold};border:1px solid #fde68a;border-radius:3px;padding:4px 11px;font-size:11.5px;">${s}</span>`).join("")}</div>` : ""}
   ${cv.languages.length ? `${sectionTitle("Sprachen",gold,`1px solid ${gold}`)}${cv.languages.map(l=>`<div style="font-family:'Inter',sans-serif;font-size:12.5px;margin-bottom:4px;display:flex;justify-content:space-between;"><strong>${l.name}</strong><span style="color:#78716c;">${l.level}</span></div>`).join("")}` : ""}
@@ -249,6 +249,11 @@ function tplBold(cv: CVContent): string {
   </div>
   <div style="padding:28px 52px 46px;">
     ${cv.profile ? `<p style="font-size:12.5px;line-height:1.75;color:#374151;margin-bottom:4px;">${cv.profile}</p>` : ""}
+    ${cv.education.length ? `${sectionTitle("Ausbildung",dark,`2px solid ${dark}`)}${cv.education.map(e=>`
+      <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
+        <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+        <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
+      </div>`).join("")}` : ""}
     ${cv.experience.length ? `${sectionTitle("Berufserfahrung",dark,`2px solid ${dark}`)}${cv.experience.map(e=>`
       <div style="margin-bottom:13px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -257,11 +262,6 @@ function tplBold(cv: CVContent): string {
         </div>
         <div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>
         <div style="font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div>
-      </div>`).join("")}` : ""}
-    ${cv.education.length ? `${sectionTitle("Ausbildung",dark,`2px solid ${dark}`)}${cv.education.map(e=>`
-      <div style="margin-bottom:9px;display:flex;justify-content:space-between;">
-        <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
-        <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
       </div>`).join("")}` : ""}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px;">
       ${cv.skills.length ? `<div>${sectionTitle("Kenntnisse",dark,`2px solid ${dark}`)}<div style="display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:#f1f5f9;color:${dark};border-radius:3px;padding:4px 10px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div></div>` : ""}
@@ -284,15 +284,15 @@ function tplCompact(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `<p style="font-size:11.5px;line-height:1.65;color:#374151;margin:10px 0 0;">${cv.profile}</p>` : ""}
-  ${cv.experience.length ? `<div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${acc};border-bottom:1px solid #e5e7eb;padding-bottom:3px;margin:12px 0 7px;">Berufserfahrung</div>${cv.experience.map(e=>`
-    <div style="display:flex;gap:10px;margin-bottom:8px;">
-      <div style="font-size:10px;color:#9ca3af;white-space:nowrap;padding-top:2px;min-width:80px;">${e.period}</div>
-      <div><strong>${e.position}</strong> · ${e.company}${e.location?" · "+e.location:""}${e.bullets?.length?`<br><span style="color:#374151;">${e.bullets.join(" · ")}</span>`:""}</div>
-    </div>`).join("")}` : ""}
   ${cv.education.length ? `<div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${acc};border-bottom:1px solid #e5e7eb;padding-bottom:3px;margin:12px 0 7px;">Ausbildung</div>${cv.education.map(e=>`
     <div style="display:flex;gap:10px;margin-bottom:6px;">
       <div style="font-size:10px;color:#9ca3af;white-space:nowrap;min-width:80px;">${e.period}</div>
       <div><strong>${e.degree}</strong> · ${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+    </div>`).join("")}` : ""}
+  ${cv.experience.length ? `<div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${acc};border-bottom:1px solid #e5e7eb;padding-bottom:3px;margin:12px 0 7px;">Berufserfahrung</div>${cv.experience.map(e=>`
+    <div style="display:flex;gap:10px;margin-bottom:8px;">
+      <div style="font-size:10px;color:#9ca3af;white-space:nowrap;padding-top:2px;min-width:80px;">${e.period}</div>
+      <div><strong>${e.position}</strong> · ${e.company}${e.location?" · "+e.location:""}${e.bullets?.length?`<br><span style="color:#374151;">${e.bullets.join(" · ")}</span>`:""}</div>
     </div>`).join("")}` : ""}
   ${cv.skills.length||cv.languages.length ? `<div style="display:flex;gap:24px;margin-top:10px;">
     ${cv.skills.length?`<div style="flex:1;"><div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${acc};margin-bottom:5px;">Kenntnisse</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${cv.skills.map(s=>`<span style="background:#f3f4f6;border-radius:3px;padding:2px 8px;font-size:11px;">${s}</span>`).join("")}</div></div>`:""}
@@ -317,15 +317,15 @@ function tplSwiss(cv: CVContent): string {
   <div style="height:3px;background:${red};margin-bottom:6px;"></div>
   <div style="font-size:10.5px;color:#888;margin-bottom:20px;">${cv.contact}</div>
   ${cv.profile ? `<div style="border-left:3px solid ${red};padding-left:14px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#333;">${cv.profile}</div>` : ""}
-  ${cv.experience.length ? `<div style="height:1px;background:#e5e7eb;margin:0 0 14px;"></div><div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${red};margin-bottom:10px;">Berufserfahrung</div>${cv.experience.map(e=>`
-    <div style="display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:12px;">
-      <div style="font-size:10.5px;color:#999;line-height:1.5;padding-top:2px;">${e.period}</div>
-      <div><div style="font-size:13px;font-weight:700;">${e.position}</div><div style="font-size:11.5px;color:#666;">${e.company}${e.location?" · "+e.location:""}</div>${bullets(e.bullets)}</div>
-    </div>`).join("")}` : ""}
   ${cv.education.length ? `<div style="height:1px;background:#e5e7eb;margin:14px 0 14px;"></div><div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${red};margin-bottom:10px;">Ausbildung</div>${cv.education.map(e=>`
     <div style="display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:10px;">
       <div style="font-size:10.5px;color:#999;">${e.period}</div>
       <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#666;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+    </div>`).join("")}` : ""}
+  ${cv.experience.length ? `<div style="height:1px;background:#e5e7eb;margin:0 0 14px;"></div><div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${red};margin-bottom:10px;">Berufserfahrung</div>${cv.experience.map(e=>`
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:12px;">
+      <div style="font-size:10.5px;color:#999;line-height:1.5;padding-top:2px;">${e.period}</div>
+      <div><div style="font-size:13px;font-weight:700;">${e.position}</div><div style="font-size:11.5px;color:#666;">${e.company}${e.location?" · "+e.location:""}</div>${bullets(e.bullets)}</div>
     </div>`).join("")}` : ""}
   <div style="height:1px;background:#e5e7eb;margin:14px 0 14px;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
@@ -350,16 +350,16 @@ function tplNordic(cv: CVContent): string {
     ${cv.photo ? `<img src="${cv.photo}" style="width:82px;height:104px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-left:24px;" />` : ""}
   </div>
   ${cv.profile ? `<div style="background:${tealL};border-radius:8px;padding:16px 18px;margin-bottom:28px;font-size:12.5px;line-height:1.75;color:#374151;">${cv.profile}</div>` : ""}
+  ${cv.education.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${teal};border-bottom:2px solid ${teal};padding-bottom:4px;margin:20px 0 14px;">Ausbildung</div>${cv.education.map(e=>`
+    <div style="margin-bottom:10px;padding-left:14px;border-left:2px solid #e5e7eb;">
+      <div style="display:flex;justify-content:space-between;"><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div></div>
+      <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+    </div>`).join("")}` : ""}
   ${cv.experience.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${teal};border-bottom:2px solid ${teal};padding-bottom:4px;margin-bottom:14px;">Berufserfahrung</div>${cv.experience.map(e=>`
     <div style="margin-bottom:14px;padding-left:14px;border-left:2px solid #e5e7eb;">
       <div style="display:flex;justify-content:space-between;"><div style="font-size:13px;font-weight:700;">${e.position}</div><div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div></div>
       <div style="font-size:11.5px;color:#6b7280;margin-top:1px;">${e.company}${e.location?" · "+e.location:""}</div>
       <div style="font-size:12px;margin-top:3px;">${bullets(e.bullets)}</div>
-    </div>`).join("")}` : ""}
-  ${cv.education.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${teal};border-bottom:2px solid ${teal};padding-bottom:4px;margin:20px 0 14px;">Ausbildung</div>${cv.education.map(e=>`
-    <div style="margin-bottom:10px;padding-left:14px;border-left:2px solid #e5e7eb;">
-      <div style="display:flex;justify-content:space-between;"><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div></div>
-      <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
     </div>`).join("")}` : ""}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px;">
     ${cv.skills.length ? `<div><div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${teal};margin-bottom:8px;">Kenntnisse</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:${tealL};color:${teal};border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;">${s}</span>`).join("")}</div></div>` : ""}
@@ -385,6 +385,14 @@ function tplCorporate(cv: CVContent): string {
   </div>
   <div style="flex:1;padding:36px 30px 40px;">
     ${cv.profile ? `<div style="background:${grnL};border-left:3px solid ${acc};padding:12px 16px;margin-bottom:22px;font-size:12.5px;line-height:1.75;color:#374151;border-radius:0 6px 6px 0;">${cv.profile}</div>` : ""}
+    ${cv.education.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${grn};border-bottom:2px solid ${grn};padding-bottom:4px;margin:18px 0 12px;">Ausbildung</div>${cv.education.map(e=>`
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:${grn};">${e.degree}</div>
+          <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
+        </div>
+        <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+      </div>`).join("")}` : ""}
     ${cv.experience.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${grn};border-bottom:2px solid ${grn};padding-bottom:4px;margin-bottom:12px;">Berufserfahrung</div>${cv.experience.map(e=>`
       <div style="margin-bottom:13px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -393,14 +401,6 @@ function tplCorporate(cv: CVContent): string {
         </div>
         <div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>
         <div style="font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div>
-      </div>`).join("")}` : ""}
-    ${cv.education.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${grn};border-bottom:2px solid ${grn};padding-bottom:4px;margin:18px 0 12px;">Ausbildung</div>${cv.education.map(e=>`
-      <div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;">
-          <div style="font-size:13px;font-weight:700;color:${grn};">${e.degree}</div>
-          <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
-        </div>
-        <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
       </div>`).join("")}` : ""}
     <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
   </div>
@@ -420,6 +420,18 @@ function tplTimeline(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `<div style="background:${orgL};border-radius:6px;padding:12px 16px;margin-bottom:22px;font-size:12.5px;line-height:1.75;color:#374151;">${cv.profile}</div>` : ""}
+  ${cv.education.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${org};margin:20px 0 14px;">Ausbildung</div>
+  <div style="position:relative;padding-left:28px;border-left:2px solid #fed7aa;">
+    ${cv.education.map(e=>`
+    <div style="position:relative;margin-bottom:10px;">
+      <div style="position:absolute;left:-35px;top:3px;width:13px;height:13px;border-radius:50%;background:#fed7aa;border:2px solid #fff;box-shadow:0 0 0 2px ${org};"></div>
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;">${e.degree}</div>
+        <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
+      </div>
+      <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+    </div>`).join("")}
+  </div>` : ""}
   ${cv.experience.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${org};margin-bottom:14px;">Berufserfahrung</div>
   <div style="position:relative;padding-left:28px;border-left:2px solid #fed7aa;">
     ${cv.experience.map((e,i)=>`
@@ -431,18 +443,6 @@ function tplTimeline(cv: CVContent): string {
       </div>
       <div style="font-size:11.5px;color:#6b7280;">${e.company}${e.location?" · "+e.location:""}</div>
       <div style="font-size:12px;margin-top:3px;">${bullets(e.bullets)}</div>
-    </div>`).join("")}
-  </div>` : ""}
-  ${cv.education.length ? `<div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${org};margin:20px 0 14px;">Ausbildung</div>
-  <div style="position:relative;padding-left:28px;border-left:2px solid #fed7aa;">
-    ${cv.education.map(e=>`
-    <div style="position:relative;margin-bottom:10px;">
-      <div style="position:absolute;left:-35px;top:3px;width:13px;height:13px;border-radius:50%;background:#fed7aa;border:2px solid #fff;box-shadow:0 0 0 2px ${org};"></div>
-      <div style="display:flex;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;">${e.degree}</div>
-        <div style="font-size:10.5px;color:#9ca3af;white-space:nowrap;padding-left:12px;">${e.period}</div>
-      </div>
-      <div style="font-size:11.5px;color:#6b7280;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
     </div>`).join("")}
   </div>` : ""}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px;">
@@ -470,6 +470,11 @@ function tplSlate(cv: CVContent): string {
   </div>
   <div style="padding:28px 52px 46px;">
     ${cv.profile ? `<p style="font-size:12.5px;line-height:1.75;color:#374151;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #e2e8f0;">${cv.profile}</p>` : ""}
+    ${cv.education.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${slate};border-bottom:2px solid ${slate};padding-bottom:4px;margin:18px 0 14px;">Ausbildung</div>${cv.education.map(e=>`
+      <div style="display:grid;grid-template-columns:110px 1fr;gap:16px;margin-bottom:10px;">
+        <div style="font-size:10.5px;color:#94a3b8;">${e.period}</div>
+        <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#64748b;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      </div>`).join("")}` : ""}
     ${cv.experience.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${slate};border-bottom:2px solid ${slate};padding-bottom:4px;margin-bottom:14px;">Berufserfahrung</div>${cv.experience.map(e=>`
       <div style="display:grid;grid-template-columns:110px 1fr;gap:16px;margin-bottom:13px;">
         <div style="font-size:10.5px;color:#94a3b8;padding-top:2px;line-height:1.5;">${e.period}</div>
@@ -478,11 +483,6 @@ function tplSlate(cv: CVContent): string {
           <div style="font-size:11.5px;color:#64748b;">${e.company}${e.location?" · "+e.location:""}</div>
           <div style="font-size:12px;margin-top:3px;">${bullets(e.bullets)}</div>
         </div>
-      </div>`).join("")}` : ""}
-    ${cv.education.length ? `<div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${slate};border-bottom:2px solid ${slate};padding-bottom:4px;margin:18px 0 14px;">Ausbildung</div>${cv.education.map(e=>`
-      <div style="display:grid;grid-template-columns:110px 1fr;gap:16px;margin-bottom:10px;">
-        <div style="font-size:10.5px;color:#94a3b8;">${e.period}</div>
-        <div><div style="font-size:13px;font-weight:700;">${e.degree}</div><div style="font-size:11.5px;color:#64748b;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
       </div>`).join("")}` : ""}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px;">
       ${cv.skills.length ? `<div><div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${slate};margin-bottom:8px;">Kenntnisse</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:${slateL};color:${slate};border:1px solid #e2e8f0;border-radius:3px;padding:4px 10px;font-size:11px;">${s}</span>`).join("")}</div></div>` : ""}
@@ -507,6 +507,14 @@ function tplTerra(cv: CVContent): string {
     <div style="clear:both;"></div>
   </div>
   ${cv.profile ? `<div style="background:${terL};border:1px solid #fed7aa;border-radius:6px;padding:14px 18px;margin-bottom:22px;font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.75;color:#374151;">${cv.profile}</div>` : ""}
+  ${cv.education.length ? `<div style="font-size:9px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${terra};border-bottom:1px solid #fed7aa;padding-bottom:5px;margin:18px 0 12px;">Ausbildung</div>${cv.education.map(e=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:700;color:${brown};">${e.degree}</div>
+        <div style="font-family:'Inter',sans-serif;font-size:10.5px;color:#a8a29e;white-space:nowrap;padding-left:12px;">${e.period}</div>
+      </div>
+      <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
+    </div>`).join("")}` : ""}
   ${cv.experience.length ? `<div style="font-size:9px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${terra};border-bottom:1px solid #fed7aa;padding-bottom:5px;margin-bottom:12px;">Berufserfahrung</div>${cv.experience.map(e=>`
     <div style="margin-bottom:14px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -515,14 +523,6 @@ function tplTerra(cv: CVContent): string {
       </div>
       <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.company}${e.location?" · "+e.location:""}</div>
       <div style="font-family:'Inter',sans-serif;font-size:12px;margin-top:4px;">${bullets(e.bullets)}</div>
-    </div>`).join("")}` : ""}
-  ${cv.education.length ? `<div style="font-size:9px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${terra};border-bottom:1px solid #fed7aa;padding-bottom:5px;margin:18px 0 12px;">Ausbildung</div>${cv.education.map(e=>`
-    <div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:${brown};">${e.degree}</div>
-        <div style="font-family:'Inter',sans-serif;font-size:10.5px;color:#a8a29e;white-space:nowrap;padding-left:12px;">${e.period}</div>
-      </div>
-      <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:#78716c;font-style:italic;">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div>
     </div>`).join("")}` : ""}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px;">
     ${cv.skills.length ? `<div><div style="font-size:9px;font-family:'Inter',sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${terra};margin-bottom:8px;">Kenntnisse</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${cv.skills.map(s=>`<span style="background:${terL};color:${terra};border:1px solid #fed7aa;border-radius:3px;padding:4px 11px;font-family:'Inter',sans-serif;font-size:11px;">${s}</span>`).join("")}</div></div>` : ""}
@@ -555,8 +555,9 @@ export function renderCVContent(cv: CVContent, template: TemplateId): string {
 // Legacy helper still used for the Documents list preview
 export function buildCVHTML(profile: FormData, template: string): string {
   const p = profile?.personal || {} as PersonalData;
-  const exp = profile?.experience || [];
-  const edu = profile?.education || [];
+  const byStart = <T extends { start?: string }>(a: T, b: T) => (a.start || "").localeCompare(b.start || "");
+  const exp = [...(profile?.experience || [])].sort(byStart);
+  const edu = [...(profile?.education || [])].sort(byStart);
   const skills = profile?.skills || [];
   const langs = profile?.languages || [];
   const cv: CVContent = {

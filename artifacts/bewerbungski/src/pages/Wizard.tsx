@@ -217,7 +217,8 @@ PFLICHTREGELN:
 5. PROFIL: Immer 3–5 Sätze, konkret, keine KI-Floskeln.
 6. BULLETS: Jede experience-Station hat 2–4 bullets mit konkreten Tätigkeiten/Erfolgen.
 7. DATUM: signature-Feld EXAKT mit dem übergebenen Datum befüllen.
-8. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".`,
+8. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".
+9. CHRONOLOGIE: Alle Einträge in education UND experience chronologisch AUFSTEIGEND sortieren (ältester Eintrag zuerst, neuester zuletzt). education beginnt IMMER mit dem Schulabschluss, danach Ausbildung/Studium.`,
         userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.\nsignature-Feld: "${(form.personal as any).city || "Ort"}, den ${today}"\n${form.school?.type || form.school?.name ? `\nSchulabschluss des Bewerbers (MUSS als erster education-Eintrag erscheinen): ${[form.school.type, form.school.name && `an ${form.school.name}`, form.school.city, form.school.year].filter(Boolean).join(", ")}` : "\nKein Schulabschluss angegeben → ersten education-Eintrag als 'Schulabschluss — Bitte ergänzen' anlegen."}\nAlle Lücken > 6 Monate füllen. Mindestens 6 Skills.${langInstr}`,
       } });
 
