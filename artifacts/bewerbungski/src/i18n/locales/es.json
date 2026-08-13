@@ -181,7 +181,9 @@
       "keywords": "Palabras clave",
       "structure": "Estructura",
       "missing": "Palabras clave que faltan"
-    }
+    },
+    "editCvBtn": "✏️ Editar ahora",
+    "doneEditing": "✓ Listo"
   },
   "wizard": {
     "steps": {

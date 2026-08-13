@@ -181,7 +181,9 @@
       "keywords": "Ключові слова",
       "structure": "Структура",
       "missing": "Відсутні ключові слова"
-    }
+    },
+    "editCvBtn": "✏️ Редагувати",
+    "doneEditing": "✓ Готово"
   },
   "wizard": {
     "steps": {

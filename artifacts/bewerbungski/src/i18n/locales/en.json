@@ -181,7 +181,9 @@
       "keywords": "Keywords",
       "structure": "Structure",
       "missing": "Missing keywords"
-    }
+    },
+    "editCvBtn": "✏️ Edit now",
+    "doneEditing": "✓ Done"
   },
   "wizard": {
     "steps": {

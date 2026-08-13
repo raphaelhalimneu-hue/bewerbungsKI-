@@ -181,7 +181,9 @@
       "keywords": "الكلمات المفتاحية",
       "structure": "البنية",
       "missing": "كلمات مفتاحية ناقصة"
-    }
+    },
+    "editCvBtn": "✏️ التعديل الآن",
+    "doneEditing": "✓ تم"
   },
   "wizard": {
     "steps": {

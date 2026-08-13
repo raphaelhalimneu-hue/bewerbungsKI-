@@ -181,7 +181,9 @@
       "keywords": "Słowa kluczowe",
       "structure": "Struktura",
       "missing": "Brakujące słowa kluczowe"
-    }
+    },
+    "editCvBtn": "✏️ Edytuj teraz",
+    "doneEditing": "✓ Gotowe"
   },
   "wizard": {
     "steps": {

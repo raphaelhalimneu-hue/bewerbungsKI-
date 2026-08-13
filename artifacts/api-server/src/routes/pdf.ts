@@ -164,10 +164,11 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
 
     const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     const filename = `${safeName} – Lebenslauf.pdf`;
+    const asciiName = `${safeName} - Lebenslauf.pdf`.replace(/[^\x20-\x7E]/g, "_");
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+      `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(filename)}`
     );
     res.send(pdfBuffer);
   } catch (err: any) {
@@ -244,10 +245,11 @@ ${paragraphs}
 
     const safeName = (doc.name || "Anschreiben").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     const filename = `${safeName} – Anschreiben.pdf`;
+    const asciiName = `${safeName} - Anschreiben.pdf`.replace(/[^\x20-\x7E]/g, "_");
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+      `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(filename)}`
     );
     res.send(pdfBuffer);
   } catch (err: any) {

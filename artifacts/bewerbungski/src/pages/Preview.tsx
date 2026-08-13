@@ -16,6 +16,7 @@ export default function Preview() {
   const cvWrapRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
+  const [editingCv, setEditingCv] = useState(false);
 
   // Initialise cover letter textarea from loaded doc
   useEffect(() => {
@@ -29,10 +30,17 @@ export default function Preview() {
     }
   }, [(doc as any)?.id]);
 
-  // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets)
+  // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets).
+  // While editing, show at 100% with horizontal scroll — mobile browsers misplace the
+  // text caret inside zoomed contentEditable areas.
   useEffect(() => {
     function applyScale() {
       if (!cvWrapRef.current || !cvRef.current) return;
+      if (editingCv) {
+        cvRef.current.style.zoom = "1";
+        cvWrapRef.current.style.minHeight = "";
+        return;
+      }
       const available = cvWrapRef.current.clientWidth - 24;
       const cvWidth = 760;
       const scale = available < cvWidth ? available / cvWidth : 1;
@@ -44,7 +52,15 @@ export default function Preview() {
     applyScale();
     window.addEventListener("resize", applyScale);
     return () => window.removeEventListener("resize", applyScale);
-  }, [(doc as any)?.id]);
+  }, [(doc as any)?.id, editingCv]);
+
+  function toggleEditCv() {
+    setEditingCv(prev => {
+      const next = !prev;
+      if (next) setTimeout(() => cvRef.current?.focus(), 50);
+      return next;
+    });
+  }
 
   function baseFileName(suffix: string) {
     const name = (doc as any)?.name
@@ -194,17 +210,20 @@ export default function Preview() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.cv")}</h3>
-                <span style={{ fontSize: 12, color: "var(--muted)", background: "var(--bg2)", padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>
-                  {t("preview.editCvHint")}
-                </span>
+                <button
+                  className={editingCv ? "btn btn-p btn-sm" : "btn btn-g btn-sm"}
+                  onClick={toggleEditCv}
+                >
+                  {editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
+                </button>
               </div>
               <div className="cv-wrap" ref={cvWrapRef}>
                 <div
                   ref={cvRef}
                   className="cv-sheet"
-                  contentEditable
+                  contentEditable={editingCv}
                   suppressContentEditableWarning
-                  style={{ outline: "none" }}
+                  style={{ outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none" }}
                 />
               </div>
             </div>

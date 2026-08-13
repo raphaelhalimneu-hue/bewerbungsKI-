@@ -181,7 +181,9 @@
       "keywords": "Anahtar kelimeler",
       "structure": "Yapı",
       "missing": "Eksik anahtar kelimeler"
-    }
+    },
+    "editCvBtn": "✏️ Şimdi düzenle",
+    "doneEditing": "✓ Bitti"
   },
   "wizard": {
     "steps": {

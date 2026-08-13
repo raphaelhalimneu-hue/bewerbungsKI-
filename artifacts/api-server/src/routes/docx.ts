@@ -225,7 +225,8 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     const buffer = await Packer.toBuffer(wordDoc);
     const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    res.setHeader("Content-Disposition", `attachment; filename="${safeName} – Lebenslauf.docx"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
+    const asciiName = `${safeName} - Lebenslauf.docx`.replace(/[^\x20-\x7E]/g, "_");
+    res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
     res.send(buffer);
   } catch (err: any) {
     req.log.error({ err }, "CV DOCX error");
@@ -280,7 +281,8 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const buffer = await Packer.toBuffer(docx);
     const safeName = (doc.name || "Anschreiben").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    res.setHeader("Content-Disposition", `attachment; filename="${safeName} – Anschreiben.docx"`);
+    const asciiName = `${safeName} - Anschreiben.docx`.replace(/[^\x20-\x7E]/g, "_");
+    res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Anschreiben.docx")}`);
     res.send(buffer);
   } catch (err: any) {
     req.log.error({ err }, "Cover letter DOCX error");
