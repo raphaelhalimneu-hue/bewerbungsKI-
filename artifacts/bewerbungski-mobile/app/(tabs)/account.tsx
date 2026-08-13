@@ -29,6 +29,7 @@ export default function AccountScreen() {
 
   const isPremium = (profile as any)?.is_premium ?? false;
   const docCount = (profile as any)?.documents_count ?? 0;
+  const docLimit = (profile as any)?.document_limit ?? (isPremium ? 33 : 3);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -59,7 +60,7 @@ export default function AccountScreen() {
             <Text style={s.statLabel}>Bewerbungen</Text>
           </View>
           <View style={s.statCard}>
-            <Text style={s.statNum}>{isPremium ? '30' : '3'}</Text>
+            <Text style={s.statNum}>{docLimit}</Text>
             <Text style={s.statLabel}>Max. erlaubt</Text>
           </View>
           <View style={s.statCard}>
@@ -79,9 +80,9 @@ export default function AccountScreen() {
               <Text style={{ fontSize: 28 }}>⭐</Text>
               <Text style={s.upgradeTitle}>Premium freischalten</Text>
             </View>
-            <Text style={s.upgradeSub}>Bis zu 30 Bewerbungen · 8 Sprachen · Alle Templates</Text>
+            <Text style={s.upgradeSub}>30 weitere Bewerbungen · 8 Sprachen · Alle Templates</Text>
             <View style={[s.primaryBtn, { marginTop: 16 }]}>
-              <Text style={s.primaryBtnText}>9,90 € einmalig → Upgrade</Text>
+              <Text style={s.primaryBtnText}>9,99 € einmalig → Upgrade</Text>
             </View>
           </TouchableOpacity>
         )}
