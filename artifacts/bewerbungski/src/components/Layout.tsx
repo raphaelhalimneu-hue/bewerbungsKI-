@@ -114,7 +114,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className="prog">
                   <div
                     className="prog-fill"
-                    style={{ width: `${Math.min(100, ((p?.documents_count || 0) / 1) * 100)}%` }}
+                    style={{ width: `${Math.min(100, ((p?.documents_count || 0) / 3) * 100)}%` }}
                   />
                 </div>
                 {((p?.documents_count || 0) >= 1) && (

@@ -28,7 +28,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         res.status(403).json({ error: "free_limit_reached" });
         return;
       }
-    } else if (value >= 30) {
+    } else if (value >= 33) {
       res.status(403).json({ error: "premium_limit_reached" });
       return;
     }

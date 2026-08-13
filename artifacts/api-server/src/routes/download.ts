@@ -56,15 +56,15 @@ router.get("/download/RaphaelKI2026", async (_req, res) => {
             line(""),
 
             h1("3. Preis und Bezahlung (Stripe)"),
-            bullet("Preis: 9,90 EUR einmalig - kein Abo."),
+            bullet("Preis: 9,99 EUR einmalig - kein Abo - enthaelt 30 Bewerbungen."),
             bullet("Einnahmen siehst du auf: dashboard.stripe.com oder in der Stripe-App."),
-            bullet("Gratis-Grenze: 1 Dokument kostenlos, danach kommt die Kaufaufforderung."),
+            bullet("Gratis-Grenze: 3 Bewerbungen kostenlos, danach kommt die Kaufaufforderung."),
             line(""),
 
             h1("4. Technik - wo alles laeuft"),
             bullet("Hosting:      railway.com          (dein Konto)"),
             bullet("Kundendaten:  supabase.com         (Konto: raphaelhalimneu@gmail.com)"),
-            bullet("KI kostenlos: console.groq.com     (dein Konto)"),
+            bullet("KI:           console.anthropic.com (dein Konto - Guthaben im Blick behalten!)"),
             bullet("Bezahlung:    dashboard.stripe.com (dein Konto)"),
             line(""),
 

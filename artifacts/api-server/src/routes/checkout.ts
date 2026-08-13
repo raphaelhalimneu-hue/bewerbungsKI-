@@ -30,9 +30,9 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
             currency: "eur",
             product_data: {
               name: "BewerbungsKI Premium",
-              description: "Unbegrenzte Bewerbungen – Lifetime",
+              description: "30 Bewerbungen – Einmalzahlung, kein Abo",
             },
-            unit_amount: 990,
+            unit_amount: 999,
           },
           quantity: 1,
         },
