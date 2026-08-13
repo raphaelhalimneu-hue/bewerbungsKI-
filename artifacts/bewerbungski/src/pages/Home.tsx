@@ -49,7 +49,7 @@ function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: stri
 }
 
 // ── Example CV showcase (rendered with a real template) ──────────────────────
-const EXAMPLE_CV: CVContent = {
+const EXAMPLE_PFLEGE: CVContent = {
   name: "Laura Sommer",
   title: "Examinierte Pflegefachkraft",
   contact: "Lindenstraße 24, 30159 Hannover · +49 170 1234567 · laura.sommer@mail.de",
@@ -69,34 +69,181 @@ const EXAMPLE_CV: CVContent = {
   signature: "Hannover, den 13.08.2026",
 };
 
-function ExampleCVShowcase() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const cvRef = useRef<HTMLDivElement>(null);
-  const html = useMemo(() => renderCVContent(EXAMPLE_CV, "elegant"), []);
+// One example per app language, adapted to the CV standards of that country.
+const EXAMPLE_EN: CVContent = {
+  name: "Laura Sommer",
+  title: "Registered Care Nurse",
+  contact: "Hanover, Germany · +49 170 1234567 · laura.sommer@mail.de · linkedin.com/in/laurasommer",
+  profile: "Registered care nurse with eight years of experience in residential long-term care. Skilled in basic and treatment care, care planning and documentation to current standards. Mentors trainees and works closely with physicians and families. Calm and empathetic, even in demanding situations.",
+  experience: [
+    { position: "Care Trainee", company: "Seniorenheim am Park", location: "Hanover, Germany", period: "Aug 2015 – Jul 2018", bullets: ["Learned basic and treatment care under the guidance of experienced staff", "Supported mobilisation, activation and daily-life assistance of residents", "Contributed to care documentation and shift handovers"] },
+    { position: "Registered Care Nurse", company: "Seniorenheim am Park", location: "Hanover, Germany", period: "Aug 2018 – Jun 2022", bullets: ["Independently cared for 24 residents across all care levels", "Created and updated care plans with complete documentation", "Administered medication and monitored vital signs as prescribed"] },
+    { position: "Care Nurse & Clinical Mentor", company: "AWO Care Centre", location: "Hanover, Germany", period: "Jul 2022 – present", bullets: ["Mentored and assessed up to 6 trainees per year", "Onboarded new colleagues and contributed to shift planning", "Wound management and implementation of current expert standards", "Point of contact for quality audits — ward last rated 1.2 (excellent)"] },
+  ],
+  education: [
+    { degree: "Secondary School Certificate", institution: "Realschule Hannover-Mitte", location: "Hanover", period: "2015", note: "" },
+    { degree: "Vocational Qualification in Geriatric Nursing", institution: "Pflegeschule Hannover", location: "Hanover", period: "2015 – 2018", note: "Final grade: 1.8 (very good)" },
+    { degree: "Clinical Mentorship Certificate (300 hrs)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Hanover", period: "2022", note: "Completed alongside full-time work" },
+  ],
+  skills: ["Basic & treatment care", "Care planning & documentation", "Medication management", "Wound care & expert standards", "Mentoring of trainees", "Mobilisation & positioning techniques", "Dementia care", "Hygiene & infection control"],
+  languages: [{ name: "German", level: "Native" }, { name: "English", level: "Fluent" }, { name: "Polish", level: "Basic" }],
+  signature: "References available upon request",
+};
 
-  useEffect(() => {
-    function fit() {
-      if (!wrapRef.current || !cvRef.current) return;
-      const available = wrapRef.current.clientWidth;
-      const scale = available < 794 ? available / 794 : 1;
-      (cvRef.current.style as any).zoom = String(scale);
-    }
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, []);
+const EXAMPLE_TR: CVContent = {
+  name: "Elif Kaya",
+  title: "Hemşire",
+  contact: "Lindenstraße 24, 30459 Hannover · +49 170 1234567 · elif.kaya@mail.de",
+  profile: "Yatılı bakım ve uzun süreli bakım alanında sekiz yıllık deneyime sahip hemşire. Temel bakım, tedavi bakımı, bakım planlaması ve güncel standartlara uygun dokümantasyon konularında yetkin. Stajyerlere rehberlik eder, doktorlar ve hasta yakınlarıyla yakın iş birliği içinde çalışır. Zor durumlarda dahi sakin ve güler yüzlü.",
+  experience: [
+    { position: "Hemşirelik Stajyeri", company: "Seniorenheim am Park", location: "Hannover, Almanya", period: "08/2015 – 07/2018", bullets: ["Deneyimli uzmanların rehberliğinde temel ve tedavi bakımını öğrenme", "Sakinlerin mobilizasyonu ve günlük yaşam desteği", "Bakım dokümantasyonu ve vardiya devirlerine katkı"] },
+    { position: "Hemşire", company: "Seniorenheim am Park", location: "Hannover, Almanya", period: "08/2018 – 06/2022", bullets: ["Tüm bakım derecelerinden 24 sakinin bakımını bağımsız olarak üstlenme", "Bakım planlarının oluşturulması ve eksiksiz dokümantasyon", "Doktor talimatına göre ilaç uygulama ve vital bulgu takibi"] },
+    { position: "Hemşire & Uygulama Eğitmeni", company: "AWO Bakım Merkezi", location: "Hannover, Almanya", period: "07/2022 – devam ediyor", bullets: ["Yılda 6 stajyerin eğitimi ve değerlendirilmesi", "Yeni çalışanların oryantasyonu ve vardiya planlamasına katkı", "Yara bakımı ve güncel uzman standartlarının uygulanması", "Kalite denetimlerinde iletişim kişisi — servis son denetimde 1,2 ile değerlendirildi"] },
+  ],
+  education: [
+    { degree: "Ortaokul Diploması", institution: "Realschule Hannover-Mitte", location: "Hannover", period: "2015", note: "" },
+    { degree: "Yaşlı Bakımı Meslek Eğitimi", institution: "Pflegeschule Hannover", location: "Hannover", period: "08/2015 – 07/2018", note: "Diploma notu: 1,8 (çok iyi)" },
+    { degree: "Uygulama Eğitmenliği Sertifikası (300 saat)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Hannover", period: "01/2022 – 06/2022", note: "Çalışırken tamamlandı" },
+  ],
+  skills: ["Temel ve tedavi bakımı", "Bakım planlaması ve dokümantasyon", "İlaç yönetimi", "Yara bakımı", "Stajyer eğitimi", "Mobilizasyon teknikleri", "Demans hastalarıyla iletişim", "Hijyen ve enfeksiyon koruması"],
+  languages: [{ name: "Türkçe", level: "Ana dil" }, { name: "Almanca", level: "Çok iyi (C1)" }, { name: "İngilizce", level: "Orta" }],
+  signature: "Hannover, 13.08.2026",
+};
+
+const EXAMPLE_AR: CVContent = {
+  name: "أمينة الخالدي",
+  title: "ممرضة معتمدة",
+  contact: "هانوفر، ألمانيا · ‎+49 170 1234567 · amina.alkhalidi@mail.de",
+  profile: "ممرضة معتمدة بخبرة ثماني سنوات في الرعاية السكنية طويلة الأمد. متمكنة من الرعاية الأساسية والعلاجية، وتخطيط الرعاية والتوثيق وفق أحدث المعايير. تشرف على المتدربين وتتعاون عن قرب مع الأطباء وذوي المرضى. هادئة ومتعاطفة حتى في المواقف الصعبة.",
+  experience: [
+    { position: "متدربة تمريض", company: "Seniorenheim am Park", location: "هانوفر، ألمانيا", period: "08/2015 – 07/2018", bullets: ["تعلّم الرعاية الأساسية والعلاجية بإشراف كوادر ذات خبرة", "المساعدة في تحريك المقيمين ودعم أنشطتهم اليومية", "المشاركة في توثيق الرعاية وتسليم المناوبات"] },
+    { position: "ممرضة معتمدة", company: "Seniorenheim am Park", location: "هانوفر، ألمانيا", period: "08/2018 – 06/2022", bullets: ["رعاية مستقلة لـ 24 مقيمًا من جميع درجات الرعاية", "إعداد خطط الرعاية وتحديثها مع توثيق كامل", "إعطاء الأدوية ومراقبة العلامات الحيوية حسب وصف الطبيب"] },
+    { position: "ممرضة ومشرفة تدريب", company: "مركز AWO للرعاية", location: "هانوفر، ألمانيا", period: "07/2022 – حتى الآن", bullets: ["تدريب وتقييم حتى 6 متدربين سنويًا", "تأهيل الزملاء الجدد والمشاركة في تخطيط المناوبات", "إدارة العناية بالجروح وتطبيق أحدث المعايير المهنية", "جهة الاتصال لتدقيق الجودة — حصل القسم على تقييم 1.2 (ممتاز)"] },
+  ],
+  education: [
+    { degree: "الشهادة الإعدادية", institution: "Realschule Hannover-Mitte", location: "هانوفر", period: "2015", note: "" },
+    { degree: "تأهيل مهني في تمريض المسنين", institution: "Pflegeschule Hannover", location: "هانوفر", period: "08/2015 – 07/2018", note: "التقدير النهائي: 1.8 (جيد جدًا)" },
+    { degree: "شهادة إشراف تدريبي (300 ساعة)", institution: "Bildungszentrum Pflege Niedersachsen", location: "هانوفر", period: "01/2022 – 06/2022", note: "بالتوازي مع العمل" },
+  ],
+  skills: ["الرعاية الأساسية والعلاجية", "تخطيط الرعاية والتوثيق", "إدارة الأدوية", "العناية بالجروح", "تدريب المتدربين", "تقنيات التحريك والتموضع", "التعامل مع مرضى الخرف", "النظافة والوقاية من العدوى"],
+  languages: [{ name: "العربية", level: "اللغة الأم" }, { name: "الألمانية", level: "ممتاز (C1)" }, { name: "الإنجليزية", level: "جيد" }],
+  signature: "هانوفر، 13.08.2026",
+};
+
+const EXAMPLE_ES: CVContent = {
+  name: "Lucía Fernández",
+  title: "Enfermera de cuidados",
+  contact: "Lindenstraße 24, 30459 Hannover · +49 170 1234567 · lucia.fernandez@mail.de",
+  profile: "Enfermera con ocho años de experiencia en cuidados residenciales de larga duración. Competente en cuidados básicos y terapéuticos, planificación de cuidados y documentación según los estándares actuales. Tutoriza a estudiantes en prácticas y colabora estrechamente con médicos y familiares. Serena y empática incluso en situaciones exigentes.",
+  experience: [
+    { position: "Aprendiz de cuidados geriátricos", company: "Seniorenheim am Park", location: "Hannover, Alemania", period: "08/2015 – 07/2018", bullets: ["Aprendizaje de cuidados básicos y terapéuticos bajo supervisión de personal experimentado", "Apoyo en la movilización, activación y acompañamiento diario de los residentes", "Participación en la documentación de cuidados y los relevos de turno"] },
+    { position: "Enfermera de cuidados", company: "Seniorenheim am Park", location: "Hannover, Alemania", period: "08/2018 – 06/2022", bullets: ["Atención autónoma de 24 residentes de todos los grados de dependencia", "Elaboración y actualización de planes de cuidados con documentación completa", "Administración de medicación y control de constantes según prescripción médica"] },
+    { position: "Enfermera y tutora de prácticas", company: "Centro de cuidados AWO", location: "Hannover, Alemania", period: "07/2022 – actualidad", bullets: ["Tutorización y evaluación de hasta 6 estudiantes al año", "Acogida de nuevos compañeros y participación en la planificación de turnos", "Gestión de heridas y aplicación de los estándares profesionales vigentes", "Persona de contacto en auditorías de calidad — unidad valorada con 1,2 (sobresaliente)"] },
+  ],
+  education: [
+    { degree: "Educación Secundaria (Realschulabschluss)", institution: "Realschule Hannover-Mitte", location: "Hannover", period: "2015", note: "" },
+    { degree: "Formación profesional en cuidados geriátricos", institution: "Pflegeschule Hannover", location: "Hannover", period: "08/2015 – 07/2018", note: "Nota final: 1,8 (notable alto)" },
+    { degree: "Certificado de tutora de prácticas (300 h)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Hannover", period: "01/2022 – 06/2022", note: "Compatibilizado con el trabajo" },
+  ],
+  skills: ["Cuidados básicos y terapéuticos", "Planificación y documentación de cuidados", "Gestión de medicación", "Cura de heridas", "Tutorización de estudiantes", "Técnicas de movilización", "Atención a personas con demencia", "Higiene y prevención de infecciones"],
+  languages: [{ name: "Español", level: "Lengua materna" }, { name: "Alemán", level: "Muy alto (C1)" }, { name: "Inglés", level: "Intermedio" }],
+  signature: "Hannover, 13/08/2026",
+};
+
+const EXAMPLE_PL: CVContent = {
+  name: "Agnieszka Kowalska",
+  title: "Pielęgniarka opiekuńcza",
+  contact: "Lindenstraße 24, 30459 Hannover · +49 170 1234567 · agnieszka.kowalska@mail.de",
+  profile: "Pielęgniarka z ośmioletnim doświadczeniem w stacjonarnej opiece długoterminowej. Biegła w pielęgnacji podstawowej i leczniczej, planowaniu opieki oraz dokumentacji zgodnej z aktualnymi standardami. Opiekunka praktykantów, blisko współpracuje z lekarzami i rodzinami podopiecznych. Spokojna i empatyczna także w wymagających sytuacjach.",
+  experience: [
+    { position: "Praktykantka opieki", company: "Seniorenheim am Park", location: "Hanower, Niemcy", period: "08/2015 – 07/2018", bullets: ["Nauka pielęgnacji podstawowej i leczniczej pod okiem doświadczonej kadry", "Wsparcie przy mobilizacji, aktywizacji i codziennym towarzyszeniu mieszkańcom", "Udział w dokumentacji opieki i przekazywaniu zmian"] },
+    { position: "Pielęgniarka opiekuńcza", company: "Seniorenheim am Park", location: "Hanower, Niemcy", period: "08/2018 – 06/2022", bullets: ["Samodzielna opieka nad 24 mieszkańcami o wszystkich stopniach niesamodzielności", "Tworzenie i aktualizacja planów opieki oraz kompletna dokumentacja", "Podawanie leków i kontrola parametrów życiowych zgodnie z zaleceniami lekarza"] },
+    { position: "Pielęgniarka i opiekunka praktyk", company: "Centrum opieki AWO", location: "Hanower, Niemcy", period: "07/2022 – obecnie", bullets: ["Szkolenie i ocena do 6 praktykantów rocznie", "Wdrażanie nowych pracowników i współtworzenie grafiku", "Leczenie ran i wdrażanie aktualnych standardów eksperckich", "Osoba kontaktowa przy audytach jakości — oddział oceniony na 1,2 (bardzo dobrze)"] },
+  ],
+  education: [
+    { degree: "Wykształcenie średnie (Realschulabschluss)", institution: "Realschule Hannover-Mitte", location: "Hanower", period: "2015", note: "" },
+    { degree: "Kształcenie zawodowe w opiece geriatrycznej", institution: "Pflegeschule Hannover", location: "Hanower", period: "08/2015 – 07/2018", note: "Ocena końcowa: 1,8 (bardzo dobra)" },
+    { degree: "Certyfikat opiekuna praktyk (300 godz.)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Hanower", period: "01/2022 – 06/2022", note: "Ukończone równolegle z pracą" },
+  ],
+  skills: ["Pielęgnacja podstawowa i lecznicza", "Planowanie opieki i dokumentacja", "Zarządzanie lekami", "Opatrywanie ran", "Szkolenie praktykantów", "Techniki mobilizacji", "Opieka nad osobami z demencją", "Higiena i ochrona przed zakażeniami"],
+  languages: [{ name: "Polski", level: "Język ojczysty" }, { name: "Niemiecki", level: "Bardzo dobry (C1)" }, { name: "Angielski", level: "Podstawowy" }],
+  signature: "Wyrażam zgodę na przetwarzanie moich danych osobowych dla potrzeb niezbędnych do realizacji procesu rekrutacji (RODO).",
+};
+
+const EXAMPLE_RU: CVContent = {
+  name: "Анна Шмидт",
+  title: "Медицинская сестра по уходу",
+  contact: "Lindenstraße 24, 30459 Hannover · +49 170 1234567 · anna.schmidt@mail.de",
+  profile: "Медицинская сестра с восьмилетним опытом работы в стационарном долгосрочном уходе. Уверенно владеет базовым и лечебным уходом, планированием ухода и документацией по актуальным стандартам. Наставница практикантов, тесно сотрудничает с врачами и родственниками. Спокойна и внимательна даже в сложных ситуациях.",
+  experience: [
+    { position: "Практикантка по уходу", company: "Seniorenheim am Park", location: "Ганновер, Германия", period: "08/2015 – 07/2018", bullets: ["Освоение базового и лечебного ухода под руководством опытных специалистов", "Помощь в мобилизации, активизации и повседневном сопровождении жильцов", "Участие в ведении документации и передаче смен"] },
+    { position: "Медицинская сестра по уходу", company: "Seniorenheim am Park", location: "Ганновер, Германия", period: "08/2018 – 06/2022", bullets: ["Самостоятельный уход за 24 жильцами всех степеней потребности в уходе", "Составление и обновление планов ухода, полная документация", "Выдача медикаментов и контроль жизненных показателей по назначению врача"] },
+    { position: "Медсестра и наставница практикантов", company: "Центр ухода AWO", location: "Ганновер, Германия", period: "07/2022 – по настоящее время", bullets: ["Обучение и аттестация до 6 практикантов в год", "Адаптация новых сотрудников и участие в планировании смен", "Уход за ранами и внедрение актуальных экспертных стандартов", "Контактное лицо при проверках качества — отделение оценено на 1,2 (отлично)"] },
+  ],
+  education: [
+    { degree: "Среднее образование (Realschulabschluss)", institution: "Realschule Hannover-Mitte", location: "Ганновер", period: "2015", note: "" },
+    { degree: "Профессиональное образование по уходу за пожилыми", institution: "Pflegeschule Hannover", location: "Ганновер", period: "08/2015 – 07/2018", note: "Итоговая оценка: 1,8 (очень хорошо)" },
+    { degree: "Сертификат наставника практики (300 ч.)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Ганновер", period: "01/2022 – 06/2022", note: "Без отрыва от работы" },
+  ],
+  skills: ["Базовый и лечебный уход", "Планирование ухода и документация", "Работа с медикаментами", "Уход за ранами", "Наставничество практикантов", "Техники мобилизации", "Уход за людьми с деменцией", "Гигиена и защита от инфекций"],
+  languages: [{ name: "Русский", level: "Родной" }, { name: "Немецкий", level: "Свободно (C1)" }, { name: "Английский", level: "Базовый" }],
+  signature: "Ганновер, 13.08.2026",
+};
+
+const EXAMPLE_UK: CVContent = {
+  name: "Оксана Мельник",
+  title: "Медична сестра з догляду",
+  contact: "Lindenstraße 24, 30459 Hannover · +49 170 1234567 · oksana.melnyk@mail.de",
+  profile: "Медична сестра з восьмирічним досвідом роботи в стаціонарному довготривалому догляді. Впевнено володіє базовим і лікувальним доглядом, плануванням догляду та документацією за актуальними стандартами. Наставниця практикантів, тісно співпрацює з лікарями та родичами. Спокійна й уважна навіть у складних ситуаціях.",
+  experience: [
+    { position: "Практикантка з догляду", company: "Seniorenheim am Park", location: "Ганновер, Німеччина", period: "08/2015 – 07/2018", bullets: ["Опанування базового та лікувального догляду під керівництвом досвідчених фахівців", "Допомога в мобілізації, активізації та повсякденному супроводі мешканців", "Участь у веденні документації та передачі змін"] },
+    { position: "Медична сестра з догляду", company: "Seniorenheim am Park", location: "Ганновер, Німеччина", period: "08/2018 – 06/2022", bullets: ["Самостійний догляд за 24 мешканцями всіх ступенів потреби в догляді", "Складання та оновлення планів догляду, повна документація", "Видача ліків і контроль життєвих показників за призначенням лікаря"] },
+    { position: "Медсестра та наставниця практикантів", company: "Центр догляду AWO", location: "Ганновер, Німеччина", period: "07/2022 – дотепер", bullets: ["Навчання та оцінювання до 6 практикантів на рік", "Адаптація нових колег і участь у плануванні змін", "Догляд за ранами та впровадження актуальних експертних стандартів", "Контактна особа під час перевірок якості — відділення оцінено на 1,2 (відмінно)"] },
+  ],
+  education: [
+    { degree: "Середня освіта (Realschulabschluss)", institution: "Realschule Hannover-Mitte", location: "Ганновер", period: "2015", note: "" },
+    { degree: "Професійна освіта з догляду за літніми людьми", institution: "Pflegeschule Hannover", location: "Ганновер", period: "08/2015 – 07/2018", note: "Підсумкова оцінка: 1,8 (дуже добре)" },
+    { degree: "Сертифікат наставниці практики (300 год.)", institution: "Bildungszentrum Pflege Niedersachsen", location: "Ганновер", period: "01/2022 – 06/2022", note: "Без відриву від роботи" },
+  ],
+  skills: ["Базовий і лікувальний догляд", "Планування догляду та документація", "Робота з медикаментами", "Догляд за ранами", "Наставництво практикантів", "Техніки мобілізації", "Догляд за людьми з деменцією", "Гігієна та захист від інфекцій"],
+  languages: [{ name: "Українська", level: "Рідна" }, { name: "Німецька", level: "Вільно (C1)" }, { name: "Англійська", level: "Базовий" }],
+  signature: "Ганновер, 13.08.2026",
+};
+
+const EXAMPLE_BY_LANG: Record<string, CVContent> = {
+  de: EXAMPLE_PFLEGE, en: EXAMPLE_EN, tr: EXAMPLE_TR, ar: EXAMPLE_AR,
+  es: EXAMPLE_ES, pl: EXAMPLE_PL, ru: EXAMPLE_RU, uk: EXAMPLE_UK,
+};
+
+const CAPTION_BY_LANG: Record<string, string> = {
+  de: "Erstellt mit", en: "Created with", tr: "Şununla oluşturuldu:", ar: "تم إنشاؤها بواسطة",
+  es: "Creado con", pl: "Utworzono w", ru: "Создано с помощью", uk: "Створено за допомогою",
+};
+const TEMPLATE_WORD_BY_LANG: Record<string, string> = {
+  de: "Vorlage", en: "Template", tr: "Şablon", ar: "القالب",
+  es: "Plantilla", pl: "Szablon", ru: "Шаблон", uk: "Шаблон",
+};
+
+function ExampleCVShowcase() {
+  const { i18n } = useTranslation();
+  const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
+  const html = useMemo(() => renderCVContent(EXAMPLE_BY_LANG[lang], "elegant"), [lang]);
 
   return (
-    <div ref={wrapRef} style={{ maxWidth: 794, margin: "0 auto" }}>
-      <div style={{
-        borderRadius: 14, overflow: "hidden", border: "1px solid var(--border)",
-        boxShadow: "0 18px 50px rgba(15,23,42,.14)", background: "#fff",
-      }}>
-        <div ref={cvRef} style={{ width: 794, background: "#fff", pointerEvents: "none", userSelect: "none" }}
-          dangerouslySetInnerHTML={{ __html: html }} />
+    <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      {/* Original size (794px wide, like the PDF) — scrolls horizontally on small screens */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "4px 2px 12px" }}>
+        <div style={{
+          width: 794, margin: "0 auto",
+          borderRadius: 14, overflow: "hidden", border: "1px solid var(--border)",
+          boxShadow: "0 18px 50px rgba(15,23,42,.14)", background: "#fff", flexShrink: 0,
+        }}>
+          <div style={{ width: 794, background: "#fff", userSelect: "none" }}
+            dangerouslySetInnerHTML={{ __html: html }} />
+        </div>
       </div>
-      <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-        <span aria-hidden>✨</span> Erstellt mit <strong style={{ color: "var(--brand)" }}>bewerbungski.com</strong> — Vorlage „Elegant“
+      <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
+        <span aria-hidden>✨</span> {CAPTION_BY_LANG[lang]} <strong style={{ color: "var(--brand)" }}>bewerbungski.com</strong> — {TEMPLATE_WORD_BY_LANG[lang]} „Elegant“
       </p>
     </div>
   );
