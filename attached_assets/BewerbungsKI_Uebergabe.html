@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>BewerbungsKI – Übergabe-Dokument für Assistenten</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;max-width:820px;margin:32px auto;padding:0 20px;color:#111;line-height:1.55}
+h1{color:#1a56db;border-bottom:3px solid #1a56db;padding-bottom:8px}
+h2{color:#1a56db;margin-top:28px}
+code,pre{background:#f3f4f6;border-radius:6px;padding:2px 6px;font-size:13px}
+pre{padding:12px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{border:1px solid #d1d5db;padding:6px 10px;text-align:left}
+.warn{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px}
+</style>
+</head>
+<body>
+<h1>BewerbungsKI – Übergabe-Dokument</h1>
+<p><b>Stand: 13. August 2026.</b> Dieses Dokument macht einen anderen Assistenten mit der App vertraut, damit er sie bearbeiten kann.</p>
+
+<h2>1. Was ist die App?</h2>
+<ul>
+<li><b>bewerbungski.com</b> — KI erstellt Lebenslauf + Anschreiben für den deutschen Arbeitsmarkt (DIN 5008, ATS-optimiert).</li>
+<li>9-Schritte-Assistent: Persönliche Daten → Schulabschluss → Ausbildung → Berufserfahrung → Skills → Sprachen → Stellenanzeige → Vorlage (14 Templates) → Generieren.</li>
+<li>Extras: Freitext-Schnelleingabe („Schnell eintippen“, KI sortiert formlosen Text in die Felder inkl. Stellenanzeige), LinkedIn-Import, Foto-Upload, DOCX-Export, gespeichertes Profil, Live-CV-Editor, Dark Mode.</li>
+<li>UI in 8 Sprachen (de, en, es, pl, ru, tr, uk, ar inkl. RTL); Bewerbungssprache wählbar.</li>
+<li>Mobile-App (Expo/React Native) existiert zusätzlich.</li>
+</ul>
+
+<h2>2. Preismodell (seit 13.08.2026)</h2>
+<ul>
+<li>3 Bewerbungen kostenlos pro Konto, danach <b>9,99 € einmalig für 30 weitere</b> (kein Abo, nichts „unbegrenzt“).</li>
+<li>Serverseitig erzwungen: ohne Kauf ab 3 Dokumenten gesperrt (<code>free_limit_reached</code>), mit Kauf ab 33 Dokumenten gesamt (<code>premium_limit_reached</code>; 33 = 3 gratis + 30 gekauft).</li>
+<li>Stripe-Webhook <code>checkout.session.completed</code> setzt <code>profiles.is_premium = true</code>. Preis ist inline (<code>unit_amount: 999</code>), keine Stripe-Price-ID.</li>
+<li>Bei Preisänderungen synchron halten: <code>checkout.ts</code>, <code>generate.ts</code>, alle 8 Sprachdateien, <code>index.html</code> (Meta + JSON-LD), Mobile-App.</li>
+</ul>
+
+<h2>3. Technik-Stack</h2>
+<table>
+<tr><th>Bereich</th><th>Technik</th></tr>
+<tr><td>Code</td><td>pnpm-Monorepo (Replit-Workspace), Node.js 24, TypeScript</td></tr>
+<tr><td>Frontend</td><td>React + Vite, Tailwind, wouter, TanStack Query, i18next (8 Sprachen)</td></tr>
+<tr><td>Backend</td><td>Express 5 unter <code>/api</code>, Port 8080</td></tr>
+<tr><td>Datenbank</td><td>PostgreSQL (Supabase) + Drizzle ORM; Tabellen <code>profiles</code> (is_premium, savedProfile jsonb) und <code>documents</code></td></tr>
+<tr><td>Login</td><td>Supabase E-Mail + Passwort (E-Mail-Bestätigung AUS, kein Magic Link)</td></tr>
+<tr><td>KI</td><td>Anthropic Claude <code>claude-sonnet-4-5</code> per direktem fetch (Generierung + Parsing, temperature 0 beim Parsing)</td></tr>
+<tr><td>Bezahlung</td><td>Stripe Checkout (einmalig) + Webhook</td></tr>
+<tr><td>Tracking</td><td>Google Ads Tag <code>AW-18372990605</code> + GA4 <code>G-0M38V4VG2D</code> in index.html; Kauf-Conversion feuert bei <code>/?session_id=…</code></td></tr>
+<tr><td>Hosting</td><td><b>Railway</b> (nicht Replit!), Domain über Strato-CNAME</td></tr>
+</table>
+
+<h2>4. Wichtige Dateien</h2>
+<pre>artifacts/bewerbungski/            React-Website
+  src/pages/Wizard.tsx             9-Schritte-Assistent, KI-Prompts, Importe
+  src/lib/buildCVHTML.ts           14 CV-Templates (HTML-Strings)
+  src/i18n/locales/*.json          8 Sprachdateien (Key-Sets identisch halten!)
+  src/components/Layout.tsx        Navigation, Free-Plan-Balken (x/3)
+  index.html                       SEO, Google-Tags, Preis in Meta/JSON-LD
+artifacts/api-server/src/routes/   Express-Routen:
+  generate.ts                      KI-Generierung + Limits (3/33)
+  checkout.ts                      Stripe-Checkout + Webhook
+  parse-linkedin.ts                LinkedIn- UND Freitext-Parser (+ normalize()-Sicherheitsnetz)
+  documents.ts, me.ts, saved-profile, download.ts, admin.ts
+lib/db/src/schema/documents.ts     DB-Schema
+lib/api-spec/                      OpenAPI-Spec → Orval-Codegen
+artifacts/bewerbungski-mobile/     Expo-Handy-App</pre>
+
+<h2>5. Deployment (nur so funktioniert es!)</h2>
+<ol>
+<li>Bei Frontend-Änderungen: <code>pnpm --filter @workspace/bewerbungski run build</code></li>
+<li>tar.gz des Workspace erstellen (ohne .git, node_modules, .local, .agents, attached_assets, .cache, .pythonlibs, Mobile, Sandbox)</li>
+<li>POST als <code>application/gzip</code> an <code>backboard.railway.com/project/f88e5c3f-e1b6-4616-8ecc-e1fa02832d0c/environment/19490e15-3d0c-48f0-a0eb-477175ddf001/up?serviceId=f987ee0c-b556-4749-997e-80402be24654</code> mit Header <code>Authorization: Bearer $RAILWAY_TOKEN</code></li>
+<li>Status per GraphQL <code>deployment(id){status}</code> pollen (~60–90 s)</li>
+</ol>
+<p class="warn">⚠️ Die Railway-CLI und Multipart-Upload funktionieren mit diesem Token NICHT. Beim Start läuft <code>drizzle push --force</code> automatisch (railway.json).</p>
+
+<h2>6. Benötigte Schlüssel (Werte stehen NICHT hier — beim Besitzer erfragen)</h2>
+<table>
+<tr><th>Variable</th><th>Zweck</th></tr>
+<tr><td>DATABASE_URL</td><td>Postgres-Verbindung</td></tr>
+<tr><td>SUPABASE_URL / VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY</td><td>Supabase-Projekt (Browser + Server)</td></tr>
+<tr><td>SUPABASE_SERVICE_ROLE_KEY</td><td>JWT-Prüfung serverseitig</td></tr>
+<tr><td>ANTHROPIC_API_KEY</td><td>Claude-KI</td></tr>
+<tr><td>STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET</td><td>Bezahlung</td></tr>
+<tr><td>RAILWAY_TOKEN</td><td>Production-Deploys</td></tr>
+<tr><td>SESSION_SECRET</td><td>Express-Session</td></tr>
+</table>
+
+<h2>7. Regeln des Besitzers (unbedingt beachten)</h2>
+<ul>
+<li>Besitzer: Raphael Halim — nicht-technisch, deutschsprachig, nur am Handy, sehr kostenbewusst: <b>wenige Deploys, einfache deutsche Erklärungen, kein Fachjargon</b>.</li>
+<li>Lebenslauf immer chronologisch <b>aufsteigend</b>: Schulabschluss zuerst, dann Ausbildung, dann Berufserfahrung (in allen 14 Templates steht Ausbildung VOR Berufserfahrung).</li>
+<li>Prompt-Regeln allein sind unzuverlässig — Sicherheitsnetze im Code (<code>normalize()</code>) beibehalten.</li>
+</ul>
+
+<h2>8. Bekannte Stolperfallen &amp; offene Punkte</h2>
+<ul>
+<li><b>Supabase Free-Tier pausiert automatisch</b>, wenn sich der Besitzer nicht wöchentlich einloggt → Login + Bezahlung fallen aus.</li>
+<li>KI-Fehler bedeuten meist: Anthropic-Guthaben leer.</li>
+<li><code>/api/download/RaphaelKI2026</code> ist ein öffentlicher, unauthentifizierter Info-Download — Absicherung ist eine offene Aufgabe.</li>
+<li>Premium-Nutzer, die alle 30 Bewerbungen verbraucht haben, können noch kein weiteres Paket kaufen (offene Aufgabe).</li>
+<li>Mobile-App zeigt teils noch alte Preise/Texte (offene Aufgabe).</li>
+<li><code>documents_count</code> wird live gezählt (COUNT auf documents) — Löschen von Dokumenten gibt Kontingent frei.</li>
+<li>Nach Schema-Änderungen <code>pnpm --filter @workspace/db run push</code>; nach OpenAPI-Änderungen Codegen laufen lassen.</li>
+</ul>
+
+<p><i>Der Quellcode liegt im Replit-Workspace des Besitzers (Monorepo mit artifacts/bewerbungski, artifacts/api-server, artifacts/bewerbungski-mobile). Ein anderer Workspace braucht Zugriff auf diesen Code, um Änderungen live zu bringen.</i></p>
+</body>
+</html>

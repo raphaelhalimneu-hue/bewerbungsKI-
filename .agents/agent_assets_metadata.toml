@@ -84,3 +84,10 @@ uri = "file://attached_assets/BewerbungsKI_Download.html"
 type = "text"
 title = "📥 Testdateien herunterladen – hier klicken"
 description = "Seite öffnen → zwei Download-Buttons → Lebenslauf und Anschreiben als Word-Datei speichern."
+
+[[outputs]]
+id = "It9v_XRaP3rZQwE2A5CEu"
+uri = "file://attached_assets/BewerbungsKI_Uebergabe.html"
+type = "text"
+title = "BewerbungsKI – Übergabe-Dokument"
+description = "Alle Infos für einen anderen Assistenten: App, Preismodell, Technik, Dateien, Deployment, Regeln und Stolperfallen (ohne Passwörter/Schlüssel)."
