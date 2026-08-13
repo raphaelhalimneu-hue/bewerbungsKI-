@@ -109,4 +109,65 @@ router.post("/parse-linkedin", requireAuth, async (req: AuthenticatedRequest, re
   }
 });
 
+// ── Free-text CV parsing: user writes about themselves in plain language ─────
+router.post("/parse-freetext", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    if (rateLimited(req.userId!)) {
+      res.status(429).json({ error: "rate_limited" });
+      return;
+    }
+    const { text } = req.body as { text: string };
+    if (!text || typeof text !== "string" || text.trim().length < 30) {
+      res.status(400).json({ error: "text_too_short" });
+      return;
+    }
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      res.status(503).json({ error: "AI not configured" });
+      return;
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4096,
+        system:
+          'Ein Bewerber beschreibt seinen Werdegang in eigenen Worten (formlos, umgangssprachlich, unvollständig). Extrahiere und strukturiere die Lebenslaufdaten. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}]}. Regeln: Fehlende Felder als leerer String — NIEMALS Daten erfinden. Ungefähre Zeitangaben ("vor 5 Jahren", "seit 2020") in JJJJ-MM umrechnen (heute ist ' + new Date().toISOString().slice(0, 7) + '). Bei nur Jahr: JJJJ-01. Bei aktueller Stelle current=true und end="". Formulierungen professionalisieren (z.B. "hab bei Bosch geschraubt" → position "Mechaniker", description professionell). Skills aus dem Text ableiten (auch implizite: wer als Mechaniker arbeitete hat "Wartung & Instandhaltung"). Sprachniveau als A1-C2 oder "Muttersprache". Behalte die Sprache des Bewerbertextes bei.',
+        messages: [{ role: "user", content: `Strukturiere diesen formlosen Werdegang zu Lebenslaufdaten:\n\n${text.slice(0, 20000)}` }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      req.log.error({ status: response.status, body: errText }, "Claude parse-freetext error");
+      res.status(500).json({ error: "parse_failed" });
+      return;
+    }
+
+    const data = await response.json() as { content: Array<{ type: string; text?: string }> };
+    let raw = data.content?.find((b) => b.type === "text")?.text ?? "";
+    raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      req.log.error({ raw: raw.slice(0, 500) }, "parse-freetext: invalid JSON from model");
+      res.status(500).json({ error: "parse_failed" });
+      return;
+    }
+    res.json({ data: normalize(parsed) });
+  } catch (err) {
+    req.log.error({ err }, "POST /parse-freetext error");
+    res.status(500).json({ error: "parse_failed" });
+  }
+});
+
 export default router;

@@ -377,6 +377,15 @@
       "year": "Year of graduation",
       "yearPh": "e.g. 2015",
       "hint": "Enter your highest school leaving qualification here."
+    },
+    "freetext": {
+      "button": "Quick type-in",
+      "hint": "Describe your career in your own words – the AI automatically sorts everything into the right fields. Example: \"I'm Max Miller from Berlin, worked 5 years at Bosch as a mechanic, before that apprenticeship at ACME…\"",
+      "placeholder": "Just start writing: Who are you? Where have you worked? What are your skills?",
+      "import": "Let AI fill it in",
+      "importing": "AI is analyzing…",
+      "success": "Data applied! Please review the fields.",
+      "error": "Analysis failed. Please try again."
     }
   },
   "notFound": {

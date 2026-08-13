@@ -377,6 +377,15 @@
       "year": "Mezuniyet yılı",
       "yearPh": "örn. 2015",
       "hint": "En yüksek okul diplomanı buraya gir."
+    },
+    "freetext": {
+      "button": "Hızlı yazım",
+      "hint": "Kariyerinizi kendi kelimelerinizle anlatın – yapay zeka her şeyi otomatik olarak doğru alanlara yerleştirir.",
+      "placeholder": "Yazmaya başlayın: Kimsiniz? Nerede çalıştınız? Neler yapabilirsiniz?",
+      "import": "Yapay zeka doldursun",
+      "importing": "Yapay zeka analiz ediyor…",
+      "success": "Veriler uygulandı! Lütfen alanları kontrol edin.",
+      "error": "Analiz başarısız oldu. Lütfen tekrar deneyin."
     }
   },
   "notFound": {

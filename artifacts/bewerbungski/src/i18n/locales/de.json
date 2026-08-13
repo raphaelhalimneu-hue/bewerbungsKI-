@@ -377,6 +377,15 @@
       "year": "Abschlussjahr",
       "yearPh": "z.B. 2015",
       "hint": "Trage hier deinen höchsten Schulabschluss ein."
+    },
+    "freetext": {
+      "button": "Schnell eintippen",
+      "hint": "Beschreibe deinen Werdegang einfach in eigenen Worten – die KI sortiert alles automatisch in die richtigen Felder. Beispiel: „Ich bin Max Müller aus Berlin, habe 5 Jahre bei Bosch als Mechaniker gearbeitet, davor Ausbildung bei ACME…\"",
+      "placeholder": "Erzähl einfach drauflos: Wer bist du? Wo hast du gearbeitet? Was kannst du?",
+      "import": "KI ausfüllen lassen",
+      "importing": "KI analysiert…",
+      "success": "Daten übernommen! Bitte prüfe die Felder.",
+      "error": "Analyse fehlgeschlagen. Bitte erneut versuchen."
     }
   },
   "notFound": {

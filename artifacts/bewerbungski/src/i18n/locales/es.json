@@ -377,6 +377,15 @@
       "year": "Año de graduación",
       "yearPh": "p. ej. 2015",
       "hint": "Introduce aquí tu titulación escolar más alta."
+    },
+    "freetext": {
+      "button": "Escritura rápida",
+      "hint": "Describe tu trayectoria con tus propias palabras: la IA ordena todo automáticamente en los campos correctos.",
+      "placeholder": "Simplemente escribe: ¿Quién eres? ¿Dónde has trabajado? ¿Qué sabes hacer?",
+      "import": "Dejar que la IA lo complete",
+      "importing": "La IA está analizando…",
+      "success": "¡Datos aplicados! Revisa los campos.",
+      "error": "Error en el análisis. Inténtalo de nuevo."
     }
   },
   "notFound": {

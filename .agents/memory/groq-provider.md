@@ -6,3 +6,5 @@ description: Which AI generates the applications and billing caveats
 - **Why:** paid API — key lives in Railway env `ANTHROPIC_API_KEY` (account raphaelhalimneu@gmail.com). If generation returns errors, first suspect empty Anthropic credit balance ("credit balance is too low"). User must top up at console.anthropic.com.
 - User once pasted an API key in chat (2026-08-11); advised to keep keys private.
 - GROQ_API_KEY still set on Railway but unused.
+
+- Der ANTHROPIC_API_KEY im Replit-Dev-Workspace ist UNGÜLTIG (invalid x-api-key); nur der Key in den Railway-Env-Vars funktioniert. KI-Features daher immer auf Production testen, nicht lokal.

@@ -377,6 +377,15 @@
       "year": "Rok ukończenia",
       "yearPh": "np. 2015",
       "hint": "Wpisz tutaj swoje najwyższe świadectwo szkolne."
+    },
+    "freetext": {
+      "button": "Szybkie wpisywanie",
+      "hint": "Opisz swoją karierę własnymi słowami – AI automatycznie uporządkuje wszystko w odpowiednich polach.",
+      "placeholder": "Po prostu pisz: Kim jesteś? Gdzie pracowałeś? Co potrafisz?",
+      "import": "Niech AI wypełni pola",
+      "importing": "AI analizuje…",
+      "success": "Dane zastosowane! Sprawdź pola.",
+      "error": "Analiza nie powiodła się. Spróbuj ponownie."
     }
   },
   "notFound": {

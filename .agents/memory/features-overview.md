@@ -37,3 +37,6 @@ description: Durable decisions for the 3 major features added in Aug 2026
 - 8 CV templates (modern/classic/creative/executive/minimal/elegant/bold/compact) via TEMPLATE_STYLES prompt-skeleton parameterization; photo upload (base64, client-resized 300x400, __FOTO__ placeholder, omitted for EN docs).
 - ATS score computed client-side (keyword 60% + sections 40%) in profileData.atsScore; list route exposes ats_score via jsonb extraction.
 - LinkedIn text-paste import: POST /api/parse-linkedin (Claude→JSON, server-side normalization, 5/15min per-user in-memory rate limit).
+
+- Freitext-Schnelleingabe (POST /api/parse-freetext, UI in StepPersonal neben LinkedIn-Import): formloser Werdegang-Text wird per Claude in Wizard-Formdaten strukturiert (seit 2026-08-13).
+- Alle Blau-Töne aus Templates/PDF-Links entfernt auf Nutzerwunsch (Templates modern/creative/executive, a{color:inherit} in PDF-Styles) — bei neuen Templates kein knalliges Blau als Textfarbe verwenden.

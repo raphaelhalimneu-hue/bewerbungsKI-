@@ -410,6 +410,26 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
   const [liOpen, setLiOpen] = useState(false);
   const [liText, setLiText] = useState("");
   const [liLoading, setLiLoading] = useState(false);
+  const [ftOpen, setFtOpen] = useState(false);
+  const [ftText, setFtText] = useState("");
+  const [ftLoading, setFtLoading] = useState(false);
+
+  async function importFreetext() {
+    if (!user) { setShowAuthModal(true); return; }
+    if (ftText.trim().length < 30) return;
+    setFtLoading(true);
+    try {
+      const res = await customFetch<{ data: Partial<FormData> }>("/api/parse-freetext", {
+        method: "POST",
+        body: JSON.stringify({ text: ftText }),
+      });
+      applyImport(res.data);
+      setFtOpen(false); setFtText("");
+      toast({ title: t("wizard.freetext.success") });
+    } catch {
+      toast({ title: t("wizard.freetext.error"), variant: "destructive" });
+    } finally { setFtLoading(false); }
+  }
 
   function handlePhoto(file: File | undefined) {
     if (!file) return;
@@ -460,12 +480,27 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {/* LinkedIn import */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button type="button" className="btn btn-s" style={{ fontSize: 13 }} onClick={() => setLiOpen(o => !o)}>
+      {/* Quick-fill: free text + LinkedIn import */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" }}>
+        <button type="button" className="btn btn-s" style={{ fontSize: 13 }} onClick={() => { setFtOpen(o => !o); setLiOpen(false); }}>
+          ⚡ {t("wizard.freetext.button")}
+        </button>
+        <button type="button" className="btn btn-s" style={{ fontSize: 13 }} onClick={() => { setLiOpen(o => !o); setFtOpen(false); }}>
           🔗 {t("wizard.linkedin.button")}
         </button>
       </div>
+      {ftOpen && (
+        <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
+          <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10, lineHeight: 1.5 }}>{t("wizard.freetext.hint")}</div>
+          <textarea className="textarea" value={ftText} onChange={e => setFtText(e.target.value)} placeholder={t("wizard.freetext.placeholder")} style={{ minHeight: 170, marginBottom: 10 }} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" className="btn btn-p btn-sm" onClick={importFreetext} disabled={ftLoading || ftText.trim().length < 30}>
+              {ftLoading ? <><span className="spin" /> {t("wizard.freetext.importing")}</> : t("wizard.freetext.import")}
+            </button>
+            <button type="button" className="btn btn-g btn-sm" onClick={() => setFtOpen(false)}>{t("wizard.linkedin.cancel")}</button>
+          </div>
+        </div>
+      )}
       {liOpen && (
         <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
           <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10, lineHeight: 1.5 }}>{t("wizard.linkedin.hint")}</div>
