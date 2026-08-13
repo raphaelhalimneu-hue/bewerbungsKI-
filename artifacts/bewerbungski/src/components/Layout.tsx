@@ -7,7 +7,7 @@ import { AuthModal } from "./AuthModal";
 import { InAppBrowserBanner } from "./InAppBrowserBanner";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
-import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiGlobe } from "react-icons/fi";
+import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -22,8 +22,8 @@ function LanguageSwitcher() {
     <div className="flex items-center gap-1.5" title={t("nav.language")}>
       <FiGlobe size={16} className="text-[var(--muted)] hidden sm:block" />
       <select
-        className="select"
-        style={{ padding: "6px 8px", fontSize: 13, width: "auto", cursor: "pointer" }}
+        className="select max-w-[84px] sm:max-w-[120px]"
+        style={{ padding: "6px 26px 6px 8px", fontSize: 13, width: "auto", textOverflow: "ellipsis", cursor: "pointer" }}
         value={current}
         onChange={e => switchTo(e.target.value)}
         aria-label={t("nav.language")}
@@ -47,11 +47,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="app flex flex-col h-screen overflow-hidden">
       <InAppBrowserBanner />
       {/* Navbar */}
-      <header className="nav shrink-0 flex items-center justify-between px-6 bg-[var(--bg2)] border-b border-[var(--border)] h-[60px] shadow-[0_1px_4px_rgba(15,23,42,0.05)] z-50">
-        <Link href="/" className="nav-brand no-underline">
+      <header className="nav shrink-0 flex items-center justify-between gap-2 px-3 sm:px-6 bg-[var(--bg2)] border-b border-[var(--border)] h-[60px] shadow-[0_1px_4px_rgba(15,23,42,0.05)] z-50">
+        <Link href="/" className="nav-brand no-underline shrink-0 whitespace-nowrap">
           Bewerbungs<span>KI</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <LanguageSwitcher />
           <button onClick={toggleTheme} className="btn-g flex items-center justify-center p-2 rounded-lg" aria-label={t("nav.toggleTheme")} title={t("nav.toggleTheme")}>
             {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
@@ -70,8 +70,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           ) : (
-            <button onClick={() => setShowAuthModal(true)} className="btn btn-p btn-sm">
-              {t("nav.signIn")}
+            <button onClick={() => setShowAuthModal(true)} className="btn btn-p btn-sm shrink-0" title={t("nav.signIn")}>
+              <FiLogIn size={16} className="sm:hidden" />
+              <span className="hidden sm:inline">{t("nav.signIn")}</span>
             </button>
           )}
         </div>
@@ -128,8 +129,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main content */}
-        <main className="main flex-1 overflow-y-auto p-4 sm:p-8">
-          <div className="max-w-[880px] mx-auto">
+        <main className="main flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 min-w-0">
+          <div className="max-w-[880px] mx-auto min-w-0">
             {children}
           </div>
         </main>

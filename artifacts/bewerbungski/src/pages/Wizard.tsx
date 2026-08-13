@@ -53,7 +53,10 @@ function blankForm(): FormData {
 }
 
 export default function Wizard() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => {
+    const s = Number(new URLSearchParams(window.location.search).get("step"));
+    return Number.isInteger(s) && s >= 0 && s <= 8 ? s : 0;
+  });
   const [form, setForm] = useState<FormData>(blankForm());
   const [docLang, setDocLang] = useState("de");
   const [motivation, setMotivation] = useState("");
@@ -394,7 +397,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
           {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} tone={tone} setTone={setTone} />}
         </div>
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "space-between", flexWrap: "wrap" }}>
           <button className="btn btn-s" onClick={() => setStep(s => s - 1)} disabled={step === 0}>{t("wizard.back")}</button>
           {step < STEPS.length - 1
             ? <button className="btn btn-p" onClick={() => setStep(s => s + 1)}>{t("wizard.next")}</button>
@@ -757,12 +760,12 @@ function StepSkills({ items, skillInput, setSkillInput, skillLevel, setSkillLeve
   const lvlLabels = [t("wizard.skills.lvl1"), t("wizard.skills.lvl2"), t("wizard.skills.lvl3"), t("wizard.skills.lvl4"), t("wizard.skills.lvl5")];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-        <div className="field" style={{ flex: 1 }}>
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+        <div className="field" style={{ flex: "1 1 160px", minWidth: 0 }}>
           <label className="label">{t("wizard.skills.skill")}</label>
           <input className="input" value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addSkill()} placeholder={t("wizard.skills.skillPh")} />
         </div>
-        <div className="field" style={{ width: 150 }}>
+        <div className="field" style={{ flex: "0 1 150px", minWidth: 110 }}>
           <label className="label">{t("wizard.skills.level")}</label>
           <select className="select" value={skillLevel} onChange={e => setSkillLevel(Number(e.target.value))}>
             {LVL_VALS.map((v, i) => <option key={v} value={v}>{lvlLabels[i]}</option>)}
@@ -797,9 +800,9 @@ function StepLanguages({ items, addLang, updateLang, delLang }: { items: Languag
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {items.length === 0 && <div style={{ textAlign: "center", color: "var(--muted)", padding: "20px 0", fontSize: 14 }}>{t("wizard.langs.empty")}</div>}
       {items.map((l, i) => (
-        <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-          <div className="field" style={{ flex: 1 }}><label className="label">{t("wizard.langs.language")}</label><input className="input" value={l.language} onChange={e => updateLang(i, "language", e.target.value)} placeholder={t("wizard.langs.languagePh")} /></div>
-          <div className="field" style={{ width: 160 }}>
+        <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+          <div className="field" style={{ flex: "1 1 140px", minWidth: 0 }}><label className="label">{t("wizard.langs.language")}</label><input className="input" value={l.language} onChange={e => updateLang(i, "language", e.target.value)} placeholder={t("wizard.langs.languagePh")} /></div>
+          <div className="field" style={{ flex: "0 1 160px", minWidth: 110 }}>
             <label className="label">{t("wizard.langs.level")}</label>
             <select className="select" value={l.level} onChange={e => updateLang(i, "level", e.target.value)}>
               {langLevels.map(lv => <option key={lv} value={lv}>{lv === "Muttersprache" ? t("wizard.langs.native") : lv}</option>)}
