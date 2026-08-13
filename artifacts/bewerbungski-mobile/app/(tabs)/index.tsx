@@ -9,7 +9,7 @@ import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useGenerateDocument, useCreateDocument } from '@workspace/api-client-react';
+import { useGenerateDocument, useCreateDocument, customFetch } from '@workspace/api-client-react';
 import { router, useFocusEffect } from 'expo-router';
 
 // ─────────────────────── Types ───────────────────────
@@ -108,6 +108,13 @@ export default function CreateScreen() {
   const generateMutation = useGenerateDocument();
   const createMutation = useCreateDocument();
 
+  // ── Freetext quick entry ──
+  const [ftOpen, setFtOpen] = useState(false);
+  const [ftText, setFtText] = useState('');
+  const [ftLoading, setFtLoading] = useState(false);
+  const [ftError, setFtError] = useState('');
+  const [ftSuccess, setFtSuccess] = useState('');
+
   const STEPS = ['👤 Persönlich', '💼 Erfahrung', '🎓 Ausbildung', '🔧 Kenntnisse', '✨ Stellenanzeige'];
 
   useFocusEffect(React.useCallback(() => { setGenError(''); }, []));
@@ -136,6 +143,72 @@ export default function CreateScreen() {
   const addLang = () => setForm(f => ({ ...f, languages: [...f.languages, { id: uid(), language: '', level: 'B2' }] }));
   const sl = (i: number, k: keyof Lang, v: string) => setForm(f => { const a = [...f.languages]; a[i] = { ...a[i], [k]: v }; return { ...f, languages: a }; });
   const delLang = (i: number) => setForm(f => ({ ...f, languages: f.languages.filter((_, x) => x !== i) }));
+
+  async function importFreetext() {
+    if (ftText.trim().length < 30 || ftLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setFtLoading(true); setFtError(''); setFtSuccess('');
+    try {
+      const res = await customFetch<{ data: any }>('/api/parse-freetext', {
+        method: 'POST',
+        body: JSON.stringify({ text: ftText }),
+      });
+      const d = res?.data || {};
+      setForm(f => {
+        const next: Form = { ...f };
+        if (d.personal) {
+          const p = d.personal;
+          next.personal = {
+            ...f.personal,
+            ...(p.firstName ? { firstName: p.firstName } : {}),
+            ...(p.lastName ? { lastName: p.lastName } : {}),
+            ...(p.title ? { title: p.title } : {}),
+            ...(p.email ? { email: p.email } : {}),
+            ...(p.phone ? { phone: p.phone } : {}),
+            ...(p.city ? { city: p.city } : {}),
+          };
+        }
+        if (Array.isArray(d.experience) && d.experience.length) {
+          next.experience = d.experience.map((e: any) => ({
+            id: uid(), company: e.company || '', position: e.position || '', city: e.city || '',
+            start: e.start || '', end: e.end || '', current: !!e.current, description: e.description || '',
+          }));
+        }
+        const eduItems: Edu[] = [];
+        if (Array.isArray(d.education)) {
+          for (const e of d.education) {
+            eduItems.push({ id: uid(), school: e.institution || '', degree: e.degree || '', field: e.field || '', start: e.start || '', end: e.end || '' });
+          }
+        }
+        if (d.school && (d.school.name || d.school.type)) {
+          eduItems.push({ id: uid(), school: d.school.name || '', degree: d.school.type || '', field: '', start: '', end: d.school.year || '' });
+        }
+        if (eduItems.length) next.education = eduItems;
+        if (Array.isArray(d.skills) && d.skills.length) {
+          next.skills = d.skills.map((sk: any) => ({ id: uid(), name: sk.name || '' })).filter((sk: Skill) => sk.name);
+        }
+        if (Array.isArray(d.languages) && d.languages.length) {
+          next.languages = d.languages.map((l: any) => ({ id: uid(), language: l.language || '', level: l.level || 'B2' })).filter((l: Lang) => l.language);
+        }
+        if (d.jobad) {
+          next.jobad = {
+            ...f.jobad,
+            ...(d.jobad.title ? { title: d.jobad.title } : {}),
+            ...(d.jobad.company ? { company: d.jobad.company } : {}),
+            ...(d.jobad.description ? { description: d.jobad.description } : {}),
+          };
+        }
+        return next;
+      });
+      setFtOpen(false); setFtText('');
+      setFtSuccess('Daten übernommen! Bitte prüfe die Felder.');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e: any) {
+      setFtError('Analyse fehlgeschlagen. Bitte erneut versuchen.');
+    } finally {
+      setFtLoading(false);
+    }
+  }
 
   // ── Generate ──
   async function handleGenerate() {
@@ -224,6 +297,48 @@ export default function CreateScreen() {
         {/* Step 0: Personal */}
         {step === 0 && (
           <View>
+            {!ftOpen && (
+              <TouchableOpacity style={[s.addBtn, { marginBottom: 16 }]} onPress={() => { Haptics.selectionAsync(); setFtOpen(true); setFtSuccess(''); }}>
+                <Text style={{ fontSize: 15 }}>⚡</Text>
+                <Text style={s.addBtnText}>Schnell eintippen</Text>
+              </TouchableOpacity>
+            )}
+            {ftOpen && (
+              <View style={[s.card, { marginBottom: 16 }]}>
+                <View style={s.itemHeader}>
+                  <Text style={s.cardTitle}>⚡ Schnell eintippen</Text>
+                  <TouchableOpacity onPress={() => { setFtOpen(false); setFtError(''); }}><Feather name="x" size={18} color={colors.mutedForeground} /></TouchableOpacity>
+                </View>
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, marginBottom: 10, fontFamily: 'Inter_400Regular' }}>
+                  Beschreibe deinen Werdegang einfach in eigenen Worten – am besten chronologisch, mit der Schule beginnend. Die KI sortiert alles automatisch in die richtigen Felder. Du kannst alles auf einmal beschreiben oder nur einzelne Teile – die KI füllt nur die Felder aus, zu denen du etwas schreibst.
+                </Text>
+                <TextInput
+                  style={[s.input, { minHeight: 140, textAlignVertical: 'top', marginBottom: 12 }]}
+                  value={ftText}
+                  onChangeText={setFtText}
+                  placeholder="Erzähl einfach drauflos – am besten der Reihe nach: Schule, Ausbildung, Beruf. Was kannst du?"
+                  placeholderTextColor={colors.mutedForeground}
+                  multiline
+                />
+                {ftError ? <Text style={s.errorText}>{ftError}</Text> : null}
+                <TouchableOpacity
+                  style={[s.primaryBtn, { opacity: ftLoading || ftText.trim().length < 30 ? 0.5 : 1 }]}
+                  onPress={importFreetext}
+                  disabled={ftLoading || ftText.trim().length < 30}
+                  activeOpacity={0.85}
+                >
+                  {ftLoading ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <ActivityIndicator color="#fff" size="small" />
+                      <Text style={s.primaryBtnText}>KI analysiert…</Text>
+                    </View>
+                  ) : (
+                    <Text style={s.primaryBtnText}>KI ausfüllen lassen</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+            {ftSuccess ? <Text style={{ color: '#16a34a', fontSize: 13, marginBottom: 12, fontFamily: 'Inter_500Medium' }}>{ftSuccess}</Text> : null}
             <Field label="Vorname *" value={form.personal.firstName} onChangeText={v => sp('firstName', v)} placeholder="Max" colors={colors} />
             <Field label="Nachname *" value={form.personal.lastName} onChangeText={v => sp('lastName', v)} placeholder="Mustermann" colors={colors} />
             <Field label="Berufsbezeichnung" value={form.personal.title} onChangeText={v => sp('title', v)} placeholder="Software Entwickler" colors={colors} />
