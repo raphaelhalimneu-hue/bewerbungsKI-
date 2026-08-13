@@ -35,10 +35,6 @@ function normalize(raw: any) {
       start: str(e?.start, 10), end: str(e?.end, 10), current: e?.current === true,
       description: str(e?.description, 2000),
     })).filter(e => e.company || e.position),
-    education: arr(raw?.education).map((e: any) => ({
-      institution: str(e?.institution, 160), city: str(e?.city, 80), degree: str(e?.degree, 160),
-      field: str(e?.field, 160), grade: str(e?.grade, 40), start: str(e?.start, 10), end: str(e?.end, 10),
-    })).filter(e => e.institution || e.degree),
     skills: arr(raw?.skills).map((s: any) => ({
       name: str(s?.name, 80),
       level: typeof s?.level === "number" && s.level >= 0 && s.level <= 100 ? Math.round(s.level) : 80,
@@ -46,6 +42,26 @@ function normalize(raw: any) {
     languages: arr(raw?.languages).map((l: any) => ({
       language: str(l?.language, 60), level: str(l?.level, 30) || "B2",
     })).filter(l => l.language),
+    ...(() => {
+      const sc = raw?.school ?? {};
+      let school = { type: str(sc?.type, 80), name: str(sc?.name, 160), city: str(sc?.city, 80), year: str(sc?.year, 10) };
+      // Safety net: the model often puts the school diploma into education despite instructions.
+      // Detect such entries, move the first one into `school`, and drop them from education.
+      const isSchool = (deg: string) => /abitur|fachabitur|realschul|hauptschul|mittlere reife|schulabschluss|hochschulreife|fachoberschulreife|quali\b/i.test(deg);
+      const edu = arr(raw?.education).map((e: any) => ({
+        institution: str(e?.institution, 160), city: str(e?.city, 80), degree: str(e?.degree, 160),
+        field: str(e?.field, 160), grade: str(e?.grade, 40), start: str(e?.start, 10), end: str(e?.end, 10),
+      })).filter(e => e.institution || e.degree);
+      const schoolEntries = edu.filter(e => isSchool(e.degree));
+      if (!school.type && !school.name && schoolEntries.length) {
+        const e = schoolEntries[0];
+        school = { type: e.degree, name: e.institution, city: e.city, year: e.end.slice(0, 4) || e.start.slice(0, 4) };
+      }
+      return {
+        education: edu.filter(e => !isSchool(e.degree)),
+        ...(school.type || school.name ? { school } : {}),
+      };
+    })(),
   };
 }
 
@@ -78,7 +94,7 @@ router.post("/parse-linkedin", requireAuth, async (req: AuthenticatedRequest, re
         model: "claude-sonnet-4-5",
         max_tokens: 4096,
         system:
-          'Du extrahierst Lebenslaufdaten aus kopiertem LinkedIn-Profiltext. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}]}. Regeln: Fehlende Felder als leerer String. Daten im Format JJJJ-MM (bei nur Jahr: JJJJ-01). Bei aktueller Stelle current=true und end="". Sprachniveau als A1-C2 oder "Muttersprache". Beschreibungen kurz zusammenfassen. Behalte die Originalsprache der Inhalte bei.',
+          'Du extrahierst Lebenslaufdaten aus kopiertem LinkedIn-Profiltext. Antworte AUSSCHLIESSLICH mit validem JSON (kein Markdown, keine Erklärungen) in exakt dieser Struktur: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","address":"","zip":"","city":"","linkedin":"","website":"","summary":""},"experience":[{"company":"","city":"","position":"","start":"JJJJ-MM","end":"JJJJ-MM","current":false,"description":""}],"education":[{"institution":"","city":"","degree":"","field":"","grade":"","start":"JJJJ-MM","end":"JJJJ-MM"}],"skills":[{"name":"","level":80}],"languages":[{"language":"","level":"B2"}],"school":{"type":"","name":"","city":"","year":"JJJJ"}}. Regeln: Der allgemeinbildende Schulabschluss (Hauptschulabschluss, Realschulabschluss/Mittlere Reife, Abitur, Fachabitur o.ä.) gehört in "school" (type=Abschlussart, name=Schulname, year=Abschlussjahr) und NICHT in "education"; "education" ist nur für Berufsausbildung/Studium/Weiterbildung. Eine Berufsausbildung/Lehre MUSS immer als education-Eintrag erscheinen (degree z.B. "Ausbildung zum KFZ-Mechatroniker") und NICHT stattdessen nur unter experience. Fehlende Felder als leerer String. Daten im Format JJJJ-MM (bei nur Jahr: JJJJ-01). Bei aktueller Stelle current=true und end="". Sprachniveau als A1-C2 oder "Muttersprache". Beschreibungen kurz zusammenfassen. Behalte die Originalsprache der Inhalte bei.',
         messages: [{ role: "user", content: `Extrahiere die Lebenslaufdaten aus diesem LinkedIn-Profiltext:\n\n${text.slice(0, 20000)}` }],
       }),
     });
