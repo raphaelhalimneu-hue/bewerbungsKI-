@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator,
   KeyboardAvoidingView, Platform, Switch, Modal,
@@ -19,7 +19,10 @@ type Edu = { id: string; school: string; degree: string; field: string; start: s
 type Skill = { id: string; name: string; };
 type Lang = { id: string; language: string; level: string; };
 type JobAd = { title: string; company: string; description: string; };
-type Form = { personal: Personal; experience: Exp[]; education: Edu[]; skills: Skill[]; languages: Lang[]; jobad: JobAd; docLang: string; };
+type School = { type: string; name: string; city: string; year: string; };
+type Form = { personal: Personal; school: School; experience: Exp[]; education: Edu[]; skills: Skill[]; languages: Lang[]; jobad: JobAd; docLang: string; };
+
+const EMPTY_SCHOOL: School = { type: '', name: '', city: '', year: '' };
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -35,6 +38,7 @@ const DOC_LANGS = [
 function blankForm(): Form {
   return {
     personal: { firstName: '', lastName: '', title: '', email: '', phone: '', city: '', birthDate: '' },
+    school: { ...EMPTY_SCHOOL },
     experience: [{ id: uid(), company: '', position: '', city: '', start: '', end: '', current: false, description: '' }],
     education: [{ id: uid(), school: '', degree: '', field: '', start: '', end: '' }],
     skills: [],
@@ -119,6 +123,43 @@ export default function CreateScreen() {
 
   useFocusEffect(React.useCallback(() => { setGenError(''); }, []));
 
+  // ── Saved profile ──
+  const [savedProfile, setSavedProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  useEffect(() => {
+    if (!user) { setSavedProfile(null); return; }
+    customFetch<{ savedProfile: any }>('/api/saved-profile')
+      .then(d => { if (d?.savedProfile) setSavedProfile(d.savedProfile); })
+      .catch(() => {});
+  }, [user?.id]);
+
+  function loadSavedProfile() {
+    if (!savedProfile) return;
+    setProfileLoading(true);
+    Haptics.selectionAsync();
+    const saved = savedProfile;
+    setForm(f => ({
+      ...f,
+      personal: { ...f.personal, ...(saved.personal || {}) },
+      school: saved.school ?? { ...EMPTY_SCHOOL },
+      experience: Array.isArray(saved.experience) && saved.experience.length
+        ? saved.experience.map((e: any) => ({ id: uid(), company: e.company || '', position: e.position || '', city: e.city || '', start: e.start || '', end: e.end || '', current: !!e.current, description: e.description || '' }))
+        : f.experience,
+      education: Array.isArray(saved.education) && saved.education.length
+        ? saved.education.map((e: any) => ({ id: uid(), school: e.school || e.institution || '', degree: e.degree || '', field: e.field || '', start: e.start || '', end: e.end || '' }))
+        : f.education,
+      skills: Array.isArray(saved.skills) && saved.skills.length
+        ? saved.skills.map((sk: any) => ({ id: uid(), name: sk.name || '' })).filter((sk: Skill) => sk.name)
+        : f.skills,
+      languages: Array.isArray(saved.languages) && saved.languages.length
+        ? saved.languages.map((l: any) => ({ id: uid(), language: l.language || '', level: l.level || 'B2' })).filter((l: Lang) => l.language)
+        : f.languages,
+    }));
+    setSavedProfile(null);
+    setProfileLoading(false);
+    setFtSuccess('Profil geladen! Bitte prüfe die Felder.');
+  }
+
   const s = makeStyles(colors);
   const isWeb = Platform.OS === 'web';
   const topPad = isWeb ? 67 : insets.top;
@@ -126,6 +167,9 @@ export default function CreateScreen() {
 
   // ── Personal helpers ──
   const sp = (k: keyof Personal, v: string) => setForm(f => ({ ...f, personal: { ...f.personal, [k]: v } }));
+
+  // ── School helpers ──
+  const sc = (k: keyof School, v: string) => setForm(f => ({ ...f, school: { ...f.school, [k]: v } }));
 
   // ── Experience helpers ──
   const addExp = () => setForm(f => ({ ...f, experience: [...f.experience, { id: uid(), company: '', position: '', city: '', start: '', end: '', current: false, description: '' }] }));
@@ -181,7 +225,7 @@ export default function CreateScreen() {
           }
         }
         if (d.school && (d.school.name || d.school.type)) {
-          eduItems.push({ id: uid(), school: d.school.name || '', degree: d.school.type || '', field: '', start: '', end: d.school.year || '' });
+          next.school = { type: d.school.type || '', name: d.school.name || '', city: d.school.city || '', year: d.school.year || '' };
         }
         if (eduItems.length) next.education = eduItems;
         if (Array.isArray(d.skills) && d.skills.length) {
@@ -256,6 +300,14 @@ export default function CreateScreen() {
         profileData: form as any,
       } });
 
+      // Auto-save profile for next time (silently)
+      try {
+        await customFetch('/api/saved-profile', {
+          method: 'PUT',
+          body: JSON.stringify({ savedProfile: { personal: form.personal, school: form.school, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
+        });
+      } catch { /* ignore */ }
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setGenerating(false);
       router.navigate('/(tabs)/documents');
@@ -297,6 +349,12 @@ export default function CreateScreen() {
         {/* Step 0: Personal */}
         {step === 0 && (
           <View>
+            {savedProfile && (
+              <TouchableOpacity style={[s.addBtn, { marginBottom: 12 }]} onPress={loadSavedProfile} disabled={profileLoading}>
+                {profileLoading ? <ActivityIndicator color={colors.primary} size="small" /> : <Text style={{ fontSize: 15 }}>📂</Text>}
+                <Text style={s.addBtnText}>Gespeichertes Profil laden</Text>
+              </TouchableOpacity>
+            )}
             {!ftOpen && (
               <TouchableOpacity style={[s.addBtn, { marginBottom: 16 }]} onPress={() => { Haptics.selectionAsync(); setFtOpen(true); setFtSuccess(''); }}>
                 <Text style={{ fontSize: 15 }}>⚡</Text>
@@ -382,6 +440,17 @@ export default function CreateScreen() {
         {/* Step 2: Education */}
         {step === 2 && (
           <View>
+            <View style={s.itemCard}>
+              <View style={s.itemHeader}>
+                <Text style={s.itemNum}>🏫 Schulabschluss</Text>
+              </View>
+              <Field label="Abschluss" value={form.school.type} onChangeText={(v: string) => sc('type', v)} placeholder="z.B. Abitur, Realschulabschluss" colors={colors} />
+              <Field label="Schule" value={form.school.name} onChangeText={(v: string) => sc('name', v)} placeholder="Name der Schule" colors={colors} />
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}><Field label="Ort" value={form.school.city} onChangeText={(v: string) => sc('city', v)} placeholder="Berlin" colors={colors} /></View>
+                <View style={{ flex: 1 }}><Field label="Jahr" value={form.school.year} onChangeText={(v: string) => sc('year', v)} placeholder="2018" keyboardType="numeric" colors={colors} /></View>
+              </View>
+            </View>
             {form.education.map((edu, i) => (
               <View key={edu.id} style={s.itemCard}>
                 <View style={s.itemHeader}>
