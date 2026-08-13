@@ -60,6 +60,27 @@
     }
     </script>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18372990605"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-18372990605');
+
+      // Kauf-Conversion: Stripe leitet nach Zahlung auf /?session_id=... zurück.
+      // transaction_id = Stripe-Session-ID → Google dedupliziert bei Reload automatisch.
+      (function () {
+        var sid = new URLSearchParams(window.location.search).get('session_id');
+        if (sid) {
+          gtag('event', 'conversion', {
+            'send_to': 'AW-18372990605/Wx9SCLvN7OAcEI2t9rhE',
+            'transaction_id': sid
+          });
+        }
+      })();
+    </script>
+
     <!-- ── Assets ── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
