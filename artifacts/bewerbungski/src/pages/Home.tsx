@@ -2,7 +2,7 @@ import { Layout } from "../components/Layout";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload, FiCamera } from "react-icons/fi";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
