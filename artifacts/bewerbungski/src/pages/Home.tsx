@@ -246,14 +246,166 @@ function localizeHeadings(html: string, lang: string): string {
   return out;
 }
 
-function ExampleCVShowcase() {
-  const { i18n } = useTranslation();
-  const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
-  const html = useMemo(() => localizeHeadings(renderCVContent(EXAMPLE_BY_LANG[lang], "elegant"), lang), [lang]);
+// Example cover letter per language, matching the CV person and role.
+type ExampleLetter = {
+  label: string;        // small heading above the letter page ("Anschreiben", "Cover letter", …)
+  cvLabel: string;      // small heading above the CV page
+  recipient: string[];  // recipient address block
+  city: string;         // city + date line
+  subject: string;
+  salutation: string;
+  paragraphs: string[];
+  closing: string;
+  rtl?: boolean;
+};
 
+const LETTER_BY_LANG: Record<string, ExampleLetter> = {
+  de: {
+    label: "Anschreiben", cvLabel: "Lebenslauf",
+    recipient: ["Caritas Pflegezentrum Hannover", "Frau Petra Wagner", "Marienstraße 12", "30171 Hannover"],
+    city: "Hannover, den 13.08.2026",
+    subject: "Bewerbung als examinierte Pflegefachkraft",
+    salutation: "Sehr geehrte Frau Wagner,",
+    paragraphs: [
+      "mit großem Interesse habe ich Ihre Stellenanzeige gelesen. Als examinierte Pflegefachkraft mit acht Jahren Erfahrung in der stationären Alten- und Langzeitpflege möchte ich mein Können gern in Ihr Team einbringen.",
+      "In meiner aktuellen Position im AWO Pflegezentrum betreue ich eigenverantwortlich Bewohnerinnen und Bewohner aller Pflegegrade, übernehme das Wundmanagement und leite als zertifizierte Praxisanleiterin jährlich bis zu sechs Auszubildende an. Bei der letzten MDK-Prüfung wurde meine Station mit der Note 1,2 bewertet — ein Ergebnis, zu dem ich mit sorgfältiger Dokumentation und gelebten Expertenstandards beigetragen habe.",
+      "Ihre Einrichtung überzeugt mich durch den Anspruch, Pflege mit Zeit und Zuwendung zu gestalten. Genau so verstehe ich meinen Beruf: fachlich sicher, ruhig und den Menschen zugewandt — auch in fordernden Situationen.",
+      "Über die Einladung zu einem persönlichen Gespräch freue ich mich sehr.",
+    ],
+    closing: "Mit freundlichen Grüßen",
+  },
+  en: {
+    label: "Cover Letter", cvLabel: "CV",
+    recipient: ["Caritas Care Centre Hanover", "Ms Petra Wagner", "Marienstraße 12", "30171 Hanover, Germany"],
+    city: "Hanover, 13 August 2026",
+    subject: "Application for the position of Registered Care Nurse",
+    salutation: "Dear Ms Wagner,",
+    paragraphs: [
+      "I am writing to apply for the position of Registered Care Nurse at your facility. With eight years of experience in residential long-term care, I would be delighted to bring my skills to your team.",
+      "In my current role at the AWO Care Centre I independently care for residents across all care levels, manage wound care and, as a certified clinical mentor, train and assess up to six trainees per year. In the most recent quality audit my ward was rated 1.2 (excellent) — a result I contributed to through meticulous documentation and consistent application of current expert standards.",
+      "I am particularly drawn to your facility's commitment to person-centred care. That is exactly how I understand my profession: professionally confident, calm and attentive — even in demanding situations.",
+      "I would welcome the opportunity to discuss my application in a personal interview.",
+    ],
+    closing: "Yours sincerely,",
+  },
+  tr: {
+    label: "Ön Yazı", cvLabel: "Özgeçmiş",
+    recipient: ["Caritas Bakım Merkezi Hannover", "Sayın Petra Wagner", "Marienstraße 12", "30171 Hannover"],
+    city: "Hannover, 13.08.2026",
+    subject: "Hemşire pozisyonu için başvuru",
+    salutation: "Sayın Wagner,",
+    paragraphs: [
+      "İlanınızı büyük bir ilgiyle okudum. Yatılı ve uzun süreli bakımda sekiz yıllık deneyime sahip bir hemşire olarak bilgi ve becerilerimi ekibinize katmak istiyorum.",
+      "AWO Bakım Merkezi'ndeki mevcut görevimde tüm bakım derecelerinden sakinlerin bakımını bağımsız olarak üstleniyor, yara bakımını yönetiyor ve sertifikalı uygulama eğitmeni olarak her yıl altı stajyere kadar eğitim veriyorum. Son kalite denetiminde servisim 1,2 (çok iyi) ile değerlendirildi — titiz dokümantasyon ve güncel standartların uygulanmasıyla bu sonuca katkıda bulundum.",
+      "Kurumunuzun insana zaman ayıran bakım anlayışı beni çok etkiledi. Mesleğimi ben de tam olarak böyle anlıyorum: uzman, sakin ve güler yüzlü — zor durumlarda bile.",
+      "Sizi şahsen tanımak için bir görüşme davetinizden mutluluk duyarım.",
+    ],
+    closing: "Saygılarımla,",
+  },
+  ar: {
+    label: "رسالة التقديم", cvLabel: "السيرة الذاتية", rtl: true,
+    recipient: ["مركز كاريتاس للرعاية – هانوفر", "السيدة بيترا فاغنر", "Marienstraße 12", "30171 هانوفر"],
+    city: "هانوفر، 13.08.2026",
+    subject: "طلب توظيف لوظيفة ممرضة معتمدة",
+    salutation: "السيدة فاغنر المحترمة،",
+    paragraphs: [
+      "قرأتُ إعلانكم الوظيفي باهتمام كبير. بصفتي ممرضة معتمدة بخبرة ثماني سنوات في الرعاية السكنية طويلة الأمد، يسعدني أن أضع خبرتي في خدمة فريقكم.",
+      "في عملي الحالي بمركز AWO للرعاية أتولى بشكل مستقل رعاية مقيمين من جميع درجات الرعاية، وأدير العناية بالجروح، وأدرّب بصفتي مشرفة تدريب معتمدة حتى ستة متدربين سنويًا. وفي آخر تدقيق للجودة حصل قسمي على تقييم 1.2 (ممتاز) — نتيجة ساهمتُ فيها بالتوثيق الدقيق وتطبيق أحدث المعايير المهنية.",
+      "ما يجذبني إلى مؤسستكم هو التزامكم برعاية تمنح الإنسان وقتًا واهتمامًا حقيقيين. وهكذا أفهم مهنتي تمامًا: كفاءة مهنية وهدوء وتعاطف — حتى في المواقف الصعبة.",
+      "يسعدني جدًا تلقّي دعوتكم لمقابلة شخصية.",
+    ],
+    closing: "مع خالص التحية والتقدير،",
+  },
+  es: {
+    label: "Carta de presentación", cvLabel: "Currículum",
+    recipient: ["Centro de cuidados Caritas Hannover", "Sra. Petra Wagner", "Marienstraße 12", "30171 Hannover, Alemania"],
+    city: "Hannover, 13 de agosto de 2026",
+    subject: "Candidatura al puesto de enfermera de cuidados",
+    salutation: "Estimada Sra. Wagner:",
+    paragraphs: [
+      "He leído su oferta de empleo con gran interés. Como enfermera con ocho años de experiencia en cuidados residenciales de larga duración, me encantaría aportar mis conocimientos a su equipo.",
+      "En mi puesto actual en el centro AWO atiendo de forma autónoma a residentes de todos los grados de dependencia, gestiono la cura de heridas y, como tutora de prácticas certificada, formo y evalúo hasta seis estudiantes al año. En la última auditoría de calidad mi unidad obtuvo una valoración de 1,2 (sobresaliente), un resultado al que contribuí con una documentación rigurosa y la aplicación de los estándares profesionales vigentes.",
+      "Me atrae especialmente el compromiso de su centro con una atención centrada en la persona. Así entiendo yo mi profesión: con seguridad profesional, serenidad y cercanía, también en situaciones exigentes.",
+      "Sería un placer poder presentarme personalmente en una entrevista.",
+    ],
+    closing: "Atentamente,",
+  },
+  pl: {
+    label: "List motywacyjny", cvLabel: "CV",
+    recipient: ["Centrum Opieki Caritas Hannover", "Pani Petra Wagner", "Marienstraße 12", "30171 Hanower, Niemcy"],
+    city: "Hanower, 13.08.2026",
+    subject: "Aplikacja na stanowisko pielęgniarki opiekuńczej",
+    salutation: "Szanowna Pani,",
+    paragraphs: [
+      "z dużym zainteresowaniem zapoznałam się z Państwa ogłoszeniem. Jako pielęgniarka z ośmioletnim doświadczeniem w stacjonarnej opiece długoterminowej chętnie wniosę swoje umiejętności do Państwa zespołu.",
+      "W obecnej pracy w centrum AWO samodzielnie opiekuję się mieszkańcami o wszystkich stopniach niesamodzielności, prowadzę leczenie ran oraz — jako certyfikowana opiekunka praktyk — szkolę i oceniam do sześciu praktykantów rocznie. Podczas ostatniego audytu jakości mój oddział otrzymał ocenę 1,2 (bardzo dobrą), do czego przyczyniłam się starannie prowadzoną dokumentacją i wdrażaniem aktualnych standardów.",
+      "Szczególnie bliskie jest mi Państwa podejście: opieka z czasem i uwagą dla człowieka. Dokładnie tak rozumiem swój zawód — profesjonalnie, spokojnie i z empatią, także w wymagających sytuacjach.",
+      "Będzie mi bardzo miło osobiście przedstawić się podczas rozmowy kwalifikacyjnej.",
+    ],
+    closing: "Z wyrazami szacunku",
+  },
+  ru: {
+    label: "Сопроводительное письмо", cvLabel: "Резюме",
+    recipient: ["Центр ухода Caritas, Ганновер", "Г-же Петре Вагнер", "Marienstraße 12", "30171 Ганновер, Германия"],
+    city: "Ганновер, 13.08.2026",
+    subject: "Отклик на вакансию медицинской сестры по уходу",
+    salutation: "Уважаемая госпожа Вагнер!",
+    paragraphs: [
+      "С большим интересом прочитала Ваше объявление о вакансии. Как медицинская сестра с восьмилетним опытом работы в стационарном долгосрочном уходе, я хотела бы применить свои знания и навыки в Вашей команде.",
+      "На нынешнем месте работы в центре AWO я самостоятельно ухаживаю за жильцами всех степеней потребности в уходе, отвечаю за уход за ранами и как сертифицированная наставница ежегодно обучаю до шести практикантов. При последней проверке качества моё отделение получило оценку 1,2 (отлично) — результат, в который я внесла вклад тщательной документацией и применением актуальных стандартов.",
+      "Меня привлекает подход Вашего учреждения: уход с вниманием и временем для человека. Именно так я понимаю свою профессию — профессионально, спокойно и с душой, даже в сложных ситуациях.",
+      "Буду рада приглашению на личное собеседование.",
+    ],
+    closing: "С уважением,",
+  },
+  uk: {
+    label: "Супровідний лист", cvLabel: "Резюме",
+    recipient: ["Центр догляду Caritas, Ганновер", "Пані Петрі Вагнер", "Marienstraße 12", "30171 Ганновер, Німеччина"],
+    city: "Ганновер, 13.08.2026",
+    subject: "Відгук на вакансію медичної сестри з догляду",
+    salutation: "Шановна пані Вагнер!",
+    paragraphs: [
+      "З великим інтересом прочитала Ваше оголошення про вакансію. Як медична сестра з восьмирічним досвідом роботи в стаціонарному довготривалому догляді, я хотіла б застосувати свої знання та навички у Вашій команді.",
+      "На теперішньому місці роботи в центрі AWO я самостійно доглядаю за мешканцями всіх ступенів потреби в догляді, відповідаю за догляд за ранами і як сертифікована наставниця щороку навчаю до шести практикантів. Під час останньої перевірки якості моє відділення отримало оцінку 1,2 (відмінно) — результат, до якого я доклалася ретельною документацією та впровадженням актуальних стандартів.",
+      "Мене приваблює підхід Вашого закладу: догляд з увагою та часом для людини. Саме так я розумію свою професію — професійно, спокійно і з душею, навіть у складних ситуаціях.",
+      "Буду рада запрошенню на особисту співбесіду.",
+    ],
+    closing: "З повагою,",
+  },
+};
+
+function buildLetterHTML(cv: CVContent, letter: ExampleLetter): string {
+  const gold = "#92400e";
+  const dir = letter.rtl ? "rtl" : "ltr";
+  return `
+<div dir="${dir}" style="position:relative;overflow:hidden;background:#fff;color:#1c1917;padding:46px 52px 50px;max-width:794px;min-height:1000px;font-family:'Playfair Display',serif;">
+  <div style="position:absolute;top:-130px;${letter.rtl ? "right" : "left"}:-90px;width:520px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(191,219,254,.45),rgba(191,219,254,0) 68%);"></div>
+  <div style="position:absolute;bottom:-150px;${letter.rtl ? "left" : "right"}:-130px;width:460px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(254,243,199,.55),rgba(254,243,199,0) 68%);"></div>
+  <div style="position:relative;">
+    <div style="text-align:center;padding-bottom:20px;border-bottom:1px solid ${gold};">
+      <div style="font-size:24px;font-weight:700;letter-spacing:1.5px;">${cv.name}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:11px;color:${gold};letter-spacing:2px;text-transform:uppercase;margin-top:5px;">${cv.title}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:10.5px;color:#78716c;margin-top:8px;">${cv.contact}</div>
+    </div>
+    <div style="font-family:'Inter',sans-serif;font-size:12px;line-height:1.8;color:#374151;margin-top:30px;">
+      ${letter.recipient.join("<br>")}
+    </div>
+    <div style="font-family:'Inter',sans-serif;font-size:12px;color:#374151;text-align:${letter.rtl ? "left" : "right"};margin-top:18px;">${letter.city}</div>
+    <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#1c1917;margin-top:26px;">${letter.subject}</div>
+    <div style="font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.85;color:#374151;margin-top:20px;">
+      <p style="margin:0 0 14px;">${letter.salutation}</p>
+      ${letter.paragraphs.map(p => `<p style="margin:0 0 14px;">${p}</p>`).join("")}
+      <p style="margin:22px 0 0;">${letter.closing}</p>
+      <p style="margin:8px 0 0;font-family:'Playfair Display',serif;font-size:17px;">${cv.name}</p>
+    </div>
+  </div>
+</div>`;
+}
+
+function ShowcasePage({ label, html }: { label: string; html: string }) {
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto" }}>
-      {/* Original size (794px wide, like the PDF) — scrolls horizontally on small screens */}
+    <div>
+      <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 10 }}>{label}</p>
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "4px 2px 12px" }}>
         <div style={{
           width: 794, margin: "0 auto",
@@ -264,7 +416,22 @@ function ExampleCVShowcase() {
             dangerouslySetInnerHTML={{ __html: html }} />
         </div>
       </div>
-      <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
+    </div>
+  );
+}
+
+function ExampleCVShowcase() {
+  const { i18n } = useTranslation();
+  const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
+  const cvHtml = useMemo(() => localizeHeadings(renderCVContent(EXAMPLE_BY_LANG[lang], "elegant"), lang), [lang]);
+  const letterHtml = useMemo(() => buildLetterHTML(EXAMPLE_BY_LANG[lang], LETTER_BY_LANG[lang]), [lang]);
+
+  return (
+    <div style={{ maxWidth: 860, margin: "0 auto", display: "grid", gap: 28 }}>
+      {/* Original size (794px wide, like the PDF) — scrolls horizontally on small screens */}
+      <ShowcasePage label={LETTER_BY_LANG[lang].label} html={letterHtml} />
+      <ShowcasePage label={LETTER_BY_LANG[lang].cvLabel} html={cvHtml} />
+      <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: -8, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
         <span aria-hidden>✨</span> {CAPTION_BY_LANG[lang]} <strong style={{ color: "var(--brand)" }}>bewerbungski.com</strong> — {TEMPLATE_WORD_BY_LANG[lang]} „Elegant“
       </p>
     </div>
