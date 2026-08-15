@@ -1,8 +1,8 @@
 import type { FormData } from "./buildCVHTML";
 
 export type AtsResult = {
-  score: number;          // 0-100
-  keywordScore: number;   // 0-100
+  score: number;                // 0-100
+  keywordScore: number | null;  // 0-100, null when no job ad was provided
   sectionScore: number;   // 0-100
   matched: string[];
   missing: string[];
@@ -31,7 +31,7 @@ export function computeAtsScore(form: FormData, cvHtml: string): AtsResult | nul
     + " " + form.skills.map(s => s.name).join(" ").toLowerCase();
 
   // ── Keyword match (60%) ──
-  let keywordScore = 0;
+  let keywordScore: number | null = null;
   const matched: string[] = [];
   const missing: string[] = [];
   if (jobText.length > 30) {
@@ -41,14 +41,13 @@ export function computeAtsScore(form: FormData, cvHtml: string): AtsResult | nul
       .sort((a, b) => b[1] - a[1])
       .slice(0, 25)
       .map(([k]) => k);
-    if (keywords.length === 0) return null;
-    for (const kw of keywords) {
-      if (cvText.includes(kw)) matched.push(kw);
-      else missing.push(kw);
+    if (keywords.length > 0) {
+      for (const kw of keywords) {
+        if (cvText.includes(kw)) matched.push(kw);
+        else missing.push(kw);
+      }
+      keywordScore = Math.round((matched.length / keywords.length) * 100);
     }
-    keywordScore = Math.round((matched.length / keywords.length) * 100);
-  } else {
-    return null; // no job ad → no meaningful ATS score
   }
 
   // ── Section completeness (40%) ──
@@ -64,6 +63,9 @@ export function computeAtsScore(form: FormData, cvHtml: string): AtsResult | nul
   ];
   const sectionScore = Math.round((checks.filter(Boolean).length / checks.length) * 100);
 
-  const score = Math.round(keywordScore * 0.6 + sectionScore * 0.4);
+  // With a job ad: 60% keywords + 40% structure. Without: structure only.
+  const score = keywordScore != null
+    ? Math.round(keywordScore * 0.6 + sectionScore * 0.4)
+    : sectionScore;
   return { score, keywordScore, sectionScore, matched: matched.slice(0, 12), missing: missing.slice(0, 8) };
 }

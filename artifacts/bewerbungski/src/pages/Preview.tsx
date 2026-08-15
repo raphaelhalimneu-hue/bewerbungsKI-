@@ -197,7 +197,7 @@ export default function Preview() {
               <div style={{ flex: 1, minWidth: 220 }}>
                 <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>🎯 {t("preview.ats.title")}</div>
                 <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.55 }}>
-                  {t("preview.ats.keywords")}: <b style={{ color: "var(--text2)" }}>{ats.keywordScore}%</b> · {t("preview.ats.structure")}: <b style={{ color: "var(--text2)" }}>{ats.sectionScore}%</b>
+                  {ats.keywordScore != null && (<>{t("preview.ats.keywords")}: <b style={{ color: "var(--text2)" }}>{ats.keywordScore}%</b> · </>)}{t("preview.ats.structure")}: <b style={{ color: "var(--text2)" }}>{ats.sectionScore}%</b>
                   {ats.missing?.length > 0 && (
                     <div style={{ marginTop: 6 }}>
                       {t("preview.ats.missing")}: {ats.missing.map((m: string) => (
