@@ -16,6 +16,7 @@ export default function Preview() {
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
   const cvRef = useRef<HTMLDivElement>(null);
   const cvWrapRef = useRef<HTMLDivElement>(null);
+  const letterRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
   const [editingCv, setEditingCv] = useState(false);
@@ -34,14 +35,16 @@ export default function Preview() {
   }
 
   const { i18n } = useTranslation();
-  async function runCheck() {
+  async function runCheck(letterOverride?: string, keepChanges?: boolean) {
     const { cvText, letterText, jobText } = docTexts();
+    const letter = letterOverride ?? letterText;
     if (cvText.length < 80) return;
-    setAiError(""); setChecking(true); setAnalysis(null); setPerfectChanges(null);
+    setAiError(""); setChecking(true); setAnalysis(null);
+    if (!keepChanges) setPerfectChanges(null);
     try {
       const res = await customFetch("/api/analyze", {
         method: "POST",
-        body: JSON.stringify({ cvText, letterText: letterText || undefined, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
+        body: JSON.stringify({ cvText, letterText: letter || undefined, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
       });
       setAnalysis(res);
     } catch { setAiError(t("scanner.error")); }
@@ -59,11 +62,17 @@ export default function Preview() {
       });
       if (res?.letter) {
         setEditedLetter(res.letter);
-        await customFetch(`/api/documents/${params.id}`, {
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        // Show the improved letter right away
+        setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        // Save + compute the new score in the background
+        customFetch(`/api/documents/${params.id}`, {
           method: "PATCH",
           body: JSON.stringify({ cover_letter: res.letter }),
-        });
-        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        }).catch(() => {});
+        setPerfecting(false);
+        await runCheck(res.letter, true);
+        return;
       }
     } catch { setAiError(t("scanner.error")); }
     finally { setPerfecting(false); }
@@ -264,7 +273,7 @@ export default function Preview() {
         {doc && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <button className="btn btn-p btn-sm" onClick={runCheck} disabled={checking || perfecting}>
+              <button className="btn btn-p btn-sm" onClick={() => runCheck()} disabled={checking || perfecting}>
                 {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
               </button>
               {((doc as any)?.cover_letter || editedLetter) && (
@@ -312,7 +321,7 @@ export default function Preview() {
             </div>
 
             {((doc as any)?.cover_letter || editedLetter) && (
-              <div>
+              <div ref={letterRef}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.coverLetter")}</h3>
                   <span style={{ fontSize: 12, color: "var(--muted)", background: "var(--bg2)", padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>
