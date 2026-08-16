@@ -489,7 +489,7 @@
     "letterSubtitle": "Paste your application – the AI reviews it like a recruiter and gives you concrete tips. Free.",
     "letterLabel": "Your application (paste text)",
     "letterPlaceholder": "Copy the text of your application here …",
-    "useAsTemplate": "Use as template for a new application",
+    "useAsTemplate": "Use this text",
     "useStyle": "Use this file's design",
     "styleBusy": "AI is reading the design …",
     "styleError": "Could not detect the design. Please try another photo/PDF."
@@ -513,8 +513,8 @@
     "actCvDesc": "The AI rates the CV like a recruiter.",
     "actLetter": "Check application",
     "actLetterDesc": "The AI rates your application and gives tips.",
-    "actTemplate": "Use CV as template",
-    "actTemplateDesc": "Reuse CV content to create a new application (works with CVs only).",
+    "actTemplate": "Use the text",
+    "actTemplateDesc": "Use the text for a new application.",
     "actStyle": "Use the design",
     "actStyleDesc": "Use the file's colors and style for your new application (photo/PDF only)."
   }

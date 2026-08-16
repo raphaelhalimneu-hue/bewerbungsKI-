@@ -98,7 +98,8 @@ Antworte AUSSCHLIESSLICH mit validem JSON (keine Erklärungen, kein Markdown):
 Alle Texte in der Sprache mit Code "${lang}".
 ${isLetter
   ? "Bewerte: Einstieg/erster Satz, Individualität (kein Standardbrief), konkrete Beispiele statt Behauptungen, Bezug zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Aufbau (DIN 5008: Betreff, Anrede, Gruß), Länge (ideal ~1 Seite)."
-  : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}`;
+  : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}
+${isLetter ? `Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : ""}`;
 
     const userPrompt = `${isLetter ? "ANSCHREIBEN" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nANSCHREIBEN:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 

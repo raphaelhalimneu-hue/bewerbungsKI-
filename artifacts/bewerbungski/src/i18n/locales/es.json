@@ -446,7 +446,7 @@
     "letterSubtitle": "Pega tu solicitud: la IA la evalúa como un reclutador y te da consejos concretos. Gratis.",
     "letterLabel": "Tu solicitud (pegar texto)",
     "letterPlaceholder": "Copia aquí el texto de tu solicitud …",
-    "useAsTemplate": "Usar como plantilla para una nueva candidatura",
+    "useAsTemplate": "Usar este texto",
     "useStyle": "Usar el diseño de este archivo",
     "styleBusy": "La IA está leyendo el diseño …",
     "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF."
@@ -470,8 +470,8 @@
     "actCvDesc": "La IA evalúa el currículum como un reclutador.",
     "actLetter": "Revisar solicitud",
     "actLetterDesc": "La IA evalúa tu solicitud y da consejos.",
-    "actTemplate": "Usar currículum como plantilla",
-    "actTemplateDesc": "Reutilizar el contenido del currículum para una nueva candidatura (solo para currículums).",
+    "actTemplate": "Usar el texto",
+    "actTemplateDesc": "Usar el texto para una nueva candidatura.",
     "actStyle": "Usar el diseño",
     "actStyleDesc": "Usar los colores y el estilo del archivo para tu nueva candidatura (solo foto/PDF)."
   }

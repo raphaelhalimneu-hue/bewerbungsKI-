@@ -446,7 +446,7 @@
     "letterSubtitle": "Wklej swoją aplikację – AI oceni ją jak rekruter i da Ci konkretne wskazówki. Za darmo.",
     "letterLabel": "Twoja aplikacja (wklej tekst)",
     "letterPlaceholder": "Skopiuj tutaj tekst swojej aplikacji …",
-    "useAsTemplate": "Użyj jako szablonu nowej aplikacji",
+    "useAsTemplate": "Użyj tego tekstu",
     "useStyle": "Użyj wyglądu tego pliku",
     "styleBusy": "AI odczytuje wygląd …",
     "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF."
@@ -470,8 +470,8 @@
     "actCvDesc": "AI ocenia CV jak rekruter.",
     "actLetter": "Sprawdź aplikację",
     "actLetterDesc": "AI ocenia Twoją aplikację i daje wskazówki.",
-    "actTemplate": "Użyj CV jako szablonu",
-    "actTemplateDesc": "Wykorzystaj treść CV, aby utworzyć nową aplikację (tylko dla CV).",
+    "actTemplate": "Użyj tekstu",
+    "actTemplateDesc": "Użyj tekstu do nowej aplikacji.",
     "actStyle": "Użyj wyglądu",
     "actStyleDesc": "Użyj kolorów i stylu pliku w nowej aplikacji (tylko zdjęcie/PDF)."
   }

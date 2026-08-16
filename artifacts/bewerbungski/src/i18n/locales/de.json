@@ -489,7 +489,7 @@
     "letterSubtitle": "Füge deine Bewerbung ein – die KI bewertet sie wie ein Personaler und gibt dir konkrete Tipps. Kostenlos.",
     "letterLabel": "Deine Bewerbung (Text einfügen)",
     "letterPlaceholder": "Kopiere den Text deiner Bewerbung hierher …",
-    "useAsTemplate": "Als Vorlage für neue Bewerbung verwenden",
+    "useAsTemplate": "Text übernehmen",
     "useStyle": "Design der Datei übernehmen",
     "styleBusy": "KI liest das Design …",
     "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen."
@@ -513,8 +513,8 @@
     "actCvDesc": "Die KI bewertet den Lebenslauf wie ein Personaler.",
     "actLetter": "Bewerbung prüfen",
     "actLetterDesc": "Die KI bewertet deine Bewerbung und gibt Tipps.",
-    "actTemplate": "Lebenslauf als Vorlage verwenden",
-    "actTemplateDesc": "Lebenslauf-Inhalte übernehmen und eine neue Bewerbung erstellen (nur für Lebensläufe geeignet).",
+    "actTemplate": "Text übernehmen",
+    "actTemplateDesc": "Den Text für eine neue Bewerbung verwenden.",
     "actStyle": "Design übernehmen",
     "actStyleDesc": "Farben und Stil der Datei für deine neue Bewerbung verwenden (nur Foto/PDF)."
   }
