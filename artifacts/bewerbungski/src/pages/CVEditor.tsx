@@ -6,7 +6,7 @@ import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { renderCVContent, type CVContent, type TemplateId } from "../lib/buildCVHTML";
+import { renderCVContent, type CVContent, type CustomStyle, type TemplateId } from "../lib/buildCVHTML";
 
 // ── Template list ────────────────────────────────────────────────────────────
 const TEMPLATES: { id: TemplateId; name: string; color: string }[] = [
@@ -45,6 +45,7 @@ export default function CVEditor() {
 
   const [cvState, setCvState] = useState<CVContent>(emptyCV());
   const [template, setTemplate] = useState<TemplateId>("modern");
+  const [customStyle, setCustomStyle] = useState<CustomStyle | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
   const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null);
   const [saving, setSaving] = useState(false);
@@ -62,6 +63,7 @@ export default function CVEditor() {
       setCvState(d.cv_json as CVContent);
     }
     if (d.template) setTemplate(d.template as TemplateId);
+    if (d.profile_data?.customStyle) setCustomStyle(d.profile_data.customStyle);
   }, [(doc as any)?.id]);
 
   // Scale preview to fit viewport
@@ -82,7 +84,7 @@ export default function CVEditor() {
   }, [activeTab]);
 
   // Derived preview HTML
-  const previewHtml = renderCVContent(cvState, template);
+  const previewHtml = renderCVContent(cvState, template, customStyle);
 
   // ── Helpers for array fields ─────────────────────────────────────────────
   function updateExp(idx: number, field: string, value: any) {
@@ -177,7 +179,7 @@ export default function CVEditor() {
     setSaving(true);
     setSaveMsg("");
     try {
-      const html = renderCVContent(cvState, template);
+      const html = renderCVContent(cvState, template, customStyle);
       await customFetch(`/api/documents/${params.id}`, {
         method: "PATCH",
         body: JSON.stringify({ cv_json: cvState, cv_html: html, template }),
@@ -461,7 +463,7 @@ export default function CVEditor() {
       <section style={sectionStyle}>
         <div style={sectionHeader}>{t("editor.sectionTemplate") || "Vorlage wechseln"}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-          {TEMPLATES.map(tpl => {
+          {(customStyle ? [...TEMPLATES, { id: "custom" as TemplateId, name: "Eigenes Design", color: customStyle.accent }] : TEMPLATES).map(tpl => {
             const active = template === tpl.id;
             return (
               <button

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Layout } from "../components/Layout";
@@ -38,7 +38,21 @@ const TEMPLATE_STYLES: Record<TemplateId, { font: string; accent: string; header
   timeline:  { font: "Helvetica,Arial,sans-serif", accent: "#ea580c", headerBg: "transparent", headerText: "#111827", subColor: "#ea580c", chipBg: "#fff7ed", chipText: "#ea580c", scale: 1 },
   slate:     { font: "Helvetica,Arial,sans-serif", accent: "#334155", headerBg: "#334155", headerText: "#ffffff", subColor: "#64748b", chipBg: "#f8fafc", chipText: "#334155", scale: 1 },
   terra:     { font: "Georgia,'Times New Roman',serif", accent: "#c2410c", headerBg: "transparent", headerText: "#7c2d12", subColor: "#c2410c", chipBg: "#fff7ed", chipText: "#c2410c", scale: 1 },
+  custom:    { font: "Helvetica,Arial,sans-serif", accent: "#1f2937", headerBg: "transparent", headerText: "#111827", subColor: "#6b7280", chipBg: "#f3f4f6", chipText: "#374151", scale: 1 },
 };
+
+/** Style descriptor for the AI prompt — for "custom", derive it from the uploaded design. */
+function styleFor(form: FormData) {
+  if (form.template === "custom" && form.customStyle) {
+    const cs = form.customStyle;
+    return {
+      font: cs.font === "serif" ? "Georgia,'Times New Roman',serif" : "Helvetica,Arial,sans-serif",
+      accent: cs.accent, headerBg: cs.headerBg, headerText: cs.headerText,
+      subColor: cs.subColor, chipBg: cs.chipBg, chipText: cs.chipText, scale: 1,
+    };
+  }
+  return TEMPLATE_STYLES[form.template] || TEMPLATE_STYLES.modern;
+}
 
 function blankForm(): FormData {
   return {
@@ -114,6 +128,9 @@ export default function Wizard() {
   function setTemplate(t: TemplateId) {
     setForm(f => ({ ...f, template: t }));
   }
+  function setCustomStyle(cs: NonNullable<FormData["customStyle"]>) {
+    setForm(f => ({ ...f, customStyle: cs, template: "custom" }));
+  }
 
   function addExp() {
     setForm(f => ({ ...f, experience: [...f.experience, { company: "", city: "", position: "", start: "", end: "", current: false, description: "" }] }));
@@ -183,7 +200,7 @@ export default function Wizard() {
         uk: { name: "Ukrainisch", locale: "uk-UA", conventions: "Ukrainische Resume-Standards." },
       };
       const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
-      const ts = TEMPLATE_STYLES[form.template] || TEMPLATE_STYLES.modern;
+      const ts = styleFor(form);
       const sz = (n: number) => Math.round(n * ts.scale * 10) / 10;
       const usePhoto = !!form.personal.photo && docLang !== "en";
       // Never send the base64 photo through the AI prompt — use a placeholder instead.
@@ -238,7 +255,7 @@ PFLICHTREGELN:
         else { throw new Error("CV-Generierung fehlgeschlagen. Bitte erneut versuchen."); }
       }
       if (usePhoto && form.personal.photo) cvContent.photo = form.personal.photo;
-      const cvHtml = renderCVContent(cvContent, form.template);
+      const cvHtml = renderCVContent(cvContent, form.template, form.customStyle);
       const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
@@ -393,7 +410,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
           {step === 4 && <StepSkills items={form.skills} skillInput={skillInput} setSkillInput={setSkillInput} skillLevel={skillLevel} setSkillLevel={setSkillLevel} addSkill={addSkill} delSkill={delSkill} />}
           {step === 5 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 6 && <StepJobAd form={form} setJobad={setJobad} />}
-          {step === 7 && <StepTemplate form={form} setTemplate={setTemplate} />}
+          {step === 7 && <StepTemplate form={form} setTemplate={setTemplate} setCustomStyle={setCustomStyle} />}
           {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} tone={tone} setTone={setTone} />}
         </div>
 
@@ -1141,11 +1158,68 @@ const TEMPLATES = [
   { id: "terra" as const,     name: "Terra",     descKey: "wizard.template.terraDesc" },
 ];
 
-function StepTemplate({ form, setTemplate }: { form: FormData; setTemplate: (t: TemplateId) => void }) {
+function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; setTemplate: (t: TemplateId) => void; setCustomStyle: (cs: NonNullable<FormData["customStyle"]>) => void }) {
   const { t } = useTranslation();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [designBusy, setDesignBusy] = useState(false);
+  const [designErr, setDesignErr] = useState("");
+  const customSelected = form.template === "custom" && !!form.customStyle;
+
+  async function handleDesignFile(file: File) {
+    setDesignErr("");
+    if (file.size > 8 * 1024 * 1024) { setDesignErr(t("fileImport.tooLarge")); return; }
+    setDesignBusy(true);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      const mimeType = file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "image/jpeg");
+      const res: any = await customFetch("/api/design", {
+        method: "POST",
+        body: JSON.stringify({ filename: file.name, mimeType, data: btoa(bin) }),
+      });
+      if (res?.accent) setCustomStyle(res);
+      else setDesignErr(t("wizard.template.customError"));
+    } catch (e: any) {
+      const msg = String(e?.message || "");
+      setDesignErr(msg.includes("429") ? t("fileImport.limit") : t("wizard.template.customError"));
+    } finally {
+      setDesignBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   return (
     <div>
       <p style={{ color: "var(--muted)", marginBottom: 20, fontSize: 14 }}>{t("wizard.template.choose")}</p>
+
+      <div style={{
+        border: `2px ${customSelected ? "solid var(--brand)" : "dashed var(--border)"}`,
+        borderRadius: 12, padding: 16, marginBottom: 18,
+        background: customSelected ? "var(--brand-l)" : "var(--bg2)",
+      }}>
+        <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDesignFile(f); }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "space-between" }}>
+          <div style={{ minWidth: 200, flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3 }}>🎨 {t("wizard.template.customTitle")}</div>
+            <div style={{ fontSize: 12.5, color: "var(--muted)", lineHeight: 1.5 }}>{t("wizard.template.customDesc")}</div>
+            {customSelected && form.customStyle && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+                {[form.customStyle.accent, form.customStyle.headerBg !== "transparent" ? form.customStyle.headerBg : form.customStyle.subColor, form.customStyle.chipBg].map((c, i) => (
+                  <span key={i} style={{ width: 18, height: 18, borderRadius: "50%", background: c, border: "1px solid var(--border)", display: "inline-block" }} />
+                ))}
+                <span style={{ fontSize: 11.5, color: "var(--brand)", fontWeight: 700 }}>✓ {t("wizard.template.customReady")}</span>
+              </div>
+            )}
+          </div>
+          <button type="button" className="btn btn-g btn-sm" disabled={designBusy} onClick={() => fileRef.current?.click()}>
+            {designBusy ? <><span className="spin" /> {t("wizard.template.customAnalyzing")}</> : t("wizard.template.customUpload")}
+          </button>
+        </div>
+        {designErr && <div style={{ color: "var(--err)", fontSize: 12.5, marginTop: 8 }}>{designErr}</div>}
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14 }}>
         {TEMPLATES.map(tp => {
           const Preview = TEMPLATE_PREVIEWS[tp.id];

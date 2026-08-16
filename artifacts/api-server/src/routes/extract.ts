@@ -109,4 +109,91 @@ router.post("/extract", requireAuth, async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── Design analysis: extract a color/font style from an uploaded CV (image or PDF) ──
+router.post("/design", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { mimeType, data } = req.body || {};
+    if (typeof mimeType !== "string" || typeof data !== "string" || data.length === 0) {
+      res.status(400).json({ error: "invalid_request" });
+      return;
+    }
+    if (data.length > MAX_FILE_BYTES * 1.4) {
+      res.status(413).json({ error: "file_too_large" });
+      return;
+    }
+    const isImage = IMAGE_TYPES.has(mimeType) && mimeType !== "image/gif";
+    const isPdf = mimeType === "application/pdf";
+    if (!isImage && !isPdf) {
+      res.status(415).json({ error: "unsupported_type" });
+      return;
+    }
+    if (!checkQuota(req.userId!)) {
+      res.status(429).json({ error: "daily_limit_reached" });
+      return;
+    }
+    const buf = Buffer.from(data, "base64");
+    if (buf.length === 0 || buf.length > MAX_FILE_BYTES) {
+      res.status(413).json({ error: "file_too_large" });
+      return;
+    }
+    if (isPdf && buf.subarray(0, 5).toString("latin1") !== "%PDF-") {
+      res.status(415).json({ error: "unsupported_type" });
+      return;
+    }
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) { res.status(503).json({ error: "ai_unavailable" }); return; }
+    const contentBlock = isPdf
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data } }
+      : { type: "image", source: { type: "base64", media_type: mimeType, data } };
+    const call = () =>
+      fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 500,
+          system: `Du analysierst das visuelle Design eines Lebenslaufs. Antworte NUR mit validem JSON, exakt dieses Schema:
+{"font":"serif"|"sans","accent":"#hex","headerBg":"#hex oder transparent","headerText":"#hex","subColor":"#hex","chipBg":"#hex","chipText":"#hex"}
+- accent: die dominante Akzentfarbe (Überschriften/Linien)
+- headerBg: Hintergrundfarbe des Kopfbereichs, "transparent" wenn weiß/keiner
+- headerText: Textfarbe im Kopfbereich
+- subColor: Farbe für Nebentexte (Firma, Ort)
+- chipBg/chipText: dezente Hintergrund-/Textfarbe für Skill-Tags, passend zur Akzentfarbe
+- font: "serif" wenn die Überschriften Serifen haben, sonst "sans"
+Alle Farben als 6-stellige Hex-Werte.`,
+          messages: [{ role: "user", content: [contentBlock, { type: "text", text: "Analysiere das Design dieses Lebenslaufs." }] }],
+        }),
+      });
+    let response = await call();
+    if (response.status === 429 || response.status === 529) {
+      await new Promise(r => setTimeout(r, 3000));
+      response = await call();
+    }
+    if (!response.ok) { res.status(502).json({ error: "ai_failed" }); return; }
+    const out: any = await response.json();
+    const raw = String(out?.content?.[0]?.text || "").replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+    let style: any;
+    try { style = JSON.parse(raw); } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) { try { style = JSON.parse(m[0]); } catch { /* fall through */ } }
+    }
+    if (!style || typeof style !== "object") { res.status(502).json({ error: "ai_failed" }); return; }
+    // Server-side sanitation: only hex colors / allowed values leave this endpoint.
+    const hex = (v: unknown, fb: string) => (typeof v === "string" && /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : fb);
+    res.json({
+      font: style.font === "serif" ? "serif" : "sans",
+      accent: hex(style.accent, "#1f2937"),
+      headerBg: style.headerBg === "transparent" ? "transparent" : hex(style.headerBg, "transparent"),
+      headerText: hex(style.headerText, "#111827"),
+      subColor: hex(style.subColor, "#6b7280"),
+      chipBg: hex(style.chipBg, "#f3f4f6"),
+      chipText: hex(style.chipText, "#374151"),
+    });
+  } catch (err) {
+    req.log?.error({ err }, "design analysis failed");
+    res.status(500).json({ error: "design_failed" });
+  }
+});
+
 export default router;

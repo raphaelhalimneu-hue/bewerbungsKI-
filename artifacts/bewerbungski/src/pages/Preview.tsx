@@ -9,6 +9,16 @@ import jsPDF from "jspdf";
 import { DECO } from "../lib/buildCVHTML";
 import { AnalysisCard } from "./Scanner";
 
+/** Deko für die Anschreiben-Karte: bekannte Vorlagen aus DECO, "custom" mit Nutzer-Akzentfarbe. */
+function letterDecoHtml(doc: any): string {
+  if (doc?.template === "custom") {
+    const acc = doc?.profile_data?.customStyle?.accent;
+    const safe = typeof acc === "string" && /^#[0-9a-fA-F]{3,8}$/.test(acc) ? acc : "#1f2937";
+    return `<div style="position:absolute;z-index:-1;pointer-events:none;top:0;left:0;right:0;height:10px;background:${safe};"></div>`;
+  }
+  return DECO[doc?.template as keyof typeof DECO] ?? "";
+}
+
 export default function Preview() {
   const { t } = useTranslation();
   const params = useParams<{ id: string }>();
@@ -373,7 +383,7 @@ export default function Preview() {
                   {/* Deko-Layer passend zur gewählten CV-Vorlage (statische, sichere Konstanten) */}
                   <div
                     aria-hidden
-                    dangerouslySetInnerHTML={{ __html: DECO[(doc as any).template as keyof typeof DECO] ?? "" }}
+                    dangerouslySetInnerHTML={{ __html: letterDecoHtml(doc) }}
                   />
                   <textarea
                     value={editedLetter}

@@ -69,7 +69,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
 
 const VALID_TEMPLATES = new Set([
   "modern","classic","creative","executive","minimal","elegant",
-  "bold","compact","swiss","nordic","corporate","timeline","slate","terra",
+  "bold","compact","swiss","nordic","corporate","timeline","slate","terra","custom",
 ]);
 
 /** Reject cv_json payloads that aren't plain objects or contain non-string scalar fields. */
@@ -150,6 +150,10 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany, language } = req.body;
+    if (template !== undefined && !VALID_TEMPLATES.has(template)) {
+      res.status(400).json({ error: "Invalid template" });
+      return;
+    }
 
     const [doc] = await db
       .insert(documentsTable)

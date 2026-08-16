@@ -375,7 +375,13 @@
       "corporateDesc": "Green sidebar, two-column, very formal",
       "timelineDesc": "Timeline layout, orange, modern",
       "slateDesc": "Dark header band, clean structure",
-      "terraDesc": "Warm earth tones, serif, elegant"
+      "terraDesc": "Warm earth tones, serif, elegant",
+      "customTitle": "Upload your own design",
+      "customDesc": "Upload your existing CV (PDF or photo) – the AI adopts its colors and style as your own template.",
+      "customUpload": "Upload design",
+      "customAnalyzing": "Analyzing design …",
+      "customReady": "Custom design active",
+      "customError": "Could not detect the design. Try a different file."
     },
     "gen": {
       "ready": "Ready to generate",

@@ -26,7 +26,12 @@ export const COVER_LETTER_DECO: Record<string, string> = {
   terra: `<div style="${DA}top:-50px;left:-70px;width:360px;height:210px;background:repeating-linear-gradient(115deg,rgba(254,215,170,.55) 0 14px,rgba(254,215,170,0) 14px 34px);transform:rotate(-8deg);"></div><div style="${DA}bottom:-40px;right:-60px;width:320px;height:180px;background:repeating-linear-gradient(115deg,rgba(251,207,232,.45) 0 12px,rgba(251,207,232,0) 12px 30px);transform:rotate(-8deg);"></div>`,
 };
 
-/** Liefert die Deko-Layer zur Vorlage — leerer String, falls unbekannt. */
-export function coverLetterDeco(template: string | null | undefined): string {
+/** Liefert die Deko-Layer zur Vorlage — leerer String, falls unbekannt.
+ *  Für "custom" wird eine Akzentleiste in der Nutzerfarbe erzeugt (nur Hex erlaubt). */
+export function coverLetterDeco(template: string | null | undefined, customAccent?: unknown): string {
+  if (template === "custom") {
+    const acc = typeof customAccent === "string" && /^#[0-9a-fA-F]{3,8}$/.test(customAccent) ? customAccent : "#1f2937";
+    return `<div style="${DA}top:0;left:0;right:0;height:10px;background:${acc};"></div>`;
+  }
   return (template && COVER_LETTER_DECO[template]) || "";
 }

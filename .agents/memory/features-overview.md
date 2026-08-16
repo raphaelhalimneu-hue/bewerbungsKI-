@@ -40,3 +40,5 @@ description: Durable decisions for the 3 major features added in Aug 2026
 
 - Freitext-Schnelleingabe (POST /api/parse-freetext, UI in StepPersonal neben LinkedIn-Import): formloser Werdegang-Text wird per Claude in Wizard-Formdaten strukturiert (seit 2026-08-13).
 - Alle Blau-Töne aus Templates/PDF-Links entfernt auf Nutzerwunsch (Templates modern/creative/executive, a{color:inherit} in PDF-Styles) — bei neuen Templates kein knalliges Blau als Textfarbe verwenden.
+
+- Custom template (Aug 2026): upload own CV (PDF/image) -> POST /api/design (Claude vision) extracts hex-only style -> template id "custom" + profileData.customStyle; rendered by tplCustom, DOCX/PDF/letter deco read customStyle.accent. All color values must stay hex-validated (CSS injection guard) in buildCVHTML, extract.ts, docx.ts, coverLetterDeco. Mobile has no custom flow (web-only for now).

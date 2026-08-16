@@ -332,7 +332,13 @@
       "corporateDesc": "Yeşil kenar çubuğu, iki sütunlu, çok resmi",
       "timelineDesc": "Zaman çizelgesi düzeni, turuncu, modern",
       "slateDesc": "Koyu başlık bandı, temiz yapı",
-      "terraDesc": "Sıcak toprak tonları, serif, zarif"
+      "terraDesc": "Sıcak toprak tonları, serif, zarif",
+      "customTitle": "Kendi tasarımını yükle",
+      "customDesc": "Mevcut özgeçmişini yükle (PDF veya fotoğraf) – yapay zekâ renkleri ve stili kendi şablonun olarak devralır.",
+      "customUpload": "Tasarım yükle",
+      "customAnalyzing": "Tasarım analiz ediliyor …",
+      "customReady": "Kendi tasarımın etkin",
+      "customError": "Tasarım algılanamadı. Başka bir dosya dene."
     },
     "gen": {
       "ready": "Oluşturmaya hazır",

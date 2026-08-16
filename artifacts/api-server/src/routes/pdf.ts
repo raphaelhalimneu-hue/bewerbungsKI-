@@ -205,7 +205,7 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
       .join("");
 
     // Deko-Layer passend zur gewählten CV-Vorlage (dezent, hinter dem Text)
-    const deco = coverLetterDeco(doc.template);
+    const deco = coverLetterDeco(doc.template, (doc.profileData as any)?.customStyle?.accent);
 
     // All styles are inline — no external requests needed
     const html = `<!DOCTYPE html>

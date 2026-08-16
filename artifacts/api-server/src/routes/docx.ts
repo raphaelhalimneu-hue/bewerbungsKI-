@@ -48,7 +48,14 @@ const TEMPLATE_THEMES: Record<string, DocxTheme> = {
   terra:     { accent: "C2410C", rule: "FED7AA" }, // terracotta #c2410c headings, rules #fed7aa
 };
 const DEFAULT_THEME: DocxTheme = { accent: "1F2937", rule: "D1D5DB" };
-function themeFor(template: unknown): DocxTheme {
+function themeFor(template: unknown, profileData?: any): DocxTheme {
+  if (String(template) === "custom") {
+    const acc = profileData?.customStyle?.accent;
+    if (typeof acc === "string" && /^#[0-9a-fA-F]{6}$/.test(acc)) {
+      return { accent: acc.slice(1).toUpperCase(), rule: "E5E7EB" };
+    }
+    return DEFAULT_THEME;
+  }
   return TEMPLATE_THEMES[String(template || "")] || DEFAULT_THEME;
 }
 /** Thick colored bar at the very top of the page, matching the template accent. */
@@ -102,7 +109,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     const skills: any[] = pd.skills || [];
     const languages: any[] = pd.languages || [];
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Name";
-    const theme = themeFor(doc.template);
+    const theme = themeFor(doc.template, (doc.profileData as any));
 
     // Contact line: address | phone | email | linkedin
     const contactParts = [
@@ -272,7 +279,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
 const VALID_TEMPLATE_IDS = new Set([
   "modern","classic","creative","executive","minimal","elegant",
-  "bold","compact","swiss","nordic","corporate","timeline","slate","terra",
+  "bold","compact","swiss","nordic","corporate","timeline","slate","terra","custom",
 ]);
 
 function isValidCvJson(cv: unknown): boolean {
@@ -301,7 +308,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
     if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
 
-    const theme = themeFor(req.body?.template && VALID_TEMPLATE_IDS.has(req.body.template) ? req.body.template : doc.template);
+    const theme = themeFor(req.body?.template && VALID_TEMPLATE_IDS.has(req.body.template) ? req.body.template : doc.template, (doc.profileData as any));
     const children: any[] = [];
     children.push(topBar(theme));
 
@@ -450,7 +457,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "";
-    const theme = themeFor(doc.template);
+    const theme = themeFor(doc.template, (doc.profileData as any));
 
     // Use edited text if provided via query param (client sends updated text), else stored text
     const letterText: string = (req.query.text as string) || doc.coverLetter || "";

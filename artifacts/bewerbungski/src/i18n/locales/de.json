@@ -375,7 +375,13 @@
       "corporateDesc": "Grüne Sidebar, zweispaltig, sehr seriös",
       "timelineDesc": "Zeitstrahl-Optik, Orange, modern",
       "slateDesc": "Dunkles Header-Band, klare Struktur",
-      "terraDesc": "Warme Erdtöne, Serif, edel"
+      "terraDesc": "Warme Erdtöne, Serif, edel",
+      "customTitle": "Eigenes Design hochladen",
+      "customDesc": "Lade deinen bisherigen Lebenslauf hoch (PDF oder Foto) – die KI übernimmt Farben und Stil als eigene Vorlage.",
+      "customUpload": "Design hochladen",
+      "customAnalyzing": "Design wird analysiert …",
+      "customReady": "Eigenes Design aktiv",
+      "customError": "Design konnte nicht erkannt werden. Versuch eine andere Datei."
     },
     "gen": {
       "ready": "Bereit zur Generierung",

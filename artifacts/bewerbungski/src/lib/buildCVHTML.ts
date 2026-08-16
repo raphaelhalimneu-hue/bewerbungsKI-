@@ -7,13 +7,21 @@ export type Experience = { company: string; city: string; position: string; star
 export type Education = { institution: string; city: string; degree: string; field: string; grade: string; start: string; end: string; };
 export type Skill = { name: string; level: number; };
 export type Language = { language: string; level: string; };
-export type TemplateId = "modern" | "classic" | "creative" | "executive" | "minimal" | "elegant" | "bold" | "compact" | "swiss" | "nordic" | "corporate" | "timeline" | "slate" | "terra";
+export type TemplateId = "modern" | "classic" | "creative" | "executive" | "minimal" | "elegant" | "bold" | "compact" | "swiss" | "nordic" | "corporate" | "timeline" | "slate" | "terra" | "custom";
+
+// User-defined design extracted by AI from an uploaded CV (colors as hex, font family class).
+export type CustomStyle = {
+  font: "serif" | "sans";
+  accent: string; headerBg: string; headerText: string;
+  subColor: string; chipBg: string; chipText: string;
+};
 export type School = { type: string; name: string; city: string; year: string; };
 export type FormData = {
   personal: PersonalData; school: School; experience: Experience[]; education: Education[];
   skills: Skill[]; languages: Language[];
   jobad: { title: string; company: string; address: string; description: string };
   template: TemplateId;
+  customStyle?: CustomStyle;
 };
 
 // Structured CV content produced by AI (JSON), rendered by fixed templates below.
@@ -112,6 +120,7 @@ export const DECO = {
   corporate: `<div style="${DA}top:-80px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.10),rgba(16,185,129,0) 70%);"></div>`,
   timeline: `<div style="${DA}top:-130px;right:-130px;width:320px;height:320px;border-radius:50%;border:36px solid #fff7ed;"></div><div style="${DA}bottom:-90px;left:-90px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(234,88,12,.07),rgba(234,88,12,0) 70%);"></div>`,
   slate: `<div style="${DA}bottom:-110px;right:-100px;width:320px;height:270px;border-radius:60% 40% 55% 45%/50% 60% 40% 50%;background:linear-gradient(135deg,rgba(99,102,241,.13),rgba(148,163,184,.09));"></div><div style="${DA}bottom:150px;right:40px;width:16px;height:16px;border-radius:50%;background:rgba(99,102,241,.35);"></div>`,
+  custom: ``, // custom template draws its own accent bar inline
   terra: `<div style="${DA}top:-50px;left:-70px;width:360px;height:210px;background:repeating-linear-gradient(115deg,rgba(254,215,170,.55) 0 14px,rgba(254,215,170,0) 14px 34px);transform:rotate(-8deg);"></div><div style="${DA}bottom:-40px;right:-60px;width:320px;height:180px;background:repeating-linear-gradient(115deg,rgba(251,207,232,.45) 0 12px,rgba(251,207,232,0) 12px 30px);transform:rotate(-8deg);"></div>`,
 };
 // Outer-Wrapper-Attribute, damit die Deko hinter dem Inhalt liegt und am Rand sauber abgeschnitten wird
@@ -622,8 +631,63 @@ function tplTerra(cv: CVContent): string {
 </div>`;
 }
 
+// ─── CUSTOM (user-uploaded design) ──────────────────────────────────────────
+/** Only allow plain hex colors — the values come from AI/user data and are interpolated into CSS. */
+function hexOk(c: unknown, fallback: string): string {
+  return typeof c === "string" && /^#[0-9a-fA-F]{3,8}$/.test(c) ? c : fallback;
+}
+
+export function sanitizeCustomStyle(st: Partial<CustomStyle> | undefined | null): CustomStyle {
+  return {
+    font: st?.font === "serif" ? "serif" : "sans",
+    accent:     hexOk(st?.accent, "#1f2937"),
+    headerBg:   st?.headerBg === "transparent" ? "transparent" : hexOk(st?.headerBg, "transparent"),
+    headerText: hexOk(st?.headerText, "#111827"),
+    subColor:   hexOk(st?.subColor, "#6b7280"),
+    chipBg:     hexOk(st?.chipBg, "#f3f4f6"),
+    chipText:   hexOk(st?.chipText, "#374151"),
+  };
+}
+
+function tplCustom(cv: CVContent, style?: Partial<CustomStyle>): string {
+  const st = sanitizeCustomStyle(style);
+  const nameFont = st.font === "serif" ? "'Playfair Display',Georgia,serif" : "'Inter',sans-serif";
+  const solidHeader = st.headerBg !== "transparent";
+  const nameColor = solidHeader ? st.headerText : st.accent;
+  const deco = `<div style="${DA}top:0;left:0;right:0;height:10px;background:${st.accent};"></div>`;
+  return `<style>${GF}*{box-sizing:border-box;margin:0;padding:0;}body,div,p,li,span{font-family:'Inter',sans-serif;}ul{list-style:disc;}</style>
+<div style="${REL}background:#fff;color:#111827;padding:46px 52px 48px;max-width:794px;">
+  ${deco}
+  <div style="${solidHeader ? `background:${st.headerBg};margin:-20px -52px 0;padding:26px 52px 20px;` : `border-bottom:2.5px solid ${st.accent};padding-bottom:18px;`}">
+    ${cv.photo ? `<img src="${cv.photo}" style="float:right;width:82px;height:104px;object-fit:cover;border-radius:4px;margin-left:18px;" />` : ""}
+    <div style="font-family:${nameFont};font-size:28px;font-weight:700;letter-spacing:.5px;color:${nameColor};">${cv.name}</div>
+    <div style="font-size:13px;color:${solidHeader ? st.subColor : st.accent};font-weight:600;letter-spacing:.5px;margin-top:4px;">${cv.title}</div>
+    <div style="font-size:11px;color:${solidHeader ? st.subColor : "#6b7280"};margin-top:8px;">${cv.contact}</div>
+    <div style="clear:both;"></div>
+  </div>
+  ${cv.profile ? `${sectionTitle("Profil",st.accent,`1px solid ${st.chipBg}`)}<p style="font-size:12.5px;line-height:1.7;color:#374151;">${cv.profile}</p>` : ""}
+  ${cv.education.length ? `${sectionTitle("Ausbildung",st.accent,`1px solid ${st.chipBg}`)}${cv.education.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+      <div><div style="font-size:13px;font-weight:700;color:#111827;">${e.degree}</div><div style="font-size:11.5px;color:${st.subColor};">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
+    </div>`).join("")}` : ""}
+  ${cv.experience.length ? `${sectionTitle("Berufserfahrung",st.accent,`1px solid ${st.chipBg}`)}${cv.experience.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:#111827;">${e.position}</div>
+        <div style="font-size:11.5px;color:${st.subColor};margin-top:1px;">${e.company}${e.location ? " · "+e.location : ""}</div>
+        <div style="font-size:12px;color:#374151;line-height:1.6;margin-top:4px;">${bullets(e.bullets)}</div>
+      </div>
+      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
+    </div>`).join("")}` : ""}
+  ${cv.skills.length ? `${sectionTitle("Kenntnisse",st.accent,`1px solid ${st.chipBg}`)}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:${st.chipBg};color:${st.chipText};border-radius:4px;padding:4px 11px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div>` : ""}
+  ${cv.languages.length ? `${sectionTitle("Sprachen",st.accent,`1px solid ${st.chipBg}`)}${cv.languages.map(l=>`<div style="font-size:12.5px;margin-bottom:4px;"><strong>${l.name}</strong> <span style="color:${st.subColor};">— ${l.level}</span></div>`).join("")}` : ""}
+  <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
+</div>`;
+}
+
 // ─── ROUTER ───────────────────────────────────────────────────────────────────
-export function renderCVContent(cv: CVContent, template: TemplateId): string {
+export function renderCVContent(cv: CVContent, template: TemplateId, customStyle?: Partial<CustomStyle>): string {
   // Escape all user-controlled fields once before any template sees them.
   const safe = escapeCVContent(cv);
   switch (template) {
@@ -640,6 +704,7 @@ export function renderCVContent(cv: CVContent, template: TemplateId): string {
     case "timeline":   return tplTimeline(safe);
     case "slate":      return tplSlate(safe);
     case "terra":      return tplTerra(safe);
+    case "custom":     return tplCustom(safe, customStyle);
     default:           return tplModern(safe);
   }
 }

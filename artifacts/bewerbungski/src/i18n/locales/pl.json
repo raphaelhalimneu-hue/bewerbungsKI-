@@ -332,7 +332,13 @@
       "corporateDesc": "Zielony pasek boczny, dwukolumnowy",
       "timelineDesc": "Oś czasu, pomarańcz, nowoczesny",
       "slateDesc": "Ciemna górna belka, czysta struktura",
-      "terraDesc": "Ciepłe kolory ziemi, serif, elegancki"
+      "terraDesc": "Ciepłe kolory ziemi, serif, elegancki",
+      "customTitle": "Prześlij własny projekt",
+      "customDesc": "Prześlij swoje dotychczasowe CV (PDF lub zdjęcie) – AI przejmie kolory i styl jako własny szablon.",
+      "customUpload": "Prześlij projekt",
+      "customAnalyzing": "Analizowanie projektu …",
+      "customReady": "Własny projekt aktywny",
+      "customError": "Nie udało się rozpoznać projektu. Spróbuj z innym plikiem."
     },
     "gen": {
       "ready": "Gotowe do wygenerowania",
