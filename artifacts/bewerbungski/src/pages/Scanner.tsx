@@ -150,11 +150,11 @@ export default function Scanner() {
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
-            <FileImportButton onText={(txt) => setCvText(txt)} onFile={(f) => setLastFile(f)} />
+            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); }} onFile={(f) => setLastFile(f)} />
           </div>
           <textarea
             value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
+            onChange={(e) => { setCvText(e.target.value); if (errorMsg) setErrorMsg(""); }}
             placeholder={mode === "letter" ? t("scanner.letterPlaceholder") : t("scanner.cvPlaceholder")}
             rows={10}
             style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)" }}
@@ -172,7 +172,7 @@ export default function Scanner() {
             <button className="btn btn-p" onClick={analyze} disabled={busy}>
               {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : t("scanner.analyze")}
             </button>
-            {mode === "cv" && cvText.trim().length >= 80 && (
+            {cvText.trim().length >= 80 && (
               <button
                 className="btn btn-g"
                 onClick={() => {
