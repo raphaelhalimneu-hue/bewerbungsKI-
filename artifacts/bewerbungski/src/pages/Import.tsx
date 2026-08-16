@@ -2,13 +2,16 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
-import { FileImportButton } from "../components/FileImportButton";
+import { FileImportButton, type UploadedFile } from "../components/FileImportButton";
+import { customFetch } from "@workspace/api-client-react";
 
 export default function ImportPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const [text, setText] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [file, setFile] = useState<UploadedFile | null>(null);
+  const [wizardBusy, setWizardBusy] = useState(false);
 
   const hasText = text.trim().length >= 80;
 
@@ -20,8 +23,22 @@ export default function ImportPage() {
     navigate("/scanner");
   }
 
-  function goWizard() {
+  async function goWizard() {
     try { sessionStorage.setItem("bk_prefill_text", text.trim()); } catch { /* ignore */ }
+    // If a file (PDF/photo) was uploaded, copy its design too
+    if (file) {
+      setWizardBusy(true);
+      try {
+        const style = await customFetch("/api/design", {
+          method: "POST",
+          body: JSON.stringify({ mimeType: file.mimeType, data: file.base64 }),
+        });
+        if (style && typeof (style as any).accent === "string") {
+          sessionStorage.setItem("bk_prefill_style", JSON.stringify(style));
+        }
+      } catch { /* design copy is best-effort */ }
+      setWizardBusy(false);
+    }
     navigate("/wizard");
   }
 
@@ -49,7 +66,7 @@ export default function ImportPage() {
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{t("importPage.textLabel")}</label>
-            <FileImportButton onText={(txt) => setText(txt)} />
+            <FileImportButton onText={(txt) => setText(txt)} onFile={setFile} />
           </div>
           <textarea
             value={text}
@@ -65,7 +82,7 @@ export default function ImportPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
           {actionCard("🔎", t("importPage.actCv"), t("importPage.actCvDesc"), () => goScan("cv"), !hasText)}
           {actionCard("✉️", t("importPage.actLetter"), t("importPage.actLetterDesc"), () => goScan("letter"), !hasText)}
-          {actionCard("📝", t("importPage.actTemplate"), t("importPage.actTemplateDesc"), goWizard, !hasText)}
+          {actionCard("📝", t("importPage.actTemplate"), t("importPage.actTemplateDesc"), goWizard, !hasText || wizardBusy, wizardBusy)}
         </div>
       </div>
     </Layout>

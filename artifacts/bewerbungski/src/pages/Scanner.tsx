@@ -4,7 +4,7 @@ import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
-import { FileImportButton } from "../components/FileImportButton";
+import { FileImportButton, type UploadedFile } from "../components/FileImportButton";
 
 type AnalyzeResult = {
   score: number;
@@ -65,6 +65,27 @@ export default function Scanner() {
   const [perfecting, setPerfecting] = useState(false);
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
   const [perfectedText, setPerfectedText] = useState<string | null>(null);
+  const [lastFile, setLastFile] = useState<UploadedFile | null>(null);
+  const [wizardBusy, setWizardBusy] = useState(false);
+
+  async function goWizard() {
+    try { sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
+    // If a file (PDF/photo) was uploaded, copy its design too
+    if (lastFile) {
+      setWizardBusy(true);
+      try {
+        const style = await customFetch("/api/design", {
+          method: "POST",
+          body: JSON.stringify({ mimeType: lastFile.mimeType, data: lastFile.base64 }),
+        });
+        if (style && typeof (style as any).accent === "string") {
+          sessionStorage.setItem("bk_prefill_style", JSON.stringify(style));
+        }
+      } catch { /* design copy is best-effort */ }
+      setWizardBusy(false);
+    }
+    navigate("/wizard");
+  }
 
   async function runPerfect() {
     if (!user) { setShowAuthModal(true); return; }
@@ -161,7 +182,7 @@ export default function Scanner() {
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
-            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} />
+            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} onFile={setLastFile} />
           </div>
           <textarea
             value={cvText}
@@ -179,14 +200,8 @@ export default function Scanner() {
               {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
             </button>
             {cvText.trim().length >= 80 && (
-              <button
-                className="btn btn-g"
-                onClick={() => {
-                  try { sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
-                  navigate("/wizard");
-                }}
-              >
-                📝 {t("scanner.useAsTemplate")}
+              <button className="btn btn-g" onClick={goWizard} disabled={wizardBusy}>
+                {wizardBusy ? <span className="spin" /> : "📝"} {t("scanner.useAsTemplate")}
               </button>
             )}
           </div>
