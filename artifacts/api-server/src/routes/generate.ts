@@ -24,7 +24,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
-    const limit = 3 + credits; // 3 free + 30 per purchased package
+    const limit = 3 + credits; // 3 free + 20 per purchased package
     if (value >= limit) {
       res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
       return;

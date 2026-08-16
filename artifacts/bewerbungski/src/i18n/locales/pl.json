@@ -52,7 +52,7 @@
     "feat6Desc": "Dodaj profesjonalne zdjęcie bezpośrednio do CV – opcjonalnie.",
     "faqTitle": "Często zadawane pytania",
     "faq1Q": "Ile kosztuje BewerbungsKI?",
-    "faq1A": "3 aplikacje są na zawsze darmowe – bez karty kredytowej. Potem jednorazowa opłata 9,99 € za 30 kolejnych aplikacji.",
+    "faq1A": "3 aplikacje są na zawsze darmowe – bez karty kredytowej. Potem jednorazowa opłata 9,99 € za 20 kolejnych aplikacji.",
     "faq2Q": "Jak dobra jest jakość?",
     "faq2A": "AI analizuje Twój profil i ofertę pracy i pisze prawdziwy, indywidualny tekst – bez szablonów, bez frazesów.",
     "faq3Q": "Co dzieje się z moimi danymi?",
@@ -130,8 +130,8 @@
     "premium": "Premium",
     "popular": "Popularne",
     "premiumPrice": "9,99 €",
-    "oneTime": "Jednorazowo — 30 aplikacji",
-    "premFeat1": "Utwórz 30 aplikacji",
+    "oneTime": "Jednorazowo — 20 aplikacji",
+    "premFeat1": "Utwórz 20 aplikacji",
     "premFeat2": "Wszystkie 3 szablony",
     "premFeat3": "CV i list motywacyjny z AI",
     "premFeat4": "Priorytetowe wsparcie",
@@ -142,8 +142,8 @@
     "redirect": "Przekierowanie do Stripe …",
     "errorTitle": "Błąd",
     "questions": "Masz pytania? Napisz do nas: support@bewerbungski.de",
-    "buyMore": "Kup kolejne 30 aplikacji →",
-    "limitReachedHint": "Wykorzystałeś wszystkie aplikacje. Kup kolejny pakiet 30 aplikacji."
+    "buyMore": "Kup kolejne 20 aplikacji →",
+    "limitReachedHint": "Wykorzystałeś wszystkie aplikacje. Kup kolejny pakiet 20 aplikacji."
   },
   "docs": {
     "title": "📄 Moje dokumenty",
@@ -185,7 +185,13 @@
       "missing": "Brakujące słowa kluczowe"
     },
     "editCvBtn": "✏️ Edytuj teraz",
-    "doneEditing": "✓ Gotowe"
+    "doneEditing": "✓ Gotowe",
+    "checkBtn": "Sprawdź aplikację",
+    "checking": "AI sprawdza …",
+    "perfectBtn": "Udoskonal",
+    "perfecting": "AI poprawia …",
+    "perfectDone": "List motywacyjny poprawiony i zapisany",
+    "changes": "Co poprawiono"
   },
   "wizard": {
     "steps": {
@@ -349,7 +355,7 @@
       "toneModernDesc": "Jasny, bezpośredni",
       "toneKreativDesc": "Osobisty, narracyjny"
     },
-    "premiumLimit": "Limit osiągnięty: wszystkie aplikacje wykorzystane. Kup kolejny pakiet 30 na stronie cennika.",
+    "premiumLimit": "Limit osiągnięty: wszystkie aplikacje wykorzystane. Kup kolejny pakiet 20 na stronie cennika.",
     "lookup": {
       "search": "Szukaj",
       "noResults": "Brak wyników.",
@@ -404,5 +410,22 @@
     "copy": "Kopiuj link",
     "copied": "Skopiowano!",
     "close": "Zamknij"
+  },
+  "scanner": {
+    "nav": "Analiza CV",
+    "title": "Analiza CV",
+    "subtitle": "Wklej swoje CV – AI oceni je jak rekruter i da konkretne wskazówki. Za darmo.",
+    "cvLabel": "Twoje CV (wklej tekst)",
+    "cvPlaceholder": "Skopiuj tutaj tekst swojego CV …",
+    "jobLabel": "Ogłoszenie o pracę (opcjonalnie)",
+    "jobPlaceholder": "Dla dopasowanej oceny: wklej tekst ogłoszenia …",
+    "analyze": "Sprawdź teraz",
+    "analyzing": "AI analizuje …",
+    "strengths": "Co jest dobre",
+    "improvements": "Co możesz poprawić",
+    "cta": "Pozwól AI od razu napisać całą aplikację",
+    "ctaBtn": "Utwórz aplikację",
+    "tooShort": "Wklej więcej tekstu (co najmniej kilka zdań).",
+    "error": "Analiza nie powiodła się. Spróbuj później."
   }
 }

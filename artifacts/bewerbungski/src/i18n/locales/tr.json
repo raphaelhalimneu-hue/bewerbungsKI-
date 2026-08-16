@@ -52,7 +52,7 @@
     "feat6Desc": "Profesyonel fotoğrafını doğrudan CV'ye ekle – isteğe bağlı.",
     "faqTitle": "Sık sorulan sorular",
     "faq1Q": "BewerbungsKI ne kadar?",
-    "faq1A": "3 başvuru kalıcı olarak ücretsizdir – kredi kartı gerekmez. Sonrasında 30 başvuru daha için tek seferlik 9,99 €.",
+    "faq1A": "3 başvuru kalıcı olarak ücretsizdir – kredi kartı gerekmez. Sonrasında 20 başvuru daha için tek seferlik 9,99 €.",
     "faq2Q": "Kalite ne kadar iyi?",
     "faq2A": "Yapay zekâ profilini ve iş ilanını analiz eder ve gerçek, bireysel metin yazar – şablon yok, klişe yok.",
     "faq3Q": "Verilerime ne olur?",
@@ -130,8 +130,8 @@
     "premium": "Premium",
     "popular": "Popüler",
     "premiumPrice": "9,99 €",
-    "oneTime": "Tek seferlik — 30 başvuru",
-    "premFeat1": "30 başvuru oluşturun",
+    "oneTime": "Tek seferlik — 20 başvuru",
+    "premFeat1": "20 başvuru oluşturun",
     "premFeat2": "3 şablonun tümü",
     "premFeat3": "Yapay zekâ özgeçmiş ve ön yazı",
     "premFeat4": "Öncelikli destek",
@@ -142,8 +142,8 @@
     "redirect": "Stripe'a yönlendiriliyor …",
     "errorTitle": "Hata",
     "questions": "Sorun mu var? Bize yaz: support@bewerbungski.de",
-    "buyMore": "30 başvuru daha satın al →",
-    "limitReachedHint": "Tüm başvurularını kullandın. 30 başvuruluk yeni bir paket satın al."
+    "buyMore": "20 başvuru daha satın al →",
+    "limitReachedHint": "Tüm başvurularını kullandın. 20 başvuruluk yeni bir paket satın al."
   },
   "docs": {
     "title": "📄 Belgelerim",
@@ -185,7 +185,13 @@
       "missing": "Eksik anahtar kelimeler"
     },
     "editCvBtn": "✏️ Şimdi düzenle",
-    "doneEditing": "✓ Bitti"
+    "doneEditing": "✓ Bitti",
+    "checkBtn": "Başvuruyu kontrol et",
+    "checking": "Yapay zekâ kontrol ediyor …",
+    "perfectBtn": "Mükemmelleştir",
+    "perfecting": "Yapay zekâ iyileştiriyor …",
+    "perfectDone": "Ön yazı iyileştirildi ve kaydedildi",
+    "changes": "Neler iyileştirildi"
   },
   "wizard": {
     "steps": {
@@ -349,7 +355,7 @@
       "toneModernDesc": "Net, doğrudan",
       "toneKreativDesc": "Kişisel, anlatısal"
     },
-    "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 30'luk paket satın al.",
+    "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 20'luk paket satın al.",
     "lookup": {
       "search": "Ara",
       "noResults": "Sonuç bulunamadı.",
@@ -404,5 +410,22 @@
     "copy": "Bağlantıyı kopyala",
     "copied": "Kopyalandı!",
     "close": "Kapat"
+  },
+  "scanner": {
+    "nav": "CV Kontrolü",
+    "title": "CV Kontrolü",
+    "subtitle": "CV'ni yapıştır – yapay zekâ bir işe alım uzmanı gibi değerlendirir ve somut ipuçları verir. Ücretsiz.",
+    "cvLabel": "CV'n (metni yapıştır)",
+    "cvPlaceholder": "CV metnini buraya kopyala …",
+    "jobLabel": "İş ilanı (isteğe bağlı)",
+    "jobPlaceholder": "Daha isabetli değerlendirme için ilan metnini yapıştır …",
+    "analyze": "Şimdi kontrol et",
+    "analyzing": "Yapay zekâ analiz ediyor …",
+    "strengths": "İyi olanlar",
+    "improvements": "Geliştirebileceklerin",
+    "cta": "Yapay zekâ başvurunu hemen baştan sona yazsın",
+    "ctaBtn": "Başvuru oluştur",
+    "tooShort": "Lütfen daha fazla metin yapıştır (en az birkaç cümle).",
+    "error": "Analiz başarısız oldu. Lütfen daha sonra tekrar dene."
   }
 }

@@ -13,6 +13,7 @@ import Documents from "@/pages/Documents";
 import Preview from "@/pages/Preview";
 import CVEditor from "@/pages/CVEditor";
 import Pricing from "@/pages/Pricing";
+import Scanner from "@/pages/Scanner";
 import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/documents" component={Documents} />
       <Route path="/preview/:id" component={Preview} />
       <Route path="/documents/:id/edit" component={CVEditor} />
+      <Route path="/scanner" component={Scanner} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />

@@ -7,7 +7,7 @@ import { AuthModal } from "./AuthModal";
 import { InAppBrowserBanner } from "./InAppBrowserBanner";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
-import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe } from "react-icons/fi";
+import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -95,6 +95,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Link href="/documents">
             <button className={`si ${location.startsWith("/documents") || location.startsWith("/preview") ? "on" : ""}`}>
               <FiFileText size={18} /> {t("nav.myDocuments")}
+            </button>
+          </Link>
+          <Link href="/scanner">
+            <button className={`si ${location.startsWith("/scanner") ? "on" : ""}`}>
+              <FiSearch size={18} /> {t("scanner.nav")}
             </button>
           </Link>
 

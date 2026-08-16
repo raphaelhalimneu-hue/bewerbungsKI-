@@ -33,7 +33,7 @@ AI-powered German job application platform that generates professional CVs and c
 
 ## Pricing model (since 2026-08-13)
 
-- 3 applications (documents) free per account, then **€9.99 one-time** for **30 more** — no subscription, nothing "unlimited".
+- 3 applications (documents) free per account, then **€9.99 one-time** for **20 more** — no subscription, nothing "unlimited".
 - Enforced server-side in `artifacts/api-server/src/routes/generate.ts`: non-premium ≥3 docs → `free_limit_reached`; premium ≥33 total docs → `premium_limit_reached` (33 = 3 free + 30 purchased).
 - Stripe webhook `checkout.session.completed` sets `profiles.is_premium = true`.
 - When changing price/limits, update ALL of: `checkout.ts` (unit_amount + description), `generate.ts`, all 8 locale files (`pricing.premiumPrice/oneTime/premFeat1`, `home.faq1A`), `index.html` (meta + JSON-LD), the mobile app, and `routes/download.ts` info document.

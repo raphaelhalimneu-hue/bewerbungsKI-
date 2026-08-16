@@ -486,11 +486,18 @@ export default function Home() {
           </p>
         )}
 
-        <Link href="/wizard">
-          <button className="btn btn-p btn-lg" style={{ fontSize: 16, padding: "15px 36px" }}>
-            {t("home.cta")} <FiArrowRight />
-          </button>
-        </Link>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/wizard">
+            <button className="btn btn-p btn-lg" style={{ fontSize: 16, padding: "15px 36px" }}>
+              {t("home.cta")} <FiArrowRight />
+            </button>
+          </Link>
+          <Link href="/scanner">
+            <button className="btn btn-g btn-lg" style={{ fontSize: 16, padding: "15px 28px" }}>
+              🔎 {t("scanner.title")}
+            </button>
+          </Link>
+        </div>
 
         {/* Trust strip */}
         <div style={{

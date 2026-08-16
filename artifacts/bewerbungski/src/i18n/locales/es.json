@@ -52,7 +52,7 @@
     "feat6Desc": "Añade una foto profesional directamente en tu CV – opcional.",
     "faqTitle": "Preguntas frecuentes",
     "faq1Q": "¿Cuánto cuesta BewerbungsKI?",
-    "faq1A": "3 candidaturas son gratis para siempre, sin tarjeta de crédito. Después, un pago único de 9,99 € por 30 candidaturas más.",
+    "faq1A": "3 candidaturas son gratis para siempre, sin tarjeta de crédito. Después, un pago único de 9,99 € por 20 candidaturas más.",
     "faq2Q": "¿Qué calidad tiene el resultado?",
     "faq2A": "La IA analiza tu perfil y la oferta de trabajo y escribe texto genuino e individual – sin plantillas ni frases vacías.",
     "faq3Q": "¿Qué pasa con mis datos?",
@@ -130,8 +130,8 @@
     "premium": "Premium",
     "popular": "Popular",
     "premiumPrice": "9,99 €",
-    "oneTime": "Pago único — 30 candidaturas",
-    "premFeat1": "Crea 30 candidaturas",
+    "oneTime": "Pago único — 20 candidaturas",
+    "premFeat1": "Crea 20 candidaturas",
     "premFeat2": "Las 3 plantillas",
     "premFeat3": "CV y carta de presentación con IA",
     "premFeat4": "Soporte prioritario",
@@ -142,8 +142,8 @@
     "redirect": "Redirigiendo a Stripe …",
     "errorTitle": "Error",
     "questions": "¿Preguntas? Escríbenos: support@bewerbungski.de",
-    "buyMore": "Comprar 30 solicitudes más →",
-    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 30 solicitudes."
+    "buyMore": "Comprar 20 solicitudes más →",
+    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 20 solicitudes."
   },
   "docs": {
     "title": "📄 Mis documentos",
@@ -185,7 +185,13 @@
       "missing": "Palabras clave que faltan"
     },
     "editCvBtn": "✏️ Editar ahora",
-    "doneEditing": "✓ Listo"
+    "doneEditing": "✓ Listo",
+    "checkBtn": "Revisar candidatura",
+    "checking": "La IA está revisando …",
+    "perfectBtn": "Perfeccionar",
+    "perfecting": "La IA está mejorando …",
+    "perfectDone": "Carta mejorada y guardada",
+    "changes": "Qué se mejoró"
   },
   "wizard": {
     "steps": {
@@ -349,7 +355,7 @@
       "toneModernDesc": "Claro, directo, sin frases vacías",
       "toneKreativDesc": "Personal, narrativo, individual"
     },
-    "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 30 en la página de precios.",
+    "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 20 en la página de precios.",
     "lookup": {
       "search": "Buscar",
       "noResults": "Sin resultados.",
@@ -404,5 +410,22 @@
     "copy": "Copiar enlace",
     "copied": "¡Copiado!",
     "close": "Cerrar"
+  },
+  "scanner": {
+    "nav": "Análisis de CV",
+    "title": "Análisis de CV",
+    "subtitle": "Pega tu CV: la IA lo evalúa como un reclutador y te da consejos concretos. Gratis.",
+    "cvLabel": "Tu CV (pegar texto)",
+    "cvPlaceholder": "Copia aquí el texto de tu CV …",
+    "jobLabel": "Oferta de empleo (opcional)",
+    "jobPlaceholder": "Para una evaluación a medida: pega el texto de la oferta …",
+    "analyze": "Analizar ahora",
+    "analyzing": "La IA está analizando …",
+    "strengths": "Lo que está bien",
+    "improvements": "Lo que puedes mejorar",
+    "cta": "Deja que la IA escriba tu candidatura completa",
+    "ctaBtn": "Crear candidatura",
+    "tooShort": "Pega más texto (al menos unas frases).",
+    "error": "El análisis falló. Inténtalo más tarde."
   }
 }

@@ -51,7 +51,7 @@
     "feat6Desc": "Professionelles Bewerbungsfoto direkt im Lebenslauf integrieren – optional.",
     "faqTitle": "Häufige Fragen",
     "faq1Q": "Was kostet BewerbungsKI?",
-    "faq1A": "3 Bewerbungen sind dauerhaft kostenlos – ohne Kreditkarte. Danach einmalig 9,99 € für 30 weitere Bewerbungen.",
+    "faq1A": "3 Bewerbungen sind dauerhaft kostenlos – ohne Kreditkarte. Danach einmalig 9,99 € für 20 weitere Bewerbungen.",
     "faq2Q": "Wie gut ist die Qualität?",
     "faq2A": "Die KI analysiert dein Profil und die Stellenanzeige und schreibt echten, individuellen Text – keine Bausteinbriefe, keine Floskeln.",
     "faq3Q": "Was passiert mit meinen Daten?",
@@ -130,8 +130,8 @@
     "premium": "Premium",
     "popular": "Beliebt",
     "premiumPrice": "9,99 €",
-    "oneTime": "Einmalig — 30 Bewerbungen",
-    "premFeat1": "30 Bewerbungen erstellen",
+    "oneTime": "Einmalig — 20 Bewerbungen",
+    "premFeat1": "20 Bewerbungen erstellen",
     "premFeat2": "Alle 3 Vorlagen",
     "premFeat3": "KI-Lebenslauf & Anschreiben",
     "premFeat4": "Prioritäts-Support",
@@ -142,8 +142,8 @@
     "redirect": "Weiterleitung zu Stripe …",
     "errorTitle": "Fehler",
     "questions": "Fragen? Schreib uns: support@bewerbungski.de",
-    "buyMore": "Weitere 30 Bewerbungen kaufen →",
-    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 30 Bewerbungen."
+    "buyMore": "Weitere 20 Bewerbungen kaufen →",
+    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 20 Bewerbungen."
   },
   "docs": {
     "title": "📄 Meine Dokumente",
@@ -186,7 +186,13 @@
       "missing": "Fehlende Keywords"
     },
     "editCvBtn": "✏️ Jetzt bearbeiten",
-    "doneEditing": "✓ Fertig"
+    "doneEditing": "✓ Fertig",
+    "checkBtn": "Bewerbung prüfen",
+    "checking": "KI prüft …",
+    "perfectBtn": "Perfektionieren",
+    "perfecting": "KI verbessert …",
+    "perfectDone": "Anschreiben verbessert und gespeichert",
+    "changes": "Das wurde verbessert"
   },
   "editor": {
     "save": "💾 Speichern",
@@ -392,7 +398,7 @@
       "toneModernDesc": "Klar, direkt, ohne Floskeln",
       "toneKreativDesc": "Persönlich, erzählerisch, individuell"
     },
-    "premiumLimit": "Limit erreicht: Alle Bewerbungen verbraucht. Kaufe auf der Preise-Seite ein weiteres 30er-Paket.",
+    "premiumLimit": "Limit erreicht: Alle Bewerbungen verbraucht. Kaufe auf der Preise-Seite ein weiteres 20er-Paket.",
     "lookup": {
       "search": "Suchen",
       "noResults": "Keine Ergebnisse.",
@@ -447,5 +453,22 @@
     "copy": "Link kopieren",
     "copied": "Kopiert!",
     "close": "Schließen"
+  },
+  "scanner": {
+    "nav": "CV-Check",
+    "title": "Lebenslauf-Check",
+    "subtitle": "Füge deinen Lebenslauf ein – die KI bewertet ihn wie ein Personaler und gibt dir konkrete Tipps. Kostenlos.",
+    "cvLabel": "Dein Lebenslauf (Text einfügen)",
+    "cvPlaceholder": "Kopiere den Text deines Lebenslaufs hierher …",
+    "jobLabel": "Stellenanzeige (optional)",
+    "jobPlaceholder": "Für eine passgenaue Bewertung: Text der Stellenanzeige einfügen …",
+    "analyze": "Jetzt prüfen",
+    "analyzing": "KI analysiert …",
+    "strengths": "Das ist gut",
+    "improvements": "Das kannst du verbessern",
+    "cta": "Lass die KI deine Bewerbung gleich komplett fertig schreiben",
+    "ctaBtn": "Bewerbung erstellen",
+    "tooShort": "Bitte füge mehr Text ein (mindestens ein paar Sätze).",
+    "error": "Analyse fehlgeschlagen. Bitte später erneut versuchen."
   }
 }

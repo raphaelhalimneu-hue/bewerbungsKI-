@@ -52,7 +52,7 @@
     "feat6Desc": "Add a professional photo directly to your CV – optional.",
     "faqTitle": "Frequently asked questions",
     "faq1Q": "What does BewerbungsKI cost?",
-    "faq1A": "3 applications are permanently free – no credit card. After that, a one-time fee of €9.99 for 30 more applications.",
+    "faq1A": "3 applications are permanently free – no credit card. After that, a one-time fee of €9.99 for 20 more applications.",
     "faq2Q": "How good is the quality?",
     "faq2A": "The AI analyses your profile and the job listing and writes genuine, individual text – no templates, no filler phrases.",
     "faq3Q": "What happens to my data?",
@@ -130,8 +130,8 @@
     "premium": "Premium",
     "popular": "Popular",
     "premiumPrice": "€9.99",
-    "oneTime": "One-time — 30 applications",
-    "premFeat1": "Create 30 applications",
+    "oneTime": "One-time — 20 applications",
+    "premFeat1": "Create 20 applications",
     "premFeat2": "All 3 templates",
     "premFeat3": "AI CV & cover letter",
     "premFeat4": "Priority support",
@@ -142,8 +142,8 @@
     "redirect": "Redirecting to Stripe …",
     "errorTitle": "Error",
     "questions": "Questions? Write to us: support@bewerbungski.de",
-    "buyMore": "Buy 30 more applications →",
-    "limitReachedHint": "You've used all your applications. Buy another package of 30 applications."
+    "buyMore": "Buy 20 more applications →",
+    "limitReachedHint": "You've used all your applications. Buy another package of 20 applications."
   },
   "docs": {
     "title": "📄 My documents",
@@ -186,7 +186,13 @@
       "missing": "Missing keywords"
     },
     "editCvBtn": "✏️ Edit now",
-    "doneEditing": "✓ Done"
+    "doneEditing": "✓ Done",
+    "checkBtn": "Check application",
+    "checking": "AI is checking …",
+    "perfectBtn": "Perfect it",
+    "perfecting": "AI is improving …",
+    "perfectDone": "Cover letter improved and saved",
+    "changes": "What was improved"
   },
   "editor": {
     "save": "💾 Save",
@@ -392,7 +398,7 @@
       "toneModernDesc": "Clear, direct, no filler phrases",
       "toneKreativDesc": "Personal, storytelling, individual"
     },
-    "premiumLimit": "Limit reached: all applications used. Buy another 30-pack on the pricing page.",
+    "premiumLimit": "Limit reached: all applications used. Buy another 20-pack on the pricing page.",
     "lookup": {
       "search": "Search",
       "noResults": "No results found.",
@@ -447,5 +453,22 @@
     "copy": "Copy link",
     "copied": "Copied!",
     "close": "Close"
+  },
+  "scanner": {
+    "nav": "CV Check",
+    "title": "CV Check",
+    "subtitle": "Paste your CV – the AI rates it like a recruiter and gives you concrete tips. Free.",
+    "cvLabel": "Your CV (paste text)",
+    "cvPlaceholder": "Copy the text of your CV here …",
+    "jobLabel": "Job posting (optional)",
+    "jobPlaceholder": "For a tailored rating: paste the job posting text …",
+    "analyze": "Check now",
+    "analyzing": "AI is analyzing …",
+    "strengths": "What's good",
+    "improvements": "What you can improve",
+    "cta": "Let the AI write your complete application right away",
+    "ctaBtn": "Create application",
+    "tooShort": "Please paste more text (at least a few sentences).",
+    "error": "Analysis failed. Please try again later."
   }
 }

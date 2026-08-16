@@ -1,9 +1,9 @@
 /**
  * Credits / quota model tests:
  * - Quota: limit = 3 free + purchased credits; correct error codes at the limit
- * - Stripe webhook fulfillment: +30 credits per checkout.session.completed
+ * - Stripe webhook fulfillment: +20 credits per checkout.session.completed
  * - Idempotency: redelivered Stripe events must NOT grant credits twice
- * - Legacy migration: is_premium profiles without credits get backfilled to 30
+ * - Legacy migration: is_premium profiles without credits get backfilled to 30 (legacy)
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
@@ -91,8 +91,8 @@ vi.mock("@workspace/db", () => {
             where() {
               if (table === profilesTable) {
                 if (typeof patch.isPremium === "boolean") state.profile.isPremium = patch.isPremium;
-                // credits is a sql`` increment expression → interpret as +30
-                if (patch.credits !== undefined) state.profile.credits += 30;
+                // credits is a sql`` increment expression → interpret as +20
+                if (patch.credits !== undefined) state.profile.credits += 20;
               }
               return Promise.resolve([]);
             },
@@ -202,24 +202,24 @@ describe("quota: 3 free + credits", () => {
 });
 
 describe("stripe webhook fulfillment", () => {
-  it("first purchase grants 30 credits and premium", async () => {
+  it("first purchase grants 20 credits and premium", async () => {
     const res = await postWebhook("evt_1");
     expect(res.status).toBe(200);
-    expect(state.profile.credits).toBe(30);
+    expect(state.profile.credits).toBe(20);
     expect(state.profile.isPremium).toBe(true);
   });
 
-  it("repurchase stacks: second distinct event adds another 30", async () => {
+  it("repurchase stacks: second distinct event adds another 20", async () => {
     await postWebhook("evt_1");
     await postWebhook("evt_2");
-    expect(state.profile.credits).toBe(60);
+    expect(state.profile.credits).toBe(40);
   });
 
   it("redelivered event is idempotent: no double credits", async () => {
     await postWebhook("evt_1");
     const res = await postWebhook("evt_1");
     expect(res.status).toBe(200); // acknowledged so Stripe stops retrying
-    expect(state.profile.credits).toBe(30);
+    expect(state.profile.credits).toBe(20);
   });
 
   it("invalid signature is rejected and grants nothing", async () => {
@@ -239,7 +239,7 @@ describe("stripe webhook fulfillment", () => {
 });
 
 describe("legacy premium migration semantics", () => {
-  it("legacy premium profile (is_premium, credits backfilled to 30) can still generate up to 33", async () => {
+  it("legacy premium profile (is_premium, credits backfilled to 30 (legacy)) can still generate up to 33", async () => {
     // Startup migration sets credits=30 for legacy is_premium rows;
     // this asserts the quota math honors that backfill.
     state.profile.isPremium = true;

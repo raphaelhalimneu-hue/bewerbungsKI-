@@ -56,7 +56,7 @@ router.get("/download/RaphaelKI2026", async (_req, res) => {
             line(""),
 
             h1("3. Preis und Bezahlung (Stripe)"),
-            bullet("Preis: 9,99 EUR einmalig - kein Abo - enthaelt 30 Bewerbungen."),
+            bullet("Preis: 9,99 EUR einmalig - kein Abo - enthaelt 20 Bewerbungen."),
             bullet("Einnahmen siehst du auf: dashboard.stripe.com oder in der Stripe-App."),
             bullet("Gratis-Grenze: 3 Bewerbungen kostenlos, danach kommt die Kaufaufforderung."),
             line(""),

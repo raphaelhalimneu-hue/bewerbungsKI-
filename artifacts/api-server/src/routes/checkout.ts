@@ -30,7 +30,7 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
             currency: "eur",
             product_data: {
               name: "BewerbungsKI Premium",
-              description: "30 Bewerbungen – Einmalzahlung, kein Abo",
+              description: "20 Bewerbungen – Einmalzahlung, kein Abo",
             },
             unit_amount: 999,
           },
@@ -83,7 +83,7 @@ router.post("/webhook/stripe", async (req, res) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
       if (userId) {
-        // Each completed checkout grants 30 more applications (stackable packages).
+        // Each completed checkout grants 20 more applications (stackable packages).
         // Idempotent: record the Stripe event id first; if it was already
         // processed (redelivery), the insert is a no-op and no credits are added.
         await db.transaction(async (tx) => {
@@ -97,7 +97,7 @@ router.post("/webhook/stripe", async (req, res) => {
             .update(profilesTable)
             .set({
               isPremium: true,
-              credits: sql`${profilesTable.credits} + 30`,
+              credits: sql`${profilesTable.credits} + 20`,
             })
             .where(eq(profilesTable.userId, userId));
         });

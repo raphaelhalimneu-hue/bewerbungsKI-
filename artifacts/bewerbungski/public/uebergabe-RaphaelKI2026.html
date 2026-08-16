@@ -29,8 +29,8 @@ td,th{border:1px solid #d1d5db;padding:6px 10px;text-align:left}
 
 <h2>2. Preismodell (seit 13.08.2026)</h2>
 <ul>
-<li>3 Bewerbungen kostenlos pro Konto, danach <b>9,99 € einmalig für 30 weitere</b> (kein Abo, nichts „unbegrenzt“).</li>
-<li>Serverseitig erzwungen: ohne Kauf ab 3 Dokumenten gesperrt (<code>free_limit_reached</code>), mit Kauf ab 33 Dokumenten gesamt (<code>premium_limit_reached</code>; 33 = 3 gratis + 30 gekauft).</li>
+<li>3 Bewerbungen kostenlos pro Konto, danach <b>9,99 € einmalig für 20 weitere</b> (kein Abo, nichts „unbegrenzt“).</li>
+<li>Serverseitig erzwungen: ohne Kauf ab 3 Dokumenten gesperrt (<code>free_limit_reached</code>), mit Kauf ab 23 Dokumenten gesamt (<code>premium_limit_reached</code>; 23 = 3 gratis + 20 gekauft).</li>
 <li>Stripe-Webhook <code>checkout.session.completed</code> setzt <code>profiles.is_premium = true</code>. Preis ist inline (<code>unit_amount: 999</code>), keine Stripe-Price-ID.</li>
 <li>Bei Preisänderungen synchron halten: <code>checkout.ts</code>, <code>generate.ts</code>, alle 8 Sprachdateien, <code>index.html</code> (Meta + JSON-LD), Mobile-App.</li>
 </ul>
@@ -57,7 +57,7 @@ td,th{border:1px solid #d1d5db;padding:6px 10px;text-align:left}
   src/components/Layout.tsx        Navigation, Free-Plan-Balken (x/3)
   index.html                       SEO, Google-Tags, Preis in Meta/JSON-LD
 artifacts/api-server/src/routes/   Express-Routen:
-  generate.ts                      KI-Generierung + Limits (3/33)
+  generate.ts                      KI-Generierung + Limits (3/23)
   checkout.ts                      Stripe-Checkout + Webhook
   parse-linkedin.ts                LinkedIn- UND Freitext-Parser (+ normalize()-Sicherheitsnetz)
   documents.ts, me.ts, saved-profile, download.ts, admin.ts
@@ -98,7 +98,7 @@ artifacts/bewerbungski-mobile/     Expo-Handy-App</pre>
 <li><b>Supabase Free-Tier pausiert automatisch</b>, wenn sich der Besitzer nicht wöchentlich einloggt → Login + Bezahlung fallen aus.</li>
 <li>KI-Fehler bedeuten meist: Anthropic-Guthaben leer.</li>
 <li><code>/api/download/RaphaelKI2026</code> ist ein öffentlicher, unauthentifizierter Info-Download — Absicherung ist eine offene Aufgabe.</li>
-<li>Premium-Nutzer, die alle 30 Bewerbungen verbraucht haben, können noch kein weiteres Paket kaufen (offene Aufgabe).</li>
+<li>Premium-Nutzer, die alle 20 Bewerbungen verbraucht haben, können noch kein weiteres Paket kaufen (offene Aufgabe).</li>
 <li>Mobile-App zeigt teils noch alte Preise/Texte (offene Aufgabe).</li>
 <li><code>documents_count</code> wird live gezählt (COUNT auf documents) — Löschen von Dokumenten gibt Kontingent frei.</li>
 <li>Nach Schema-Änderungen <code>pnpm --filter @workspace/db run push</code>; nach OpenAPI-Änderungen Codegen laufen lassen.</li>

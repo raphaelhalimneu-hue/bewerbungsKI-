@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { DECO } from "../lib/buildCVHTML";
+import { AnalysisCard } from "./Scanner";
 
 export default function Preview() {
   const { t } = useTranslation();
@@ -18,6 +19,55 @@ export default function Preview() {
   const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
   const [editingCv, setEditingCv] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [perfecting, setPerfecting] = useState(false);
+  const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
+  const [aiError, setAiError] = useState("");
+
+  function docTexts() {
+    const d: any = doc || {};
+    const cvText = String(d.cv_html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const pd = d.profile_data || {};
+    const jobText = [pd.jobad?.title, pd.jobad?.company, pd.jobad?.description].filter(Boolean).join("\n");
+    return { cvText, letterText: editedLetter || d.cover_letter || "", jobText };
+  }
+
+  const { i18n } = useTranslation();
+  async function runCheck() {
+    const { cvText, letterText, jobText } = docTexts();
+    if (cvText.length < 80) return;
+    setAiError(""); setChecking(true); setAnalysis(null); setPerfectChanges(null);
+    try {
+      const res = await customFetch("/api/analyze", {
+        method: "POST",
+        body: JSON.stringify({ cvText, letterText: letterText || undefined, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
+      });
+      setAnalysis(res);
+    } catch { setAiError(t("scanner.error")); }
+    finally { setChecking(false); }
+  }
+
+  async function runPerfect() {
+    const { cvText, letterText, jobText } = docTexts();
+    if (!letterText || letterText.trim().length < 80) return;
+    setAiError(""); setPerfecting(true); setPerfectChanges(null);
+    try {
+      const res: any = await customFetch("/api/perfect", {
+        method: "POST",
+        body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
+      });
+      if (res?.letter) {
+        setEditedLetter(res.letter);
+        await customFetch(`/api/documents/${params.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ cover_letter: res.letter }),
+        });
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+      }
+    } catch { setAiError(t("scanner.error")); }
+    finally { setPerfecting(false); }
+  }
 
   // Initialise cover letter textarea from loaded doc
   useEffect(() => {
@@ -210,6 +260,33 @@ export default function Preview() {
             </div>
           );
         })()}
+
+        {doc && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              <button className="btn btn-p btn-sm" onClick={runCheck} disabled={checking || perfecting}>
+                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
+              </button>
+              {((doc as any)?.cover_letter || editedLetter) && (
+                <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting}>
+                  {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
+                </button>
+              )}
+            </div>
+            {aiError && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{aiError}</div>}
+            {perfectChanges && (
+              <div style={{ marginTop: 12, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px" }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 4 }}>✅ {t("preview.perfectDone")}</div>
+                {perfectChanges.length > 0 && (
+                  <ul style={{ margin: 0, paddingInlineStart: 20, fontSize: 13, lineHeight: 1.6, color: "var(--muted)" }}>
+                    {perfectChanges.map((c, i) => <li key={i}>{c}</li>)}
+                  </ul>
+                )}
+              </div>
+            )}
+            {analysis && <AnalysisCard result={analysis} />}
+          </div>
+        )}
 
         {doc && (
           <>

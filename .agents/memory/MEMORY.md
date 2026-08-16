@@ -6,5 +6,5 @@
 - [Railway deploy method](railway-deploy.md) — tar-ball upload via backboard GraphQL API; multipart and CLI do NOT work with the workspace token.
 - [Custom domain bewerbungski.com](custom-domain.md) — Strato CNAME only (no TXT); stuck Railway certs fixed by delete+recreate, which changes the CNAME target.
 - [AI provider](groq-provider.md) — generation runs on Claude (claude-sonnet-4-5) since 2026-08-11; errors usually mean empty Anthropic credit.
-- [Pricing model](pricing-model.md) — 3 kostenlos, dann 9,99 € einmalig für 30 weitere (Limit 33 Dokumente gesamt); kein "unbegrenzt/Lifetime" mehr (seit 2026-08-13).
+- [Pricing model](pricing-model.md) — 3 kostenlos, dann 9,99 € einmalig für 20 weitere (Limit 23 Dokumente gesamt; Bestandskäufer behalten 30); kein "unbegrenzt/Lifetime" mehr (30→20 am 2026-08-16).
 - [Features Aug 2026](features-overview.md) — profil-save (savedProfile jsonb), inline-edit (contentEditable CV + textarea letter), DOCX export (/api/documents/:id/download/cv.docx + cover-letter.docx), Mobile Expo app.

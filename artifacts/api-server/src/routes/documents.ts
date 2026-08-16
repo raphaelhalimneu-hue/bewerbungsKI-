@@ -100,7 +100,7 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { cv_html, cv_json, template } = req.body;
+    const { cv_html, cv_json, template, cover_letter } = req.body;
 
     // Validate template against allowlist
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
@@ -118,6 +118,10 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
       res.status(400).json({ error: "cv_html must be a string" }); return;
     }
 
+    if (cover_letter !== undefined && typeof cover_letter !== "string") {
+      res.status(400).json({ error: "cover_letter must be a string" }); return;
+    }
+
     const [existing] = await db
       .select()
       .from(documentsTable)
@@ -128,6 +132,7 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
     const updates: Record<string, any> = {};
     if (cv_html !== undefined) updates.cvHtml = cv_html;
     if (template !== undefined) updates.template = template;
+    if (cover_letter !== undefined) updates.coverLetter = cover_letter;
     if (cv_json !== undefined) {
       // Merge cv_json into profileData
       const pd = (existing.profileData as any) || {};
