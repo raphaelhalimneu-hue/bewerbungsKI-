@@ -432,5 +432,13 @@
     "ctaBtn": "Başvuru oluştur",
     "tooShort": "Lütfen daha fazla metin yapıştır (en az birkaç cümle).",
     "error": "Analiz başarısız oldu. Lütfen daha sonra tekrar dene."
+  },
+  "fileImport": {
+    "button": "Dosya yükle (PDF, Word, fotoğraf)",
+    "reading": "Dosya okunuyor …",
+    "tooLarge": "Dosya çok büyük (en fazla 8 MB).",
+    "noText": "Dosyada metin bulunamadı.",
+    "limit": "Günlük yükleme sınırına ulaşıldı. Yarın tekrar dene.",
+    "error": "Dosya okunamadı."
   }
 }

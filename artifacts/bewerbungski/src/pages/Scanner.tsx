@@ -4,6 +4,7 @@ import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
+import { FileImportButton } from "../components/FileImportButton";
 
 type AnalyzeResult = {
   score: number;
@@ -90,7 +91,10 @@ export default function Scanner() {
         <p style={{ color: "var(--muted)", fontSize: 14.5, lineHeight: 1.6, marginBottom: 22 }}>{t("scanner.subtitle")}</p>
 
         <div className="card">
-          <label style={{ fontWeight: 700, fontSize: 14, display: "block", marginBottom: 6 }}>{t("scanner.cvLabel")}</label>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+            <label style={{ fontWeight: 700, fontSize: 14 }}>{t("scanner.cvLabel")}</label>
+            <FileImportButton onText={(txt) => setCvText(txt)} />
+          </div>
           <textarea
             value={cvText}
             onChange={(e) => setCvText(e.target.value)}

@@ -8,6 +8,7 @@ import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/
 import type { FormData, Experience, Education, Skill, Language, TemplateId, CVContent } from "../lib/buildCVHTML";
 import { renderCVContent } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
+import { FileImportButton } from "../components/FileImportButton";
 
 const STEPS = [
   { id: "personal",   icon: "👤" },
@@ -501,6 +502,9 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
       {ftOpen && (
         <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
           <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10, lineHeight: 1.5 }}>{t("wizard.freetext.hint")}</div>
+          <div style={{ marginBottom: 10 }}>
+            <FileImportButton onText={(txt) => setFtText(txt)} />
+          </div>
           <textarea className="textarea" value={ftText} onChange={e => setFtText(e.target.value)} placeholder={t("wizard.freetext.placeholder")} style={{ minHeight: 170, marginBottom: 10 }} />
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" className="btn btn-p btn-sm" onClick={importFreetext} disabled={ftLoading || ftText.trim().length < 30}>

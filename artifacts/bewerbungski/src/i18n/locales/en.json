@@ -475,5 +475,13 @@
     "ctaBtn": "Create application",
     "tooShort": "Please paste more text (at least a few sentences).",
     "error": "Analysis failed. Please try again later."
+  },
+  "fileImport": {
+    "button": "Upload file (PDF, Word, photo)",
+    "reading": "Reading file …",
+    "tooLarge": "File too large (max. 8 MB).",
+    "noText": "No text found in the file.",
+    "limit": "Daily upload limit reached. Try again tomorrow.",
+    "error": "Could not read the file."
   }
 }

@@ -432,5 +432,13 @@
     "ctaBtn": "Utwórz aplikację",
     "tooShort": "Wklej więcej tekstu (co najmniej kilka zdań).",
     "error": "Analiza nie powiodła się. Spróbuj później."
+  },
+  "fileImport": {
+    "button": "Prześlij plik (PDF, Word, zdjęcie)",
+    "reading": "Odczytywanie pliku …",
+    "tooLarge": "Plik jest za duży (maks. 8 MB).",
+    "noText": "Nie znaleziono tekstu w pliku.",
+    "limit": "Osiągnięto dzienny limit przesyłania. Spróbuj jutro.",
+    "error": "Nie udało się odczytać pliku."
   }
 }

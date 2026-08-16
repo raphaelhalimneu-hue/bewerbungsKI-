@@ -475,5 +475,13 @@
     "ctaBtn": "Bewerbung erstellen",
     "tooShort": "Bitte füge mehr Text ein (mindestens ein paar Sätze).",
     "error": "Analyse fehlgeschlagen. Bitte später erneut versuchen."
+  },
+  "fileImport": {
+    "button": "Datei hochladen (PDF, Word, Foto)",
+    "reading": "Datei wird gelesen …",
+    "tooLarge": "Datei zu groß (max. 8 MB).",
+    "noText": "Kein Text in der Datei gefunden.",
+    "limit": "Tageslimit für Datei-Uploads erreicht. Versuch es morgen wieder.",
+    "error": "Datei konnte nicht gelesen werden."
   }
 }
