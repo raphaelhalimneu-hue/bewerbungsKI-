@@ -1161,7 +1161,7 @@ function PreviewTerra() {
   );
 }
 
-const TEMPLATE_PREVIEWS: Record<string, () => JSX.Element> = {
+const TEMPLATE_PREVIEWS: Record<string, () => React.JSX.Element> = {
   modern: PreviewModern, classic: PreviewClassic, creative: PreviewCreative,
   executive: PreviewExecutive, minimal: PreviewMinimal, elegant: PreviewElegant,
   bold: PreviewBold, compact: PreviewCompact,
