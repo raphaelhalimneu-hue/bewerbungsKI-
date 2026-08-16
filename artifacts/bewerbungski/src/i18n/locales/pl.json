@@ -449,7 +449,8 @@
     "useAsTemplate": "Użyj tego tekstu",
     "useStyle": "Użyj wyglądu tego pliku",
     "styleBusy": "AI odczytuje wygląd …",
-    "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF."
+    "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF.",
+    "improvedTitle": "Twój ulepszony tekst"
   },
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",

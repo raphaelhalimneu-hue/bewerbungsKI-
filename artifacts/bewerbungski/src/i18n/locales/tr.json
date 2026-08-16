@@ -449,7 +449,8 @@
     "useAsTemplate": "Bu metni kullan",
     "useStyle": "Bu dosyanın tasarımını kullan",
     "styleBusy": "Yapay zekâ tasarımı okuyor …",
-    "styleError": "Tasarım algılanamadı. Lütfen başka bir fotoğraf/PDF deneyin."
+    "styleError": "Tasarım algılanamadı. Lütfen başka bir fotoğraf/PDF deneyin.",
+    "improvedTitle": "İyileştirilmiş metnin"
   },
   "fileImport": {
     "button": "Dosya yükle (PDF, Word, fotoğraf)",

@@ -64,6 +64,7 @@ export default function Scanner() {
   const [errorMsg, setErrorMsg] = useState("");
   const [perfecting, setPerfecting] = useState(false);
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
+  const [perfectedText, setPerfectedText] = useState<string | null>(null);
 
   async function runPerfect() {
     if (!user) { setShowAuthModal(true); return; }
@@ -80,6 +81,7 @@ export default function Scanner() {
       });
       if (res?.letter) {
         setCvText(res.letter);
+        setPerfectedText(res.letter);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
         setPerfecting(false);
@@ -186,6 +188,15 @@ export default function Scanner() {
             )}
           </div>
         </div>
+
+        {perfectedText && (
+          <div className="card" style={{ marginTop: 16 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>✨ {t("scanner.improvedTitle")}</div>
+            <div style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}>
+              {perfectedText}
+            </div>
+          </div>
+        )}
 
         {perfectChanges && (
           <div className="card" style={{ marginTop: 16 }}>

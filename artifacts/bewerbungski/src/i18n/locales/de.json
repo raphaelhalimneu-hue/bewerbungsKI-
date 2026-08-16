@@ -492,7 +492,8 @@
     "useAsTemplate": "Text übernehmen",
     "useStyle": "Design der Datei übernehmen",
     "styleBusy": "KI liest das Design …",
-    "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen."
+    "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen.",
+    "improvedTitle": "Dein verbesserter Text"
   },
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",

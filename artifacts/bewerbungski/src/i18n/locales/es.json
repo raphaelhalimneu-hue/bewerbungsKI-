@@ -449,7 +449,8 @@
     "useAsTemplate": "Usar este texto",
     "useStyle": "Usar el diseño de este archivo",
     "styleBusy": "La IA está leyendo el diseño …",
-    "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF."
+    "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF.",
+    "improvedTitle": "Tu texto mejorado"
   },
   "fileImport": {
     "button": "Subir archivo (PDF, Word, foto)",

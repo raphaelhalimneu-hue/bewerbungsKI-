@@ -492,7 +492,8 @@
     "useAsTemplate": "Use this text",
     "useStyle": "Use this file's design",
     "styleBusy": "AI is reading the design …",
-    "styleError": "Could not detect the design. Please try another photo/PDF."
+    "styleError": "Could not detect the design. Please try another photo/PDF.",
+    "improvedTitle": "Your improved text"
   },
   "fileImport": {
     "button": "Upload file (PDF, Word, photo)",
