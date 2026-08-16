@@ -79,7 +79,8 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
-    if (!checkQuota(req.userId!, "analyze")) {
+    const unlimitedA = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
@@ -138,7 +139,8 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
-    if (!checkQuota(req.userId!, "perfect")) {
+    const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }

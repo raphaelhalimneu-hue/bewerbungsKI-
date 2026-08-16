@@ -24,8 +24,9 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
-    const limit = 3 + credits; // 3 free + 20 per purchased package
-    if (value >= limit) {
+    const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    const limit = 3 + credits; // 3 free + 10 per purchased package
+    if (!unlimited && value >= limit) {
       res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
       return;
     }

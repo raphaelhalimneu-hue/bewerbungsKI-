@@ -27,11 +27,12 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
 
+    const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
     res.json({
       email: profile.email,
-      is_premium: profile.isPremium,
+      is_premium: unlimited ? true : profile.isPremium,
       credits: profile.credits,
-      document_limit: 3 + profile.credits,
+      document_limit: unlimited ? 999999 : 3 + profile.credits,
       documents_count: Number(docCount) || 0,
     });
   } catch (err) {

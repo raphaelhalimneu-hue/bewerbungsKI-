@@ -54,7 +54,7 @@
     "feat6Desc": "Profesyonel fotoğrafını doğrudan CV'ye ekle – isteğe bağlı.",
     "faqTitle": "Sık sorulan sorular",
     "faq1Q": "BewerbungsKI ne kadar?",
-    "faq1A": "3 başvuru kalıcı olarak ücretsizdir – kredi kartı gerekmez. Sonrasında 20 başvuru daha için tek seferlik 9,99 €.",
+    "faq1A": "3 başvuru kalıcı olarak ücretsizdir – kredi kartı gerekmez. Sonrasında 10 başvuru daha için tek seferlik 9,99 €.",
     "faq2Q": "Kalite ne kadar iyi?",
     "faq2A": "Yapay zekâ profilini ve iş ilanını analiz eder ve gerçek, bireysel metin yazar – şablon yok, klişe yok.",
     "faq3Q": "Verilerime ne olur?",
@@ -132,8 +132,8 @@
     "premium": "Premium",
     "popular": "Popüler",
     "premiumPrice": "9,99 €",
-    "oneTime": "Tek seferlik — 20 başvuru",
-    "premFeat1": "20 başvuru oluşturun",
+    "oneTime": "Tek seferlik — 10 başvuru",
+    "premFeat1": "10 başvuru oluşturun",
     "premFeat2": "3 şablonun tümü",
     "premFeat3": "Yapay zekâ özgeçmiş ve ön yazı",
     "premFeat4": "Öncelikli destek",
@@ -144,8 +144,8 @@
     "redirect": "Stripe'a yönlendiriliyor …",
     "errorTitle": "Hata",
     "questions": "Sorun mu var? Bize yaz: support@bewerbungski.de",
-    "buyMore": "20 başvuru daha satın al →",
-    "limitReachedHint": "Tüm başvurularını kullandın. 20 başvuruluk yeni bir paket satın al."
+    "buyMore": "10 başvuru daha satın al →",
+    "limitReachedHint": "Tüm başvurularını kullandın. 10 başvuruluk yeni bir paket satın al."
   },
   "docs": {
     "title": "📄 Belgelerim",
@@ -368,7 +368,7 @@
       "toneModernDesc": "Net, doğrudan",
       "toneKreativDesc": "Kişisel, anlatısal"
     },
-    "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 20'luk paket satın al.",
+    "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 10'luk paket satın al.",
     "lookup": {
       "search": "Ara",
       "noResults": "Sonuç bulunamadı.",

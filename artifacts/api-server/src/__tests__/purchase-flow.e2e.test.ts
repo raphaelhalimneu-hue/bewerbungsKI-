@@ -8,9 +8,9 @@
  *   2. Generates + saves 3 documents (Claude mocked at fetch level)
  *   3. 4th generate → 403 free_limit_reached
  *   4. POST /checkout → Stripe Checkout session (metadata.userId set)
- *   5. Stripe webhook checkout.session.completed → is_premium=true, credits=20
- *   6. /me shows limit 23; generating works again
- *   7. Saves documents up to 23 total → generate → 403 premium_limit_reached
+ *   5. Stripe webhook checkout.session.completed → is_premium=true, credits=10
+ *   6. /me shows limit 13; generating works again
+ *   7. Saves documents up to 13 total → generate → 403 premium_limit_reached
  *
  * Only external boundaries are faked: Supabase auth, Stripe SDK signature
  * verification, the Anthropic HTTP API, e-mail sending, and the database
@@ -103,7 +103,7 @@ vi.mock("@workspace/db", () => {
             where() {
               if (table === profilesTable) {
                 if (typeof patch.isPremium === "boolean") state.profile.isPremium = patch.isPremium;
-                if (patch.credits !== undefined) state.profile.credits += 20; // sql`credits + 20`
+                if (patch.credits !== undefined) state.profile.credits += 10; // sql`credits + 10`
               }
               return Promise.resolve([]);
             },
@@ -192,7 +192,7 @@ const webhook = (eventId: string) =>
 // The full journey, in order (steps share state on purpose)
 // ---------------------------------------------------------------------------
 
-describe("E2E: 3 gratis → Kauf → 30 weitere → Limit 23", () => {
+describe("E2E: 3 gratis → Kauf → 10 weitere → Limit 13", () => {
   it("step 1: fresh user sees limit 3 and 0 documents", async () => {
     const res = await getMe();
     expect(res.status).toBe(200);
@@ -232,18 +232,18 @@ describe("E2E: 3 gratis → Kauf → 30 weitere → Limit 23", () => {
     expect(session.line_items[0].price_data.unit_amount).toBe(999);
   });
 
-  it("step 5: webhook fulfillment unlocks premium with +20 credits", async () => {
+  it("step 5: webhook fulfillment unlocks premium with +10 credits", async () => {
     const res = await webhook("evt_e2e_1");
     expect(res.status).toBe(200);
     const me = await getMe();
-    expect(me.body).toMatchObject({ is_premium: true, credits: 20, document_limit: 23 });
+    expect(me.body).toMatchObject({ is_premium: true, credits: 10, document_limit: 13 });
   });
 
   it("step 5b: webhook redelivery does not grant credits twice", async () => {
     const res = await webhook("evt_e2e_1");
     expect(res.status).toBe(200);
     const me = await getMe();
-    expect(me.body.credits).toBe(20);
+    expect(me.body.credits).toBe(10);
   });
 
   it("step 6: generation works again after purchase", async () => {
@@ -252,14 +252,14 @@ describe("E2E: 3 gratis → Kauf → 30 weitere → Limit 23", () => {
     expect(res.body.result).toContain("Generierter Lebenslauf");
   });
 
-  it("step 7: at 23 documents, generation is blocked with premium_limit_reached", async () => {
+  it("step 7: at 13 documents, generation is blocked with premium_limit_reached", async () => {
     // Fill up to the premium limit (3 already saved)
-    for (let n = state.docs.length + 1; n <= 23; n++) {
+    for (let n = state.docs.length + 1; n <= 13; n++) {
       const save = await saveDocument(n);
       expect(save.status).toBe(201);
     }
     const me = await getMe();
-    expect(me.body.documents_count).toBe(23);
+    expect(me.body.documents_count).toBe(13);
 
     const blocked = await generate();
     expect(blocked.status).toBe(403);

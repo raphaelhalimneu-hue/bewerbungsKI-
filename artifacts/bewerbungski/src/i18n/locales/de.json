@@ -53,7 +53,7 @@
     "feat6Desc": "Professionelles Bewerbungsfoto direkt im Lebenslauf integrieren – optional.",
     "faqTitle": "Häufige Fragen",
     "faq1Q": "Was kostet BewerbungsKI?",
-    "faq1A": "3 Bewerbungen sind dauerhaft kostenlos – ohne Kreditkarte. Danach einmalig 9,99 € für 20 weitere Bewerbungen.",
+    "faq1A": "3 Bewerbungen sind dauerhaft kostenlos – ohne Kreditkarte. Danach einmalig 9,99 € für 10 weitere Bewerbungen.",
     "faq2Q": "Wie gut ist die Qualität?",
     "faq2A": "Die KI analysiert dein Profil und die Stellenanzeige und schreibt echten, individuellen Text – keine Bausteinbriefe, keine Floskeln.",
     "faq3Q": "Was passiert mit meinen Daten?",
@@ -132,8 +132,8 @@
     "premium": "Premium",
     "popular": "Beliebt",
     "premiumPrice": "9,99 €",
-    "oneTime": "Einmalig — 20 Bewerbungen",
-    "premFeat1": "20 Bewerbungen erstellen",
+    "oneTime": "Einmalig — 10 Bewerbungen",
+    "premFeat1": "10 Bewerbungen erstellen",
     "premFeat2": "Alle 3 Vorlagen",
     "premFeat3": "KI-Lebenslauf & Anschreiben",
     "premFeat4": "Prioritäts-Support",
@@ -144,8 +144,8 @@
     "redirect": "Weiterleitung zu Stripe …",
     "errorTitle": "Fehler",
     "questions": "Fragen? Schreib uns: support@bewerbungski.de",
-    "buyMore": "Weitere 20 Bewerbungen kaufen →",
-    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 20 Bewerbungen."
+    "buyMore": "Weitere 10 Bewerbungen kaufen →",
+    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 10 Bewerbungen."
   },
   "docs": {
     "title": "📄 Meine Dokumente",
@@ -411,7 +411,7 @@
       "toneModernDesc": "Klar, direkt, ohne Floskeln",
       "toneKreativDesc": "Persönlich, erzählerisch, individuell"
     },
-    "premiumLimit": "Limit erreicht: Alle Bewerbungen verbraucht. Kaufe auf der Preise-Seite ein weiteres 20er-Paket.",
+    "premiumLimit": "Limit erreicht: Alle Bewerbungen verbraucht. Kaufe auf der Preise-Seite ein weiteres 10er-Paket.",
     "lookup": {
       "search": "Suchen",
       "noResults": "Keine Ergebnisse.",

@@ -54,7 +54,7 @@
     "feat6Desc": "Añade una foto profesional directamente en tu CV – opcional.",
     "faqTitle": "Preguntas frecuentes",
     "faq1Q": "¿Cuánto cuesta BewerbungsKI?",
-    "faq1A": "3 candidaturas son gratis para siempre, sin tarjeta de crédito. Después, un pago único de 9,99 € por 20 candidaturas más.",
+    "faq1A": "3 candidaturas son gratis para siempre, sin tarjeta de crédito. Después, un pago único de 9,99 € por 10 candidaturas más.",
     "faq2Q": "¿Qué calidad tiene el resultado?",
     "faq2A": "La IA analiza tu perfil y la oferta de trabajo y escribe texto genuino e individual – sin plantillas ni frases vacías.",
     "faq3Q": "¿Qué pasa con mis datos?",
@@ -132,8 +132,8 @@
     "premium": "Premium",
     "popular": "Popular",
     "premiumPrice": "9,99 €",
-    "oneTime": "Pago único — 20 candidaturas",
-    "premFeat1": "Crea 20 candidaturas",
+    "oneTime": "Pago único — 10 candidaturas",
+    "premFeat1": "Crea 10 candidaturas",
     "premFeat2": "Las 3 plantillas",
     "premFeat3": "CV y carta de presentación con IA",
     "premFeat4": "Soporte prioritario",
@@ -144,8 +144,8 @@
     "redirect": "Redirigiendo a Stripe …",
     "errorTitle": "Error",
     "questions": "¿Preguntas? Escríbenos: support@bewerbungski.de",
-    "buyMore": "Comprar 20 solicitudes más →",
-    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 20 solicitudes."
+    "buyMore": "Comprar 10 solicitudes más →",
+    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 10 solicitudes."
   },
   "docs": {
     "title": "📄 Mis documentos",
@@ -368,7 +368,7 @@
       "toneModernDesc": "Claro, directo, sin frases vacías",
       "toneKreativDesc": "Personal, narrativo, individual"
     },
-    "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 20 en la página de precios.",
+    "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 10 en la página de precios.",
     "lookup": {
       "search": "Buscar",
       "noResults": "Sin resultados.",
