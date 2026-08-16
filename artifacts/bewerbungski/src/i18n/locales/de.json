@@ -482,7 +482,17 @@
     "cta": "Lass die KI deine Bewerbung gleich komplett fertig schreiben",
     "ctaBtn": "Bewerbung erstellen",
     "tooShort": "Bitte füge mehr Text ein (mindestens ein paar Sätze).",
-    "error": "Analyse fehlgeschlagen. Bitte später erneut versuchen."
+    "error": "Analyse fehlgeschlagen. Bitte später erneut versuchen.",
+    "modeCv": "Lebenslauf",
+    "modeLetter": "Anschreiben",
+    "letterTitle": "Anschreiben-Check",
+    "letterSubtitle": "Füge dein Anschreiben ein – die KI bewertet es wie ein Personaler und gibt dir konkrete Tipps. Kostenlos.",
+    "letterLabel": "Dein Anschreiben (Text einfügen)",
+    "letterPlaceholder": "Kopiere den Text deines Anschreibens hierher …",
+    "useAsTemplate": "Als Vorlage für neue Bewerbung verwenden",
+    "useStyle": "Design der Datei übernehmen",
+    "styleBusy": "KI liest das Design …",
+    "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen."
   },
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",
@@ -491,5 +501,21 @@
     "noText": "Kein Text in der Datei gefunden.",
     "limit": "Tageslimit für Datei-Uploads erreicht. Versuch es morgen wieder.",
     "error": "Datei konnte nicht gelesen werden."
+  },
+  "importPage": {
+    "nav": "Datei-Import",
+    "title": "Datei importieren",
+    "subtitle": "Lade eine Datei hoch (PDF, Word, Foto) oder füge Text ein – und wähle dann, was du damit machen möchtest.",
+    "textLabel": "Dein Text",
+    "placeholder": "Datei hochladen oder Text hierher kopieren …",
+    "whatNext": "Was möchtest du damit machen?",
+    "actCv": "Lebenslauf prüfen",
+    "actCvDesc": "Die KI bewertet den Lebenslauf wie ein Personaler.",
+    "actLetter": "Anschreiben prüfen",
+    "actLetterDesc": "Die KI bewertet das Anschreiben und gibt Tipps.",
+    "actTemplate": "Lebenslauf als Vorlage verwenden",
+    "actTemplateDesc": "Lebenslauf-Inhalte übernehmen und eine neue Bewerbung erstellen (nur für Lebensläufe geeignet).",
+    "actStyle": "Design übernehmen",
+    "actStyleDesc": "Farben und Stil der Datei für deine neue Bewerbung verwenden (nur Foto/PDF)."
   }
 }

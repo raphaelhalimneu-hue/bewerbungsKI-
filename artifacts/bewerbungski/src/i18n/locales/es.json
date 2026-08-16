@@ -439,7 +439,17 @@
     "cta": "Deja que la IA escriba tu candidatura completa",
     "ctaBtn": "Crear candidatura",
     "tooShort": "Pega más texto (al menos unas frases).",
-    "error": "El análisis falló. Inténtalo más tarde."
+    "error": "El análisis falló. Inténtalo más tarde.",
+    "modeCv": "Currículum",
+    "modeLetter": "Carta de presentación",
+    "letterTitle": "Revisión de carta de presentación",
+    "letterSubtitle": "Pega tu carta de presentación: la IA la evalúa como un reclutador y te da consejos concretos. Gratis.",
+    "letterLabel": "Tu carta de presentación (pegar texto)",
+    "letterPlaceholder": "Copia aquí el texto de tu carta de presentación …",
+    "useAsTemplate": "Usar como plantilla para una nueva candidatura",
+    "useStyle": "Usar el diseño de este archivo",
+    "styleBusy": "La IA está leyendo el diseño …",
+    "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF."
   },
   "fileImport": {
     "button": "Subir archivo (PDF, Word, foto)",
@@ -448,5 +458,21 @@
     "noText": "No se encontró texto en el archivo.",
     "limit": "Límite diario de subidas alcanzado. Inténtalo mañana.",
     "error": "No se pudo leer el archivo."
+  },
+  "importPage": {
+    "nav": "Importar archivo",
+    "title": "Importar un archivo",
+    "subtitle": "Sube un archivo (PDF, Word, foto) o pega texto, y elige qué hacer con él.",
+    "textLabel": "Tu texto",
+    "placeholder": "Sube un archivo o copia el texto aquí …",
+    "whatNext": "¿Qué quieres hacer con él?",
+    "actCv": "Revisar currículum",
+    "actCvDesc": "La IA evalúa el currículum como un reclutador.",
+    "actLetter": "Revisar carta de presentación",
+    "actLetterDesc": "La IA evalúa la carta y da consejos.",
+    "actTemplate": "Usar currículum como plantilla",
+    "actTemplateDesc": "Reutilizar el contenido del currículum para una nueva candidatura (solo para currículums).",
+    "actStyle": "Usar el diseño",
+    "actStyleDesc": "Usar los colores y el estilo del archivo para tu nueva candidatura (solo foto/PDF)."
   }
 }

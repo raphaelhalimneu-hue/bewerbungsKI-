@@ -42,3 +42,5 @@ description: Durable decisions for the 3 major features added in Aug 2026
 - Alle Blau-Töne aus Templates/PDF-Links entfernt auf Nutzerwunsch (Templates modern/creative/executive, a{color:inherit} in PDF-Styles) — bei neuen Templates kein knalliges Blau als Textfarbe verwenden.
 
 - Custom template (Aug 2026): upload own CV (PDF/image) -> POST /api/design (Claude vision) extracts hex-only style -> template id "custom" + profileData.customStyle; rendered by tplCustom, DOCX/PDF/letter deco read customStyle.accent. All color values must stay hex-validated (CSS injection guard) in buildCVHTML, extract.ts, docx.ts, coverLetterDeco. Mobile has no custom flow (web-only for now).
+
+**2026-08-16:** Import-Seite `/import` (eigener Menüpunkt): Datei hochladen/Text einfügen → 4 Aktionen (CV-Check, Anschreiben-Check, CV als Vorlage, Design übernehmen). Übergaben per sessionStorage: `bk_scan_text`/`bk_scan_mode` (→ Scanner), `bk_prefill_text` (→ Wizard-Freitext), `bk_prefill_style` (→ Wizard setCustomStyle). Scanner hat CV/Anschreiben-Umschalter (`docType` an /api/analyze); "als Vorlage" bewusst CV-only (Anschreiben darf nie in den CV-Parser).

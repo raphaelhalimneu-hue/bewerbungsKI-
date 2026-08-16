@@ -67,9 +67,10 @@ function parseJson(text: string): any | null {
  */
 router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { cvText, letterText, jobText, language } = req.body as {
-      cvText?: string; letterText?: string; jobText?: string; language?: string;
+    const { cvText, letterText, jobText, language, docType } = req.body as {
+      cvText?: string; letterText?: string; jobText?: string; language?: string; docType?: string;
     };
+    const isLetter = docType === "letter";
     if (!cvText || typeof cvText !== "string" || cvText.trim().length < 80) {
       res.status(400).json({ error: "cv_too_short" });
       return;
@@ -84,7 +85,7 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
-    const systemPrompt = `Du bist ein erfahrener Recruiter und Bewerbungscoach. Analysiere die Bewerbung streng aber fair, wie ein ATS-System plus menschlicher Personaler.
+    const systemPrompt = `Du bist ein erfahrener Recruiter und Bewerbungscoach. Analysiere ${isLetter ? "das Anschreiben" : "die Bewerbung"} streng aber fair, wie ein ATS-System plus menschlicher Personaler.
 
 Antworte AUSSCHLIESSLICH mit validem JSON (keine Erklärungen, kein Markdown):
 {
@@ -95,9 +96,11 @@ Antworte AUSSCHLIESSLICH mit validem JSON (keine Erklärungen, kein Markdown):
 }
 
 Alle Texte in der Sprache mit Code "${lang}".
-Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge.`;
+${isLetter
+  ? "Bewerte: Einstieg/erster Satz, Individualität (kein Standardbrief), konkrete Beispiele statt Behauptungen, Bezug zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Aufbau (DIN 5008: Betreff, Anrede, Gruß), Länge (ideal ~1 Seite)."
+  : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}`;
 
-    const userPrompt = `LEBENSLAUF:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nANSCHREIBEN:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
+    const userPrompt = `${isLetter ? "ANSCHREIBEN" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nANSCHREIBEN:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
     if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }

@@ -90,6 +90,21 @@ export default function Wizard() {
   const [hasSavedProfile, setHasSavedProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
 
+  // Prefill custom design from Scanner ("use file design"): style JSON stored before navigation
+  useEffect(() => {
+    try {
+      const style = sessionStorage.getItem("bk_prefill_style");
+      if (style) {
+        sessionStorage.removeItem("bk_prefill_style");
+        const cs = JSON.parse(style);
+        if (cs && typeof cs.accent === "string") {
+          setCustomStyle(cs);
+          toast({ title: t("wizard.template.customReady") });
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     customFetch<{ savedProfile: unknown }>("/api/saved-profile")
@@ -441,6 +456,18 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
   const [ftOpen, setFtOpen] = useState(false);
   const [ftText, setFtText] = useState("");
   const [ftLoading, setFtLoading] = useState(false);
+
+  // Prefill from Scanner ("use as template"): text stored in sessionStorage before navigation
+  useEffect(() => {
+    try {
+      const pre = sessionStorage.getItem("bk_prefill_text");
+      if (pre && pre.trim().length >= 30) {
+        setFtText(pre);
+        setFtOpen(true);
+        sessionStorage.removeItem("bk_prefill_text");
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   async function importFreetext() {
     if (!user) { setShowAuthModal(true); return; }

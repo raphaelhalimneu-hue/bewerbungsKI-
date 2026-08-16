@@ -439,7 +439,17 @@
     "cta": "Pozwól AI od razu napisać całą aplikację",
     "ctaBtn": "Utwórz aplikację",
     "tooShort": "Wklej więcej tekstu (co najmniej kilka zdań).",
-    "error": "Analiza nie powiodła się. Spróbuj później."
+    "error": "Analiza nie powiodła się. Spróbuj później.",
+    "modeCv": "CV",
+    "modeLetter": "List motywacyjny",
+    "letterTitle": "Sprawdzenie listu motywacyjnego",
+    "letterSubtitle": "Wklej swój list motywacyjny – AI oceni go jak rekruter i da Ci konkretne wskazówki. Za darmo.",
+    "letterLabel": "Twój list motywacyjny (wklej tekst)",
+    "letterPlaceholder": "Skopiuj tutaj tekst swojego listu motywacyjnego …",
+    "useAsTemplate": "Użyj jako szablonu nowej aplikacji",
+    "useStyle": "Użyj wyglądu tego pliku",
+    "styleBusy": "AI odczytuje wygląd …",
+    "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF."
   },
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",
@@ -448,5 +458,21 @@
     "noText": "Nie znaleziono tekstu w pliku.",
     "limit": "Osiągnięto dzienny limit przesyłania. Spróbuj jutro.",
     "error": "Nie udało się odczytać pliku."
+  },
+  "importPage": {
+    "nav": "Import pliku",
+    "title": "Importuj plik",
+    "subtitle": "Prześlij plik (PDF, Word, zdjęcie) lub wklej tekst – potem wybierz, co z nim zrobić.",
+    "textLabel": "Twój tekst",
+    "placeholder": "Prześlij plik lub skopiuj tekst tutaj …",
+    "whatNext": "Co chcesz z tym zrobić?",
+    "actCv": "Sprawdź CV",
+    "actCvDesc": "AI ocenia CV jak rekruter.",
+    "actLetter": "Sprawdź list motywacyjny",
+    "actLetterDesc": "AI ocenia list i daje wskazówki.",
+    "actTemplate": "Użyj CV jako szablonu",
+    "actTemplateDesc": "Wykorzystaj treść CV, aby utworzyć nową aplikację (tylko dla CV).",
+    "actStyle": "Użyj wyglądu",
+    "actStyleDesc": "Użyj kolorów i stylu pliku w nowej aplikacji (tylko zdjęcie/PDF)."
   }
 }

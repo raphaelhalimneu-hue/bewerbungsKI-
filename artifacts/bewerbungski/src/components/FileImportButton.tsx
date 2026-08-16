@@ -7,8 +7,10 @@ import { useAuth } from "../context/AuthContext";
 const ACCEPT = ".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp";
 const MAX_BYTES = 8 * 1024 * 1024;
 
+export type UploadedFile = { base64: string; mimeType: string; filename: string };
+
 /** Upload a PDF/DOCX/TXT/photo and get its text back (photos via AI OCR). */
-export function FileImportButton({ onText }: { onText: (text: string) => void }) {
+export function FileImportButton({ onText, onFile }: { onText: (text: string) => void; onFile?: (file: UploadedFile) => void }) {
   const { t } = useTranslation();
   const { user, setShowAuthModal } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +39,9 @@ export function FileImportButton({ onText }: { onText: (text: string) => void })
           : n.endsWith(".png") ? "image/png"
           : n.endsWith(".webp") ? "image/webp"
           : "image/jpeg";
+      }
+      if (onFile && (mimeType.startsWith("image/") || mimeType === "application/pdf")) {
+        onFile({ base64, mimeType, filename: file.name });
       }
       const res: any = await customFetch("/api/extract", {
         method: "POST",
