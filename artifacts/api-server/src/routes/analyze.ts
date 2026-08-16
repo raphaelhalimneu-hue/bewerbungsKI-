@@ -68,15 +68,15 @@ function parseJson(text: string): any | null {
  */
 router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { cvText, letterText, jobText, language, docType } = req.body as {
-      cvText?: string; letterText?: string; jobText?: string; language?: string; docType?: string;
+    const { cvText, letterText, jobText, language, docType, contextText } = req.body as {
+      cvText?: string; letterText?: string; jobText?: string; language?: string; docType?: string; contextText?: string;
     };
     const isLetter = docType === "letter";
     if (!cvText || typeof cvText !== "string" || cvText.trim().length < 80) {
       res.status(400).json({ error: "cv_too_short" });
       return;
     }
-    if (cvText.length > 60000 || (letterText && (typeof letterText !== "string" || letterText.length > 60000)) || (jobText && (typeof jobText !== "string" || jobText.length > 60000))) {
+    if (cvText.length > 60000 || (letterText && (typeof letterText !== "string" || letterText.length > 60000)) || (jobText && (typeof jobText !== "string" || jobText.length > 60000)) || (contextText && (typeof contextText !== "string" || contextText.length > 60000))) {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
@@ -103,11 +103,11 @@ Alle Texte in der Sprache mit Code "${lang}".
 ${isLetter
   ? "Bewerte: Einstieg/erster Satz, Individualität (kein Standardbrief), konkrete Beispiele statt Behauptungen, Bezug zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Aufbau (DIN 5008: Betreff, Anrede, Gruß), Länge (ideal ~1 Seite)."
   : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}
-${isLetter ? `Der Text ist NUR das Bewerbungsschreiben – ein Lebenslauf liegt absichtlich NICHT bei. Erwähne den Lebenslauf mit keinem Wort, fordere keinen Lebenslauf und ziehe keine Punkte ab, weil kein Lebenslauf dabei ist.
-Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : `Der Text ist NUR der Lebenslauf – ein Bewerbungsschreiben liegt absichtlich NICHT bei. Ziehe keine Punkte ab, weil kein Bewerbungsschreiben dabei ist.`}
+${isLetter ? `Bewerte AUSSCHLIESSLICH das Bewerbungsschreiben. ${contextText ? "Der beigefügte Lebenslauf ist NUR Kontext zum Verständnis – bewerte ihn NICHT, gib keine Tipps dazu und ziehe keine Punkte wegen des Lebenslaufs ab." : "Ein Lebenslauf liegt absichtlich NICHT bei. Erwähne den Lebenslauf mit keinem Wort, fordere keinen Lebenslauf und ziehe keine Punkte ab, weil kein Lebenslauf dabei ist."}
+Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : `Bewerte AUSSCHLIESSLICH den Lebenslauf. ${contextText ? "Die beigefügte Bewerbung ist NUR Kontext zum Verständnis – bewerte sie NICHT, gib keine Tipps dazu und ziehe keine Punkte wegen der Bewerbung ab." : "Ein Bewerbungsschreiben liegt absichtlich NICHT bei. Ziehe keine Punkte ab, weil kein Bewerbungsschreiben dabei ist."}`}
 Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich und so, wie du es einem Freund sagen würdest.`;
 
-    const userPrompt = `${isLetter ? "BEWERBUNG" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nBEWERBUNG:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
+    const userPrompt = `${isLetter ? "BEWERBUNG" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nBEWERBUNG:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}${contextText ? `\n${isLetter ? "LEBENSLAUF" : "BEWERBUNG"} (NUR KONTEXT – NICHT BEWERTEN):\n${String(contextText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
     if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }

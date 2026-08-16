@@ -65,13 +65,16 @@ export default function Preview() {
   async function runCheck(letterOverride?: string, keepChanges?: boolean) {
     const { cvText, letterText, jobText } = docTexts();
     const letter = letterOverride ?? letterText;
-    if (cvText.length < 80) return;
+    // If a Bewerbung exists, check ONLY the Bewerbung (never drag the CV in); otherwise check the CV.
+    const isLetter = !!(letter && letter.trim().length >= 80);
+    const mainText = isLetter ? letter : cvText;
+    if (mainText.length < 80) return;
     setAiError(""); setChecking(true); setAnalysis(null);
     if (!keepChanges) setPerfectChanges(null);
     try {
       const res = await customFetch("/api/analyze", {
         method: "POST",
-        body: JSON.stringify({ cvText, letterText: letter || undefined, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
+        body: JSON.stringify({ cvText: mainText, docType: isLetter ? "letter" : "cv", jobText: jobText || undefined, contextText: isLetter && cvText.length >= 80 ? cvText : undefined, language: i18n.resolvedLanguage || "de" }),
       });
       setAnalysis(res);
     } catch { setAiError(t("scanner.error")); }
