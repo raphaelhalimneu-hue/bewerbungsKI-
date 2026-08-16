@@ -59,7 +59,6 @@ export default function Scanner() {
   const { user, setShowAuthModal } = useAuth();
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
-  const [jobText, setJobText] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
@@ -111,7 +110,6 @@ export default function Scanner() {
         body: JSON.stringify({
           cvText: cvText.trim(),
           docType: mode,
-          jobText: jobText.trim() || undefined,
           language: i18n.resolvedLanguage || "de",
         }),
       });
@@ -157,14 +155,6 @@ export default function Scanner() {
             onChange={(e) => { setCvText(e.target.value); if (errorMsg) setErrorMsg(""); }}
             placeholder={mode === "letter" ? t("scanner.letterPlaceholder") : t("scanner.cvPlaceholder")}
             rows={10}
-            style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)" }}
-          />
-          <label style={{ fontWeight: 700, fontSize: 14, display: "block", margin: "16px 0 6px" }}>{t("scanner.jobLabel")}</label>
-          <textarea
-            value={jobText}
-            onChange={(e) => setJobText(e.target.value)}
-            placeholder={t("scanner.jobPlaceholder")}
-            rows={5}
             style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)" }}
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
