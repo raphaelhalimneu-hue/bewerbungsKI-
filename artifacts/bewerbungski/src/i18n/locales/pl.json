@@ -13,7 +13,9 @@
     "upgrade": "Ulepsz",
     "premium": "Premium",
     "language": "Język",
-    "toggleTheme": "Przełącz tryb jasny/ciemny"
+    "toggleTheme": "Przełącz tryb jasny/ciemny",
+    "remaining": "Pozostało {{remaining}} z {{limit}} aplikacji",
+    "lowRemainingHint": "Prawie wyczerpane – zdobądź więcej aplikacji"
   },
   "home": {
     "badge": "🚀 CV + list motywacyjny w 3 minuty",

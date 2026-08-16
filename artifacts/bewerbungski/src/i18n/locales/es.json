@@ -13,7 +13,9 @@
     "upgrade": "Mejorar",
     "premium": "Premium",
     "language": "Idioma",
-    "toggleTheme": "Cambiar modo claro/oscuro"
+    "toggleTheme": "Cambiar modo claro/oscuro",
+    "remaining": "Te quedan {{remaining}} de {{limit}} candidaturas",
+    "lowRemainingHint": "Casi agotado – consigue más candidaturas"
   },
   "home": {
     "badge": "🚀 CV + carta de presentación en 3 minutos",

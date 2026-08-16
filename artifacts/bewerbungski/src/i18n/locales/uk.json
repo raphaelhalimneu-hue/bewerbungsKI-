@@ -13,7 +13,9 @@
     "upgrade": "Оновити",
     "premium": "Premium",
     "language": "Мова",
-    "toggleTheme": "Перемкнути світлу/темну тему"
+    "toggleTheme": "Перемкнути світлу/темну тему",
+    "remaining": "Залишилося {{remaining}} з {{limit}} заявок",
+    "lowRemainingHint": "Майже вичерпано – отримайте більше заявок"
   },
   "home": {
     "badge": "🚀 Резюме + лист за 3 хвилини",

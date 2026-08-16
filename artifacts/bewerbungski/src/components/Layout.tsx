@@ -111,25 +111,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
             </Link>
 
-            {!p?.is_premium && (
-              <div className="mt-3 p-4 bg-[var(--bg3)] rounded-[12px] border border-[var(--border)]">
-                <div className="text-[13px] font-bold mb-1">{t("nav.freePlan")}</div>
-                <div className="text-[12px] text-[var(--muted)] mb-3">
-                  {t("nav.docCount", { count: p?.documents_count || 0 })}
+            {user && typeof p?.document_limit === "number" && (() => {
+              const limit = p.document_limit;
+              const count = p?.documents_count || 0;
+              const remaining = Math.max(0, limit - count);
+              return (
+                <div className="mt-3 p-4 bg-[var(--bg3)] rounded-[12px] border border-[var(--border)]">
+                  <div className="text-[13px] font-bold mb-1">{p?.is_premium ? t("nav.premium") : t("nav.freePlan")}</div>
+                  <div className="text-[12px] text-[var(--muted)] mb-3">
+                    {t("nav.remaining", { remaining, limit })}
+                  </div>
+                  <div className="prog">
+                    <div
+                      className="prog-fill"
+                      style={{ width: `${Math.min(100, (count / Math.max(1, limit)) * 100)}%` }}
+                    />
+                  </div>
+                  {remaining <= 3 && (
+                    <>
+                      <div className="text-[12px] text-[var(--warn)] mt-3">{t("nav.lowRemainingHint")}</div>
+                      <Link href="/pricing">
+                        <button className="btn btn-p btn-sm btn-full mt-2">{t("nav.upgrade")}</button>
+                      </Link>
+                    </>
+                  )}
                 </div>
-                <div className="prog">
-                  <div
-                    className="prog-fill"
-                    style={{ width: `${Math.min(100, ((p?.documents_count || 0) / 3) * 100)}%` }}
-                  />
-                </div>
-                {((p?.documents_count || 0) >= 1) && (
-                  <Link href="/pricing">
-                    <button className="btn btn-p btn-sm btn-full mt-3">{t("nav.upgrade")}</button>
-                  </Link>
-                )}
-              </div>
-            )}
+              );
+            })()}
           </div>
         </aside>
 

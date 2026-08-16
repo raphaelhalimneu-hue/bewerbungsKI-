@@ -13,7 +13,9 @@
     "upgrade": "Upgrade",
     "premium": "Premium",
     "language": "Language",
-    "toggleTheme": "Toggle light/dark mode"
+    "toggleTheme": "Toggle light/dark mode",
+    "remaining": "{{remaining}} of {{limit}} applications left",
+    "lowRemainingHint": "Almost used up – get more applications now"
   },
   "home": {
     "badge": "🚀 CV + cover letter in 3 minutes",

@@ -8,7 +8,8 @@ import { useListDocuments, useDeleteDocument } from "@workspace/api-client-react
 import { customFetch } from "@workspace/api-client-react";
 
 export default function Documents() {
-  const { user, setShowAuthModal } = useAuth();
+  const { user, profile, setShowAuthModal, refetchProfile } = useAuth();
+  const p = profile as any;
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
@@ -22,6 +23,7 @@ export default function Documents() {
       await deleteMutation.mutateAsync({ id });
       toast({ title: t("docs.deleted") });
       refetch();
+      refetchProfile();
     } catch (e: any) {
       toast({ title: t("docs.deleteError"), description: e.message, variant: "destructive" });
     }
@@ -60,6 +62,23 @@ export default function Documents() {
           <h2 style={{ fontFamily: "var(--fd)", fontSize: 24, fontWeight: 700 }}>{t("docs.title")}</h2>
           <button className="btn btn-p" onClick={() => navigate("/wizard")}>{t("docs.newDoc")}</button>
         </div>
+
+        {user && typeof p?.document_limit === "number" && (() => {
+          const limit = p.document_limit;
+          const remaining = Math.max(0, limit - (p?.documents_count || 0));
+          return (
+            <div className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "12px 16px", marginBottom: 16 }}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>
+                📊 {t("nav.remaining", { remaining, limit })}
+              </span>
+              {remaining <= 3 && (
+                <button className="btn btn-p btn-sm" onClick={() => navigate("/pricing")}>
+                  {t("nav.lowRemainingHint")}
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
         {!user ? (
           <div className="card" style={{ textAlign: "center", padding: 40 }}>

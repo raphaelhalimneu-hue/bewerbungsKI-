@@ -13,7 +13,9 @@
     "upgrade": "Yükselt",
     "premium": "Premium",
     "language": "Dil",
-    "toggleTheme": "Açık/koyu modu değiştir"
+    "toggleTheme": "Açık/koyu modu değiştir",
+    "remaining": "{{limit}} başvurudan {{remaining}} tanesi kaldı",
+    "lowRemainingHint": "Neredeyse bitti – hemen daha fazla başvuru edinin"
   },
   "home": {
     "badge": "🚀 CV + ön yazı 3 dakikada",

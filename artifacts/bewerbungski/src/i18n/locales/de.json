@@ -13,7 +13,9 @@
     "upgrade": "Upgrade",
     "premium": "Premium",
     "language": "Sprache",
-    "toggleTheme": "Design wechseln (hell/dunkel)"
+    "toggleTheme": "Design wechseln (hell/dunkel)",
+    "remaining": "Noch {{remaining}} von {{limit}} Bewerbungen übrig",
+    "lowRemainingHint": "Fast aufgebraucht – jetzt mehr Bewerbungen sichern"
   },
   "home": {
     "badge": "🚀 Lebenslauf + Anschreiben in 3 Minuten",

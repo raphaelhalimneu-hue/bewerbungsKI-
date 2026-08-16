@@ -13,6 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
+  refetchProfile: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -96,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         showAuthModal,
         setShowAuthModal,
+        refetchProfile,
       }}
     >
       {children}

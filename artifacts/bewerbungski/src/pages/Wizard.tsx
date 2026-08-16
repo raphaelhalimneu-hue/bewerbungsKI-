@@ -80,7 +80,7 @@ export default function Wizard() {
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
-  const { user, setShowAuthModal } = useAuth();
+  const { user, setShowAuthModal, refetchProfile } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
@@ -330,6 +330,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         });
       } catch { /* ignore */ }
       toast({ title: t("wizard.success") });
+      refetchProfile();
       navigate("/documents");
     } catch (e: any) {
       if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {

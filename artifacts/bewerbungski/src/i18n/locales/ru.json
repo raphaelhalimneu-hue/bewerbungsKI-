@@ -13,7 +13,9 @@
     "upgrade": "Улучшить",
     "premium": "Premium",
     "language": "Язык",
-    "toggleTheme": "Переключить светлую/тёмную тему"
+    "toggleTheme": "Переключить светлую/тёмную тему",
+    "remaining": "Осталось {{remaining}} из {{limit}} заявок",
+    "lowRemainingHint": "Почти закончились – получите больше заявок"
   },
   "home": {
     "badge": "🚀 Резюме + письмо за 3 минуты",
