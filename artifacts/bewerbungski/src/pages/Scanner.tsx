@@ -144,7 +144,7 @@ export default function Scanner() {
           {(["cv", "letter"] as const).map((m) => (
             <button
               key={m}
-              onClick={() => { setMode(m); setResult(null); setErrorMsg(""); }}
+              onClick={() => { setMode(m); setResult(null); setErrorMsg(""); setPerfectedText(null); setPerfectChanges(null); }}
               className="btn"
               style={{
                 fontWeight: 700, fontSize: 13.5, padding: "8px 16px", borderRadius: 999,
@@ -161,7 +161,7 @@ export default function Scanner() {
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
-            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); }} />
+            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} />
           </div>
           <textarea
             value={cvText}
