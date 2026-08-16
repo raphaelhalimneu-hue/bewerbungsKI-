@@ -33,6 +33,7 @@ async function callClaude(req: AuthenticatedRequest, systemPrompt: string, userP
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
         max_tokens: 4096,
+        temperature: 0,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
@@ -92,7 +93,7 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
 
 Antworte AUSSCHLIESSLICH mit validem JSON (keine Erklärungen, kein Markdown):
 {
-  "score": <0-100, Gesamtqualität>,
+  "score": <0-10, auch halbe Punkte erlaubt: Wie würdest du dieses Dokument als Recruiter ehrlich von 10 Punkten bewerten?>,
   "summary": "<2-3 Sätze Gesamteindruck>",
   "strengths": ["<Stärke 1>", "..."],  // 2-4 Punkte
   "improvements": [ { "title": "<kurzer Titel>", "tip": "<konkreter, umsetzbarer Tipp mit Beispiel>" } ]  // 3-6 Punkte, wichtigste zuerst
@@ -102,7 +103,9 @@ Alle Texte in der Sprache mit Code "${lang}".
 ${isLetter
   ? "Bewerte: Einstieg/erster Satz, Individualität (kein Standardbrief), konkrete Beispiele statt Behauptungen, Bezug zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Aufbau (DIN 5008: Betreff, Anrede, Gruß), Länge (ideal ~1 Seite)."
   : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}
-${isLetter ? `Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : ""}`;
+${isLetter ? `Der Text ist NUR das Bewerbungsschreiben – ein Lebenslauf liegt absichtlich NICHT bei. Erwähne den Lebenslauf mit keinem Wort, fordere keinen Lebenslauf und ziehe keine Punkte ab, weil kein Lebenslauf dabei ist.
+Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : `Der Text ist NUR der Lebenslauf – ein Bewerbungsschreiben liegt absichtlich NICHT bei. Ziehe keine Punkte ab, weil kein Bewerbungsschreiben dabei ist.`}
+Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich und so, wie du es einem Freund sagen würdest.`;
 
     const userPrompt = `${isLetter ? "BEWERBUNG" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nBEWERBUNG:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
@@ -115,7 +118,9 @@ ${isLetter ? `Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das e
       res.status(500).json({ error: "analysis_failed" });
       return;
     }
-    parsed.score = Math.max(0, Math.min(100, Math.round(rawScore)));
+    // Model is instructed to rate 0-10; UI shows 0-100. Values slightly above 10 are treated as 0-10 overflow.
+    const scaled = rawScore <= 15 ? Math.min(rawScore, 10) * 10 : rawScore;
+    parsed.score = Math.max(0, Math.min(100, Math.round(scaled)));
     res.json(parsed);
   } catch (err) {
     req.log.error({ err }, "POST /analyze error");
