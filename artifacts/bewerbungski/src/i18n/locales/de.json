@@ -516,6 +516,8 @@
     "actTemplate": "Text übernehmen",
     "actTemplateDesc": "Den Text für eine neue Bewerbung verwenden.",
     "actStyle": "Design übernehmen",
-    "actStyleDesc": "Farben und Stil der Datei für deine neue Bewerbung verwenden (nur Foto/PDF)."
+    "actStyleDesc": "Farben und Stil der Datei für deine neue Bewerbung verwenden (nur Foto/PDF).",
+    "stylePreviewTitle": "So sieht dein Design aus",
+    "styleUse": "Mit diesem Design erstellen"
   }
 }

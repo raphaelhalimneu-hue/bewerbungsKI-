@@ -516,6 +516,8 @@
     "actTemplate": "Use the text",
     "actTemplateDesc": "Use the text for a new application.",
     "actStyle": "Use the design",
-    "actStyleDesc": "Use the file's colors and style for your new application (photo/PDF only)."
+    "actStyleDesc": "Use the file's colors and style for your new application (photo/PDF only).",
+    "stylePreviewTitle": "This is your design",
+    "styleUse": "Create with this design"
   }
 }

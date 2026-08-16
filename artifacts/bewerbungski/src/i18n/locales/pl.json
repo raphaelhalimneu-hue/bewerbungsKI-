@@ -473,6 +473,8 @@
     "actTemplate": "Użyj tekstu",
     "actTemplateDesc": "Użyj tekstu do nowej aplikacji.",
     "actStyle": "Użyj wyglądu",
-    "actStyleDesc": "Użyj kolorów i stylu pliku w nowej aplikacji (tylko zdjęcie/PDF)."
+    "actStyleDesc": "Użyj kolorów i stylu pliku w nowej aplikacji (tylko zdjęcie/PDF).",
+    "stylePreviewTitle": "Tak wygląda Twój projekt",
+    "styleUse": "Utwórz z tym projektem"
   }
 }

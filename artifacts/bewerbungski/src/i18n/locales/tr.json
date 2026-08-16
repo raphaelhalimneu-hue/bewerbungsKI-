@@ -473,6 +473,8 @@
     "actTemplate": "Metni kullan",
     "actTemplateDesc": "Metni yeni bir başvuru için kullan.",
     "actStyle": "Tasarımı kullan",
-    "actStyleDesc": "Dosyanın renklerini ve stilini yeni başvurunda kullan (yalnızca fotoğraf/PDF)."
+    "actStyleDesc": "Dosyanın renklerini ve stilini yeni başvurunda kullan (yalnızca fotoğraf/PDF).",
+    "stylePreviewTitle": "Tasarımın böyle görünüyor",
+    "styleUse": "Bu tasarımla oluştur"
   }
 }

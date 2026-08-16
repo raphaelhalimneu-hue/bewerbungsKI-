@@ -109,12 +109,13 @@ ${isLetter ? `Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das e
     const text = await callClaude(req, systemPrompt, userPrompt);
     if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }
     const parsed = parseJson(text);
-    if (!parsed || typeof parsed.score !== "number") {
+    const rawScore = parsed ? Number(parsed.score ?? parsed.totalScore ?? parsed.gesamtScore) : NaN;
+    if (!parsed || !Number.isFinite(rawScore)) {
       req.log.error({ text: text.slice(0, 500) }, "analyze: unparseable model output");
       res.status(500).json({ error: "analysis_failed" });
       return;
     }
-    parsed.score = Math.max(0, Math.min(100, Math.round(parsed.score)));
+    parsed.score = Math.max(0, Math.min(100, Math.round(rawScore)));
     res.json(parsed);
   } catch (err) {
     req.log.error({ err }, "POST /analyze error");
