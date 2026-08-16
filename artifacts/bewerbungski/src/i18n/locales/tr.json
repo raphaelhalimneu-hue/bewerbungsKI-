@@ -191,7 +191,12 @@
     "perfectBtn": "Mükemmelleştir",
     "perfecting": "Yapay zekâ iyileştiriyor …",
     "perfectDone": "Ön yazı iyileştirildi ve kaydedildi",
-    "changes": "Neler iyileştirildi"
+    "changes": "Neler iyileştirildi",
+    "noLetterTitle": "Henüz ön yazı yok",
+    "noLetterText": "Bu belge için henüz bir ön yazı oluşturulmadı. Tek tıkla şimdi oluşturun — otomatik olarak kaydedilir.",
+    "createLetterNow": "✉️ Ön yazıyı şimdi oluştur",
+    "creatingLetter": "Ön yazı oluşturuluyor …",
+    "letterCreateError": "Ön yazı oluşturulamadı. Lütfen tekrar deneyin."
   },
   "wizard": {
     "steps": {

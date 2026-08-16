@@ -191,7 +191,12 @@
     "perfectBtn": "Udoskonal",
     "perfecting": "AI poprawia …",
     "perfectDone": "List motywacyjny poprawiony i zapisany",
-    "changes": "Co poprawiono"
+    "changes": "Co poprawiono",
+    "noLetterTitle": "Brak listu motywacyjnego",
+    "noLetterText": "Do tego dokumentu nie utworzono jeszcze listu motywacyjnego. Utwórz go teraz jednym kliknięciem — zostanie zapisany automatycznie.",
+    "createLetterNow": "✉️ Utwórz list motywacyjny teraz",
+    "creatingLetter": "Tworzenie listu motywacyjnego …",
+    "letterCreateError": "Nie udało się utworzyć listu motywacyjnego. Spróbuj ponownie."
   },
   "wizard": {
     "steps": {

@@ -192,7 +192,12 @@
     "perfectBtn": "Perfektionieren",
     "perfecting": "KI verbessert …",
     "perfectDone": "Anschreiben verbessert und gespeichert",
-    "changes": "Das wurde verbessert"
+    "changes": "Das wurde verbessert",
+    "noLetterTitle": "Noch kein Anschreiben vorhanden",
+    "noLetterText": "Zu diesem Dokument wurde noch kein Anschreiben erstellt. Erstelle es jetzt mit einem Klick — es wird automatisch gespeichert.",
+    "createLetterNow": "✉️ Anschreiben jetzt erstellen",
+    "creatingLetter": "Anschreiben wird erstellt …",
+    "letterCreateError": "Das Anschreiben konnte nicht erstellt werden. Bitte versuche es erneut."
   },
   "editor": {
     "save": "💾 Speichern",

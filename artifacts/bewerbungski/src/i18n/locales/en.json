@@ -192,7 +192,12 @@
     "perfectBtn": "Perfect it",
     "perfecting": "AI is improving …",
     "perfectDone": "Cover letter improved and saved",
-    "changes": "What was improved"
+    "changes": "What was improved",
+    "noLetterTitle": "No cover letter yet",
+    "noLetterText": "No cover letter has been created for this document yet. Create it now with one click — it will be saved automatically.",
+    "createLetterNow": "✉️ Create cover letter now",
+    "creatingLetter": "Creating cover letter …",
+    "letterCreateError": "The cover letter could not be created. Please try again."
   },
   "editor": {
     "save": "💾 Save",

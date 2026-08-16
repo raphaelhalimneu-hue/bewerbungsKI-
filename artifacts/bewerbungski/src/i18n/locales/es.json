@@ -191,7 +191,12 @@
     "perfectBtn": "Perfeccionar",
     "perfecting": "La IA está mejorando …",
     "perfectDone": "Carta mejorada y guardada",
-    "changes": "Qué se mejoró"
+    "changes": "Qué se mejoró",
+    "noLetterTitle": "Aún no hay carta de presentación",
+    "noLetterText": "Todavía no se ha creado una carta de presentación para este documento. Créala ahora con un clic — se guardará automáticamente.",
+    "createLetterNow": "✉️ Crear carta de presentación ahora",
+    "creatingLetter": "Creando carta de presentación …",
+    "letterCreateError": "No se pudo crear la carta de presentación. Inténtalo de nuevo."
   },
   "wizard": {
     "steps": {

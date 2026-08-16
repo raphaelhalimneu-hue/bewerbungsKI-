@@ -25,6 +25,23 @@ export default function Preview() {
   const [perfecting, setPerfecting] = useState(false);
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
   const [aiError, setAiError] = useState("");
+  const [creatingLetter, setCreatingLetter] = useState(false);
+  const [letterError, setLetterError] = useState(false);
+
+  async function handleCreateLetter() {
+    setCreatingLetter(true);
+    setLetterError(false);
+    try {
+      const resp = await customFetch<{ result: string }>(`/api/documents/${params.id}/cover-letter`, { method: "POST" });
+      if (resp?.result) setEditedLetter(resp.result);
+      else setLetterError(true);
+    } catch (e) {
+      console.error("Cover letter generation failed", e);
+      setLetterError(true);
+    } finally {
+      setCreatingLetter(false);
+    }
+  }
 
   function docTexts() {
     const d: any = doc || {};
@@ -319,6 +336,23 @@ export default function Preview() {
                 />
               </div>
             </div>
+
+            {!((doc as any)?.cover_letter || editedLetter) && (
+              <div className="card" style={{ border: "1px dashed var(--border)", borderRadius: 14, padding: 24, textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--fd)", fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
+                  ✉️ {t("preview.noLetterTitle")}
+                </div>
+                <div style={{ fontSize: 14, color: "var(--muted)", marginBottom: 14, lineHeight: 1.6 }}>
+                  {t("preview.noLetterText")}
+                </div>
+                <button className="btn btn-p" onClick={handleCreateLetter} disabled={creatingLetter}>
+                  {creatingLetter ? <><span className="spin" /> {t("preview.creatingLetter")}</> : <>{t("preview.createLetterNow")}</>}
+                </button>
+                {letterError && (
+                  <div style={{ marginTop: 12, fontSize: 13, color: "var(--err)" }}>{t("preview.letterCreateError")}</div>
+                )}
+              </div>
+            )}
 
             {((doc as any)?.cover_letter || editedLetter) && (
               <div ref={letterRef}>

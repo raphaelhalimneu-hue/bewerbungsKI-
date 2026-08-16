@@ -190,6 +190,193 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
   }
 });
 
+// Nachträgliche Anschreiben-Erzeugung für bestehende Dokumente ohne Anschreiben.
+// Kein Kredit-Check: das Dokument existiert bereits und zählt schon gegen das Limit.
+const LETTER_LANGS: Record<string, { name: string; locale: string; conventions: string }> = {
+  de: { name: "Deutsch", locale: "de-DE", conventions: "Deutsche Bewerbungsstandards (DIN 5008)." },
+  en: { name: "Englisch", locale: "en-GB", conventions: "Britisch/internationale Standards: 'Cover Letter'." },
+  tr: { name: "Türkisch", locale: "tr-TR", conventions: "Türkische Bewerbungsstandards." },
+  ar: { name: "Arabisch", locale: "ar", conventions: "Korrektes Hocharabisch, Layout rechtsläufig gedacht." },
+  es: { name: "Spanisch", locale: "es-ES", conventions: "Spanische Standards (Carta de presentación)." },
+  pl: { name: "Polnisch", locale: "pl-PL", conventions: "Polnische Bewerbungsstandards." },
+  ru: { name: "Russisch", locale: "ru-RU", conventions: "Russische Standards." },
+  uk: { name: "Ukrainisch", locale: "uk-UA", conventions: "Ukrainische Standards." },
+};
+
+// Missbrauchsschutz: pro Dokument nur eine laufende Erzeugung, pro Nutzer max.
+// LETTER_REGEN_MAX Aufrufe pro Zeitfenster (Endpoint ist bewusst ohne Kredit-Check,
+// da das Dokument bereits gegen das Limit zählt).
+const letterRegenInFlight = new Set<string>();
+const letterRegenHistory = new Map<string, number[]>();
+const LETTER_REGEN_MAX = 5;
+const LETTER_REGEN_WINDOW_MS = 10 * 60 * 1000;
+
+router.post("/documents/:id/cover-letter", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const docId = String(req.params.id);
+  try {
+    const [doc] = await db
+      .select()
+      .from(documentsTable)
+      .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
+    if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+
+    // Idempotent: existiert bereits ein Anschreiben, wird es zurückgegeben —
+    // keine erneute (kostenpflichtige) KI-Generierung.
+    if (doc.coverLetter && doc.coverLetter.trim() !== "") {
+      res.json({ result: doc.coverLetter, alreadyExisted: true });
+      return;
+    }
+
+    // Rate-Limit pro Nutzer
+    const now = Date.now();
+    const hist = (letterRegenHistory.get(req.userId!) || []).filter((t) => now - t < LETTER_REGEN_WINDOW_MS);
+    if (hist.length >= LETTER_REGEN_MAX) {
+      letterRegenHistory.set(req.userId!, hist);
+      res.status(429).json({ error: "rate_limited" });
+      return;
+    }
+
+    // Parallel-Schutz pro Dokument
+    if (letterRegenInFlight.has(docId)) {
+      res.status(409).json({ error: "generation_in_progress" });
+      return;
+    }
+    letterRegenInFlight.add(docId);
+    hist.push(now);
+    letterRegenHistory.set(req.userId!, hist);
+
+    try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      res.status(503).json({ error: "AI generation not configured. Please set ANTHROPIC_API_KEY." });
+      return;
+    }
+
+    const pd = (doc.profileData as any) || {};
+    const personal = pd.personal || {};
+    const jobad = pd.jobad || {};
+    const experience: any[] = Array.isArray(pd.experience) ? pd.experience : [];
+    const skills: any[] = Array.isArray(pd.skills) ? pd.skills : [];
+    const lang = LETTER_LANGS[pd.language] || LETTER_LANGS.de;
+    const langInstr = lang === LETTER_LANGS.de || pd.language === "de" ? "" :
+      ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch). Beachte die landestypischen Konventionen: ${lang.conventions}`;
+    const today = new Date().toLocaleDateString(lang.locale, { day: "2-digit", month: "2-digit", year: "numeric" });
+    const hasJobad = !!(jobad.title || jobad.description || jobad.company);
+
+    const systemPrompt = `Du bist Experte für Bewerbungsanschreiben. Schreibe wie ein echter, gut ausgebildeter Mensch — nicht wie eine KI.
+
+TON: FORMELL - klassisches Geschaeftsdeutsch, 'Sehr geehrte Damen und Herren', serioese Sprache, keine persoenlichen Anekdoten. Praezise, sachlich, professionell.
+
+REGELN:
+- Keine KI-Phrasen: kein „dynamisch", „leidenschaftlich", „stets", „zeitnah", „ich bin überzeugt, dass ich", „ich freue mich sehr".
+- Keine Aufzählungen mit Gedankenstrichen im Fließtext.
+- Aktive Sprache: „Ich entwickelte" statt „Es wurde entwickelt".
+- Eröffnung NICHT mit „Hiermit bewerbe ich mich".
+
+STRUKTUR (DIN 5008):
+1. Empfängeradresse des Unternehmens (linke Seite)
+2. Datum-Zeile
+3. Betreffzeile (ohne „Betreff:")
+4. Anrede
+5. Einleitung: konkreter Bezug zur Stelle / zum Unternehmen
+6. Hauptteil: Erfahrung + Mehrwert
+7. Motivationsabsatz
+8. Schluss: Gesprächseinladung, keine Floskeln
+9. „Mit freundlichen Grüßen" + Name
+
+Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen. 350–420 Wörter.`;
+
+    const userPrompt = `Schreibe Anschreiben (Sprache: ${lang.name}):
+
+Bewerber: ${personal.firstName || ""} ${personal.lastName || ""}${personal.title ? ", " + personal.title : ""}
+Adresse Bewerber: ${[personal.address, `${personal.zip || ""} ${personal.city || ""}`.trim()].filter(Boolean).join(", ")}
+Stelle: ${hasJobad ? `${jobad.title || "Initiativbewerbung"} bei ${jobad.company || "dem Unternehmen"}` : `Initiativbewerbung als ${experience[0]?.position || personal.title || "Fachkraft"} (keine konkrete Stellenanzeige — schreibe ein überzeugendes Initiativ-Anschreiben passend zum Werdegang, Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${jobad.address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${jobad.address}` : ""}
+Stellenbeschreibung: ${jobad.description || "nicht angegeben"}
+
+Erfahrung (aktuellste zuerst):
+${experience.slice(0, 4).map((e) => `• ${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}${e.start ? " (" + String(e.start).slice(0, 7) + " – " + (e.current ? "heute" : String(e.end || "").slice(0, 7)) + ")" : ""}${e.description ? ": " + String(e.description).slice(0, 120) : ""}`).join("\n")}
+
+Kernkompetenzen: ${skills.slice(0, 10).map((s) => s.name).join(", ") || "aus Erfahrung ableiten"}
+
+Datum-Zeile EXAKT: "${personal.city || "Ort"}, den ${today}"
+Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`;
+
+    const callClaude = () =>
+      fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 4096,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+
+    let response = await callClaude();
+    if (response.status === 429 || response.status === 529) {
+      const retryAfter = parseFloat(response.headers.get("retry-after") || "");
+      const waitSec = Math.min(Number.isFinite(retryAfter) ? retryAfter + 1 : 15, 40);
+      req.log.warn({ waitSec }, "Claude rate limit/overloaded, retrying once");
+      await new Promise((r) => setTimeout(r, waitSec * 1000));
+      response = await callClaude();
+    }
+
+    if (!response.ok) {
+      const errText = await response.text();
+      req.log.error({ status: response.status, body: errText }, "Claude API error (cover-letter regen)");
+      if (response.status === 429 || response.status === 529) {
+        res.status(503).json({ error: "busy_try_again" });
+        return;
+      }
+      res.status(500).json({ error: "Generation failed" });
+      return;
+    }
+
+    const data = await response.json() as { content: Array<{ type: string; text?: string }> };
+    let result = data.content?.find((b) => b.type === "text")?.text ?? "";
+    result = result.replace(/^```(?:html|xml)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+
+    if (!result) {
+      res.status(500).json({ error: "Generation failed" });
+      return;
+    }
+
+    // Konditionales Update: nur schreiben, wenn weiterhin kein Anschreiben existiert
+    // (verhindert Überschreiben bei parallelen Anfragen über mehrere Prozesse).
+    const updated = await db
+      .update(documentsTable)
+      .set({ coverLetter: result })
+      .where(and(
+        eq(documentsTable.id, doc.id),
+        sql`(${documentsTable.coverLetter} IS NULL OR ${documentsTable.coverLetter} = '')`,
+      ))
+      .returning({ id: documentsTable.id });
+
+    if (!updated || updated.length === 0) {
+      // Ein anderer Prozess hat inzwischen ein Anschreiben gespeichert — dieses zurückgeben.
+      const [fresh] = await db
+        .select()
+        .from(documentsTable)
+        .where(and(eq(documentsTable.id, doc.id), eq(documentsTable.userId, req.userId!)));
+      res.json({ result: fresh?.coverLetter || result, alreadyExisted: true });
+      return;
+    }
+
+    res.json({ result });
+    } finally {
+      letterRegenInFlight.delete(docId);
+    }
+  } catch (err) {
+    req.log.error({ err }, "POST /documents/:id/cover-letter error");
+    res.status(500).json({ error: "Generation failed" });
+  }
+});
+
 router.delete("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     await db
