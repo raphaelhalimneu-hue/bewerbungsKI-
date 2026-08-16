@@ -9,3 +9,6 @@ description: BewerbungsKI pricing since 2026-08-13 — credits model, limits, an
 - Schema-Änderungen shippen als idempotente Startup-Migration im API-Server (lib/migrate.ts läuft vor listen), weil drizzle push nur die Dev-DB trifft; Backfill: legacy is_premium mit credits=0 → 30.
 - **Why:** Nutzer wollte hartes Limit statt "unbegrenzt/Lifetime"; Review verlangte Idempotenz (Stripe redelivert Events) und Erhalt der Alt-Käufer-Ansprüche beim Modellwechsel.
 - **How to apply:** Bei Preis-/Limit-Änderungen alle Stellen synchron halten: checkout.ts (unit_amount + Beschreibung), generate.ts (Limit-Formel), me.ts (credits/document_limit), openapi.yaml + orval codegen, 8 i18n-Dateien (premiumPrice/oneTime/buyMore/limitReachedHint), index.html (Meta + JSON-LD), Mobile-App (noch alt, siehe Task).
+
+- 2026-08-16: Stripe-Webhook in Produktion end-to-end verifiziert (rotierter Endpoint-Secret, signiertes Testevent → +20 credits + stripe_events-Row). Secret-Rotation: neuen Endpoint anlegen (Secret nur in Create-Response), Railway-Var setzen, redeployen, alten Endpoint löschen.
+- Prod-DB direkt erreichbar via temporärem Railway tcpProxyCreate auf den Postgres-Service (danach tcpProxyDelete); DATABASE_URL ist internal-only.
