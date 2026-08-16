@@ -4,7 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
-import { coverLetterDeco } from "../lib/coverLetterDeco";
+import { templateDeco } from "@workspace/template-deco";
 
 const router = Router();
 
@@ -205,7 +205,7 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
       .join("");
 
     // Deko-Layer passend zur gewählten CV-Vorlage (dezent, hinter dem Text)
-    const deco = coverLetterDeco(doc.template, (doc.profileData as any)?.customStyle?.accent);
+    const deco = templateDeco(doc.template, (doc.profileData as any)?.customStyle?.accent);
 
     // All styles are inline — no external requests needed
     const html = `<!DOCTYPE html>

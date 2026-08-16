@@ -6,17 +6,12 @@ import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { DECO } from "../lib/buildCVHTML";
+import { templateDeco } from "@workspace/template-deco";
 import { AnalysisCard } from "./Scanner";
 
-/** Deko für die Bewerbung-Karte: bekannte Vorlagen aus DECO, "custom" mit Nutzer-Akzentfarbe. */
+/** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
 function letterDecoHtml(doc: any): string {
-  if (doc?.template === "custom") {
-    const acc = doc?.profile_data?.customStyle?.accent;
-    const safe = typeof acc === "string" && /^#[0-9a-fA-F]{3,8}$/.test(acc) ? acc : "#1f2937";
-    return `<div style="position:absolute;z-index:-1;pointer-events:none;top:0;left:0;right:0;height:10px;background:${safe};"></div>`;
-  }
-  return DECO[doc?.template as keyof typeof DECO] ?? "";
+  return templateDeco(doc?.template, doc?.profile_data?.customStyle?.accent);
 }
 
 export default function Preview() {
