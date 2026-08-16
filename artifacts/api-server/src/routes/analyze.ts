@@ -134,9 +134,10 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
  */
 router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { cvText, letterText, jobText, profileText, language } = req.body as {
-      cvText?: string; letterText?: string; jobText?: string; profileText?: string; language?: string;
+    const { cvText, letterText, jobText, profileText, language, docType } = req.body as {
+      cvText?: string; letterText?: string; jobText?: string; profileText?: string; language?: string; docType?: string;
     };
+    const isCvMode = docType === "cv";
     if (!letterText || typeof letterText !== "string" || letterText.trim().length < 80) {
       res.status(400).json({ error: "letter_too_short" });
       return;
@@ -152,7 +153,17 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
-    const systemPrompt = `Du bist ein erfahrener Bewerbungscoach. Perfektioniere das Anschreiben${profileText ? " und das Profil-Statement des Lebenslaufs" : ""}: entferne Floskeln und KI-Phrasen, mache Erfolge konkret und messbar, aktive Sprache, klare Struktur (DIN 5008 beim Anschreiben beibehalten: Empfängeradresse, Datum, Betreff, Anrede, Gruß + Name), gleiche Länge ±15 %. Erfinde KEINE Fakten.
+    const systemPrompt = isCvMode
+      ? `Du bist ein erfahrener Bewerbungscoach. Perfektioniere den folgenden Lebenslauf-Text: entferne Floskeln, mache Erfolge konkret und messbar, aktive Sprache, klare Struktur und einheitliche Formatierung (Überschriften, Stichpunkte, Datumsformate), gleiche Länge ±15 %. Erfinde KEINE Fakten, keine Zahlen, keine Stationen.
+
+Antworte AUSSCHLIESSLICH mit validem JSON:
+{
+  "letter": "<der komplette verbesserte Lebenslauf-Text als reiner Text>",
+  "changes": ["<kurz: was verbessert wurde>", "..."]  // 2-5 Punkte
+}
+
+Alle Texte in der Sprache mit Code "${typeof language === "string" && language.length <= 5 ? language : "de"}".`
+      : `Du bist ein erfahrener Bewerbungscoach. Perfektioniere das Anschreiben${profileText ? " und das Profil-Statement des Lebenslaufs" : ""}: entferne Floskeln und KI-Phrasen, mache Erfolge konkret und messbar, aktive Sprache, klare Struktur (DIN 5008 beim Anschreiben beibehalten: Empfängeradresse, Datum, Betreff, Anrede, Gruß + Name), gleiche Länge ±15 %. Erfinde KEINE Fakten.
 
 Antworte AUSSCHLIESSLICH mit validem JSON:
 {
@@ -163,7 +174,7 @@ Antworte AUSSCHLIESSLICH mit validem JSON:
 
 Alle Texte in der Sprache mit Code "${lang}".`;
 
-    const userPrompt = `ANSCHREIBEN:\n${letterText.slice(0, MAX_INPUT)}${profileText ? `\n\nPROFIL-STATEMENT:\n${String(profileText).slice(0, 3000)}` : ""}${cvText ? `\n\nLEBENSLAUF (Kontext, nicht umschreiben):\n${String(cvText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\n\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
+    const userPrompt = `${isCvMode ? "LEBENSLAUF" : "ANSCHREIBEN"}:\n${letterText.slice(0, MAX_INPUT)}${profileText ? `\n\nPROFIL-STATEMENT:\n${String(profileText).slice(0, 3000)}` : ""}${cvText ? `\n\nLEBENSLAUF (Kontext, nicht umschreiben):\n${String(cvText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\n\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
     if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }

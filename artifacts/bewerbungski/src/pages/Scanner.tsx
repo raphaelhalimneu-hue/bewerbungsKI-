@@ -62,6 +62,35 @@ export default function Scanner() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [perfecting, setPerfecting] = useState(false);
+  const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
+
+  async function runPerfect() {
+    if (!user) { setShowAuthModal(true); return; }
+    if (cvText.trim().length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
+    setErrorMsg(""); setPerfecting(true); setPerfectChanges(null);
+    try {
+      const res: any = await customFetch("/api/perfect", {
+        method: "POST",
+        body: JSON.stringify({
+          letterText: cvText.trim(),
+          docType: mode,
+          language: i18n.resolvedLanguage || "de",
+        }),
+      });
+      if (res?.letter) {
+        setCvText(res.letter);
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        setResult(null);
+      } else {
+        setErrorMsg(t("scanner.error"));
+      }
+    } catch {
+      setErrorMsg(t("scanner.error"));
+    } finally {
+      setPerfecting(false);
+    }
+  }
 
   // Prefill from the Import page
   useEffect(() => {
@@ -136,9 +165,14 @@ export default function Scanner() {
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button className="btn btn-p" onClick={analyze} disabled={busy}>
+            <button className="btn btn-p" onClick={analyze} disabled={busy || perfecting}>
               {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : t("scanner.analyze")}
             </button>
+            {cvText.trim().length >= 80 && (
+              <button className="btn btn-g" onClick={runPerfect} disabled={busy || perfecting}>
+                {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
+              </button>
+            )}
             {cvText.trim().length >= 80 && (
               <button
                 className="btn btn-g"
@@ -153,21 +187,18 @@ export default function Scanner() {
           </div>
         </div>
 
-        {result && (
-          <>
-            <AnalysisCard result={result} />
-            <div className="card" style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>🚀 {t("scanner.cta")}</div>
-              <button
-                className="btn btn-p"
-                onClick={() => {
-                  try { if (cvText.trim().length >= 80) sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
-                  navigate("/wizard");
-                }}
-              >{t("scanner.ctaBtn")}</button>
-            </div>
-          </>
+        {perfectChanges && (
+          <div className="card" style={{ marginTop: 16 }}>
+            <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 4 }}>✅ {t("preview.perfectDone")}</div>
+            {perfectChanges.length > 0 && (
+              <ul style={{ margin: 0, paddingInlineStart: 20, fontSize: 13, lineHeight: 1.6, color: "var(--muted)" }}>
+                {perfectChanges.map((c, i) => <li key={i}>{c}</li>)}
+              </ul>
+            )}
+          </div>
         )}
+
+        {result && <AnalysisCard result={result} />}
       </div>
     </Layout>
   );
