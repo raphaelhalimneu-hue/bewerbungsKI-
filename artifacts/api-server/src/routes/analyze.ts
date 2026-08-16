@@ -85,7 +85,9 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
-    const systemPrompt = `Du bist ein erfahrener Recruiter und Bewerbungscoach. Analysiere ${isLetter ? "das Anschreiben" : "die Bewerbung"} streng aber fair, wie ein ATS-System plus menschlicher Personaler.
+    const systemPrompt = `Du bist ein erfahrener Recruiter und Bewerbungscoach. ${isLetter
+  ? "Das vorliegende Dokument ist ein BEWERBUNGSSCHREIBEN. Analysiere es als Bewerbungsschreiben"
+  : "Das vorliegende Dokument ist ein LEBENSLAUF (CV). Analysiere es ausschließlich als Lebenslauf – bewerte NICHT, ob es ein Bewerbungsschreiben ist, und fordere keine Anrede, keinen Einstiegssatz und keine Grußformel"} – streng aber fair, wie ein ATS-System plus menschlicher Personaler.
 
 Antworte AUSSCHLIESSLICH mit validem JSON (keine Erklärungen, kein Markdown):
 {
@@ -101,7 +103,7 @@ ${isLetter
   : "Bewerte: Klarheit, Struktur, messbare Erfolge, Passung zur Stelle (falls Stellenanzeige gegeben), Floskeln/KI-Phrasen, Lücken, Länge."}
 ${isLetter ? `Nenne das Dokument in deiner Antwort immer "Bewerbung" (bzw. das entsprechende Wort für "Bewerbung" in der Zielsprache) – verwende NIE das Wort "Anschreiben".` : ""}`;
 
-    const userPrompt = `${isLetter ? "ANSCHREIBEN" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nANSCHREIBEN:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
+    const userPrompt = `${isLetter ? "BEWERBUNG" : "LEBENSLAUF"}:\n${cvText.slice(0, MAX_INPUT)}\n${letterText ? `\nBEWERBUNG:\n${String(letterText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
     if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }
