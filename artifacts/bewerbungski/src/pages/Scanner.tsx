@@ -82,6 +82,8 @@ export default function Scanner() {
         setCvText(res.letter);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
+        setPerfecting(false);
+        void analyze(res.letter);
       } else {
         setErrorMsg(t("scanner.error"));
       }
@@ -102,19 +104,22 @@ export default function Scanner() {
         if (m === "letter" || m === "cv") setMode(m);
         sessionStorage.removeItem("bk_scan_text");
         sessionStorage.removeItem("bk_scan_mode");
+        // Check automatically, since there is no separate check button anymore
+        void analyze(pre);
       }
     } catch { /* ignore */ }
   }, []);
 
-  async function analyze() {
+  async function analyze(textOverride?: string) {
     if (!user) { setShowAuthModal(true); return; }
-    if (cvText.trim().length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
+    const text = (textOverride ?? cvText).trim();
+    if (text.length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setBusy(true); setResult(null);
     try {
       const res = await customFetch("/api/analyze", {
         method: "POST",
         body: JSON.stringify({
-          cvText: cvText.trim(),
+          cvText: text,
           docType: mode,
           language: i18n.resolvedLanguage || "de",
         }),
@@ -165,14 +170,9 @@ export default function Scanner() {
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button className="btn btn-p" onClick={analyze} disabled={busy || perfecting}>
-              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : t("scanner.analyze")}
+            <button className="btn btn-p" onClick={runPerfect} disabled={busy || perfecting || cvText.trim().length < 80}>
+              {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : <>✨ {t("preview.perfectBtn")}</>}
             </button>
-            {cvText.trim().length >= 80 && (
-              <button className="btn btn-g" onClick={runPerfect} disabled={busy || perfecting}>
-                {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
-              </button>
-            )}
             {cvText.trim().length >= 80 && (
               <button
                 className="btn btn-g"
