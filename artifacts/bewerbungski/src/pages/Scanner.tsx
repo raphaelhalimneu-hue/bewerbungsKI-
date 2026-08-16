@@ -158,7 +158,13 @@ export default function Scanner() {
             <AnalysisCard result={result} />
             <div className="card" style={{ marginTop: 16, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>🚀 {t("scanner.cta")}</div>
-              <button className="btn btn-p" onClick={() => navigate("/wizard")}>{t("scanner.ctaBtn")}</button>
+              <button
+                className="btn btn-p"
+                onClick={() => {
+                  try { if (cvText.trim().length >= 80) sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
+                  navigate("/wizard");
+                }}
+              >{t("scanner.ctaBtn")}</button>
             </div>
           </>
         )}
