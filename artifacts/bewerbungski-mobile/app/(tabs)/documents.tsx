@@ -75,7 +75,7 @@ export default function DocumentsScreen() {
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: botPad + 40 }}>
               {selected.cover_letter ? (
                 <>
-                  <Text style={s.sectionTitle}>✉️ Anschreiben</Text>
+                  <Text style={s.sectionTitle}>✉️ Bewerbung</Text>
                   <View style={[s.card, { marginBottom: 24 }]}>
                     <Text style={s.letterText}>{selected.cover_letter}</Text>
                   </View>
@@ -114,7 +114,7 @@ export default function DocumentsScreen() {
                 <Text style={s.docName} numberOfLines={2}>{(item as any).name}</Text>
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
                   {(item as any).job_title && <View style={s.tag}><Text style={s.tagText}>{(item as any).job_title}</Text></View>}
-                  {(item as any).cover_letter && <View style={[s.tag, { backgroundColor: colors.accent }]}><Text style={[s.tagText, { color: colors.primary }]}>✉️ Anschreiben</Text></View>}
+                  {(item as any).cover_letter && <View style={[s.tag, { backgroundColor: colors.accent }]}><Text style={[s.tagText, { color: colors.primary }]}>✉️ Bewerbung</Text></View>}
                 </View>
                 <Text style={s.docDate}>{fmtDate((item as any).created_at)}</Text>
               </View>

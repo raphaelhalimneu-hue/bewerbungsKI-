@@ -248,7 +248,7 @@ function localizeHeadings(html: string, lang: string): string {
 
 // Example cover letter per language, matching the CV person and role.
 type ExampleLetter = {
-  label: string;        // small heading above the letter page ("Anschreiben", "Cover letter", …)
+  label: string;        // small heading above the letter page ("Bewerbung", "Cover letter", …)
   cvLabel: string;      // small heading above the CV page
   recipient: string[];  // recipient address block
   city: string;         // city + date line
@@ -261,7 +261,7 @@ type ExampleLetter = {
 
 const LETTER_BY_LANG: Record<string, ExampleLetter> = {
   de: {
-    label: "Anschreiben", cvLabel: "Lebenslauf",
+    label: "Bewerbung", cvLabel: "Lebenslauf",
     recipient: ["Caritas Pflegezentrum Hannover", "Frau Petra Wagner", "Marienstraße 12", "30171 Hannover"],
     city: "Hannover, den 13.08.2026",
     subject: "Bewerbung als examinierte Pflegefachkraft",

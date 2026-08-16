@@ -280,13 +280,13 @@ export default function CreateScreen() {
 
       let letterText = '';
       {
-        setGenPhase('Anschreiben wird erstellt …');
+        setGenPhase('Bewerbung wird erstellt …');
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: 'letter',
-          systemPrompt: 'Du bist Experte für Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, keine KI-Phrasen. Nur den Anschreiben-Text, kein HTML.',
+          systemPrompt: 'Du bist Experte für Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, keine KI-Phrasen. Nur den Bewerbung-Text, kein HTML.',
           userPrompt: form.jobad.title || form.jobad.description
-            ? `Anschreiben für: ${form.personal.firstName} ${form.personal.lastName}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ')}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nBeschreibung: ${form.jobad.description || 'nicht angegeben'}\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`
-            : `Initiativbewerbung (KEINE konkrete Stellenanzeige vorhanden!) für: ${form.personal.firstName} ${form.personal.lastName}\nAngestrebte Position: ${form.experience[0]?.position || form.personal.title || 'passend zur Erfahrung'}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ') || 'Berufseinsteiger'}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nSchreibe ein überzeugendes allgemeines Initiativ-Anschreiben, Anrede "Sehr geehrte Damen und Herren", Empfänger "Personalabteilung". Erfinde KEINE Firma und KEINE Stelle.\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`,
+            ? `Bewerbung für: ${form.personal.firstName} ${form.personal.lastName}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ')}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nBeschreibung: ${form.jobad.description || 'nicht angegeben'}\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`
+            : `Initiativbewerbung (KEINE konkrete Stellenanzeige vorhanden!) für: ${form.personal.firstName} ${form.personal.lastName}\nAngestrebte Position: ${form.experience[0]?.position || form.personal.title || 'passend zur Erfahrung'}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ') || 'Berufseinsteiger'}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nSchreibe ein überzeugendes allgemeines Initiativ-Bewerbung, Anrede "Sehr geehrte Damen und Herren", Empfänger "Personalabteilung". Erfinde KEINE Firma und KEINE Stelle.\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`,
         } });
         letterText = letterRes.result;
       }
@@ -540,7 +540,7 @@ export default function CreateScreen() {
             <View style={[s.card, { alignItems: 'center', paddingVertical: 32 }]}>
               <Text style={{ fontSize: 40, marginBottom: 12 }}>✨</Text>
               <Text style={[s.cardTitle, { textAlign: 'center', marginBottom: 6 }]}>Alles bereit?</Text>
-              <Text style={{ color: colors.mutedForeground, fontSize: 13, textAlign: 'center', marginBottom: 20 }}>KI erstellt Lebenslauf + Anschreiben — dauert ca. 20 Sekunden.</Text>
+              <Text style={{ color: colors.mutedForeground, fontSize: 13, textAlign: 'center', marginBottom: 20 }}>KI erstellt Lebenslauf + Bewerbung — dauert ca. 20 Sekunden.</Text>
               {!form.personal.firstName && <Text style={[s.errorText, { marginBottom: 12 }]}>Bitte Vornamen in Schritt 1 eingeben.</Text>}
               <TouchableOpacity style={[s.primaryBtn, { width: '100%', opacity: !form.personal.firstName ? 0.5 : 1 }]} onPress={handleGenerate} disabled={!form.personal.firstName} activeOpacity={0.85}>
                 <Text style={s.primaryBtnText}>✨ Jetzt generieren</Text>

@@ -140,20 +140,20 @@ export default function Documents() {
                           <button
                             className="btn btn-p btn-sm"
                             disabled={busy}
-                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cover-letter.pdf`, `${safeName(doc)} – Anschreiben.pdf`, `${doc.id}-letter-pdf`)}
+                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cover-letter.pdf`, `${safeName(doc)} – Bewerbung.pdf`, `${doc.id}-letter-pdf`)}
                             title={t("docs.downloadLetterPdf")}
                             style={{ fontSize: 12 }}
                           >
-                            {downloading === `${doc.id}-letter-pdf` ? <><span className="spin" /> PDF…</> : <>⬇ Anschreiben PDF</>}
+                            {downloading === `${doc.id}-letter-pdf` ? <><span className="spin" /> PDF…</> : <>⬇ Bewerbung PDF</>}
                           </button>
                           <button
                             className="btn btn-g btn-sm"
                             disabled={busy}
-                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cover-letter.docx`, `${safeName(doc)} – Anschreiben.docx`, `${doc.id}-letter-docx`)}
+                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cover-letter.docx`, `${safeName(doc)} – Bewerbung.docx`, `${doc.id}-letter-docx`)}
                             title={t("docs.downloadLetterDocx")}
                             style={{ fontSize: 12 }}
                           >
-                            {downloading === `${doc.id}-letter-docx` ? <><span className="spin" /> Word…</> : <>⬇ Anschreiben DOCX</>}
+                            {downloading === `${doc.id}-letter-docx` ? <><span className="spin" /> Word…</> : <>⬇ Bewerbung DOCX</>}
                           </button>
                         </>
                       )}

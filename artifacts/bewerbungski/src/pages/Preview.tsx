@@ -9,7 +9,7 @@ import jsPDF from "jspdf";
 import { DECO } from "../lib/buildCVHTML";
 import { AnalysisCard } from "./Scanner";
 
-/** Deko für die Anschreiben-Karte: bekannte Vorlagen aus DECO, "custom" mit Nutzer-Akzentfarbe. */
+/** Deko für die Bewerbung-Karte: bekannte Vorlagen aus DECO, "custom" mit Nutzer-Akzentfarbe. */
 function letterDecoHtml(doc: any): string {
   if (doc?.template === "custom") {
     const acc = doc?.profile_data?.customStyle?.accent;
@@ -194,7 +194,7 @@ export default function Preview() {
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
-      a.download = baseFileName("Anschreiben") + ".pdf";
+      a.download = baseFileName("Bewerbung") + ".pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -215,7 +215,7 @@ export default function Preview() {
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
-      a.download = baseFileName(type === "cv" ? "Lebenslauf" : "Anschreiben") + ".docx";
+      a.download = baseFileName(type === "cv" ? "Lebenslauf" : "Bewerbung") + ".docx";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -252,7 +252,7 @@ export default function Preview() {
                       {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
-                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>⬇ Anschreiben .docx</>}
+                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>⬇ Bewerbung .docx</>}
                     </button>
                   </>
                 )}
