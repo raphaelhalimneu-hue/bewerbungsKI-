@@ -172,8 +172,11 @@ export default function Scanner() {
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button className="btn btn-p" onClick={runPerfect} disabled={busy || perfecting || cvText.trim().length < 80}>
-              {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : <>✨ {t("preview.perfectBtn")}</>}
+            <button className="btn btn-p" onClick={() => analyze()} disabled={busy || perfecting || cvText.trim().length < 80}>
+              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : t("scanner.analyze")}
+            </button>
+            <button className="btn btn-g" onClick={runPerfect} disabled={busy || perfecting || cvText.trim().length < 80}>
+              {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
             </button>
             {cvText.trim().length >= 80 && (
               <button
