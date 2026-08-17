@@ -502,5 +502,11 @@
     "text": "Twoja pierwsza aplikacja jest całkowicie darmowa – CV i list motywacyjny w 3 minuty, bez karty kredytowej.",
     "cta": "Utwórz teraz za darmo",
     "dismiss": "Nie, dziękuję"
+  },
+  "locked": {
+    "title": "Darmowa aplikacja wykorzystana",
+    "text": "Utworzyłeś już swoją darmową aplikację. Zdobądź 10 kolejnych aplikacji, aby dalej korzystać ze skanera i edytora.",
+    "editorText": "Twój darmowy limit został wykorzystany — ulepsz plan, aby edytować i zapisywać. Podgląd i pobieranie pozostają darmowe.",
+    "cta": "Odblokuj teraz"
   }
 }

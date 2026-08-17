@@ -502,5 +502,11 @@
     "text": "Tu primera candidatura es totalmente gratis: CV y carta de presentación en 3 minutos, sin tarjeta de crédito.",
     "cta": "Crear gratis ahora",
     "dismiss": "No, gracias"
+  },
+  "locked": {
+    "title": "Solicitud gratuita utilizada",
+    "text": "Ya has creado tu solicitud gratuita. Consigue 10 solicitudes más para seguir usando el escáner y el editor.",
+    "editorText": "Tu cuota gratuita se ha agotado: actualiza para editar y guardar. Ver y descargar sigue siendo gratis.",
+    "cta": "Desbloquear ahora"
   }
 }

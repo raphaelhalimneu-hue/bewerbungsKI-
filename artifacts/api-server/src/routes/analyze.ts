@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -80,6 +81,10 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const unlimitedA = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
     if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
@@ -144,6 +149,10 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     if (letterText.length > 60000 || (cvText && (typeof cvText !== "string" || cvText.length > 60000)) || (jobText && (typeof jobText !== "string" || jobText.length > 60000)) || (profileText && (typeof profileText !== "string" || profileText.length > 10000))) {
       res.status(413).json({ error: "input_too_large" });
+      return;
+    }
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
       return;
     }
     const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());

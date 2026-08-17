@@ -545,5 +545,11 @@
     "text": "Your first application is completely free – CV and cover letter in 3 minutes, no credit card needed.",
     "cta": "Create for free now",
     "dismiss": "No thanks"
+  },
+  "locked": {
+    "title": "Free application used",
+    "text": "You have already created your free application. Get 10 more applications to keep using the scanner and editor.",
+    "editorText": "Your free quota is used up — upgrade to edit and save. Viewing and downloading stays free.",
+    "cta": "Unlock now"
   }
 }

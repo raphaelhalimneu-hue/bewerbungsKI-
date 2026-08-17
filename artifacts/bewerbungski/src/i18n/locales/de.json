@@ -545,5 +545,11 @@
     "text": "Deine erste Bewerbung ist komplett kostenlos – Lebenslauf und Anschreiben in 3 Minuten, keine Kreditkarte nötig.",
     "cta": "Jetzt kostenlos erstellen",
     "dismiss": "Nein danke"
+  },
+  "locked": {
+    "title": "Kostenlose Bewerbung verbraucht",
+    "text": "Du hast deine kostenlose Bewerbung bereits erstellt. Hol dir 10 weitere Bewerbungen, um den Scanner und den Editor weiter zu nutzen.",
+    "editorText": "Dein kostenloses Kontingent ist verbraucht — zum Bearbeiten und Speichern brauchst du ein Upgrade. Ansehen und Herunterladen bleibt frei.",
+    "cta": "Jetzt freischalten"
   }
 }

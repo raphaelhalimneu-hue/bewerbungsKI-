@@ -502,5 +502,11 @@
     "text": "İlk başvurun tamamen ücretsiz – 3 dakikada CV ve ön yazı, kredi kartı gerekmez.",
     "cta": "Şimdi ücretsiz oluştur",
     "dismiss": "Hayır, teşekkürler"
+  },
+  "locked": {
+    "title": "Ücretsiz başvuru kullanıldı",
+    "text": "Ücretsiz başvurunuzu zaten oluşturdunuz. Tarayıcıyı ve düzenleyiciyi kullanmaya devam etmek için 10 başvuru daha alın.",
+    "editorText": "Ücretsiz hakkınız doldu — düzenlemek ve kaydetmek için yükseltme gerekli. Görüntüleme ve indirme ücretsiz kalır.",
+    "cta": "Şimdi aç"
   }
 }

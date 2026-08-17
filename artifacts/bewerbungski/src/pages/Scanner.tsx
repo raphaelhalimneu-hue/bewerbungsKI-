@@ -56,7 +56,9 @@ export function AnalysisCard({ result }: { result: AnalyzeResult }) {
 export default function Scanner() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
-  const { user, setShowAuthModal } = useAuth();
+  const { user, profile, setShowAuthModal } = useAuth();
+  const p = profile as any;
+  const locked = !!user && !!p && !p.is_premium && (p.credits || 0) === 0 && (p.documents_count || 0) >= 1;
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,6 +91,7 @@ export default function Scanner() {
 
   async function runPerfect() {
     if (!user) { setShowAuthModal(true); return; }
+    if (locked) { navigate("/pricing"); return; }
     if (cvText.trim().length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setPerfecting(true); setPerfectChanges(null);
     try {
@@ -135,6 +138,7 @@ export default function Scanner() {
 
   async function analyze(textOverride?: string) {
     if (!user) { setShowAuthModal(true); return; }
+    if (locked) return;
     const text = (textOverride ?? cvText).trim();
     if (text.length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setBusy(true); setResult(null);
@@ -161,7 +165,16 @@ export default function Scanner() {
         <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>🔎 {mode === "letter" ? t("scanner.letterTitle") : t("scanner.title")}</h1>
         <p style={{ color: "var(--muted)", fontSize: 14.5, lineHeight: 1.6, marginBottom: 16 }}>{mode === "letter" ? t("scanner.letterSubtitle") : t("scanner.subtitle")}</p>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {locked && (
+          <div className="card" style={{ marginBottom: 16, textAlign: "center", padding: "26px 18px" }}>
+            <div style={{ fontSize: 34, marginBottom: 8 }}>🔒</div>
+            <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 6 }}>{t("locked.title")}</div>
+            <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>{t("locked.text")}</p>
+            <button className="btn btn-p" onClick={() => navigate("/pricing")}>{t("locked.cta")}</button>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 16, ...(locked ? { opacity: 0.5, pointerEvents: "none" as const } : {}) }}>
           {(["cv", "letter"] as const).map((m) => (
             <button
               key={m}
@@ -179,7 +192,7 @@ export default function Scanner() {
           ))}
         </div>
 
-        <div className="card">
+        <div className="card" style={locked ? { opacity: 0.5, pointerEvents: "none" } : undefined}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
             <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} onFile={setLastFile} />

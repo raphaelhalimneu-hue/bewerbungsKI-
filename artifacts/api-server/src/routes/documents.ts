@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 
@@ -103,6 +104,11 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
+
     const { cv_html, cv_json, template, cover_letter } = req.body;
 
     // Validate template against allowlist
