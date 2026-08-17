@@ -13,8 +13,22 @@
 export const TEMPLATE_IDS = [
   "modern", "classic", "creative", "executive", "minimal", "elegant", "bold",
   "compact", "swiss", "nordic", "corporate", "timeline", "slate", "terra", "custom",
+  // Briefkopf-Designs (PNG-Hintergründe, seit 2026-08-17)
+  "blobs", "welle", "halo", "splitblock", "klammern", "winkel",
+  "bogen", "zweig", "berge", "konfetti", "wellenband", "farbkreis",
+  "blobcorner", "aurora", "prisma", "verlaufswelle", "blaupause", "technik", "raster",
 ] as const;
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
+
+/** Akzentfarbe je Briefkopf-Design — genutzt für Anschreiben-Deko und Word-Export. */
+export const LETTERHEAD_ACCENTS: Record<string, string> = {
+  blobs: "#d97b7b", welle: "#4a7cb5", halo: "#c97a5a",
+  splitblock: "#1a1a1a", klammern: "#1f4d47", winkel: "#5c1a2b",
+  bogen: "#b8873f", zweig: "#1f3a5f", berge: "#a8552f",
+  konfetti: "#d94f4f", wellenband: "#d16587", farbkreis: "#e76f51",
+  blobcorner: "#7c6ff2", aurora: "#e05575", prisma: "#2fb5a3",
+  verlaufswelle: "#7c6ff2", blaupause: "#2b5a8c", technik: "#3d3d3d", raster: "#2f5940",
+};
 
 const DA = "position:absolute;z-index:-1;pointer-events:none;";
 
@@ -33,6 +47,27 @@ export const DECO: Record<TemplateId, string> = {
   timeline: `<div style="${DA}top:-130px;right:-130px;width:320px;height:320px;border-radius:50%;border:36px solid #fff7ed;"></div><div style="${DA}bottom:-90px;left:-90px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(234,88,12,.07),rgba(234,88,12,0) 70%);"></div>`,
   slate: `<div style="${DA}bottom:-110px;right:-100px;width:320px;height:270px;border-radius:60% 40% 55% 45%/50% 60% 40% 50%;background:linear-gradient(135deg,rgba(99,102,241,.13),rgba(148,163,184,.09));"></div><div style="${DA}bottom:150px;right:40px;width:16px;height:16px;border-radius:50%;background:rgba(99,102,241,.35);"></div>`,
   custom: ``, // custom template draws its own accent bar inline
+  // Briefkopf-Designs: Anschreiben bekommen eine schlichte Akzentleiste in der
+  // Designfarbe (das PNG selbst gehört nur zum Lebenslauf-Layout).
+  blobs: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#d97b7b;"></div>`,
+  welle: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#4a7cb5;"></div>`,
+  halo: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#c97a5a;"></div>`,
+  splitblock: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#1a1a1a;"></div>`,
+  klammern: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#1f4d47;"></div>`,
+  winkel: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#5c1a2b;"></div>`,
+  bogen: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#b8873f;"></div>`,
+  zweig: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#1f3a5f;"></div>`,
+  berge: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#a8552f;"></div>`,
+  konfetti: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#d94f4f;"></div>`,
+  wellenband: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#d16587;"></div>`,
+  farbkreis: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#e76f51;"></div>`,
+  blobcorner: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#7c6ff2;"></div>`,
+  aurora: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#e05575;"></div>`,
+  prisma: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#2fb5a3;"></div>`,
+  verlaufswelle: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#7c6ff2;"></div>`,
+  blaupause: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#2b5a8c;"></div>`,
+  technik: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#3d3d3d;"></div>`,
+  raster: `<div style="${DA}top:0;left:0;right:0;height:8px;background:#2f5940;"></div>`,
   terra: `<div style="${DA}top:-50px;left:-70px;width:360px;height:210px;background:repeating-linear-gradient(115deg,rgba(254,215,170,.55) 0 14px,rgba(254,215,170,0) 14px 34px);transform:rotate(-8deg);"></div><div style="${DA}bottom:-40px;right:-60px;width:320px;height:180px;background:repeating-linear-gradient(115deg,rgba(251,207,232,.45) 0 12px,rgba(251,207,232,0) 12px 30px);transform:rotate(-8deg);"></div>`,
 };
 

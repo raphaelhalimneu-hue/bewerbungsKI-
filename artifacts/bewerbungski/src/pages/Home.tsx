@@ -423,7 +423,7 @@ function ShowcasePage({ label, html }: { label: string; html: string }) {
 function ExampleCVShowcase() {
   const { i18n } = useTranslation();
   const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
-  const cvHtml = useMemo(() => localizeHeadings(renderCVContent(EXAMPLE_BY_LANG[lang], "elegant"), lang), [lang]);
+  const cvHtml = useMemo(() => localizeHeadings(renderCVContent(EXAMPLE_BY_LANG[lang], "blobs"), lang), [lang]);
   const letterHtml = useMemo(() => buildLetterHTML(EXAMPLE_BY_LANG[lang], LETTER_BY_LANG[lang]), [lang]);
 
   return (

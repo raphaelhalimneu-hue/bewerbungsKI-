@@ -2,7 +2,8 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
+import path from "path";
 import { execSync } from "child_process";
 import { templateDeco } from "@workspace/template-deco";
 
@@ -86,14 +87,25 @@ async function htmlToPdf(html: string): Promise<Buffer> {
   try {
     const page = await browser.newPage();
 
-    // SSRF protection: abort every outgoing request except inline data: URIs
+    // SSRF protection: abort every outgoing request except inline data: URIs.
+    // Exception: local letterhead PNGs (/letterheads/NN-name.png) are served
+    // directly from the built frontend assets on disk — no network involved.
     await page.setRequestInterception(true);
     page.on("request", (req) => {
-      if (req.url().startsWith("data:")) {
-        req.continue();
-      } else {
-        req.abort("blockedbyclient");
+      const url = req.url();
+      if (url.startsWith("data:")) { req.continue(); return; }
+      const m = url.match(/\/letterheads\/([a-z0-9-]+\.png)$/i);
+      if (m) {
+        try {
+          const dir = path.resolve(__dirname, "../../bewerbungski/dist/public/letterheads");
+          const file = path.resolve(dir, m[1]);
+          if (file.startsWith(dir + path.sep) && existsSync(file)) {
+            req.respond({ status: 200, contentType: "image/png", body: readFileSync(file) });
+            return;
+          }
+        } catch { /* fall through to abort */ }
       }
+      req.abort("blockedbyclient");
     });
 
     await page.setContent(html, { waitUntil: "load", timeout: 30_000 });

@@ -669,10 +669,78 @@ function tplCustom(cv: CVContent, style?: Partial<CustomStyle>): string {
 </div>`;
 }
 
+// ─── BRIEFKOPF-DESIGNS (PNG-Hintergründe) ───────────────────────────────────
+type LetterheadCfg = {
+  file: string; accent: string; sub: string; chipBg: string; chipText: string;
+  serif?: boolean; pad?: string; // CSS padding override der Textzone
+};
+export const LETTERHEADS: Record<string, LetterheadCfg> = {
+  blobs:         { file: "01-organisch-blobs-pastell.png",        accent: "#d97b7b", sub: "#8a8a8a", chipBg: "#fbeaea", chipText: "#a85454" },
+  welle:         { file: "02-organisch-wellenlinie-blau.png",     accent: "#4a7cb5", sub: "#7a8aa0", chipBg: "#e7f0fa", chipText: "#33587f", pad: "56px 64px 130px" },
+  halo:          { file: "03-organisch-halo-terrakotta.png",      accent: "#c97a5a", sub: "#9a7a6a", chipBg: "#f7e8de", chipText: "#a85f3f", pad: "96px 64px 56px" },
+  splitblock:    { file: "04-geometrisch-splitblock-schwarz.png", accent: "#1a1a1a", sub: "#6b6b6b", chipBg: "#f0f0f0", chipText: "#1a1a1a", pad: "56px 300px 56px 64px" },
+  klammern:      { file: "05-geometrisch-eckenklammern-petrol.png", accent: "#1f4d47", sub: "#5f7a74", chipBg: "#e9efe9", chipText: "#1f4d47", pad: "80px 80px 80px" },
+  winkel:        { file: "06-geometrisch-winkel-bordeaux.png",    accent: "#5c1a2b", sub: "#8a5f6b", chipBg: "#f4e8ec", chipText: "#5c1a2b", pad: "110px 64px 56px" },
+  bogen:         { file: "07-elegant-bogenlinien-gold.png",       accent: "#b8873f", sub: "#8a7a5f", chipBg: "#f6eedd", chipText: "#8f6a2f", serif: true, pad: "120px 64px 56px" },
+  zweig:         { file: "08-elegant-zweig-navy.png",             accent: "#1f3a5f", sub: "#5f708a", chipBg: "#e8edf5", chipText: "#1f3a5f", serif: true, pad: "56px 120px 56px 64px" },
+  berge:         { file: "09-elegant-berglinien-terrakotta.png",  accent: "#a8552f", sub: "#8a6f5f", chipBg: "#f5e9e2", chipText: "#a8552f", serif: true, pad: "56px 64px 110px" },
+  konfetti:      { file: "10-verspielt-konfetti-tropical.png",    accent: "#d94f4f", sub: "#7a7a7a", chipBg: "#fdecec", chipText: "#c23c3c", pad: "56px 130px 56px 64px" },
+  wellenband:    { file: "11-verspielt-wellenband-candy.png",     accent: "#d16587", sub: "#8a7a80", chipBg: "#fdeef3", chipText: "#b54c6e", pad: "56px 64px 130px" },
+  farbkreis:     { file: "12-verspielt-farbkreis-citrus.png",     accent: "#e76f51", sub: "#8a7a70", chipBg: "#fdeee8", chipText: "#c25537", pad: "90px 64px 56px" },
+  blobcorner:    { file: "13-verlauf-blobcorner-violettblau.png", accent: "#7c6ff2", sub: "#8a85a8", chipBg: "#efecfd", chipText: "#5f52d4" },
+  aurora:        { file: "14-verlauf-aurora-peach.png",           accent: "#e05575", sub: "#9a7a80", chipBg: "#fdeef1", chipText: "#c23c5c" },
+  prisma:        { file: "15-verlauf-prisma-mint.png",            accent: "#2fb5a3", sub: "#6f8a85", chipBg: "#e6f7f3", chipText: "#1f8a7a", pad: "120px 64px 56px" },
+  verlaufswelle: { file: "16-verlauf-welle-violettblau.png",      accent: "#7c6ff2", sub: "#8a85a8", chipBg: "#efecfd", chipText: "#5f52d4", pad: "56px 64px 130px" },
+  blaupause:     { file: "17-technisch-blaupauserahmen-blau.png", accent: "#2b5a8c", sub: "#6f80a0", chipBg: "#e9f0f7", chipText: "#2b5a8c", pad: "90px 90px 90px" },
+  technik:       { file: "18-technisch-ecke-graphit.png",         accent: "#3d3d3d", sub: "#7a7a7a", chipBg: "#efefef", chipText: "#3d3d3d", pad: "80px 80px 56px 64px" },
+  raster:        { file: "19-technisch-rasterblock-gruen.png",    accent: "#2f5940", sub: "#6f857a", chipBg: "#e9f1ec", chipText: "#2f5940", pad: "90px 64px 56px" },
+};
+
+export function letterheadUrl(id: string): string {
+  const cfg = LETTERHEADS[id];
+  const base = (typeof import.meta !== "undefined" && (import.meta as any).env?.BASE_URL) || "/";
+  return cfg ? `${base}letterheads/${cfg.file}` : "";
+}
+
+function tplLetterhead(cv: CVContent, id: string): string {
+  const c = LETTERHEADS[id];
+  const nameFont = c.serif ? "'Playfair Display',Georgia,serif" : "'Inter',sans-serif";
+  const pad = c.pad || "56px 64px 56px";
+  return `<style>${GF}*{box-sizing:border-box;margin:0;padding:0;}body,div,p,li,span{font-family:'Inter',sans-serif;}ul{list-style:disc;}</style>
+<div style="${REL}background:#fff url('${letterheadUrl(id)}') top center / 100% auto no-repeat;color:#111827;padding:${pad};max-width:794px;min-height:1123px;">
+  <div style="border-bottom:2.5px solid ${c.accent};padding-bottom:18px;">
+    ${cv.photo ? `<img src="${cv.photo}" style="float:right;width:82px;height:104px;object-fit:cover;border-radius:4px;margin-left:18px;" />` : ""}
+    <div style="font-family:${nameFont};font-size:28px;font-weight:700;letter-spacing:.5px;color:#111827;">${cv.name}</div>
+    <div style="font-size:13px;color:${c.accent};font-weight:600;letter-spacing:.5px;margin-top:4px;">${cv.title}</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:8px;">${cv.contact}</div>
+    <div style="clear:both;"></div>
+  </div>
+  ${cv.profile ? `${sectionTitle("Profil",c.accent,`1px solid ${c.chipBg}`)}<p style="font-size:12.5px;line-height:1.7;color:#374151;">${cv.profile}</p>` : ""}
+  ${cv.education.length ? `${sectionTitle("Ausbildung",c.accent,`1px solid ${c.chipBg}`)}${cv.education.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+      <div><div style="font-size:13px;font-weight:700;color:#111827;">${e.degree}</div><div style="font-size:11.5px;color:${c.sub};">${e.institution}${e.location?" · "+e.location:""}${e.note?" · "+e.note:""}</div></div>
+      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
+    </div>`).join("")}` : ""}
+  ${cv.experience.length ? `${sectionTitle("Berufserfahrung",c.accent,`1px solid ${c.chipBg}`)}${cv.experience.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:#111827;">${e.position}</div>
+        <div style="font-size:11.5px;color:${c.sub};margin-top:1px;">${e.company}${e.location ? " · "+e.location : ""}</div>
+        <div style="font-size:12px;color:#374151;line-height:1.6;margin-top:4px;">${bullets(e.bullets)}</div>
+      </div>
+      <div style="font-size:11px;color:#9ca3af;white-space:nowrap;padding-left:16px;">${e.period}</div>
+    </div>`).join("")}` : ""}
+  ${cv.skills.length ? `${sectionTitle("Kenntnisse",c.accent,`1px solid ${c.chipBg}`)}<div style="display:flex;flex-wrap:wrap;gap:7px;">${cv.skills.map(s=>`<span style="background:${c.chipBg};color:${c.chipText};border-radius:4px;padding:4px 11px;font-size:11.5px;font-weight:500;">${s}</span>`).join("")}</div>` : ""}
+  ${cv.languages.length ? `${sectionTitle("Sprachen",c.accent,`1px solid ${c.chipBg}`)}${cv.languages.map(l=>`<div style="font-size:12.5px;margin-bottom:4px;"><strong>${l.name}</strong> <span style="color:${c.sub};">— ${l.level}</span></div>`).join("")}` : ""}
+  <div style="margin-top:36px;font-size:12px;color:#374151;">${cv.signature}</div>
+</div>`;
+}
+
 // ─── ROUTER ───────────────────────────────────────────────────────────────────
 export function renderCVContent(cv: CVContent, template: TemplateId, customStyle?: Partial<CustomStyle>): string {
   // Escape all user-controlled fields once before any template sees them.
   const safe = escapeCVContent(cv);
+  if (LETTERHEADS[template]) return tplLetterhead(safe, template);
   switch (template) {
     case "classic":    return tplClassic(safe);
     case "creative":   return tplCreative(safe);

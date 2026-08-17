@@ -46,6 +46,26 @@ const TEMPLATE_THEMES: Record<string, DocxTheme> = {
   timeline:  { accent: "EA580C", rule: "EA580C" }, // orange #ea580c headings, 3px header border
   slate:     { accent: "334155", rule: "334155" }, // slate #334155 headings + 2px rules
   terra:     { accent: "C2410C", rule: "FED7AA" }, // terracotta #c2410c headings, rules #fed7aa
+  // Briefkopf-Designs (PNG-Hintergründe im Web; Word übernimmt die Akzentfarbe)
+  blobs:         { accent: "D97B7B", rule: "FBEAEA" },
+  welle:         { accent: "4A7CB5", rule: "E7F0FA" },
+  halo:          { accent: "C97A5A", rule: "F7E8DE" },
+  splitblock:    { accent: "1A1A1A", rule: "F0F0F0" },
+  klammern:      { accent: "1F4D47", rule: "E9EFE9" },
+  winkel:        { accent: "5C1A2B", rule: "F4E8EC" },
+  bogen:         { accent: "B8873F", rule: "F6EEDD" },
+  zweig:         { accent: "1F3A5F", rule: "E8EDF5" },
+  berge:         { accent: "A8552F", rule: "F5E9E2" },
+  konfetti:      { accent: "D94F4F", rule: "FDECEC" },
+  wellenband:    { accent: "D16587", rule: "FDEEF3" },
+  farbkreis:     { accent: "E76F51", rule: "FDEEE8" },
+  blobcorner:    { accent: "7C6FF2", rule: "EFECFD" },
+  aurora:        { accent: "E05575", rule: "FDEEF1" },
+  prisma:        { accent: "2FB5A3", rule: "E6F7F3" },
+  verlaufswelle: { accent: "7C6FF2", rule: "EFECFD" },
+  blaupause:     { accent: "2B5A8C", rule: "E9F0F7" },
+  technik:       { accent: "3D3D3D", rule: "EFEFEF" },
+  raster:        { accent: "2F5940", rule: "E9F1EC" },
 };
 const DEFAULT_THEME: DocxTheme = { accent: "1F2937", rule: "D1D5DB" };
 function themeFor(template: unknown, profileData?: any): DocxTheme {
@@ -280,6 +300,9 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 const VALID_TEMPLATE_IDS = new Set([
   "modern","classic","creative","executive","minimal","elegant",
   "bold","compact","swiss","nordic","corporate","timeline","slate","terra","custom",
+  "blobs","welle","halo","splitblock","klammern","winkel","bogen","zweig","berge",
+  "konfetti","wellenband","farbkreis","blobcorner","aurora","prisma","verlaufswelle",
+  "blaupause","technik","raster",
 ]);
 
 function isValidCvJson(cv: unknown): boolean {

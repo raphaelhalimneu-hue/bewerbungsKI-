@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/api-client-react";
 import type { FormData, Experience, Education, Skill, Language, TemplateId, CVContent } from "../lib/buildCVHTML";
-import { renderCVContent } from "../lib/buildCVHTML";
+import { renderCVContent, letterheadUrl } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
 import { FileImportButton } from "../components/FileImportButton";
 
@@ -39,6 +39,26 @@ const TEMPLATE_STYLES: Record<TemplateId, { font: string; accent: string; header
   slate:     { font: "Helvetica,Arial,sans-serif", accent: "#334155", headerBg: "#334155", headerText: "#ffffff", subColor: "#64748b", chipBg: "#f8fafc", chipText: "#334155", scale: 1 },
   terra:     { font: "Georgia,'Times New Roman',serif", accent: "#c2410c", headerBg: "transparent", headerText: "#7c2d12", subColor: "#c2410c", chipBg: "#fff7ed", chipText: "#c2410c", scale: 1 },
   custom:    { font: "Helvetica,Arial,sans-serif", accent: "#1f2937", headerBg: "transparent", headerText: "#111827", subColor: "#6b7280", chipBg: "#f3f4f6", chipText: "#374151", scale: 1 },
+  // Briefkopf-Designs (PNG-Hintergründe)
+  blobs:         { font: "Helvetica,Arial,sans-serif", accent: "#d97b7b", headerBg: "transparent", headerText: "#111827", subColor: "#8a8a8a", chipBg: "#fbeaea", chipText: "#a85454", scale: 1 },
+  welle:         { font: "Helvetica,Arial,sans-serif", accent: "#4a7cb5", headerBg: "transparent", headerText: "#111827", subColor: "#7a8aa0", chipBg: "#e7f0fa", chipText: "#33587f", scale: 1 },
+  halo:          { font: "Helvetica,Arial,sans-serif", accent: "#c97a5a", headerBg: "transparent", headerText: "#111827", subColor: "#9a7a6a", chipBg: "#f7e8de", chipText: "#a85f3f", scale: 1 },
+  splitblock:    { font: "Helvetica,Arial,sans-serif", accent: "#1a1a1a", headerBg: "transparent", headerText: "#111827", subColor: "#6b6b6b", chipBg: "#f0f0f0", chipText: "#1a1a1a", scale: 1 },
+  klammern:      { font: "Helvetica,Arial,sans-serif", accent: "#1f4d47", headerBg: "transparent", headerText: "#111827", subColor: "#5f7a74", chipBg: "#e9efe9", chipText: "#1f4d47", scale: 1 },
+  winkel:        { font: "Helvetica,Arial,sans-serif", accent: "#5c1a2b", headerBg: "transparent", headerText: "#111827", subColor: "#8a5f6b", chipBg: "#f4e8ec", chipText: "#5c1a2b", scale: 1 },
+  bogen:         { font: "Georgia,'Times New Roman',serif", accent: "#b8873f", headerBg: "transparent", headerText: "#111827", subColor: "#8a7a5f", chipBg: "#f6eedd", chipText: "#8f6a2f", scale: 1 },
+  zweig:         { font: "Georgia,'Times New Roman',serif", accent: "#1f3a5f", headerBg: "transparent", headerText: "#111827", subColor: "#5f708a", chipBg: "#e8edf5", chipText: "#1f3a5f", scale: 1 },
+  berge:         { font: "Georgia,'Times New Roman',serif", accent: "#a8552f", headerBg: "transparent", headerText: "#111827", subColor: "#8a6f5f", chipBg: "#f5e9e2", chipText: "#a8552f", scale: 1 },
+  konfetti:      { font: "Helvetica,Arial,sans-serif", accent: "#d94f4f", headerBg: "transparent", headerText: "#111827", subColor: "#7a7a7a", chipBg: "#fdecec", chipText: "#c23c3c", scale: 1 },
+  wellenband:    { font: "Helvetica,Arial,sans-serif", accent: "#d16587", headerBg: "transparent", headerText: "#111827", subColor: "#8a7a80", chipBg: "#fdeef3", chipText: "#b54c6e", scale: 1 },
+  farbkreis:     { font: "Helvetica,Arial,sans-serif", accent: "#e76f51", headerBg: "transparent", headerText: "#111827", subColor: "#8a7a70", chipBg: "#fdeee8", chipText: "#c25537", scale: 1 },
+  blobcorner:    { font: "Helvetica,Arial,sans-serif", accent: "#7c6ff2", headerBg: "transparent", headerText: "#111827", subColor: "#8a85a8", chipBg: "#efecfd", chipText: "#5f52d4", scale: 1 },
+  aurora:        { font: "Helvetica,Arial,sans-serif", accent: "#e05575", headerBg: "transparent", headerText: "#111827", subColor: "#9a7a80", chipBg: "#fdeef1", chipText: "#c23c5c", scale: 1 },
+  prisma:        { font: "Helvetica,Arial,sans-serif", accent: "#2fb5a3", headerBg: "transparent", headerText: "#111827", subColor: "#6f8a85", chipBg: "#e6f7f3", chipText: "#1f8a7a", scale: 1 },
+  verlaufswelle: { font: "Helvetica,Arial,sans-serif", accent: "#7c6ff2", headerBg: "transparent", headerText: "#111827", subColor: "#8a85a8", chipBg: "#efecfd", chipText: "#5f52d4", scale: 1 },
+  blaupause:     { font: "Helvetica,Arial,sans-serif", accent: "#2b5a8c", headerBg: "transparent", headerText: "#111827", subColor: "#6f80a0", chipBg: "#e9f0f7", chipText: "#2b5a8c", scale: 1 },
+  technik:       { font: "Helvetica,Arial,sans-serif", accent: "#3d3d3d", headerBg: "transparent", headerText: "#111827", subColor: "#7a7a7a", chipBg: "#efefef", chipText: "#3d3d3d", scale: 1 },
+  raster:        { font: "Helvetica,Arial,sans-serif", accent: "#2f5940", headerBg: "transparent", headerText: "#111827", subColor: "#6f857a", chipBg: "#e9f1ec", chipText: "#2f5940", scale: 1 },
 };
 
 /** Style descriptor for the AI prompt — for "custom", derive it from the uploaded design. */
@@ -63,7 +83,7 @@ function blankForm(): FormData {
     skills: [],
     languages: [],
     jobad: { title: "", company: "", address: "", description: "" },
-    template: "modern",
+    template: "blobs",
   };
 }
 
@@ -889,301 +909,26 @@ function StepJobAd({ form, setJobad }: { form: FormData; setJobad: (k: string, v
   );
 }
 
-// ── Mini CV previews (SVG layout sketches) ──────────────────────────────────
-function PreviewModern() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="0" y="0" width="80" height="22" fill="#fff" />
-      <line x1="8" y1="21" x2="72" y2="21" stroke="#2563eb" strokeWidth="1.5" />
-      <rect x="20" y="5" width="40" height="4" rx="1" fill="#111" />
-      <rect x="26" y="11" width="28" height="2.5" rx="1" fill="#2563eb" opacity=".7" />
-      <rect x="15" y="16" width="50" height="1.5" rx="1" fill="#aaa" />
-      {[27,33,40,47,54,61,68,75,82,89].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width="30" height="1.5" rx="1" fill={i===0||i===3||i===5?"#374151":"#ccc"} opacity={i===0||i===3||i===5?1:.7} />
-          {(i===1||i===2||i===4)&&<rect x="8" y={y} width="20" height="1.5" rx="1" fill="#ccc" />}
-          {(i===1||i===2||i===4)&&<rect x="50" y={y} width="22" height="1.5" rx="1" fill="#eee" />}
-        </g>
-      ))}
-      <rect x="8" y="93" width="14" height="4" rx="2" fill="#dbeafe" />
-      <rect x="24" y="93" width="14" height="4" rx="2" fill="#dbeafe" />
-      <rect x="40" y="93" width="10" height="4" rx="2" fill="#dbeafe" />
-    </svg>
-  );
-}
-function PreviewClassic() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="5" width="44" height="5" rx="1" fill="#0f172a" />
-      <rect x="8" y="12" width="30" height="2.5" rx="1" fill="#6b7280" />
-      <line x1="8" y1="18" x2="72" y2="18" stroke="#0f172a" strokeWidth="2" />
-      {[23,33,43,53,63,73,83].map((y,i) => i < 6 && (
-        <g key={y}>
-          <rect x="8" y={y} width="14" height="1.5" rx="1" fill={i%3===0?"#374151":"#ccc"} />
-          <rect x="26" y={y} width="34" height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} opacity={i%3===0?1:.8} />
-          {i%3!==0 && <rect x="26" y={y+3} width="24" height="1.5" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-function PreviewCreative() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="0" y="0" width="26" height="108" fill="#1e3a5f" />
-      <circle cx="13" cy="18" r="8" fill="#3b82f6" opacity=".4" />
-      <rect x="3" y="30" width="20" height="2" rx="1" fill="#3b82f6" opacity=".6" />
-      {[36,41,46,51,56,62,68,74].map((y,i) => <rect key={y} x="3" y={y} width={i%3===0?20:14} height="1.5" rx="1" fill={i%3===0?"#94a3b8":"#475569"} />)}
-      {[28,36,44,52,60,68,76,84].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="30" y={y} width={i%4===0?36:28} height="1.5" rx="1" fill={i%4===0?"#111":"#ccc"} />
-          {i%4!==0&&<rect x="30" y={y+3} width="20" height="1.5" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-function PreviewExecutive() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="4" width="64" height="1.5" fill="#1e3a8a" />
-      <rect x="20" y="7" width="40" height="5" rx="1" fill="#1e3a8a" />
-      <rect x="26" y="14" width="28" height="2" rx="1" fill="#475569" />
-      <rect x="18" y="18" width="44" height="1.2" rx="1" fill="#94a3b8" />
-      <rect x="8" y="21" width="64" height="1.5" fill="#1e3a8a" />
-      {[26,33,40,47,54,62,70,78].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#1e3a8a":"#ccc"} opacity={i%3===0?1:.9} />
-          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.5" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <rect x="8" y="93" width="28" height="4" rx="2" fill="#eff6ff" />
-      <rect x="40" y="93" width="18" height="4" rx="2" fill="#eff6ff" />
-    </svg>
-  );
-}
-function PreviewMinimal() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="12" y="8" width="36" height="5" rx="1" fill="#111" />
-      <rect x="12" y="15" width="24" height="2" rx="1" fill="#9ca3af" />
-      <rect x="12" y="19" width="50" height="1.2" rx="1" fill="#e5e7eb" />
-      {[25,32,39,46,53,60,67,74,81].map((y,i) => i < 8 && (
-        <g key={y}>
-          <rect x="12" y={y} width={i===0||i===3||i===6?8:5} height="1.5" rx="1" fill="#9ca3af" />
-          <rect x="24" y={y} width={i%3===0?38:28} height="1.5" rx="1" fill={i%3===0?"#374151":"#d1d5db"} />
-          {i%3===1&&<rect x="24" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <line x1="12" y1="88" x2="68" y2="88" stroke="#f3f4f6" strokeWidth="1" />
-      <rect x="12" y="91" width="50" height="1.5" rx="1" fill="#e5e7eb" />
-    </svg>
-  );
-}
-function PreviewElegant() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="22" y="5" width="36" height="5" rx="1" fill="#1c1917" />
-      <rect x="26" y="12" width="28" height="2.5" rx="1" fill="#92400e" opacity=".8" />
-      <rect x="16" y="17" width="48" height="1.2" rx="1" fill="#d97706" opacity=".5" />
-      <line x1="8" y1="20" x2="72" y2="20" stroke="#92400e" strokeWidth=".8" />
-      <rect x="8" y="23" width="64" height="6" rx="1" fill="#fffbeb" />
-      <rect x="10" y="25" width="50" height="1.5" rx="1" fill="#92400e" opacity=".4" />
-      {[33,40,47,54,61,68,75,82].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#92400e":"#d1d5db"} opacity={i%3===0?.9:1} />
-          {i%3!==0&&<rect x="8" y={y+3} width="18" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-function PreviewBold() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="0" y="0" width="80" height="26" fill="#0f172a" />
-      <rect x="8" y="5" width="40" height="5" rx="1" fill="#f8fafc" />
-      <rect x="8" y="12" width="28" height="2.5" rx="1" fill="#94a3b8" />
-      <rect x="8" y="17" width="50" height="1.5" rx="1" fill="#475569" />
-      {[31,38,45,52,59,66,73,80].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#0f172a":"#d1d5db"} />
-          {i%3===0&&<rect x="50" y={y} width="18" height="1.5" rx="1" fill="#e2e8f0" />}
-          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <rect x="8" y="90" width="14" height="4" rx="2" fill="#f1f5f9" />
-      <rect x="24" y="90" width="14" height="4" rx="2" fill="#f1f5f9" />
-    </svg>
-  );
-}
-function PreviewCompact() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="5" width="32" height="4" rx="1" fill="#111" />
-      <rect x="8" y="11" width="60" height="1.2" rx="1" fill="#9ca3af" />
-      <line x1="8" y1="14" x2="72" y2="14" stroke="#1f2937" strokeWidth="1" />
-      {Array.from({length: 12}, (_,i) => (
-        <g key={i}>
-          <rect x="8" y={17 + i * 7} width={8} height="1.2" rx="1" fill="#9ca3af" />
-          <rect x="18" y={17 + i * 7} width={i%4===0?45:i%4===1?35:i%4===2?28:40} height="1.2" rx="1" fill={i%4===0?"#111":"#ccc"} />
-          {i%4!==0&&<rect x="18" y={17 + i*7 + 3} width="22" height="1" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function PreviewSwiss() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="14" width="64" height="3" fill="#dc2626" />
-      <rect x="8" y="5" width="38" height="5" rx="1" fill="#111" />
-      <rect x="8" y="11" width="22" height="2" rx="1" fill="#555" />
-      <rect x="8" y="19" width="60" height="1.2" rx="1" fill="#ddd" />
-      {[24,31,38,45,52,60,68,76].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width="14" height="1.5" rx="1" fill="#ccc" />
-          <rect x="26" y={y} width={i%3===0?38:28} height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} />
-          {i%3!==0&&<rect x="26" y={y+3} width="20" height="1.2" rx="1" fill="#eee" />}
-        </g>
-      ))}
-      <rect x="8" y="88" width="12" height="4" rx="2" fill="#fef2f2" style={{ outline: "1px solid #fecaca" }} />
-      <rect x="22" y="88" width="12" height="4" rx="2" fill="#fef2f2" />
-    </svg>
-  );
-}
-function PreviewNordic() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="5" width="40" height="5.5" rx="1" fill="#111827" />
-      <rect x="8" y="12" width="26" height="2.5" rx="1" fill="#0d9488" />
-      <rect x="8" y="17" width="55" height="1.2" rx="1" fill="#9ca3af" />
-      <rect x="8" y="22" width="64" height="7" rx="3" fill="#f0fdfa" />
-      {[33,40,47,55,63,71,79].map((y,i) => i < 6 && (
-        <g key={y}>
-          <rect x="10" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#111":"#ccc"} />
-          {i%3===0&&<rect x="10" y={y} width="2" height="8" rx="1" fill="#0d9488" opacity=".3" />}
-          {i%3!==0&&<rect x="10" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <rect x="8" y="92" width="12" height="4" rx="10" fill="#f0fdfa" />
-      <rect x="22" y="92" width="14" height="4" rx="10" fill="#f0fdfa" />
-      <rect x="38" y="92" width="10" height="4" rx="10" fill="#f0fdfa" />
-    </svg>
-  );
-}
-function PreviewCorporate() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="0" y="0" width="24" height="108" fill="#065f46" />
-      <circle cx="12" cy="14" r="7" fill="#10b981" opacity=".35" />
-      <rect x="3" y="25" width="18" height="1.8" rx="1" fill="#10b981" opacity=".7" />
-      {[31,37,43,49,55,61,67,73,79,85,91].map((y,i) => <rect key={y} x="3" y={y} width={i%3===0?18:13} height="1.3" rx="1" fill={i%3===0?"#d1fae5":"#6ee7b7"} opacity={i%3===0?.9:.5} />)}
-      {[15,23,31,39,47,55,63,71,79].map((y,i) => i < 8 && (
-        <g key={y}>
-          <rect x="28" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#065f46":"#ccc"} />
-          {i%3!==0&&<rect x="28" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-function PreviewTimeline() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="8" y="5" width="36" height="5" rx="1" fill="#111" />
-      <rect x="8" y="12" width="24" height="2.5" rx="1" fill="#ea580c" />
-      <rect x="8" y="16" width="50" height="1.2" rx="1" fill="#9ca3af" />
-      <rect x="8" y="19" width="64" height="1" rx="1" fill="#ea580c" />
-      <line x1="20" y1="24" x2="20" y2="100" stroke="#fed7aa" strokeWidth="1.5" />
-      {[25,36,47,58,69,80].map((y,i) => (
-        <g key={y}>
-          <circle cx="20" cy={y+2} r="3" fill={i===0?"#ea580c":"#fed7aa"} />
-          <rect x="27" y={y} width={i%2===0?38:28} height="2" rx="1" fill={i%2===0?"#111":"#ccc"} />
-          {i%2===0&&<rect x="27" y={y+4} width="22" height="1.5" rx="1" fill="#e5e7eb" />}
-          {i%2===0&&<rect x="27" y={y+7} width="30" height="1.2" rx="1" fill="#f5f5f5" />}
-        </g>
-      ))}
-    </svg>
-  );
-}
-function PreviewSlate() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fff" />
-      <rect x="0" y="0" width="80" height="24" fill="#334155" />
-      <rect x="8" y="5" width="38" height="5" rx="1" fill="#f1f5f9" />
-      <rect x="8" y="12" width="26" height="2" rx="1" fill="#94a3b8" />
-      <rect x="8" y="16" width="46" height="1.5" rx="1" fill="#475569" />
-      {[29,37,45,53,61,69,77,85].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width="14" height="1.5" rx="1" fill="#94a3b8" />
-          <rect x="26" y={y} width={i%3===0?40:30} height="1.5" rx="1" fill={i%3===0?"#334155":"#ccc"} />
-          {i%3!==0&&<rect x="26" y={y+3} width="22" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <rect x="8" y="90" width="14" height="4" rx="2" fill="#f8fafc" />
-      <rect x="24" y="90" width="14" height="4" rx="2" fill="#f8fafc" />
-    </svg>
-  );
-}
-function PreviewTerra() {
-  return (
-    <svg viewBox="0 0 80 108" style={{ width: "100%", borderRadius: 4 }}>
-      <rect width="80" height="108" fill="#fffbf7" />
-      <rect x="22" y="5" width="36" height="5.5" rx="1" fill="#7c2d12" />
-      <rect x="28" y="12" width="24" height="2.5" rx="1" fill="#c2410c" />
-      <rect x="14" y="17" width="52" height="1" rx="1" fill="#fed7aa" />
-      <rect x="8" y="22" width="64" height="6" rx="2" fill="#fff7ed" />
-      <rect x="10" y="24" width="50" height="1.5" rx="1" fill="#fed7aa" />
-      {[32,39,46,53,60,68,76,84].map((y,i) => i < 7 && (
-        <g key={y}>
-          <rect x="8" y={y} width={i%3===0?40:28} height="1.5" rx="1" fill={i%3===0?"#7c2d12":"#d1d5db"} opacity={i%3===0?.9:1} />
-          {i%3!==0&&<rect x="8" y={y+3} width="20" height="1.2" rx="1" fill="#e5e7eb" />}
-        </g>
-      ))}
-      <rect x="8" y="90" width="14" height="4" rx="2" fill="#fff7ed" />
-      <rect x="24" y="90" width="14" height="4" rx="2" fill="#fff7ed" />
-    </svg>
-  );
-}
-
-const TEMPLATE_PREVIEWS: Record<string, () => React.JSX.Element> = {
-  modern: PreviewModern, classic: PreviewClassic, creative: PreviewCreative,
-  executive: PreviewExecutive, minimal: PreviewMinimal, elegant: PreviewElegant,
-  bold: PreviewBold, compact: PreviewCompact,
-  swiss: PreviewSwiss, nordic: PreviewNordic, corporate: PreviewCorporate,
-  timeline: PreviewTimeline, slate: PreviewSlate, terra: PreviewTerra,
-};
-
 const TEMPLATES = [
-  { id: "modern" as const,    name: "Modern",    descKey: "wizard.template.modernDesc" },
-  { id: "classic" as const,   name: "Classic",   descKey: "wizard.template.classicDesc" },
-  { id: "creative" as const,  name: "Creative",  descKey: "wizard.template.creativeDesc" },
-  { id: "executive" as const, name: "Executive", descKey: "wizard.template.executiveDesc" },
-  { id: "minimal" as const,   name: "Minimal",   descKey: "wizard.template.minimalDesc" },
-  { id: "elegant" as const,   name: "Elegant",   descKey: "wizard.template.elegantDesc" },
-  { id: "bold" as const,      name: "Bold",      descKey: "wizard.template.boldDesc" },
-  { id: "compact" as const,   name: "Compact",   descKey: "wizard.template.compactDesc" },
-  { id: "swiss" as const,     name: "Swiss",     descKey: "wizard.template.swissDesc" },
-  { id: "nordic" as const,    name: "Nordic",    descKey: "wizard.template.nordicDesc" },
-  { id: "corporate" as const, name: "Corporate", descKey: "wizard.template.corporateDesc" },
-  { id: "timeline" as const,  name: "Timeline",  descKey: "wizard.template.timelineDesc" },
-  { id: "slate" as const,     name: "Slate",     descKey: "wizard.template.slateDesc" },
-  { id: "terra" as const,     name: "Terra",     descKey: "wizard.template.terraDesc" },
+  { id: "blobs" as const,         name: "Blobs",      descKey: "wizard.template.blobsDesc" },
+  { id: "welle" as const,         name: "Welle",      descKey: "wizard.template.welleDesc" },
+  { id: "halo" as const,          name: "Halo",       descKey: "wizard.template.haloDesc" },
+  { id: "splitblock" as const,    name: "Block",      descKey: "wizard.template.splitblockDesc" },
+  { id: "klammern" as const,      name: "Frame",      descKey: "wizard.template.klammernDesc" },
+  { id: "winkel" as const,        name: "Chevron",    descKey: "wizard.template.winkelDesc" },
+  { id: "bogen" as const,         name: "Arc",        descKey: "wizard.template.bogenDesc" },
+  { id: "zweig" as const,         name: "Botanic",    descKey: "wizard.template.zweigDesc" },
+  { id: "berge" as const,         name: "Horizon",    descKey: "wizard.template.bergeDesc" },
+  { id: "konfetti" as const,      name: "Konfetti",   descKey: "wizard.template.konfettiDesc" },
+  { id: "wellenband" as const,    name: "Candy",      descKey: "wizard.template.wellenbandDesc" },
+  { id: "farbkreis" as const,     name: "Citrus",     descKey: "wizard.template.farbkreisDesc" },
+  { id: "blobcorner" as const,    name: "Nova",       descKey: "wizard.template.blobcornerDesc" },
+  { id: "aurora" as const,        name: "Aurora",     descKey: "wizard.template.auroraDesc" },
+  { id: "prisma" as const,        name: "Prisma",     descKey: "wizard.template.prismaDesc" },
+  { id: "verlaufswelle" as const, name: "Flow",       descKey: "wizard.template.verlaufswelleDesc" },
+  { id: "blaupause" as const,     name: "Blueprint",  descKey: "wizard.template.blaupauseDesc" },
+  { id: "technik" as const,       name: "Graphit",    descKey: "wizard.template.technikDesc" },
+  { id: "raster" as const,        name: "Raster",     descKey: "wizard.template.rasterDesc" },
 ];
 
 function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; setTemplate: (t: TemplateId) => void; setCustomStyle: (cs: NonNullable<FormData["customStyle"]>) => void }) {
@@ -1250,7 +995,6 @@ function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; s
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14 }}>
         {TEMPLATES.map(tp => {
-          const Preview = TEMPLATE_PREVIEWS[tp.id];
           const selected = form.template === tp.id;
           return (
             <div key={tp.id} onClick={() => setTemplate(tp.id)} style={{
@@ -1264,7 +1008,8 @@ function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; s
                 marginBottom: 8, border: "1px solid #e5e7eb",
                 boxShadow: "0 1px 4px rgba(0,0,0,.06)",
               }}>
-                <Preview />
+                <img src={letterheadUrl(tp.id)} alt={tp.name} loading="lazy"
+                  style={{ display: "block", width: "100%", aspectRatio: "210/297", objectFit: "cover" }} />
               </div>
               <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{tp.name}</div>
               <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.4 }}>{t(tp.descKey)}</div>

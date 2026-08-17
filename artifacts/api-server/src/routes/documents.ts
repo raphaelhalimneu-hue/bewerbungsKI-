@@ -70,6 +70,9 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
 const VALID_TEMPLATES = new Set([
   "modern","classic","creative","executive","minimal","elegant",
   "bold","compact","swiss","nordic","corporate","timeline","slate","terra","custom",
+  "blobs","welle","halo","splitblock","klammern","winkel","bogen","zweig","berge",
+  "konfetti","wellenband","farbkreis","blobcorner","aurora","prisma","verlaufswelle",
+  "blaupause","technik","raster",
 ]);
 
 /** Reject cv_json payloads that aren't plain objects or contain non-string scalar fields. */
