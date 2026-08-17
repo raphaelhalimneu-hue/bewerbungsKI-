@@ -517,7 +517,7 @@
   "fileImport": {
     "button": "Upload file (PDF, Word, photo)",
     "reading": "Reading file …",
-    "tooLarge": "File too large (max. 8 MB).",
+    "tooLarge": "File too large (max. 15 MB).",
     "noText": "No text found in the file.",
     "limit": "Daily upload limit reached. Try again tomorrow.",
     "error": "Could not read the file."

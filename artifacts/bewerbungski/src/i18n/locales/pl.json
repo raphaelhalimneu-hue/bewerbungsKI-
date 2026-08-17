@@ -474,7 +474,7 @@
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",
     "reading": "Odczytywanie pliku …",
-    "tooLarge": "Plik jest za duży (maks. 8 MB).",
+    "tooLarge": "Plik jest za duży (maks. 15 MB).",
     "noText": "Nie znaleziono tekstu w pliku.",
     "limit": "Osiągnięto dzienny limit przesyłania. Spróbuj jutro.",
     "error": "Nie udało się odczytać pliku."

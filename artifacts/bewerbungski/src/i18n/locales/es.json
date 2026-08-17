@@ -474,7 +474,7 @@
   "fileImport": {
     "button": "Subir archivo (PDF, Word, foto)",
     "reading": "Leyendo archivo …",
-    "tooLarge": "Archivo demasiado grande (máx. 8 MB).",
+    "tooLarge": "Archivo demasiado grande (máx. 15 MB).",
     "noText": "No se encontró texto en el archivo.",
     "limit": "Límite diario de subidas alcanzado. Inténtalo mañana.",
     "error": "No se pudo leer el archivo."

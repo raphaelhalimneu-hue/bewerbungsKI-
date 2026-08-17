@@ -941,8 +941,8 @@ function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; s
 
   async function handleDesignFile(file: File) {
     setDesignErr("");
-    file = await compressImageIfNeeded(file, 8 * 1024 * 1024);
-    if (file.size > 8 * 1024 * 1024) { setDesignErr(t("fileImport.tooLarge")); return; }
+    file = await compressImageIfNeeded(file, 15 * 1024 * 1024);
+    if (file.size > 15 * 1024 * 1024) { setDesignErr(t("fileImport.tooLarge")); return; }
     setDesignBusy(true);
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
