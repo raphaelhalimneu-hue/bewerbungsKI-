@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { AuthModal } from "./AuthModal";
 import { InAppBrowserBanner } from "./InAppBrowserBanner";
+import { ExitIntentPopup } from "./ExitIntentPopup";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
 import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload } from "react-icons/fi";
@@ -46,6 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app flex flex-col h-screen overflow-hidden">
       <InAppBrowserBanner />
+      <ExitIntentPopup />
       {/* Navbar */}
       <header className="nav shrink-0 flex items-center justify-between gap-2 px-3 sm:px-6 bg-[var(--bg2)] border-b border-[var(--border)] h-[60px] shadow-[0_1px_4px_rgba(15,23,42,0.05)] z-50">
         <Link href="/" className="nav-brand no-underline shrink-0 whitespace-nowrap">

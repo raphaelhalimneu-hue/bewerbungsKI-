@@ -496,5 +496,11 @@
     "actStyleDesc": "Usar los colores y el estilo del archivo para tu nueva candidatura (solo foto/PDF).",
     "stylePreviewTitle": "Así se ve tu diseño",
     "styleUse": "Crear con este diseño"
+  },
+  "exitPopup": {
+    "title": "¡Espera un momento!",
+    "text": "Tu primera candidatura es totalmente gratis: CV y carta de presentación en 3 minutos, sin tarjeta de crédito.",
+    "cta": "Crear gratis ahora",
+    "dismiss": "No, gracias"
   }
 }

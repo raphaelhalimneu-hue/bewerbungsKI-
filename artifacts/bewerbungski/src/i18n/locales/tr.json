@@ -496,5 +496,11 @@
     "actStyleDesc": "Dosyanın renklerini ve stilini yeni başvurunda kullan (yalnızca fotoğraf/PDF).",
     "stylePreviewTitle": "Tasarımın böyle görünüyor",
     "styleUse": "Bu tasarımla oluştur"
+  },
+  "exitPopup": {
+    "title": "Bir saniye bekle!",
+    "text": "İlk başvurun tamamen ücretsiz – 3 dakikada CV ve ön yazı, kredi kartı gerekmez.",
+    "cta": "Şimdi ücretsiz oluştur",
+    "dismiss": "Hayır, teşekkürler"
   }
 }

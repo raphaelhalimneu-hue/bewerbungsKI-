@@ -496,5 +496,11 @@
     "actStyleDesc": "Użyj kolorów i stylu pliku w nowej aplikacji (tylko zdjęcie/PDF).",
     "stylePreviewTitle": "Tak wygląda Twój projekt",
     "styleUse": "Utwórz z tym projektem"
+  },
+  "exitPopup": {
+    "title": "Poczekaj chwilę!",
+    "text": "Twoja pierwsza aplikacja jest całkowicie darmowa – CV i list motywacyjny w 3 minuty, bez karty kredytowej.",
+    "cta": "Utwórz teraz za darmo",
+    "dismiss": "Nie, dziękuję"
   }
 }
