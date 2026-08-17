@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BewerbungsKI Sales Kit</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;}
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-thumb{background:#c7c2b8; border-radius:4px;}
+</style>
+</head>
+<body class="bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
+<div id="root"></div>
+
+<script>
+const { useState, useEffect } = React;
+const h = React.createElement;
+
+/* ================= DATA ================= */
+const LANGS = [
+  { code:'de', label:'Deutsch', rtl:false },
+  { code:'en', label:'English', rtl:false },
+  { code:'ar', label:'العربية', rtl:true },
+  { code:'fr', label:'Français', rtl:false },
+  { code:'es', label:'Español', rtl:false },
+  { code:'pt', label:'Português', rtl:false },
+  { code:'tr', label:'Türkçe', rtl:false },
+  { code:'pl', label:'Polski', rtl:false },
+];
+
+const UI = {
+  de:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Tracker', copy:'Kopieren', copied:'Kopiert!',
+       freeGen:'Kostenlose Generierungen', upgradeClicks:'Upgrade-Klicks', purchases:'Käufe',
+       convRate:'Conversion-Rate (Kauf / Kostenlos)', clickRate:'Klick-zu-Kauf-Rate', reset:'Zurücksetzen',
+       badgeNone:'', title:'BewerbungsKI Sales Kit' },
+  en:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Tracker', copy:'Copy', copied:'Copied!',
+       freeGen:'Free generations', upgradeClicks:'Upgrade clicks', purchases:'Purchases',
+       convRate:'Conversion rate (Purchase / Free)', clickRate:'Click-to-purchase rate', reset:'Reset',
+       title:'BewerbungsKI Sales Kit' },
+  ar:{ offerLab:'مختبر العروض', exitIntent:'نافذة الخروج', tracker:'متتبع التحويل', copy:'نسخ', copied:'تم النسخ!',
+       freeGen:'الإصدارات المجانية', upgradeClicks:'نقرات الترقية', purchases:'المشتريات',
+       convRate:'معدل التحويل (شراء / مجاني)', clickRate:'معدل النقر إلى الشراء', reset:'إعادة تعيين',
+       title:'حقيبة مبيعات BewerbungsKI' },
+  fr:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Suivi', copy:'Copier', copied:'Copié !',
+       freeGen:'Générations gratuites', upgradeClicks:'Clics de mise à niveau', purchases:'Achats',
+       convRate:'Taux de conversion (Achat / Gratuit)', clickRate:'Taux clic → achat', reset:'Réinitialiser',
+       title:'BewerbungsKI Sales Kit' },
+  es:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Seguimiento', copy:'Copiar', copied:'¡Copiado!',
+       freeGen:'Generaciones gratuitas', upgradeClicks:'Clics de mejora', purchases:'Compras',
+       convRate:'Tasa de conversión (Compra / Gratis)', clickRate:'Tasa clic → compra', reset:'Restablecer',
+       title:'BewerbungsKI Sales Kit' },
+  pt:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Rastreador', copy:'Copiar', copied:'Copiado!',
+       freeGen:'Gerações gratuitas', upgradeClicks:'Cliques de upgrade', purchases:'Compras',
+       convRate:'Taxa de conversão (Compra / Grátis)', clickRate:'Taxa clique → compra', reset:'Redefinir',
+       title:'BewerbungsKI Sales Kit' },
+  tr:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Takip', copy:'Kopyala', copied:'Kopyalandı!',
+       freeGen:'Ücretsiz üretimler', upgradeClicks:'Yükseltme tıklamaları', purchases:'Satın almalar',
+       convRate:'Dönüşüm oranı (Satın alma / Ücretsiz)', clickRate:'Tıklama → satın alma oranı', reset:'Sıfırla',
+       title:'BewerbungsKI Sales Kit' },
+  pl:{ offerLab:'Offer Lab', exitIntent:'Exit-Intent', tracker:'Tracker', copy:'Kopiuj', copied:'Skopiowano!',
+       freeGen:'Darmowe generacje', upgradeClicks:'Kliknięcia upgrade', purchases:'Zakupy',
+       convRate:'Współczynnik konwersji (Zakup / Darmowe)', clickRate:'Współczynnik klik → zakup', reset:'Resetuj',
+       title:'BewerbungsKI Sales Kit' },
+};
+
+const OFFERS = {
+  de:[
+    {label:'Monatlich', headline:'Flexibel bleiben', price:'9,99 €/Monat', benefits:'Jederzeit kündbar · Alle Vorlagen · KI-Anschreiben', cta:'Jetzt starten', badge:null},
+    {label:'Jährlich', headline:'Am meisten sparen', price:'59,99 €/Jahr', benefits:'50% günstiger als monatlich · Alle Vorlagen · Priorität-Support', cta:'Jahresplan wählen', badge:'-50%'},
+    {label:'Limitiertes Angebot', headline:'Nur für kurze Zeit', price:'7,99 €/Monat', benefits:'Erste 3 Monate reduziert · Alle Vorlagen · Sofort startklar', cta:'Angebot sichern', badge:'Limitiert'},
+    {label:'Dringend', headline:'Deine Bewerbung wartet nicht', price:'9,99 €/Monat', benefits:'Nur noch heute verfügbar · Sofortzugang · Keine Wartezeit', cta:'Jetzt sichern', badge:'⏰ Endet heute'},
+  ],
+  en:[
+    {label:'Monthly', headline:'Stay flexible', price:'$9.99/month', benefits:'Cancel anytime · All templates · AI cover letters', cta:'Start now', badge:null},
+    {label:'Yearly', headline:'Save the most', price:'$59.99/year', benefits:'50% cheaper than monthly · All templates · Priority support', cta:'Choose yearly plan', badge:'-50%'},
+    {label:'Limited Offer', headline:'For a short time only', price:'$7.99/month', benefits:'First 3 months discounted · All templates · Ready instantly', cta:'Claim offer', badge:'Limited'},
+    {label:'Urgency', headline:"Your application can't wait", price:'$9.99/month', benefits:'Available today only · Instant access · No waiting', cta:'Secure it now', badge:'⏰ Ends today'},
+  ],
+  ar:[
+    {label:'شهري', headline:'ابقَ مرنًا', price:'9.99€/شهريًا', benefits:'إلغاء في أي وقت · جميع القوالب · خطابات تقديم بالذكاء الاصطناعي', cta:'ابدأ الآن', badge:null},
+    {label:'سنوي', headline:'وفّر أكثر', price:'59.99€/سنويًا', benefits:'أرخص بـ 50% من الاشتراك الشهري · جميع القوالب · دعم ذو أولوية', cta:'اختر الخطة السنوية', badge:'-50%'},
+    {label:'عرض محدود', headline:'لفترة محدودة فقط', price:'7.99€/شهريًا', benefits:'خصم على أول 3 أشهر · جميع القوالب · جاهز فورًا', cta:'احصل على العرض', badge:'عرض محدود'},
+    {label:'عاجل', headline:'طلبك لا ينتظر', price:'9.99€/شهريًا', benefits:'متاح اليوم فقط · وصول فوري · بدون انتظار', cta:'احجز الآن', badge:'⏰ ينتهي اليوم'},
+  ],
+  fr:[
+    {label:'Mensuel', headline:'Restez flexible', price:'9,99 €/mois', benefits:'Résiliable à tout moment · Tous les modèles · Lettres de motivation IA', cta:'Commencer', badge:null},
+    {label:'Annuel', headline:'Économisez le plus', price:'59,99 €/an', benefits:"50% moins cher qu'au mois · Tous les modèles · Support prioritaire", cta:"Choisir l'offre annuelle", badge:'-50%'},
+    {label:'Offre limitée', headline:'Pour une durée limitée', price:'7,99 €/mois', benefits:'3 premiers mois réduits · Tous les modèles · Prêt immédiatement', cta:"Profiter de l'offre", badge:'Limité'},
+    {label:'Urgence', headline:"Votre candidature n'attend pas", price:'9,99 €/mois', benefits:"Disponible aujourd'hui seulement · Accès immédiat · Aucune attente", cta:'Réserver maintenant', badge:"⏰ Se termine aujourd'hui"},
+  ],
+  es:[
+    {label:'Mensual', headline:'Mantente flexible', price:'9,99 €/mes', benefits:'Cancela cuando quieras · Todas las plantillas · Cartas de presentación con IA', cta:'Empezar ahora', badge:null},
+    {label:'Anual', headline:'Ahorra más', price:'59,99 €/año', benefits:'50% más barato que mensual · Todas las plantillas · Soporte prioritario', cta:'Elegir plan anual', badge:'-50%'},
+    {label:'Oferta limitada', headline:'Solo por tiempo limitado', price:'7,99 €/mes', benefits:'Primeros 3 meses con descuento · Todas las plantillas · Listo al instante', cta:'Aprovechar oferta', badge:'Limitada'},
+    {label:'Urgente', headline:'Tu candidatura no puede esperar', price:'9,99 €/mes', benefits:'Disponible solo hoy · Acceso inmediato · Sin esperas', cta:'Asegurar ahora', badge:'⏰ Termina hoy'},
+  ],
+  pt:[
+    {label:'Mensal', headline:'Mantenha-se flexível', price:'9,99 €/mês', benefits:'Cancele quando quiser · Todos os modelos · Cartas de apresentação com IA', cta:'Começar agora', badge:null},
+    {label:'Anual', headline:'Economize mais', price:'59,99 €/ano', benefits:'50% mais barato que o mensal · Todos os modelos · Suporte prioritário', cta:'Escolher plano anual', badge:'-50%'},
+    {label:'Oferta limitada', headline:'Por tempo limitado', price:'7,99 €/mês', benefits:'Primeiros 3 meses com desconto · Todos os modelos · Pronto na hora', cta:'Aproveitar oferta', badge:'Limitada'},
+    {label:'Urgente', headline:'Sua candidatura não pode esperar', price:'9,99 €/mês', benefits:'Disponível somente hoje · Acesso imediato · Sem espera', cta:'Garantir agora', badge:'⏰ Termina hoje'},
+  ],
+  tr:[
+    {label:'Aylık', headline:'Esnek kal', price:'9,99 €/ay', benefits:'İstediğin zaman iptal et · Tüm şablonlar · Yapay zekâ ile ön yazılar', cta:'Şimdi başla', badge:null},
+    {label:'Yıllık', headline:'En fazla tasarruf et', price:'59,99 €/yıl', benefits:'Aylıktan %50 daha ucuz · Tüm şablonlar · Öncelikli destek', cta:'Yıllık planı seç', badge:'-%50'},
+    {label:'Sınırlı teklif', headline:'Sadece kısa süreliğine', price:'7,99 €/ay', benefits:'İlk 3 ay indirimli · Tüm şablonlar · Anında hazır', cta:'Teklifi yakala', badge:'Sınırlı'},
+    {label:'Acil', headline:'Başvurun bekleyemez', price:'9,99 €/ay', benefits:'Sadece bugün geçerli · Anında erişim · Bekleme yok', cta:'Şimdi garantile', badge:'⏰ Bugün sona eriyor'},
+  ],
+  pl:[
+    {label:'Miesięczny', headline:'Zachowaj elastyczność', price:'9,99 €/miesiąc', benefits:'Anuluj w dowolnym momencie · Wszystkie szablony · Listy motywacyjne z AI', cta:'Zacznij teraz', badge:null},
+    {label:'Roczny', headline:'Oszczędzaj najwięcej', price:'59,99 €/rok', benefits:'50% taniej niż miesięcznie · Wszystkie szablony · Priorytetowe wsparcie', cta:'Wybierz plan roczny', badge:'-50%'},
+    {label:'Oferta ograniczona', headline:'Tylko przez krótki czas', price:'7,99 €/miesiąc', benefits:'Pierwsze 3 miesiące taniej · Wszystkie szablony · Gotowe od razu', cta:'Skorzystaj z oferty', badge:'Ograniczona'},
+    {label:'Pilne', headline:'Twoja aplikacja nie może czekać', price:'9,99 €/miesiąc', benefits:'Dostępne tylko dziś · Natychmiastowy dostęp · Bez oczekiwania', cta:'Zabezpiecz teraz', badge:'⏰ Kończy się dziś'},
+  ],
+};
+
+const EXIT_INTENTS = {
+  de:['Warte! Bevor du gehst – erhalte 20% Rabatt auf deinen ersten Monat.',
+      'Deine Bewerbungsunterlagen sind fast fertig. Schließe jetzt ab und spare Zeit.',
+      'Noch unsicher? Teste BewerbungsKI 7 Tage lang kostenlos.'],
+  en:['Wait! Before you go — get 20% off your first month.',
+      'Your application documents are almost ready. Finish now and save time.',
+      'Still unsure? Try BewerbungsKI free for 7 days.'],
+  ar:['انتظر! قبل أن تغادر — احصل على خصم 20% على أول شهر.',
+      'مستنداتك أصبحت جاهزة تقريبًا. أكمل الآن ووفر وقتك.',
+      'لا زلت غير متأكد؟ جرّب BewerbungsKI مجانًا لمدة 7 أيام.'],
+  fr:['Attendez ! Avant de partir — obtenez 20% de réduction sur votre premier mois.',
+      'Vos documents de candidature sont presque prêts. Terminez maintenant et gagnez du temps.',
+      'Encore indécis ? Essayez BewerbungsKI gratuitement pendant 7 jours.'],
+  es:['¡Espera! Antes de irte, obtén un 20% de descuento en tu primer mes.',
+      'Tus documentos de candidatura ya casi están listos. Termina ahora y ahorra tiempo.',
+      '¿Aún no estás seguro? Prueba BewerbungsKI gratis durante 7 días.'],
+  pt:['Espere! Antes de sair — ganhe 20% de desconto no primeiro mês.',
+      'Seus documentos de candidatura já estão quase prontos. Finalize agora e economize tempo.',
+      'Ainda em dúvida? Experimente o BewerbungsKI grátis por 7 dias.'],
+  tr:['Dur! Ayrılmadan önce — ilk ayına %20 indirim kazan.',
+      'Başvuru belgelerin neredeyse hazır. Şimdi tamamla ve zaman kazan.',
+      "Hâlâ emin değil misin? BewerbungsKI'yi 7 gün ücretsiz dene."],
+  pl:['Czekaj! Zanim wyjdziesz — zdobądź 20% zniżki na pierwszy miesiąc.',
+      'Twoje dokumenty aplikacyjne są niemal gotowe. Dokończ teraz i oszczędź czas.',
+      'Wciąż się wahasz? Wypróbuj BewerbungsKI za darmo przez 7 dni.'],
+};
+
+/* ================= COMPONENTS ================= */
+
+function CopyButton({ text, label }) {
+  const [copied, setCopied] = useState(false);
+  const onClick = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+  return h('button', {
+    onClick,
+    className: 'text-xs px-3 py-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors whitespace-nowrap'
+  }, copied ? '✓ ' + label : label);
+}
+
+function OfferCard({ offer, copyLabel }) {
+  const fullText = `${offer.headline}\n${offer.price}\n${offer.benefits}\n${offer.cta}`;
+  return h('div', { className: 'flex flex-col gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900' },
+    h('div', { className: 'flex items-center justify-between gap-2' },
+      h('span', { className: 'text-xs uppercase tracking-wide text-neutral-500' }, offer.label),
+      offer.badge && h('span', { className: 'text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' }, offer.badge)
+    ),
+    h('div', { className: 'text-lg font-bold' }, offer.headline),
+    h('div', { className: 'text-2xl font-extrabold' }, offer.price),
+    h('div', { className: 'text-sm text-neutral-600 dark:text-neutral-400 flex-1' }, offer.benefits),
+    h('div', { className: 'text-sm font-semibold px-3 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-center' }, offer.cta),
+    h('div', { className: 'flex justify-end pt-1' }, h(CopyButton, { text: fullText, label: copyLabel }))
+  );
+}
+
+function OfferLab({ lang, t }) {
+  const offers = OFFERS[lang];
+  return h('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4' },
+    offers.map((o, i) => h(OfferCard, { key: i, offer: o, copyLabel: t.copy }))
+  );
+}
+
+function ExitIntent({ lang, t }) {
+  const texts = EXIT_INTENTS[lang];
+  return h('div', { className: 'flex flex-col gap-3' },
+    texts.map((txt, i) => h('div', {
+      key: i,
+      className: 'flex items-start justify-between gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'
+    },
+      h('p', { className: 'text-sm flex-1' }, txt),
+      h(CopyButton, { text: txt, label: t.copy })
+    ))
+  );
+}
+
+function Tracker({ t }) {
+  const [data, setData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bwki_tracker');
+      return saved ? JSON.parse(saved) : { free: 0, clicks: 0, purchases: 0 };
+    } catch (e) { return { free: 0, clicks: 0, purchases: 0 }; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bwki_tracker', JSON.stringify(data));
+  }, [data]);
+
+  const update = (key) => (e) => {
+    const val = Math.max(0, Number(e.target.value) || 0);
+    setData({ ...data, [key]: val });
+  };
+
+  const convRate = data.free > 0 ? ((data.purchases / data.free) * 100).toFixed(2) : '0.00';
+  const clickRate = data.clicks > 0 ? ((data.purchases / data.clicks) * 100).toFixed(2) : '0.00';
+
+  const field = (key, label) => h('div', { className: 'flex flex-col gap-1' },
+    h('label', { className: 'text-xs text-neutral-500' }, label),
+    h('input', {
+      type: 'number', min: 0, value: data[key], onChange: update(key),
+      className: 'px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-lg font-semibold'
+    })
+  );
+
+  return h('div', { className: 'flex flex-col gap-6 max-w-md' },
+    h('div', { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4' },
+      field('free', t.freeGen), field('clicks', t.upgradeClicks), field('purchases', t.purchases)
+    ),
+    h('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-4' },
+      h('div', { className: 'p-4 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' },
+        h('div', { className: 'text-xs opacity-70' }, t.convRate),
+        h('div', { className: 'text-3xl font-extrabold' }, convRate + '%')
+      ),
+      h('div', { className: 'p-4 rounded-xl bg-neutral-200 dark:bg-neutral-800' },
+        h('div', { className: 'text-xs opacity-70' }, t.clickRate),
+        h('div', { className: 'text-3xl font-extrabold' }, clickRate + '%')
+      )
+    ),
+    h('button', {
+      onClick: () => setData({ free: 0, clicks: 0, purchases: 0 }),
+      className: 'self-start text-xs px-3 py-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+    }, t.reset)
+  );
+}
+
+function App() {
+  const [lang, setLang] = useState('de');
+  const [tab, setTab] = useState('offers');
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
+
+  const langMeta = LANGS.find(l => l.code === lang);
+  const t = UI[lang];
+
+  return h('div', {
+    dir: langMeta.rtl ? 'rtl' : 'ltr',
+    className: 'min-h-screen'
+  },
+    h('div', { className: 'max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6' },
+
+      // Header
+      h('div', { className: 'flex flex-wrap items-center justify-between gap-3' },
+        h('h1', { className: 'text-xl font-bold' }, t.title),
+        h('div', { className: 'flex items-center gap-2 flex-wrap' },
+          h('select', {
+            value: lang, onChange: e => setLang(e.target.value),
+            className: 'text-sm px-3 py-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900'
+          }, LANGS.map(l => h('option', { key: l.code, value: l.code }, l.label))),
+          h('button', {
+            onClick: () => setDark(!dark),
+            className: 'text-sm px-3 py-1.5 rounded-full border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900'
+          }, dark ? '☀️' : '🌙')
+        )
+      ),
+
+      // Tabs
+      h('div', { className: 'flex gap-2 border-b border-neutral-200 dark:border-neutral-800' },
+        ['offers', 'exit', 'tracker'].map(key => {
+          const labels = { offers: t.offerLab, exit: t.exitIntent, tracker: t.tracker };
+          const active = tab === key;
+          return h('button', {
+            key, onClick: () => setTab(key),
+            className: `px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${active ? 'border-neutral-900 dark:border-white' : 'border-transparent text-neutral-500'}`
+          }, labels[key]);
+        })
+      ),
+
+      // Content
+      tab === 'offers' && h(OfferLab, { lang, t }),
+      tab === 'exit' && h(ExitIntent, { lang, t }),
+      tab === 'tracker' && h(Tracker, { t })
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
