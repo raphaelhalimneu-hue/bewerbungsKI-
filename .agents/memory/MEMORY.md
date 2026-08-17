@@ -6,7 +6,7 @@
 - [Railway deploy method](railway-deploy.md) — tar-ball upload via backboard GraphQL API; multipart and CLI do NOT work with the workspace token.
 - [Custom domain bewerbungski.com](custom-domain.md) — Strato CNAME only (no TXT); stuck Railway certs fixed by delete+recreate, which changes the CNAME target.
 - [AI provider](groq-provider.md) — generation runs on Claude (claude-sonnet-4-5) since 2026-08-11; errors usually mean empty Anthropic credit.
-- [Pricing model](pricing-model.md) — 3 kostenlos, dann 9,99 € einmalig für 10 weitere (Limit 13 Dokumente gesamt; Bestandskäufer behalten 30); kein "unbegrenzt/Lifetime" mehr (30→20→10 am 2026-08-16).
+- [Pricing model](pricing-model.md) — 1 kostenlos (3→1 am 2026-08-17), dann 9,99 € einmalig für 10 weitere (Limit 13 Dokumente gesamt; Bestandskäufer behalten 30); kein "unbegrenzt/Lifetime" mehr (30→20→10 am 2026-08-16).
 - [Briefkopf-Vorlagen](letterhead-templates.md) — 19 user-designte PNG-Briefköpfe ersetzen die alte 14er-Auswahl (2026-08-17); alte IDs bleiben für Bestandsdokumente renderbar; PDF-Puppeteer erlaubt nur /letterheads/*.png von Disk.
 - [DOCX/PDF-Export-Fallstricke](docx-export-quirks.md) — DOCX: nur DXA-Tabellenbreiten + cleanText für Unicode-Spaces (Mobile-Viewer); PDF: CSS-zoom vor html2canvas auf 1.
 - [Features Aug 2026](features-overview.md) — profil-save (savedProfile jsonb), inline-edit (contentEditable CV + textarea letter), DOCX export (/api/documents/:id/download/cv.docx + cover-letter.docx), Mobile Expo app.

@@ -29,7 +29,7 @@ export default function AccountScreen() {
 
   const isPremium = (profile as any)?.is_premium ?? false;
   const docCount = (profile as any)?.documents_count ?? 0;
-  const docLimit = (profile as any)?.document_limit ?? (isPremium ? 33 : 3);
+  const docLimit = (profile as any)?.document_limit ?? (isPremium ? 11 : 1);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>

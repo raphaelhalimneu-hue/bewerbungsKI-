@@ -4,13 +4,13 @@
  * Walks ONE user sequentially through the whole journey against the real
  * Express app (real routes, real quota math, real webhook handler):
  *
- *   1. Fresh user: /me shows limit 3, 0 documents
+ *   1. Fresh user: /me shows limit 1, 0 documents
  *   2. Generates + saves 3 documents (Claude mocked at fetch level)
- *   3. 4th generate → 403 free_limit_reached
+ *   3. 2nd generate → 403 free_limit_reached
  *   4. POST /checkout → Stripe Checkout session (metadata.userId set)
  *   5. Stripe webhook checkout.session.completed → is_premium=true, credits=10
- *   6. /me shows limit 13; generating works again
- *   7. Saves documents up to 13 total → generate → 403 premium_limit_reached
+ *   6. /me shows limit 11; generating works again
+ *   7. Saves documents up to 11 total → generate → 403 premium_limit_reached
  *
  * Only external boundaries are faked: Supabase auth, Stripe SDK signature
  * verification, the Anthropic HTTP API, e-mail sending, and the database
@@ -192,31 +192,29 @@ const webhook = (eventId: string) =>
 // The full journey, in order (steps share state on purpose)
 // ---------------------------------------------------------------------------
 
-describe("E2E: 3 gratis → Kauf → 10 weitere → Limit 13", () => {
-  it("step 1: fresh user sees limit 3 and 0 documents", async () => {
+describe("E2E: 1 gratis → Kauf → 10 weitere → Limit 11", () => {
+  it("step 1: fresh user sees limit 1 and 0 documents", async () => {
     const res = await getMe();
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       is_premium: false,
       credits: 0,
-      document_limit: 3,
+      document_limit: 1,
       documents_count: 0,
     });
   });
 
-  it("step 2: generates and saves 3 free documents", async () => {
-    for (let n = 1; n <= 3; n++) {
-      const gen = await generate();
-      expect(gen.status).toBe(200);
-      expect(gen.body.result).toContain("Generierter Lebenslauf");
-      const save = await saveDocument(n);
-      expect(save.status).toBe(201);
-    }
+  it("step 2: generates and saves 1 free document", async () => {
+    const gen = await generate();
+    expect(gen.status).toBe(200);
+    expect(gen.body.result).toContain("Generierter Lebenslauf");
+    const save = await saveDocument(1);
+    expect(save.status).toBe(201);
     const me = await getMe();
-    expect(me.body.documents_count).toBe(3);
+    expect(me.body.documents_count).toBe(1);
   });
 
-  it("step 3: 4th generation is blocked with free_limit_reached", async () => {
+  it("step 3: 2nd generation is blocked with free_limit_reached", async () => {
     const res = await generate();
     expect(res.status).toBe(403);
     expect(res.body.error).toBe("free_limit_reached");
@@ -236,7 +234,7 @@ describe("E2E: 3 gratis → Kauf → 10 weitere → Limit 13", () => {
     const res = await webhook("evt_e2e_1");
     expect(res.status).toBe(200);
     const me = await getMe();
-    expect(me.body).toMatchObject({ is_premium: true, credits: 10, document_limit: 13 });
+    expect(me.body).toMatchObject({ is_premium: true, credits: 10, document_limit: 11 });
   });
 
   it("step 5b: webhook redelivery does not grant credits twice", async () => {
@@ -252,14 +250,14 @@ describe("E2E: 3 gratis → Kauf → 10 weitere → Limit 13", () => {
     expect(res.body.result).toContain("Generierter Lebenslauf");
   });
 
-  it("step 7: at 13 documents, generation is blocked with premium_limit_reached", async () => {
-    // Fill up to the premium limit (3 already saved)
-    for (let n = state.docs.length + 1; n <= 13; n++) {
+  it("step 7: at 11 documents, generation is blocked with premium_limit_reached", async () => {
+    // Fill up to the premium limit (1 already saved)
+    for (let n = state.docs.length + 1; n <= 11; n++) {
       const save = await saveDocument(n);
       expect(save.status).toBe(201);
     }
     const me = await getMe();
-    expect(me.body.documents_count).toBe(13);
+    expect(me.body.documents_count).toBe(11);
 
     const blocked = await generate();
     expect(blocked.status).toBe(403);
