@@ -2,7 +2,6 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked } from "../lib/freeLock";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -166,10 +165,6 @@ function sendPdfError(res: any, err: any, label: string, log: any) {
 // ── CV PDF ────────────────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
@@ -197,10 +192,6 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
 // ── Cover Letter PDF ──────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)

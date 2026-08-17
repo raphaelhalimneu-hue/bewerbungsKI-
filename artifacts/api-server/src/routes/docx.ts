@@ -7,7 +7,6 @@ import {
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -140,10 +139,6 @@ function formatPeriod(start?: string, end?: string, current?: boolean, presentWo
 // ── CV DOCX ──────────────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
@@ -354,10 +349,6 @@ function isValidCvJson(cv: unknown): boolean {
 // ── CV DOCX from editor (cv_json) ────────────────────────────────────────────
 router.post("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
@@ -513,10 +504,6 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 // ── Cover Letter DOCX ─────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
