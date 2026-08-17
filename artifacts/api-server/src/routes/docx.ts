@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   Document, Paragraph, TextRun, Packer,
   AlignmentType, BorderStyle,
-  Table, TableRow, TableCell, WidthType,
+  Table, TableRow, TableCell, WidthType, TableLayoutType,
 } from "docx";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
@@ -16,14 +16,22 @@ const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "auto" };
 const NO_BORDERS_TABLE = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER, insideH: NO_BORDER, insideV: NO_BORDER };
 const NO_BORDERS_CELL = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER };
 
+// Normalize exotic Unicode spaces (NBSP, narrow NBSP, thin space, zero-width...)
+// that AI-generated text sometimes contains — some Word/Docs viewers render
+// them as zero width, which makes words appear glued together.
+function cleanText(text: string): string {
+  return String(text ?? "")
+    .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, " ")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
+}
 function bold(text: string, size = 22) {
-  return new TextRun({ text, bold: true, size, font: FONT });
+  return new TextRun({ text: cleanText(text), bold: true, size, font: FONT });
 }
 function normal(text: string, size = 22) {
-  return new TextRun({ text, size, font: FONT });
+  return new TextRun({ text: cleanText(text), size, font: FONT });
 }
 function muted(text: string, size = 20) {
-  return new TextRun({ text, size, color: "6B7280", font: FONT });
+  return new TextRun({ text: cleanText(text), size, color: "6B7280", font: FONT });
 }
 // ── Template themes ──────────────────────────────────────────────────────────
 // Accent colors mirror the HTML templates in bewerbungski/src/lib/buildCVHTML.ts
@@ -95,13 +103,27 @@ function hr(theme: DocxTheme = DEFAULT_THEME) {
 }
 function sectionHeading(title: string, theme: DocxTheme = DEFAULT_THEME) {
   return new Paragraph({
-    children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 19, font: FONT, color: theme.accent })],
+    children: [new TextRun({ text: cleanText(title.toUpperCase()), bold: true, size: 19, font: FONT, color: theme.accent })],
     spacing: { before: 280, after: 80 },
     border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: theme.rule } },
   });
 }
 
 type DocxHeadings = { profile: string; education: string; experience: string; skills: string; languages: string; present: string };
+const HEADINGS_BY_LANG: Record<string, DocxHeadings> = {
+  de: { profile: "Profil", education: "Ausbildung", experience: "Berufserfahrung", skills: "Kenntnisse", languages: "Sprachen", present: "heute" },
+  en: { profile: "Profile", education: "Education", experience: "Work Experience", skills: "Skills", languages: "Languages", present: "present" },
+  tr: { profile: "Profil", education: "E\u011fitim", experience: "\u0130\u015f Deneyimi", skills: "Beceriler", languages: "Diller", present: "halen" },
+  ar: { profile: "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a", education: "\u0627\u0644\u062a\u0639\u0644\u064a\u0645", experience: "\u0627\u0644\u062e\u0628\u0631\u0629 \u0627\u0644\u0645\u0647\u0646\u064a\u0629", skills: "\u0627\u0644\u0645\u0647\u0627\u0631\u0627\u062a", languages: "\u0627\u0644\u0644\u063a\u0627\u062a", present: "\u062d\u062a\u0649 \u0627\u0644\u0622\u0646" },
+  es: { profile: "Perfil", education: "Formaci\u00f3n", experience: "Experiencia laboral", skills: "Competencias", languages: "Idiomas", present: "actualidad" },
+  pl: { profile: "Profil", education: "Wykszta\u0142cenie", experience: "Do\u015bwiadczenie zawodowe", skills: "Umiej\u0119tno\u015bci", languages: "J\u0119zyki", present: "obecnie" },
+  ru: { profile: "\u041f\u0440\u043e\u0444\u0438\u043b\u044c", education: "\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435", experience: "\u041e\u043f\u044b\u0442 \u0440\u0430\u0431\u043e\u0442\u044b", skills: "\u041d\u0430\u0432\u044b\u043a\u0438", languages: "\u042f\u0437\u044b\u043a\u0438", present: "\u043f\u043e \u043d\u0430\u0441\u0442. \u0432\u0440\u0435\u043c\u044f" },
+  uk: { profile: "\u041f\u0440\u043e\u0444\u0456\u043b\u044c", education: "\u041e\u0441\u0432\u0456\u0442\u0430", experience: "\u0414\u043e\u0441\u0432\u0456\u0434 \u0440\u043e\u0431\u043e\u0442\u0438", skills: "\u041d\u0430\u0432\u0438\u0447\u043a\u0438", languages: "\u041c\u043e\u0432\u0438", present: "\u0434\u043e\u0442\u0435\u043f\u0435\u0440" },
+};
+function headingsFor(profileData: any): DocxHeadings {
+  const lang = String(profileData?.language || "de");
+  return HEADINGS_BY_LANG[lang] || HEADINGS_BY_LANG.de;
+}
 function formatPeriod(start?: string, end?: string, current?: boolean, presentWord = "heute"): string {
   const fmt = (d: string) => {
     if (!d) return "";
@@ -130,12 +152,11 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     const education: any[] = pd.education || [];
     const skills: any[] = pd.skills || [];
     const languages: any[] = pd.languages || [];
-    const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "";
+    const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Name";
     const theme = themeFor(doc.template, (doc.profileData as any));
-
     const H = headingsFor(doc.profileData as any);
 
-    const H = headingsFor(doc.profileData as any);
+    // Contact line: address | phone | email | linkedin
     const contactParts = [
       [p.address, p.zip, p.city].filter(Boolean).join(" "),
       p.phone,
@@ -148,7 +169,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
 
     // ── Header ──
     children.push(new Paragraph({
-      children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
+      children: [new TextRun({ text: cleanText(fullName.toUpperCase()), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
     }));
@@ -182,18 +203,20 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     if (experience.length) {
       children.push(sectionHeading(H.experience, theme));
       for (const exp of experience) {
-        const period = formatPeriod(edu.start, edu.end);
-        const companyLine = [exp.company, exp.location].filter(Boolean).join(", ");
+        const period = formatPeriod(exp.start, exp.end, exp.current, H.present);
+        const companyLine = [exp.company, exp.city].filter(Boolean).join(", ");
         const descLines: string[] = exp.description
           ? exp.description.split(/\n/).map((l: string) => l.trim()).filter(Boolean)
           : [];
 
         children.push(new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
+          width: { size: 10106, type: WidthType.DXA },
+          columnWidths: [7883, 2223],
+          layout: TableLayoutType.FIXED,
           borders: NO_BORDERS_TABLE,
           rows: [new TableRow({ children: [
             new TableCell({
-              width: { size: 78, type: WidthType.PERCENTAGE },
+              width: { size: 7883, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [
                 new Paragraph({ children: [bold(exp.position || "Position", 22)], spacing: { before: 140, after: 30 } }),
@@ -208,7 +231,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
               ],
             }),
             new TableCell({
-              width: { size: 22, type: WidthType.PERCENTAGE },
+              width: { size: 2223, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [
                 new Paragraph({ children: [muted(period, 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } }),
@@ -228,11 +251,61 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
         const institutionLine = [edu.institution, edu.city].filter(Boolean).join(", ");
         const degreeLine = [edu.degree, edu.field].filter(Boolean).join(" – ");
 
-    const docLang = String(pd.language || "de");
+        children.push(new Table({
+          width: { size: 10106, type: WidthType.DXA },
+          columnWidths: [7883, 2223],
+          layout: TableLayoutType.FIXED,
+          borders: NO_BORDERS_TABLE,
+          rows: [new TableRow({ children: [
+            new TableCell({
+              width: { size: 7883, type: WidthType.DXA },
+              borders: NO_BORDERS_CELL,
+              children: [
+                new Paragraph({ children: [bold(degreeLine || "Abschluss", 22)], spacing: { before: 140, after: 30 } }),
+                new Paragraph({ children: [muted(institutionLine, 20)], spacing: { after: 80 } }),
+              ],
+            }),
+            new TableCell({
+              width: { size: 2223, type: WidthType.DXA },
+              borders: NO_BORDERS_CELL,
+              children: [
+                new Paragraph({ children: [muted(period, 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } }),
+              ],
+            }),
+          ] })],
+        }));
+      }
+    }
+
+    // ── Kenntnisse ──
+    if (skills.length) {
+      children.push(sectionHeading(H.skills, theme));
+      // Each skill as an inline chip (plain text, comma-separated — reliable across all Word versions)
+      children.push(new Paragraph({
+        children: skills.map((s: any, i: number) => [
+          i > 0 ? new TextRun({ text: "   |   ", size: 20, font: FONT, color: "9CA3AF" }) : null,
+          new TextRun({ text: cleanText(s.name || String(s)), size: 20, font: FONT }),
+        ]).flat().filter(Boolean) as TextRun[],
+        spacing: { after: 100 },
+      }));
+    }
+
+    // ── Sprachen ──
+    if (languages.length) {
+      children.push(sectionHeading(H.languages, theme));
+      for (const lang of languages) {
+        children.push(new Paragraph({
+          children: [bold(lang.language || "", 21), normal(`  —  ${lang.level || ""}`, 21)],
+          spacing: { after: 60 },
+        }));
+      }
+    }
+
+    // ── Signature line ──
     const city = p.city || "Ort";
     const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
     children.push(new Paragraph({
-      children: [normal(docLang === "de" ? `${city}, den ${today}` : `${city}, ${today}`, 20)],
+      children: [normal(String(pd?.language || "de") === "de" ? `${city}, den ${today}` : `${city}, ${today}`, 20)],
       spacing: { before: 400, after: 40 },
     }));
     children.push(new Paragraph({ children: [muted(fullName, 19)], spacing: { after: 0 } }));
@@ -241,10 +314,10 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       sections: [{ properties: { page: { margin: { top: 720, right: 900, bottom: 720, left: 900 } } }, children }],
     });
 
-    const buffer = await Packer.toBuffer(docx);
-    const safeName = (doc.name || "Anschreiben").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
+    const buffer = await Packer.toBuffer(wordDoc);
+    const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    const asciiName = `${safeName} - Anschreiben.docx`.replace(/[^\x20-\x7E]/g, "_");
+    const asciiName = `${safeName} - Lebenslauf.docx`.replace(/[^\x20-\x7E]/g, "_");
     res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
     res.send(buffer);
   } catch (err: any) {
@@ -287,17 +360,14 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
     if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
 
-    const theme = themeFor(doc.template, (doc.profileData as any));
-
-    const H = headingsFor(doc.profileData as any);
-
+    const theme = themeFor(req.body?.template && VALID_TEMPLATE_IDS.has(req.body.template) ? req.body.template : doc.template, (doc.profileData as any));
     const H = headingsFor(doc.profileData as any);
     const children: any[] = [];
     children.push(topBar(theme));
 
     // Header
     children.push(new Paragraph({
-      children: [new TextRun({ text: (cv.name || "").toUpperCase(), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
+      children: [new TextRun({ text: cleanText((cv.name || "").toUpperCase()), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
     }));
@@ -328,11 +398,13 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
       children.push(sectionHeading(H.education, theme));
       for (const edu of cv.education) {
         children.push(new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
+          width: { size: 10106, type: WidthType.DXA },
+          columnWidths: [7883, 2223],
+          layout: TableLayoutType.FIXED,
           borders: NO_BORDERS_TABLE,
           rows: [new TableRow({ children: [
             new TableCell({
-              width: { size: 78, type: WidthType.PERCENTAGE },
+              width: { size: 7883, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [
                 new Paragraph({ children: [bold(edu.degree || "", 22)], spacing: { before: 140, after: 30 } }),
@@ -340,7 +412,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
               ],
             }),
             new TableCell({
-              width: { size: 22, type: WidthType.PERCENTAGE },
+              width: { size: 2223, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [new Paragraph({ children: [muted(edu.period || "", 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } })],
             }),
@@ -356,11 +428,13 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
         const companyLine = [exp.company, exp.location].filter(Boolean).join(", ");
         const bullets: string[] = Array.isArray(exp.bullets) ? exp.bullets : [];
         children.push(new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
+          width: { size: 10106, type: WidthType.DXA },
+          columnWidths: [7883, 2223],
+          layout: TableLayoutType.FIXED,
           borders: NO_BORDERS_TABLE,
           rows: [new TableRow({ children: [
             new TableCell({
-              width: { size: 78, type: WidthType.PERCENTAGE },
+              width: { size: 7883, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [
                 new Paragraph({ children: [bold(exp.position || "", 22)], spacing: { before: 140, after: 30 } }),
@@ -375,7 +449,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
               ],
             }),
             new TableCell({
-              width: { size: 22, type: WidthType.PERCENTAGE },
+              width: { size: 2223, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
               children: [new Paragraph({ children: [muted(exp.period || "", 18)], alignment: AlignmentType.RIGHT, spacing: { before: 140 } })],
             }),
@@ -390,7 +464,7 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
       children.push(new Paragraph({
         children: cv.skills.map((s: string, i: number) => [
           i > 0 ? new TextRun({ text: "   |   ", size: 20, font: FONT, color: "9CA3AF" }) : null,
-          new TextRun({ text: typeof s === "string" ? s : (s as any).name || "", size: 20, font: FONT }),
+          new TextRun({ text: cleanText(typeof s === "string" ? s : (s as any).name || ""), size: 20, font: FONT }),
         ]).flat().filter(Boolean) as TextRun[],
         spacing: { after: 100 },
       }));
@@ -415,10 +489,10 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
     const wordDoc = new Document({
       sections: [{ properties: { page: { margin: { top: 720, right: 900, bottom: 720, left: 900 } } }, children }],
     });
-    const buffer = await Packer.toBuffer(docx);
-    const safeName = (doc.name || "Anschreiben").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
+    const buffer = await Packer.toBuffer(wordDoc);
+    const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    const asciiName = `${safeName} - Anschreiben.docx`.replace(/[^\x20-\x7E]/g, "_");
+    const asciiName = `${safeName} - Lebenslauf.docx`.replace(/[^\x20-\x7E]/g, "_");
     res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
     res.send(buffer);
   } catch (err: any) {
@@ -441,9 +515,6 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const p = pd.personal || {};
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "";
     const theme = themeFor(doc.template, (doc.profileData as any));
-
-    const H = headingsFor(doc.profileData as any);
-
     const H = headingsFor(doc.profileData as any);
 
     // Use edited text if provided via query param (client sends updated text), else stored text
@@ -455,7 +526,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
 
     if (fullName) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: fullName.toUpperCase(), bold: true, size: 32, font: FONT, characterSpacing: 60, color: theme.accent })],
+        children: [new TextRun({ text: cleanText(fullName.toUpperCase()), bold: true, size: 32, font: FONT, characterSpacing: 60, color: theme.accent })],
         alignment: AlignmentType.CENTER,
         spacing: { after: 80 },
       }));
@@ -467,7 +538,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const lines = letterText.split(/\n/);
     for (const line of lines) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: line, size: 22, font: FONT })],
+        children: [new TextRun({ text: cleanText(line), size: 22, font: FONT })],
         spacing: { after: line.trim() === "" ? 80 : 120 },
         alignment: AlignmentType.JUSTIFIED,
       }));
@@ -490,19 +561,3 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
 });
 
 export default router;
-
-function headingsFor(profileData: any): DocxHeadings {
-  const lang = String(profileData?.language || "de");
-  return HEADINGS_BY_LANG[lang] || HEADINGS_BY_LANG.de;
-}
-
-const HEADINGS_BY_LANG: Record<string, DocxHeadings> = {
-  de: { profile: "Profil", education: "Ausbildung", experience: "Berufserfahrung", skills: "Kenntnisse", languages: "Sprachen", present: "heute" },
-  en: { profile: "Profile", education: "Education", experience: "Work Experience", skills: "Skills", languages: "Languages", present: "present" },
-  tr: { profile: "Profil", education: "Eğitim", experience: "İş Deneyimi", skills: "Beceriler", languages: "Diller", present: "halen" },
-  ar: { profile: "الملف الشخصي", education: "التعليم", experience: "الخبرة المهنية", skills: "المهارات", languages: "اللغات", present: "حتى الآن" },
-  es: { profile: "Perfil", education: "Formación", experience: "Experiencia laboral", skills: "Competencias", languages: "Idiomas", present: "actualidad" },
-  pl: { profile: "Profil", education: "Wykształcenie", experience: "Doświadczenie zawodowe", skills: "Umiejętności", languages: "Języki", present: "obecnie" },
-  ru: { profile: "Профиль", education: "Образование", experience: "Опыт работы", skills: "Навыки", languages: "Языки", present: "по наст. время" },
-  uk: { profile: "Профіль", education: "Освіта", experience: "Досвід роботи", skills: "Навички", languages: "Мови", present: "дотепер" },
-};

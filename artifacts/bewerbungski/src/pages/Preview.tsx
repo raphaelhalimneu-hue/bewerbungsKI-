@@ -160,7 +160,17 @@ export default function Preview() {
     setExporting("cv-pdf");
     try {
       const el = cvRef.current;
-      const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false, windowWidth: 794 });
+      // On mobile the preview is scaled down via CSS zoom — reset it during
+      // capture, otherwise html2canvas rasterises the shrunken element and the
+      // text comes out blurry/jagged in the PDF.
+      const prevZoom = el.style.zoom;
+      el.style.zoom = "1";
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false, windowWidth: 794 });
+      } finally {
+        el.style.zoom = prevZoom;
+      }
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageWidth = pdf.internal.pageSize.getWidth();
