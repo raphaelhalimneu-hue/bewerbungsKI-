@@ -40,10 +40,28 @@ if (urlLang) {
   }
 }
 
-/** Keeps canonical/hreflang/title in sync with route changes. */
+// Internal, login-only pages must not appear in Google results.
+const NOINDEX_PREFIXES = ["/wizard", "/documents", "/preview", "/scanner", "/import", "/admin"];
+
+function syncRobotsMeta(location: string) {
+  const noindex = NOINDEX_PREFIXES.some(p => location === p || location.startsWith(p + "/"));
+  let meta = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+  if (noindex) {
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", "noindex, nofollow");
+  } else if (meta) {
+    meta.remove();
+  }
+}
+
+/** Keeps canonical/hreflang/title/robots in sync with route changes. */
 function LocaleHeadSync() {
   const [location] = useLocation();
-  useEffect(() => { updateLocaleHead(); }, [location]);
+  useEffect(() => { updateLocaleHead(); syncRobotsMeta(location); }, [location]);
   return null;
 }
 
