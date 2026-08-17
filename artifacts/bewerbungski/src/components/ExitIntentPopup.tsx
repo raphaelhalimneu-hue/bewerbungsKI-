@@ -29,15 +29,52 @@ export function ExitIntentPopup() {
   useEffect(() => {
     if (!eligiblePage || isPremium || recentlyShown()) return;
 
-    function onMouseOut(e: MouseEvent) {
-      // Fires when the cursor leaves through the top of the viewport (desktop exit intent)
-      if (e.relatedTarget || e.clientY > 10) return;
+    let fired = false;
+    function trigger() {
+      if (fired) return;
+      fired = true;
       try { localStorage.setItem(LS_KEY, String(Date.now())); } catch { /* ignore */ }
       setOpen(true);
-      document.removeEventListener("mouseout", onMouseOut);
+      cleanup();
     }
-    document.addEventListener("mouseout", onMouseOut);
-    return () => document.removeEventListener("mouseout", onMouseOut);
+
+    // Desktop: cursor leaves through the top of the viewport
+    function onMouseOut(e: MouseEvent) {
+      if (e.relatedTarget || e.clientY > 10) return;
+      trigger();
+    }
+
+    // Mobile: after real engagement (scrolled down), a fast scroll back to the
+    // top is a strong "about to leave" signal.
+    const scroller = document.querySelector("main") || document.scrollingElement || document.documentElement;
+    let maxScroll = 0;
+    let lastY = 0;
+    let lastT = 0;
+    function onScroll() {
+      const y = (scroller as HTMLElement).scrollTop ?? 0;
+      const now = Date.now();
+      if (y > maxScroll) maxScroll = y;
+      const dt = now - lastT;
+      if (dt > 0 && dt < 400 && maxScroll > 600 && y < 80 && lastY - y > 250) {
+        trigger();
+      }
+      lastY = y;
+      lastT = now;
+    }
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const scrollTarget: EventTarget = scroller === document.scrollingElement || scroller === document.documentElement ? window : (scroller as HTMLElement);
+
+    function cleanup() {
+      document.removeEventListener("mouseout", onMouseOut);
+      scrollTarget.removeEventListener("scroll", onScroll);
+    }
+
+    if (isTouch) {
+      scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    } else {
+      document.addEventListener("mouseout", onMouseOut);
+    }
+    return cleanup;
   }, [eligiblePage, isPremium]);
 
   if (!open) return null;
