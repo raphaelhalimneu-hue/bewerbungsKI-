@@ -3,6 +3,7 @@ import { FiUpload } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { customFetch } from "@workspace/api-client-react";
 import { useAuth } from "../context/AuthContext";
+import { compressImageIfNeeded } from "../lib/compressImage";
 
 const ACCEPT = ".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp";
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -19,6 +20,7 @@ export function FileImportButton({ onText, onFile }: { onText: (text: string) =>
 
   async function handleFile(file: File) {
     setErr("");
+    file = await compressImageIfNeeded(file, MAX_BYTES);
     if (file.size > MAX_BYTES) { setErr(t("fileImport.tooLarge")); return; }
     setBusy(true);
     try {

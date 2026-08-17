@@ -8,6 +8,7 @@ import { useGenerateDocument, useCreateDocument, customFetch } from "@workspace/
 import type { FormData, Experience, Education, Skill, Language, TemplateId, CVContent } from "../lib/buildCVHTML";
 import { renderCVContent, letterheadUrl } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
+import { compressImageIfNeeded } from "../lib/compressImage";
 import { FileImportButton } from "../components/FileImportButton";
 
 const STEPS = [
@@ -940,6 +941,7 @@ function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; s
 
   async function handleDesignFile(file: File) {
     setDesignErr("");
+    file = await compressImageIfNeeded(file, 8 * 1024 * 1024);
     if (file.size > 8 * 1024 * 1024) { setDesignErr(t("fileImport.tooLarge")); return; }
     setDesignBusy(true);
     try {
