@@ -223,30 +223,6 @@ const TEMPLATE_WORD_BY_LANG: Record<string, string> = {
   de: "Vorlage", en: "Template", tr: "Şablon", ar: "القالب",
   es: "Plantilla", pl: "Szablon", ru: "Шаблон", uk: "Шаблон",
 };
-
-// The templates use fixed German section headings — translate them for the showcase.
-const HEADINGS_BY_LANG: Record<string, Record<string, string>> = {
-  en: { Ausbildung: "Education", Berufserfahrung: "Work Experience", Kenntnisse: "Skills", Sprachen: "Languages", Profil: "Profile" },
-  tr: { Ausbildung: "Eğitim", Berufserfahrung: "İş Deneyimi", Kenntnisse: "Beceriler", Sprachen: "Diller", Profil: "Profil" },
-  ar: { Ausbildung: "التعليم", Berufserfahrung: "الخبرة المهنية", Kenntnisse: "المهارات", Sprachen: "اللغات", Profil: "الملف الشخصي" },
-  es: { Ausbildung: "Formación", Berufserfahrung: "Experiencia laboral", Kenntnisse: "Competencias", Sprachen: "Idiomas", Profil: "Perfil" },
-  pl: { Ausbildung: "Wykształcenie", Berufserfahrung: "Doświadczenie zawodowe", Kenntnisse: "Umiejętności", Sprachen: "Języki", Profil: "Profil" },
-  ru: { Ausbildung: "Образование", Berufserfahrung: "Опыт работы", Kenntnisse: "Навыки", Sprachen: "Языки", Profil: "Профиль" },
-  uk: { Ausbildung: "Освіта", Berufserfahrung: "Досвід роботи", Kenntnisse: "Навички", Sprachen: "Мови", Profil: "Профіль" },
-};
-
-function localizeHeadings(html: string, lang: string): string {
-  const map = HEADINGS_BY_LANG[lang];
-  if (!map) return html;
-  let out = html;
-  for (const [de, tr] of Object.entries(map)) {
-    // Only replace heading text nodes (between > and <), never words inside content.
-    out = out.replace(new RegExp(`>${de}<`, "g"), `>${tr}<`);
-  }
-  return out;
-}
-
-// Example cover letter per language, matching the CV person and role.
 type ExampleLetter = {
   label: string;        // small heading above the letter page ("Bewerbung", "Cover letter", …)
   cvLabel: string;      // small heading above the CV page
@@ -423,7 +399,7 @@ function ShowcasePage({ label, html }: { label: string; html: string }) {
 function ExampleCVShowcase() {
   const { i18n } = useTranslation();
   const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
-  const cvHtml = useMemo(() => localizeHeadings(renderCVContent(EXAMPLE_BY_LANG[lang], "blobs"), lang), [lang]);
+  const cvHtml = useMemo(() => renderCVContent(EXAMPLE_BY_LANG[lang], "blobs", undefined, lang), [lang]);
   const letterHtml = useMemo(() => buildLetterHTML(EXAMPLE_BY_LANG[lang], LETTER_BY_LANG[lang]), [lang]);
 
   return (

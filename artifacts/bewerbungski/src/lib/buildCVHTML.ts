@@ -669,6 +669,16 @@ function tplCustom(cv: CVContent, style?: Partial<CustomStyle>): string {
 </div>`;
 }
 
+export const CV_HEADINGS_BY_LANG: Record<string, Record<string, string>> = {
+  en: { Ausbildung: "Education", Berufserfahrung: "Work Experience", "Berufliche Laufbahn": "Professional Career", Kenntnisse: "Skills", Sprachen: "Languages", Profil: "Profile", Kontakt: "Contact", Bewerbung: "Application" },
+  tr: { Ausbildung: "Eğitim", Berufserfahrung: "İş Deneyimi", "Berufliche Laufbahn": "Kariyer Geçmişi", Kenntnisse: "Beceriler", Sprachen: "Diller", Profil: "Profil", Kontakt: "İletişim", Bewerbung: "Başvuru" },
+  ar: { Ausbildung: "التعليم", Berufserfahrung: "الخبرة المهنية", "Berufliche Laufbahn": "المسار المهني", Kenntnisse: "المهارات", Sprachen: "اللغات", Profil: "الملف الشخصي", Kontakt: "التواصل", Bewerbung: "طلب توظيف" },
+  es: { Ausbildung: "Formación", Berufserfahrung: "Experiencia laboral", "Berufliche Laufbahn": "Trayectoria profesional", Kenntnisse: "Competencias", Sprachen: "Idiomas", Profil: "Perfil", Kontakt: "Contacto", Bewerbung: "Candidatura" },
+  pl: { Ausbildung: "Wykształcenie", Berufserfahrung: "Doświadczenie zawodowe", "Berufliche Laufbahn": "Przebieg kariery", Kenntnisse: "Umiejętności", Sprachen: "Języki", Profil: "Profil", Kontakt: "Kontakt", Bewerbung: "Aplikacja" },
+  ru: { Ausbildung: "Образование", Berufserfahrung: "Опыт работы", "Berufliche Laufbahn": "Карьерный путь", Kenntnisse: "Навыки", Sprachen: "Языки", Profil: "Профиль", Kontakt: "Контакты", Bewerbung: "Резюме" },
+  uk: { Ausbildung: "Освіта", Berufserfahrung: "Досвід роботи", "Berufliche Laufbahn": "Кар'єрний шлях", Kenntnisse: "Навички", Sprachen: "Мови", Profil: "Профіль", Kontakt: "Контакти", Bewerbung: "Резюме" },
+};
+
 // ─── BRIEFKOPF-DESIGNS (PNG-Hintergründe) ───────────────────────────────────
 type LetterheadCfg = {
   file: string; accent: string; sub: string; chipBg: string; chipText: string;
@@ -737,9 +747,14 @@ function tplLetterhead(cv: CVContent, id: string): string {
 }
 
 // ─── ROUTER ───────────────────────────────────────────────────────────────────
-export function renderCVContent(cv: CVContent, template: TemplateId, customStyle?: Partial<CustomStyle>): string {
+export function renderCVContent(cv: CVContent, template: TemplateId, customStyle?: Partial<CustomStyle>, lang?: string): string {
   // Escape all user-controlled fields once before any template sees them.
   const safe = escapeCVContent(cv);
+  const html = renderTemplate(safe, template, customStyle);
+  return localizeCVHtml(html, lang);
+}
+
+function renderTemplate(safe: CVContent, template: TemplateId, customStyle?: Partial<CustomStyle>): string {
   if (LETTERHEADS[template]) return tplLetterhead(safe, template);
   switch (template) {
     case "classic":    return tplClassic(safe);
@@ -759,8 +774,6 @@ export function renderCVContent(cv: CVContent, template: TemplateId, customStyle
     default:           return tplModern(safe);
   }
 }
-
-// Legacy helper still used for the Documents list preview
 export function buildCVHTML(profile: FormData, template: string): string {
   const p = profile?.personal || {} as PersonalData;
   const byStart = <T extends { start?: string }>(a: T, b: T) => (a.start || "").localeCompare(b.start || "");
@@ -790,4 +803,25 @@ export function buildCVHTML(profile: FormData, template: string): string {
     photo: p.photo,
   };
   return renderCVContent(cv, template as TemplateId);
+}
+
+/**
+ * Translate the static German section headings of a rendered CV into the
+ * given document language, and wrap Arabic output in an RTL container.
+ * German (or unknown languages) are returned unchanged.
+ */
+export function localizeCVHtml(html: string, lang?: string): string {
+  if (!lang || lang === "de") return html;
+  const map = CV_HEADINGS_BY_LANG[lang];
+  let out = html;
+  if (map) {
+    for (const [de, tr] of Object.entries(map)) {
+      // Only replace heading text nodes (between > and <), never words inside content.
+      out = out.replace(new RegExp(`>${de}<`, "g"), `>${tr}<`);
+    }
+  }
+  if (lang === "ar") {
+    out = `<div dir="rtl" style="direction:rtl;text-align:right;">${out}</div>`;
+  }
+  return out;
 }

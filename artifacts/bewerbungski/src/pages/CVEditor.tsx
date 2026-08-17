@@ -83,8 +83,12 @@ export default function CVEditor() {
     return () => window.removeEventListener("resize", applyScale);
   }, [activeTab]);
 
+  // Language the application was generated in (stored by the wizard) — used
+  // so section headings render in the document language.
+  const docLang: string = (doc as any)?.profile_data?.language || "de";
+
   // Derived preview HTML
-  const previewHtml = renderCVContent(cvState, template, customStyle);
+  const previewHtml = renderCVContent(cvState, template, customStyle, docLang);
 
   // ── Helpers for array fields ─────────────────────────────────────────────
   function updateExp(idx: number, field: string, value: any) {
@@ -179,7 +183,7 @@ export default function CVEditor() {
     setSaving(true);
     setSaveMsg("");
     try {
-      const html = renderCVContent(cvState, template, customStyle);
+      const html = renderCVContent(cvState, template, customStyle, docLang);
       await customFetch(`/api/documents/${params.id}`, {
         method: "PATCH",
         body: JSON.stringify({ cv_json: cvState, cv_html: html, template }),

@@ -290,7 +290,7 @@ PFLICHTREGELN:
         else { throw new Error("CV-Generierung fehlgeschlagen. Bitte erneut versuchen."); }
       }
       if (usePhoto && form.personal.photo) cvContent.photo = form.personal.photo;
-      const cvHtml = renderCVContent(cvContent, form.template, form.customStyle);
+      const cvHtml = renderCVContent(cvContent, form.template, form.customStyle, docLang);
       const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
