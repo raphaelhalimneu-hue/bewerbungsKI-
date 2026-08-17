@@ -8,7 +8,7 @@ import { InAppBrowserBanner } from "./InAppBrowserBanner";
 import { ExitIntentPopup } from "./ExitIntentPopup";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
-import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload } from "react-icons/fi";
+import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -43,6 +43,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const p = profile as any;
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  // Close the mobile menu on navigation
+  React.useEffect(() => { setMobileMenuOpen(false); }, [location]);
+
+  const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean }[] = [
+    { href: "/", icon: <FiHome size={18} />, label: t("nav.home"), active: location === "/" },
+    { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard") },
+    { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
+    { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner") },
+    { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import") },
+    { href: "/pricing", icon: <FiStar size={18} />, label: p?.is_premium ? t("nav.premiumActive") : t("nav.getPremium"), active: location === "/pricing" },
+  ];
 
   return (
     <div className="app flex flex-col h-screen overflow-hidden">
@@ -54,6 +67,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           Bewerbungs<span>KI</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <button
+            onClick={() => setMobileMenuOpen(o => !o)}
+            className="btn-g flex md:hidden items-center justify-center p-2 rounded-lg"
+            aria-label={t("nav.menu")}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+          </button>
           <LanguageSwitcher />
           <button onClick={toggleTheme} className="btn-g flex items-center justify-center p-2 rounded-lg" aria-label={t("nav.toggleTheme")} title={t("nav.toggleTheme")}>
             {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
@@ -79,6 +100,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
+
+      {/* Mobile menu drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-[60px] z-40" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <nav
+            className="relative bg-[var(--bg2)] border-b border-[var(--border)] shadow-lg px-3 py-3 flex flex-col gap-1"
+            onClick={e => e.stopPropagation()}
+          >
+            {menuItems.map(item => (
+              <Link key={item.href} href={item.href}>
+                <button className={`si w-full ${item.active ? "on" : ""}`}>
+                  {item.icon} {item.label}
+                </button>
+              </Link>
+            ))}
+            {user && typeof p?.document_limit === "number" && (
+              <div className="text-[12px] text-[var(--muted)] px-3 pt-2">
+                {t("nav.remaining", { remaining: Math.max(0, p.document_limit - (p?.documents_count || 0)), limit: p.document_limit })}
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
