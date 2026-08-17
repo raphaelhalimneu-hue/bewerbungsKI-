@@ -570,6 +570,7 @@ export default function CVEditor() {
               width: 360, minWidth: 320, flexShrink: 0,
               borderRight: "1px solid var(--border)",
               overflowY: "auto", background: "var(--bg2)",
+              ...(locked ? { opacity: 0.5, pointerEvents: "none" as const } : {}),
             }}
           >
             <FormPanel />
