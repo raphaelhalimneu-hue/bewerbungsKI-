@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { FiX, FiGift } from "react-icons/fi";
 
 const LS_KEY = "exitPopupShownAt";
-const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // once per week
+const COOLDOWN_MS = 24 * 60 * 60 * 1000; // once per day
 
 function recentlyShown(): boolean {
   try {
