@@ -67,6 +67,15 @@ export async function runStartupMigrations(): Promise<void> {
     await pool.query(`SELECT pg_advisory_unlock(824601)`);
   }
   await pool.query(
+    `CREATE TABLE IF NOT EXISTS export_counters (
+      user_id text NOT NULL,
+      doc_id text NOT NULL,
+      kind text NOT NULL,
+      count integer NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, doc_id, kind)
+    )`,
+  );
+  await pool.query(
     `CREATE TABLE IF NOT EXISTS email_codes (
       user_id text PRIMARY KEY,
       code text NOT NULL,

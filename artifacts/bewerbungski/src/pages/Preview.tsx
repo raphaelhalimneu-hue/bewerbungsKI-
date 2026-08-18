@@ -42,6 +42,10 @@ export default function Preview() {
   // printable without limits — but it cannot be EDITED. Word stays paid.
   const docxLocked = freeUser;
   const editLocked = freeUser;
+  // Free accounts: ONE print per part (CV / letter), counted on the server
+  const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
+  const cvPrintLocked = freeUser && (printUsed.cv_print || 0) >= 1;
+  const letterPrintLocked = freeUser && (printUsed.letter_print || 0) >= 1;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -152,6 +156,14 @@ export default function Preview() {
     finally { setPerfecting(false); }
   }
 
+  // Load already-used prints so the lock survives a reload
+  useEffect(() => {
+    if (!freeUser || !params.id) return;
+    customFetch(`/api/documents/${params.id}/export-counters`)
+      .then((r: any) => { if (r?.counts) setPrintUsed(r.counts); })
+      .catch(() => {});
+  }, [params.id, freeUser]);
+
   // Initialise cover letter textarea from loaded doc. A stored perfected copy
   // is shown to free users (view-only — downloads keep serving the original).
   useEffect(() => {
@@ -236,8 +248,25 @@ export default function Preview() {
     return `${name ? name + " – " : ""}${suffix}`;
   }
 
-  // Printing is always allowed (also for free users).
-  function printCv() {
+  // Free accounts: one print per part — the popup is opened synchronously
+  // (click context), then the server confirms the remaining allowance.
+  async function consumePrint(kind: "cv_print" | "letter_print"): Promise<boolean> {
+    if (!freeUser) return true;
+    try {
+      const r: any = await customFetch(`/api/documents/${params.id}/export-event`, {
+        method: "POST",
+        body: JSON.stringify({ kind }),
+      });
+      if (r?.allowed) {
+        setPrintUsed((u) => ({ ...u, [kind]: (u[kind] || 0) + 1 }));
+        return true;
+      }
+    } catch { /* fall through: treat as not allowed */ }
+    setPrintUsed((u) => ({ ...u, [kind]: 1 }));
+    return false;
+  }
+
+  async function printCv() {
     const el = cvRef.current;
     if (!el) return;
     // Sanitize the stored CV HTML before re-parsing it in the popup:
@@ -254,6 +283,7 @@ export default function Preview() {
     const w = window.open("", "_blank");
     if (!w) return;
     w.opener = null;
+    if (!(await consumePrint("cv_print"))) { w.close(); navigate("/pricing"); return; }
     const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
       .map(n => n.outerHTML)
       .join("");
@@ -262,11 +292,12 @@ export default function Preview() {
     setTimeout(() => { w.focus(); w.print(); }, 500);
   }
 
-  function printLetter() {
+  async function printLetter() {
     const text = editedLetter || (doc as any)?.cover_letter || "";
     if (!text) return;
     const w = window.open("", "_blank");
     if (!w) return;
+    if (!(await consumePrint("letter_print"))) { w.close(); navigate("/pricing"); return; }
     w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;line-height:1.7;margin:2.5cm;white-space:pre-wrap}</style></head><body></body></html>`);
     w.document.body.textContent = text;
     w.document.close();
@@ -370,12 +401,12 @@ export default function Preview() {
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
                 {freeUser && (
                   <>
-                    <button className="btn btn-p btn-sm" onClick={printCv}>
-                      {t("preview.print")} · {t("preview.cv")}
+                    <button className="btn btn-p btn-sm" onClick={() => (cvPrintLocked ? navigate("/pricing") : printCv())} style={cvPrintLocked ? { opacity: 0.6 } : undefined}>
+                      {cvPrintLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.cv")}
                     </button>
                     {((doc as any)?.cover_letter || editedLetter) && (
-                      <button className="btn btn-p btn-sm" onClick={printLetter}>
-                        {t("preview.print")} · {t("preview.coverLetter")}
+                      <button className="btn btn-p btn-sm" onClick={() => (letterPrintLocked ? navigate("/pricing") : printLetter())} style={letterPrintLocked ? { opacity: 0.6 } : undefined}>
+                        {letterPrintLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.coverLetter")}
                       </button>
                     )}
                   </>

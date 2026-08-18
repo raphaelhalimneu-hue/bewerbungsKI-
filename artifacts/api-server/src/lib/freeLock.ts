@@ -1,5 +1,36 @@
-import { db, profilesTable, documentsTable } from "@workspace/db";
+import { db, pool, profilesTable, documentsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
+
+export type PrintKind = "cv_print" | "letter_print";
+export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
+/** Free accounts: max 1 print per part (CV / letter) per document. */
+export const FREE_PRINT_LIMIT = 1;
+
+/**
+ * Atomically consume one print for a free account. Returns true while the
+ * limit is not yet reached (and counts it), false when it is used up.
+ */
+export async function consumePrintQuota(userId: string, docId: string, kind: PrintKind): Promise<boolean> {
+  const r = await pool.query(
+    `INSERT INTO export_counters (user_id, doc_id, kind, count) VALUES ($1, $2, $3, 1)
+     ON CONFLICT (user_id, doc_id, kind)
+     DO UPDATE SET count = export_counters.count + 1 WHERE export_counters.count < $4
+     RETURNING count`,
+    [userId, docId, kind, FREE_PRINT_LIMIT],
+  );
+  return (r.rowCount ?? 0) > 0;
+}
+
+/** Current print counts for one document (missing kinds = 0). */
+export async function getPrintCounts(userId: string, docId: string): Promise<Record<PrintKind, number>> {
+  const r = await pool.query(
+    `SELECT kind, count FROM export_counters WHERE user_id = $1 AND doc_id = $2`,
+    [userId, docId],
+  );
+  const out: Record<PrintKind, number> = { cv_print: 0, letter_print: 0 };
+  for (const row of r.rows) if (row.kind in out) out[row.kind as PrintKind] = row.count;
+  return out;
+}
 
 /**
  * Premium features (Scanner/Analyse, Perfektionieren, Live-Editor-Speichern)

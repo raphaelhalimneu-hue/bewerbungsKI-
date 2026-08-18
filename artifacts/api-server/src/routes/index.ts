@@ -14,6 +14,7 @@ import analyzeRouter from "./analyze";
 import extractRouter from "./extract";
 import ratingsRouter from "./ratings";
 import verifyRouter from "./verify";
+import exportsRouter from "./exports";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(analyzeRouter);
 router.use(extractRouter);
 router.use(ratingsRouter);
 router.use(verifyRouter);
+router.use(exportsRouter);
 
 export default router;
