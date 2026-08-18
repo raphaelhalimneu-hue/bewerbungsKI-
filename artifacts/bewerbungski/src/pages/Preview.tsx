@@ -129,7 +129,7 @@ export default function Preview() {
         customFetch(`/api/documents/${params.id}`, {
           method: "PATCH",
           body: JSON.stringify(
-            freeUser
+            freeUser || !pAuth
               ? {
                   perfected_letter: res.letter,
                   ...(cvHtmlToSave ? { perfected_cv_html: cvHtmlToSave } : {}),
@@ -195,7 +195,7 @@ export default function Preview() {
       if (d.perfected_letter) setEditedLetter(d.perfected_letter);
       if (d.perfected_cv_html && cvRef.current) cvRef.current.innerHTML = d.perfected_cv_html;
     }).catch(() => {});
-  }, [(doc as any)?.id, freeUser]);
+  }, [(doc as any)?.id, freeUser, !!pAuth, (doc as any)?.perfected_letter, (doc as any)?.perfected_cv_html]);
 
   // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets).
   // While editing, show at 100% with horizontal scroll — mobile browsers misplace the
