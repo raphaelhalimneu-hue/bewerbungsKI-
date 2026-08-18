@@ -91,7 +91,6 @@ export default function Scanner() {
 
   async function runPerfect() {
     if (!user) { setShowAuthModal(true); return; }
-    if (locked) { navigate("/pricing"); return; }
     if (cvText.trim().length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setPerfecting(true); setPerfectChanges(null);
     try {
@@ -174,7 +173,7 @@ export default function Scanner() {
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, ...(locked ? { opacity: 0.5, pointerEvents: "none" as const } : {}) }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           {(["cv", "letter"] as const).map((m) => (
             <button
               key={m}
@@ -192,7 +191,7 @@ export default function Scanner() {
           ))}
         </div>
 
-        <div className="card" style={locked ? { opacity: 0.5, pointerEvents: "none" } : undefined}>
+        <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
             <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} onFile={setLastFile} />
@@ -206,8 +205,8 @@ export default function Scanner() {
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button className="btn btn-p" onClick={() => analyze()} disabled={busy || perfecting || cvText.trim().length < 80}>
-              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : t("scanner.analyze")}
+            <button className="btn btn-p" onClick={() => (locked ? navigate("/pricing") : analyze())} disabled={busy || perfecting || cvText.trim().length < 80} style={locked ? { opacity: 0.6 } : undefined}>
+              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : <>{locked ? "🔒 " : ""}{t("scanner.analyze")}</>}
             </button>
             <button className="btn btn-g" onClick={runPerfect} disabled={busy || perfecting || cvText.trim().length < 80}>
               {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}

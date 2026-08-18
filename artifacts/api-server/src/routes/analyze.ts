@@ -151,10 +151,8 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
+    // Perfecting is allowed for free users too — they can view the improved
+    // version, but saving/downloading it stays behind the purchase.
     const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
     if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
