@@ -22,3 +22,5 @@ Gratis-Nutzer dürfen /perfect nutzen und das Ergebnis ANSEHEN (Scanner + Previe
 
 ## Power-Paket (2026-08-18)
 Zweites Paket: 29,90 € einmalig = unbegrenzt Bewerbungen + 50× Perfektionieren (lifetime, atomar reserviert via perfect_count/is_unlimited in profiles) + stilles Fair-Use-Limit 10 Generierungen/Tag (DB-Zählung docs heute + In-Memory). Webhook upsertet Profile (kein verlorener Kauf), Doppelkauf von Power wird im /checkout mit 400 already_unlimited geblockt. Premium bleibt 9,99 € = +10 Credits; seit 2026-08-18 zusätzlich 10× Perfektionieren pro 10er-Paket (Cap = credits, gleiche perfect_count-Reservierung). Gratis-Nutzer behalten den Tages-Teaser (5/Tag, view-only).
+
+- Entscheidung 2026-08-18: Die 1 Gratis-Bewerbung darf heruntergeladen werden (bewusst, als Werbung/Conversion). Nur die KI-perfektionierte Fassung bleibt für Gratis-Nutzer download-gesperrt (nur ansehen/drucken). Eine komplette Download-Sperre für Gratis-Nutzer wurde gebaut und auf Nutzerwunsch wieder entfernt.
