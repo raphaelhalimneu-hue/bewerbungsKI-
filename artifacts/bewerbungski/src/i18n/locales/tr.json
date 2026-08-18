@@ -486,7 +486,8 @@
     "tooLarge": "Dosya çok büyük (en fazla 50 MB).",
     "noText": "Dosyada metin bulunamadı.",
     "limit": "Günlük yükleme sınırına ulaşıldı. Yarın tekrar dene.",
-    "error": "Dosya okunamadı."
+    "error": "Dosya okunamadı.",
+    "verifyFirst": "Lütfen önce e-posta adresini onayla — spam klasörünü de kontrol et."
   },
   "importPage": {
     "nav": "Dosya içe aktar",

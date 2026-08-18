@@ -529,7 +529,8 @@
     "tooLarge": "File too large (max. 50 MB).",
     "noText": "No text found in the file.",
     "limit": "Daily upload limit reached. Try again tomorrow.",
-    "error": "Could not read the file."
+    "error": "Could not read the file.",
+    "verifyFirst": "Please confirm your email address first — also check your spam folder."
   },
   "importPage": {
     "nav": "File import",

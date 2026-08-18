@@ -486,7 +486,8 @@
     "tooLarge": "Archivo demasiado grande (máx. 50 MB).",
     "noText": "No se encontró texto en el archivo.",
     "limit": "Límite diario de subidas alcanzado. Inténtalo mañana.",
-    "error": "No se pudo leer el archivo."
+    "error": "No se pudo leer el archivo.",
+    "verifyFirst": "Confirma primero tu correo electrónico; revisa también la carpeta de spam."
   },
   "importPage": {
     "nav": "Importar archivo",

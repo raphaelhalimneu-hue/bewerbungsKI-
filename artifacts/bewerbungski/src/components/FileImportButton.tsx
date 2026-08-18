@@ -21,6 +21,8 @@ export function FileImportButton({ onText, onFile }: { onText: (text: string) =>
 
   async function handleFile(file: File) {
     setErr("");
+    // Uploads need an account — open the login modal instead of a cryptic read error
+    if (!user) { setShowAuthModal(true); return; }
     file = await compressImageIfNeeded(file, IMAGE_TARGET_BYTES);
     if (file.size > MAX_BYTES) { setErr(t("fileImport.tooLarge")); return; }
     setBusy(true);
@@ -55,7 +57,7 @@ export function FileImportButton({ onText, onFile }: { onText: (text: string) =>
     } catch (e: any) {
       const msg = String(e?.message || "");
       const status = e?.status ?? (msg.match(/\b(4\d\d|5\d\d)\b/)?.[1] ? Number(msg.match(/\b(4\d\d|5\d\d)\b/)![1]) : 0);
-      setErr(status === 429 ? t("fileImport.limit") : status === 422 ? t("fileImport.noText") : status === 413 ? t("fileImport.tooLarge") : t("fileImport.error"));
+      setErr(status === 429 ? t("fileImport.limit") : status === 422 ? t("fileImport.noText") : status === 413 ? t("fileImport.tooLarge") : status === 403 || status === 401 ? t("fileImport.verifyFirst") : t("fileImport.error"));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
