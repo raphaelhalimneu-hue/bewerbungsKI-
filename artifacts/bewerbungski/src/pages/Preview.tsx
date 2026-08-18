@@ -32,11 +32,14 @@ export default function Preview() {
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
   // True once the letter shown is the AI-perfected version (this session)
   const [perfectedApplied, setPerfectedApplied] = useState(false);
+  // True once the CV shown contains the AI-perfected profile (this session)
+  const [cvPerfectedApplied, setCvPerfectedApplied] = useState(false);
   const { profile } = useAuth();
   const pAuth = profile as any;
   const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
   // Free users may VIEW the perfected version, but downloading it requires a purchase
   const letterDlLocked = freeUser && perfectedApplied;
+  const cvDlLocked = freeUser && cvPerfectedApplied;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -92,11 +95,14 @@ export default function Preview() {
   async function runPerfect() {
     const { cvText, letterText, jobText } = docTexts();
     if (!letterText || letterText.trim().length < 80) return;
+    // CV profile statement: perfected together with the letter (same rules)
+    const cvJson: any = (doc as any)?.cv_json || null;
+    const profileText = cvJson?.profile && String(cvJson.profile).trim().length >= 40 ? String(cvJson.profile) : undefined;
     setAiError(""); setPerfecting(true); setPerfectChanges(null);
     try {
       const res: any = await customFetch("/api/perfect", {
         method: "POST",
-        body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, language: i18n.resolvedLanguage || "de" }),
+        body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, profileText, language: i18n.resolvedLanguage || "de" }),
       });
       if (res?.letter) {
         setEditedLetter(res.letter);
@@ -104,10 +110,27 @@ export default function Preview() {
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         // Show the improved letter right away
         setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-        // Save + compute the new score in the background
+        // Apply the improved CV profile statement in the visible CV (view is
+        // free; downloads of the perfected CV stay behind the purchase)
+        let cvHtmlToSave: string | undefined;
+        if (typeof res.profile === "string" && res.profile.trim().length >= 40 && profileText && cvRef.current) {
+          const target = Array.from(cvRef.current.querySelectorAll("p,div")).find(
+            (el) => el.children.length === 0 && (el.textContent || "").trim() === profileText.trim(),
+          );
+          if (target) {
+            target.textContent = res.profile;
+            setCvPerfectedApplied(true);
+            cvHtmlToSave = cvRef.current.innerHTML;
+          }
+        }
+        // Save + compute the new score in the background (the server rejects
+        // the save for locked free accounts — view-only stays enforced)
         customFetch(`/api/documents/${params.id}`, {
           method: "PATCH",
-          body: JSON.stringify({ cover_letter: res.letter }),
+          body: JSON.stringify({
+            cover_letter: res.letter,
+            ...(cvHtmlToSave ? { cv_html: cvHtmlToSave, cv_json: { ...cvJson, profile: res.profile } } : {}),
+          }),
         }).catch(() => {});
         setPerfecting(false);
         // Free users cannot use /analyze — skip the automatic re-check so the
@@ -174,6 +197,7 @@ export default function Preview() {
 
   // CV PDF: client-side via html2canvas so contentEditable edits are captured
   async function handleDownloadCvPdf() {
+    if (cvDlLocked) { navigate("/pricing"); return; }
     if (!cvRef.current) return;
     setExporting("cv-pdf");
     try {
@@ -232,6 +256,7 @@ export default function Preview() {
 
   async function downloadDocx(type: "cv" | "cover-letter") {
     if (type === "cover-letter" && letterDlLocked) { navigate("/pricing"); return; }
+    if (type === "cv" && cvDlLocked) { navigate("/pricing"); return; }
     const key = type === "cv" ? "cv-docx" : "letter-docx";
     setExporting(key as any);
     try {
@@ -269,10 +294,10 @@ export default function Preview() {
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
                 <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
+                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{cvDlLocked ? "🔒 " : ""}{t("preview.downloadCv")}</>}
                 </button>
                 <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
-                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>⬇ CV .docx</>}
+                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{cvDlLocked ? "🔒" : "⬇"} CV .docx</>}
                 </button>
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
