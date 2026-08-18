@@ -523,5 +523,16 @@
     "commentPlaceholder": "Bize iletmek istediğiniz bir şey var mı? (isteğe bağlı)",
     "send": "Değerlendirmeyi gönder",
     "thanks": "Değerlendirmeniz için teşekkürler!"
+  },
+  "verify": {
+    "title": "E-postanı doğrula",
+    "description": "{{email}} adresine 6 haneli bir kod gönderdik. Buraya gir.",
+    "submit": "Doğrula",
+    "resend": "Kodu tekrar gönder",
+    "resendIn": "{{s}} sn içinde tekrar gönder",
+    "success": "E-posta doğrulandı! ✓",
+    "wrongCode": "Kod yanlış veya süresi dolmuş.",
+    "sendError": "Kod gönderilemedi. Lütfen tekrar dene.",
+    "signOut": "Başka bir e-posta kullan (çıkış yap)"
   }
 }

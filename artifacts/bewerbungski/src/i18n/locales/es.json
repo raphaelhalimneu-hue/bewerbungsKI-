@@ -523,5 +523,16 @@
     "commentPlaceholder": "¿Algo más que quieras contarnos? (opcional)",
     "send": "Enviar valoración",
     "thanks": "¡Gracias por tu valoración!"
+  },
+  "verify": {
+    "title": "Confirma tu correo",
+    "description": "Hemos enviado un código de 6 dígitos a {{email}}. Introdúcelo aquí.",
+    "submit": "Confirmar",
+    "resend": "Reenviar código",
+    "resendIn": "Reenviar en {{s}} s",
+    "success": "¡Correo confirmado! ✓",
+    "wrongCode": "El código es incorrecto o ha caducado.",
+    "sendError": "No se pudo enviar el código. Inténtalo de nuevo.",
+    "signOut": "Usar otro correo (cerrar sesión)"
   }
 }

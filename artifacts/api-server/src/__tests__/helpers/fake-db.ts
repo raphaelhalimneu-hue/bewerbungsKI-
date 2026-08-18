@@ -15,12 +15,12 @@ export const store: { docs: FakeDoc[]; profile: Record<string, any> } = {
   docs: [],
   // Downloads are purchase-gated — default to a paying profile so the
   // download regression tests exercise the happy path.
-  profile: { userId: "user-1", isPremium: true, credits: 0 },
+  profile: { userId: "user-1", isPremium: true, credits: 0, emailVerifiedAt: new Date() },
 };
 
 export function resetStore() {
   store.docs = [];
-  store.profile = { userId: "user-1", isPremium: true, credits: 0 };
+  store.profile = { userId: "user-1", isPremium: true, credits: 0, emailVerifiedAt: new Date() };
 }
 
 export function seedDoc(doc: Partial<FakeDoc>): FakeDoc {

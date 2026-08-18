@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { requireVerifiedEmail } from "../middlewares/verified";
 
 const router = Router();
 
@@ -68,7 +69,7 @@ function normalize(raw: any) {
   };
 }
 
-router.post("/parse-linkedin", requireAuth, async (req: AuthenticatedRequest, res) => {
+router.post("/parse-linkedin", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
     if (rateLimited(req.userId!)) {
       res.status(429).json({ error: "rate_limited" });
@@ -130,7 +131,7 @@ router.post("/parse-linkedin", requireAuth, async (req: AuthenticatedRequest, re
 });
 
 // ── Free-text CV parsing: user writes about themselves in plain language ─────
-router.post("/parse-freetext", requireAuth, async (req: AuthenticatedRequest, res) => {
+router.post("/parse-freetext", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
     if (rateLimited(req.userId!)) {
       res.status(429).json({ error: "rate_limited" });

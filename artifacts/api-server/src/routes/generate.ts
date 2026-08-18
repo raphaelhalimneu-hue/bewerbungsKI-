@@ -37,6 +37,11 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
     const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    if (!unlimited && !profile?.emailVerifiedAt) {
+      // New signups must confirm their email address before generating
+      res.status(403).json({ error: "email_unverified" });
+      return;
+    }
     if (profile?.isUnlimited && !unlimited) {
       // Power package: unlimited applications, but a silent fair-use cap of
       // 10 new generations per day protects the AI budget from abuse.

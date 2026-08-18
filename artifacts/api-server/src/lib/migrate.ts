@@ -48,6 +48,34 @@ export async function runStartupMigrations(): Promise<void> {
     )`,
   );
 
+  // Email verification: new signups must confirm their address via 6-digit code.
+  // Existing accounts are grandfathered in (backfilled as verified) exactly once,
+  // guarded by a column-existence check so re-runs never re-verify new users.
+  // Advisory lock makes check+alter+backfill safe under concurrent starts
+  // (rolling deploys): only one instance performs the one-time backfill.
+  await pool.query(`SELECT pg_advisory_lock(824601)`);
+  try {
+    const verCol = await pool.query(
+      `SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'email_verified_at'`,
+    );
+    if (!verCol.rowCount) {
+      await pool.query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email_verified_at timestamp`);
+      const bf = await pool.query(`UPDATE profiles SET email_verified_at = now()`);
+      logger.info({ rows: bf.rowCount }, "Backfilled email_verified_at for existing profiles");
+    }
+  } finally {
+    await pool.query(`SELECT pg_advisory_unlock(824601)`);
+  }
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS email_codes (
+      user_id text PRIMARY KEY,
+      code text NOT NULL,
+      expires_at timestamp NOT NULL,
+      attempts integer NOT NULL DEFAULT 0,
+      last_sent_at timestamp NOT NULL DEFAULT now()
+    )`,
+  );
+
   // Backfill: legacy premium buyers (boolean is_premium, no credits yet) keep
   // their purchased 30-application package. Safe to re-run: after this change,
   // is_premium=true always comes with credits>0, so only legacy rows match.

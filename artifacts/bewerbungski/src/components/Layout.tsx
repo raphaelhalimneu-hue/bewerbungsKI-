@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { AuthModal } from "./AuthModal";
+import { VerifyEmailModal } from "./VerifyEmailModal";
 import { InAppBrowserBanner } from "./InAppBrowserBanner";
 import { ExitIntentPopup } from "./ExitIntentPopup";
 import { LANGUAGES } from "../i18n";
@@ -202,6 +203,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <AuthModal />
+      <VerifyEmailModal />
     </div>
   );
 }

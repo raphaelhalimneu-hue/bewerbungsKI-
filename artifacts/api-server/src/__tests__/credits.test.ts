@@ -17,10 +17,11 @@ type ProfileRow = {
   email: string;
   isPremium: boolean;
   credits: number;
+  emailVerifiedAt?: Date | null;
 };
 
 const state = {
-  profile: { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0 } as ProfileRow,
+  profile: { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0, emailVerifiedAt: new Date() } as ProfileRow,
   docCount: 0,
   processedEvents: new Set<string>(),
 };
@@ -165,7 +166,7 @@ function postGenerate() {
 }
 
 beforeEach(() => {
-  state.profile = { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0 };
+  state.profile = { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0, emailVerifiedAt: new Date() };
   state.docCount = 0;
   state.processedEvents.clear();
 });

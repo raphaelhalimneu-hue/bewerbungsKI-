@@ -52,9 +52,12 @@ vi.mock("@workspace/db", () => {
 
   const dbLike = {
     select: () => ({
-      from: () => ({
+      from: (table: any) => ({
         where: () => {
-          const rows = rowsForWhere();
+          const rows =
+            table === profilesTable
+              ? [{ userId: "user-1", isPremium: true, credits: 0, emailVerifiedAt: new Date() }]
+              : rowsForWhere();
           return {
             orderBy: () => Promise.resolve(rows),
             then: (ok: any, err: any) => Promise.resolve(rows).then(ok, err),

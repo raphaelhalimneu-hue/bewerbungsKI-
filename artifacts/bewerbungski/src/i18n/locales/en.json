@@ -566,5 +566,16 @@
     "commentPlaceholder": "Anything else you'd like to tell us? (optional)",
     "send": "Submit rating",
     "thanks": "Thanks for your rating!"
+  },
+  "verify": {
+    "title": "Confirm your email",
+    "description": "We sent a 6-digit code to {{email}}. Enter it here.",
+    "submit": "Confirm",
+    "resend": "Resend code",
+    "resendIn": "Resend in {{s}} s",
+    "success": "Email confirmed! ✓",
+    "wrongCode": "The code is wrong or expired.",
+    "sendError": "The code could not be sent. Please try again.",
+    "signOut": "Use a different email (sign out)"
   }
 }

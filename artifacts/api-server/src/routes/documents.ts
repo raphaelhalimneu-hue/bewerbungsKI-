@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { requireVerifiedEmail } from "../middlewares/verified";
 import { isFreeQuotaLocked } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
@@ -253,7 +254,7 @@ const letterRegenHistory = new Map<string, number[]>();
 const LETTER_REGEN_MAX = 5;
 const LETTER_REGEN_WINDOW_MS = 10 * 60 * 1000;
 
-router.post("/documents/:id/cover-letter", requireAuth, async (req: AuthenticatedRequest, res) => {
+router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   const docId = String(req.params.id);
   try {
     const [doc] = await db

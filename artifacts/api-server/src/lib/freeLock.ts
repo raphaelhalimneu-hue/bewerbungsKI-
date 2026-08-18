@@ -25,6 +25,20 @@ export async function isFreeAccount(userId: string, email?: string): Promise<boo
   return !(profile?.isPremium || (profile?.credits ?? 0) > 0);
 }
 
+/** True when the account still has to confirm its email address (new signups). */
+export async function isEmailUnverified(userId: string, email?: string): Promise<boolean> {
+  const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
+    .toLowerCase()
+    .split(",")
+    .includes((email || "").toLowerCase());
+  if (unlimited) return false;
+  const [profile] = await db
+    .select()
+    .from(profilesTable)
+    .where(eq(profilesTable.userId, userId));
+  return !profile?.emailVerifiedAt;
+}
+
 export async function isFreeQuotaLocked(userId: string, email?: string): Promise<boolean> {
   const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
     .toLowerCase()

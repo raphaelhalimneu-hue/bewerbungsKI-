@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { requireVerifiedEmail } from "../middlewares/verified";
 
 const router = Router();
 
@@ -49,7 +50,7 @@ async function ocrWithClaude(mimeType: string, base64: string): Promise<string |
   return data?.content?.[0]?.text ?? null;
 }
 
-router.post("/extract", requireAuth, async (req: AuthenticatedRequest, res) => {
+router.post("/extract", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
     const { mimeType, data } = req.body || {};
     if (typeof mimeType !== "string" || typeof data !== "string" || data.length === 0) {
@@ -110,7 +111,7 @@ router.post("/extract", requireAuth, async (req: AuthenticatedRequest, res) => {
 });
 
 // ── Design analysis: extract a color/font style from an uploaded CV (image or PDF) ──
-router.post("/design", requireAuth, async (req: AuthenticatedRequest, res) => {
+router.post("/design", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
     const { mimeType, data } = req.body || {};
     if (typeof mimeType !== "string" || typeof data !== "string" || data.length === 0) {

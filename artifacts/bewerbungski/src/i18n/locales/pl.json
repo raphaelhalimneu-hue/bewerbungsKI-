@@ -523,5 +523,16 @@
     "commentPlaceholder": "Chcesz nam coś jeszcze przekazać? (opcjonalnie)",
     "send": "Wyślij ocenę",
     "thanks": "Dziękujemy za ocenę!"
+  },
+  "verify": {
+    "title": "Potwierdź e-mail",
+    "description": "Wysłaliśmy 6-cyfrowy kod na {{email}}. Wpisz go tutaj.",
+    "submit": "Potwierdź",
+    "resend": "Wyślij kod ponownie",
+    "resendIn": "Wyślij ponownie za {{s}} s",
+    "success": "E-mail potwierdzony! ✓",
+    "wrongCode": "Kod jest nieprawidłowy lub wygasł.",
+    "sendError": "Nie udało się wysłać kodu. Spróbuj ponownie.",
+    "signOut": "Użyj innego adresu (wyloguj)"
   }
 }

@@ -566,5 +566,16 @@
     "commentPlaceholder": "Möchtest du uns noch etwas mitteilen? (optional)",
     "send": "Bewertung absenden",
     "thanks": "Danke für deine Bewertung!"
+  },
+  "verify": {
+    "title": "E-Mail bestätigen",
+    "description": "Wir haben einen 6-stelligen Code an {{email}} geschickt. Gib ihn hier ein.",
+    "submit": "Bestätigen",
+    "resend": "Code erneut senden",
+    "resendIn": "Erneut senden in {{s}} s",
+    "success": "E-Mail bestätigt! ✓",
+    "wrongCode": "Der Code ist falsch oder abgelaufen.",
+    "sendError": "Der Code konnte nicht gesendet werden. Bitte erneut versuchen.",
+    "signOut": "Andere E-Mail verwenden (abmelden)"
   }
 }

@@ -35,6 +35,7 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       credits: profile.credits,
       document_limit: unlimited || profile.isUnlimited ? 999999 : 1 + profile.credits,
       documents_count: Number(docCount) || 0,
+      email_verified: unlimited ? true : !!profile.emailVerifiedAt,
     });
   } catch (err) {
     req.log.error({ err }, "GET /me error");

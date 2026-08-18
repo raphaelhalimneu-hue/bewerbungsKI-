@@ -24,7 +24,7 @@ import request from "supertest";
 // ---------------------------------------------------------------------------
 
 const state = {
-  profile: { userId: "e2e-user", email: "e2e@example.com", isPremium: false, credits: 0 },
+  profile: { userId: "e2e-user", email: "e2e@example.com", isPremium: false, credits: 0, emailVerifiedAt: new Date() },
   docs: [] as any[],
   processedEvents: new Set<string>(),
 };

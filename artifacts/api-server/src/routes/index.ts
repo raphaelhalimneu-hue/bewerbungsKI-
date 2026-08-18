@@ -13,6 +13,7 @@ import parseLinkedinRouter from "./parse-linkedin";
 import analyzeRouter from "./analyze";
 import extractRouter from "./extract";
 import ratingsRouter from "./ratings";
+import verifyRouter from "./verify";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(parseLinkedinRouter);
 router.use(analyzeRouter);
 router.use(extractRouter);
 router.use(ratingsRouter);
+router.use(verifyRouter);
 
 export default router;

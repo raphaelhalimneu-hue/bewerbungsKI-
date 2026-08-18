@@ -12,6 +12,8 @@ export const profilesTable = pgTable("profiles", {
   isUnlimited: boolean("is_unlimited").notNull().default(false),
   perfectCount: integer("perfect_count").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id"),
+  // Null = email not yet confirmed (accounts created before this feature were backfilled)
+  emailVerifiedAt: timestamp("email_verified_at"),
   savedProfile: jsonb("saved_profile"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
