@@ -41,6 +41,8 @@ export default function Preview() {
   // Free users may VIEW the perfected version, but downloading it requires a purchase
   const letterDlLocked = freeUser && perfectedApplied;
   const cvDlLocked = freeUser && cvPerfectedApplied;
+  // Free trial: PDF download stays free, Word (DOCX) requires a purchase
+  const docxLocked = freeUser;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -334,6 +336,7 @@ export default function Preview() {
   }
 
   async function downloadDocx(type: "cv" | "cover-letter") {
+    if (docxLocked) { navigate("/pricing"); return; }
     if (type === "cover-letter" && letterDlLocked) { navigate("/pricing"); return; }
     if (type === "cv" && cvDlLocked) { navigate("/pricing"); return; }
     const key = type === "cv" ? "cv-docx" : "letter-docx";
@@ -388,7 +391,7 @@ export default function Preview() {
                   {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{cvDlLocked ? "🔒 " : ""}{t("preview.downloadCv")}</>}
                 </button>
                 <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
-                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{cvDlLocked ? "🔒" : "⬇"} CV .docx</>}
+                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked || cvDlLocked ? "🔒" : "⬇"} CV .docx</>}
                 </button>
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
@@ -396,7 +399,7 @@ export default function Preview() {
                       {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{letterDlLocked ? "🔒 " : ""}{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
-                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{letterDlLocked ? "🔒" : "⬇"} Bewerbung .docx</>}
+                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked || letterDlLocked ? "🔒" : "⬇"} Bewerbung .docx</>}
                     </button>
                   </>
                 )}

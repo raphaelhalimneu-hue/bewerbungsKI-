@@ -46,6 +46,8 @@ export default function CVEditor() {
   const { profile } = useAuth();
   const p = profile as any;
   const locked = !!p && !p.is_premium && (p.credits || 0) === 0 && (p.documents_count || 0) >= 1;
+  // Free trial: PDF stays free, Word (DOCX) requires a purchase
+  const docxLocked = !!p && !p.is_premium && (p.credits || 0) === 0;
 
   const [cvState, setCvState] = useState<CVContent>(emptyCV());
   const [template, setTemplate] = useState<TemplateId>("modern");
@@ -233,6 +235,7 @@ export default function CVEditor() {
 
   // ── DOCX export ──────────────────────────────────────────────────────────
   async function handleDownloadDocx() {
+    if (docxLocked) { navigate("/pricing"); return; }
     setExporting("docx");
     try {
       const blob = await customFetch<Blob>(`/api/documents/${params.id}/download/cv.docx`, {
@@ -535,7 +538,7 @@ export default function CVEditor() {
               {exporting === "pdf" ? <><span className="spin" /> PDF…</> : "⬇ PDF"}
             </button>
             <button className="btn btn-g btn-sm" onClick={handleDownloadDocx} disabled={exporting !== null} style={{ minWidth: 120 }}>
-              {exporting === "docx" ? <><span className="spin" /> Word…</> : "⬇ DOCX"}
+              {exporting === "docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} DOCX</>}
             </button>
           </div>
         </div>

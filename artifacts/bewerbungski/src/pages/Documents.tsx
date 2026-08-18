@@ -11,6 +11,9 @@ export default function Documents() {
   const { user, profile, setShowAuthModal, refetchProfile } = useAuth();
   const p = profile as any;
   const [, navigate] = useLocation();
+  const pA = profile as any;
+  // Free trial: PDF stays free, Word (DOCX) requires a purchase
+  const docxLocked = !!pA && !pA.is_premium && (pA.credits || 0) === 0;
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { data: docs = [], refetch } = useListDocuments({ query: { enabled: !!user } as any });
@@ -30,6 +33,7 @@ export default function Documents() {
   }
 
   async function downloadFile(docId: string, url: string, filename: string, key: string) {
+    if (docxLocked && url.endsWith(".docx")) { navigate("/pricing"); return; }
     setDownloading(key);
     try {
       const blob = await customFetch<Blob>(url, { responseType: "blob" });
@@ -132,7 +136,7 @@ export default function Documents() {
                         title={t("docs.downloadCvDocx")}
                         style={{ fontSize: 12 }}
                       >
-                        {downloading === `${doc.id}-cv-docx` ? <><span className="spin" /> Word…</> : <>⬇ CV DOCX</>}
+                        {downloading === `${doc.id}-cv-docx` ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV DOCX</>}
                       </button>
                       {/* Cover letter downloads (only if document has one) */}
                       {doc.has_cover_letter && (
@@ -153,7 +157,7 @@ export default function Documents() {
                             title={t("docs.downloadLetterDocx")}
                             style={{ fontSize: 12 }}
                           >
-                            {downloading === `${doc.id}-letter-docx` ? <><span className="spin" /> Word…</> : <>⬇ Bewerbung DOCX</>}
+                            {downloading === `${doc.id}-letter-docx` ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} Bewerbung DOCX</>}
                           </button>
                         </>
                       )}
