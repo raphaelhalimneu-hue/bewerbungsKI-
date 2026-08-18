@@ -58,7 +58,8 @@ export default function Scanner() {
   const [, navigate] = useLocation();
   const { user, profile, setShowAuthModal } = useAuth();
   const p = profile as any;
-  const locked = !!user && !!p && !p.is_premium && (p.credits || 0) === 0 && (p.documents_count || 0) >= 1;
+  const isFree = !!user && !!p && !p.is_premium && (p.credits || 0) === 0;
+  const locked = isFree && (p.documents_count || 0) >= 1;
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -108,7 +109,8 @@ export default function Scanner() {
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
         setPerfecting(false);
-        void analyze(res.letter);
+        // Free accounts see the perfected text, but not its score
+        if (!isFree) void analyze(res.letter);
       } else {
         setErrorMsg(t("scanner.error"));
       }
