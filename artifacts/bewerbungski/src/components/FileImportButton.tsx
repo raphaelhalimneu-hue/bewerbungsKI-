@@ -6,7 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { compressImageIfNeeded } from "../lib/compressImage";
 
 const ACCEPT = ".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp";
-const MAX_BYTES = 15 * 1024 * 1024;
+const MAX_BYTES = 20 * 1024 * 1024;
+const IMAGE_TARGET_BYTES = 4 * 1024 * 1024; // photos: compress well below the cap
 
 export type UploadedFile = { base64: string; mimeType: string; filename: string };
 
@@ -20,7 +21,7 @@ export function FileImportButton({ onText, onFile }: { onText: (text: string) =>
 
   async function handleFile(file: File) {
     setErr("");
-    file = await compressImageIfNeeded(file, MAX_BYTES);
+    file = await compressImageIfNeeded(file, IMAGE_TARGET_BYTES);
     if (file.size > MAX_BYTES) { setErr(t("fileImport.tooLarge")); return; }
     setBusy(true);
     try {

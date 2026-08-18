@@ -25,7 +25,7 @@ export async function compressImageIfNeeded(file: File, maxBytes: number): Promi
     if (!ctx) return file;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    for (const quality of [0.85, 0.7, 0.55]) {
+    for (const quality of [0.85, 0.7, 0.55, 0.4, 0.3]) {
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/jpeg", quality));
       if (blob && blob.size <= maxBytes) {
         const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
