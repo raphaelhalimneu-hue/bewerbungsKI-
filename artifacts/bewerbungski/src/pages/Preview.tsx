@@ -43,6 +43,8 @@ export default function Preview() {
   const cvDlLocked = freeUser && cvPerfectedApplied;
   // Free trial: PDF download stays free, Word (DOCX) requires a purchase
   const docxLocked = freeUser;
+  // Printing is locked for free accounts once the free document limit is used up
+  const printLocked = freeUser && (pAuth.documents_count || 0) >= (pAuth.document_limit || 1);
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -375,12 +377,12 @@ export default function Preview() {
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
                 {freeUser && (
                   <>
-                    <button className="btn btn-p btn-sm" onClick={printCv}>
-                      {t("preview.print")} · {t("preview.cv")}
+                    <button className="btn btn-p btn-sm" onClick={() => (printLocked ? navigate("/pricing") : printCv())} style={printLocked ? { opacity: 0.6 } : undefined}>
+                      {printLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.cv")}
                     </button>
                     {((doc as any)?.cover_letter || editedLetter) && (
-                      <button className="btn btn-p btn-sm" onClick={printLetter}>
-                        {t("preview.print")} · {t("preview.coverLetter")}
+                      <button className="btn btn-p btn-sm" onClick={() => (printLocked ? navigate("/pricing") : printLetter())} style={printLocked ? { opacity: 0.6 } : undefined}>
+                        {printLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.coverLetter")}
                       </button>
                     )}
                   </>
