@@ -7,7 +7,7 @@ const router = Router();
 // Body: { filename, mimeType, data } with data = base64 (no data: prefix).
 // Free feature — guarded by a daily per-user quota and size limits.
 
-const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB decoded (base64 ~27 MB, under the model request cap)
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB decoded (PDF/DOCX parsed locally; photos are compressed client-side before upload)
 const DAILY_EXTRACT_LIMIT = 20;
 const usage = new Map<string, { day: string; count: number }>();
 function checkQuota(userId: string): boolean {

@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { compressImageIfNeeded } from "../lib/compressImage";
 
 const ACCEPT = ".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp";
-const MAX_BYTES = 20 * 1024 * 1024;
+const MAX_BYTES = 50 * 1024 * 1024;
 const IMAGE_TARGET_BYTES = 4 * 1024 * 1024; // photos: compress well below the cap
 
 export type UploadedFile = { base64: string; mimeType: string; filename: string };

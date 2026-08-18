@@ -483,7 +483,7 @@
   "fileImport": {
     "button": "Dosya yükle (PDF, Word, fotoğraf)",
     "reading": "Dosya okunuyor …",
-    "tooLarge": "Dosya çok büyük (en fazla 20 MB).",
+    "tooLarge": "Dosya çok büyük (en fazla 50 MB).",
     "noText": "Dosyada metin bulunamadı.",
     "limit": "Günlük yükleme sınırına ulaşıldı. Yarın tekrar dene.",
     "error": "Dosya okunamadı."

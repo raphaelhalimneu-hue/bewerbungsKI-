@@ -526,7 +526,7 @@
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",
     "reading": "Datei wird gelesen …",
-    "tooLarge": "Datei zu groß (max. 20 MB).",
+    "tooLarge": "Datei zu groß (max. 50 MB).",
     "noText": "Kein Text in der Datei gefunden.",
     "limit": "Tageslimit für Datei-Uploads erreicht. Versuch es morgen wieder.",
     "error": "Datei konnte nicht gelesen werden."
