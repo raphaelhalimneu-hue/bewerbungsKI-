@@ -21,4 +21,4 @@ Gratis-Nutzer dürfen /perfect nutzen und das Ergebnis ANSEHEN (Scanner + Previe
 
 
 ## Power-Paket (2026-08-18)
-Zweites Paket: 29,90 € einmalig = unbegrenzt Bewerbungen + 50× Perfektionieren (lifetime, atomar reserviert via perfect_count/is_unlimited in profiles) + stilles Fair-Use-Limit 10 Generierungen/Tag (DB-Zählung docs heute + In-Memory). Webhook upsertet Profile (kein verlorener Kauf), Doppelkauf von Power wird im /checkout mit 400 already_unlimited geblockt. Premium bleibt 9,99 € = +10 Credits.
+Zweites Paket: 29,90 € einmalig = unbegrenzt Bewerbungen + 50× Perfektionieren (lifetime, atomar reserviert via perfect_count/is_unlimited in profiles) + stilles Fair-Use-Limit 10 Generierungen/Tag (DB-Zählung docs heute + In-Memory). Webhook upsertet Profile (kein verlorener Kauf), Doppelkauf von Power wird im /checkout mit 400 already_unlimited geblockt. Premium bleibt 9,99 € = +10 Credits; seit 2026-08-18 zusätzlich 10× Perfektionieren pro 10er-Paket (Cap = credits, gleiche perfect_count-Reservierung). Gratis-Nutzer behalten den Tages-Teaser (5/Tag, view-only).

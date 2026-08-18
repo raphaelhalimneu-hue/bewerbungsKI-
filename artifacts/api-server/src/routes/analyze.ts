@@ -160,17 +160,20 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
-    // Power package: 50 perfect uses total (lifetime cap, part of the offer).
+    // Paid perfect quota: Power = 50 lifetime; Premium = 10 per purchased
+    // 10-pack (credits holds 10 per package, so cap = credits). Free users
+    // keep the small daily teaser quota above.
     // Reserve the use atomically BEFORE calling the model (no check-then-act
     // race); if the model call fails, the reservation is released below.
     let reservedPowerUse = false;
     if (!unlimitedP) {
       const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
-      if (prof?.isUnlimited) {
+      const cap = prof?.isUnlimited ? 50 : (prof?.isPremium || (prof?.credits ?? 0) > 0) ? (prof?.credits ?? 0) : 0;
+      if (prof && cap > 0) {
         const reserved = await db
           .update(profilesTable)
           .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
-          .where(and(eq(profilesTable.userId, req.userId!), eq(profilesTable.isUnlimited, true), lt(profilesTable.perfectCount, 50)))
+          .where(and(eq(profilesTable.userId, req.userId!), lt(profilesTable.perfectCount, cap)))
           .returning({ perfectCount: profilesTable.perfectCount });
         if (reserved.length === 0) {
           res.status(429).json({ error: "perfect_limit_reached" });

@@ -22,7 +22,7 @@ export default function Pricing() {
   }
 
   const freeFeats = [t("pricing.freeFeat1"), t("pricing.freeFeat2"), t("pricing.freeFeat3"), t("pricing.freeFeat4")];
-  const premFeats = [t("pricing.premFeat1"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
+  const premFeats = [t("pricing.premFeat1"), t("pricing.premFeat6"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
   const powerFeats = [t("pricing.powerFeat1"), t("pricing.powerFeat2"), t("pricing.premFeat2"), t("pricing.premFeat4"), t("pricing.premFeat5")];
 
   return (
