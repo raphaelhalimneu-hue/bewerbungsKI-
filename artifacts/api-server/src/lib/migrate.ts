@@ -17,7 +17,13 @@ export async function runStartupMigrations(): Promise<void> {
   );
   await pool.query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS perfect_count integer NOT NULL DEFAULT 0`,
+  );
+
+  // Perfected view-only copies for locked free accounts
+  await pool.query(
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_letter text`,
+  );
+  await pool.query(
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_cv_html text`,
   );
 
