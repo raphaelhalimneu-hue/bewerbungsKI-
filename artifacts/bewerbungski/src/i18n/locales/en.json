@@ -149,8 +149,9 @@
     "power": "POWER",
     "bestValue": "Best value",
     "powerPrice": "€29.90",
-    "oneTimePower": "One-time — 50 applications",
-    "powerFeat1": "Create 50 applications"
+    "oneTimePower": "One-time — Unlimited applications",
+    "powerFeat1": "Create unlimited applications",
+    "powerFeat2": "50× AI perfecting"
   },
   "docs": {
     "title": "📄 My documents",
@@ -518,7 +519,8 @@
     "styleBusy": "AI is reading the design …",
     "styleError": "Could not detect the design. Please try another photo/PDF.",
     "improvedTitle": "Your improved text",
-    "dailyLimit": "Daily limit reached (abuse protection). Try again tomorrow."
+    "dailyLimit": "Daily limit reached (abuse protection). Try again tomorrow.",
+    "perfectLimit": "Your perfecting quota (50×) is used up."
   },
   "fileImport": {
     "button": "Upload file (PDF, Word, photo)",

@@ -23,7 +23,7 @@ export default function Pricing() {
 
   const freeFeats = [t("pricing.freeFeat1"), t("pricing.freeFeat2"), t("pricing.freeFeat3"), t("pricing.freeFeat4")];
   const premFeats = [t("pricing.premFeat1"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
-  const powerFeats = [t("pricing.powerFeat1"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
+  const powerFeats = [t("pricing.powerFeat1"), t("pricing.powerFeat2"), t("pricing.premFeat2"), t("pricing.premFeat4"), t("pricing.premFeat5")];
 
   return (
     <Layout>
@@ -120,14 +120,20 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <button
-              className="btn btn-p btn-full btn-lg"
-              onClick={() => handleUpgrade("power")}
-              disabled={checkoutMutation.isPending}
-            >
-              {checkoutMutation.isPending ? <span className="spin" /> : null}
-              {checkoutMutation.isPending ? t("pricing.loading") : t("pricing.upgradeNow")}
-            </button>
+            {(profile as any)?.is_unlimited ? (
+              <div style={{ background: "#dcfce7", color: "var(--ok)", borderRadius: 10, padding: "12px 20px", textAlign: "center", fontWeight: 600, fontSize: 14 }}>
+                {t("pricing.premiumActive")}
+              </div>
+            ) : (
+              <button
+                className="btn btn-p btn-full btn-lg"
+                onClick={() => handleUpgrade("power")}
+                disabled={checkoutMutation.isPending}
+              >
+                {checkoutMutation.isPending ? <span className="spin" /> : null}
+                {checkoutMutation.isPending ? t("pricing.loading") : t("pricing.upgradeNow")}
+              </button>
+            )}
           </div>
         </div>
 

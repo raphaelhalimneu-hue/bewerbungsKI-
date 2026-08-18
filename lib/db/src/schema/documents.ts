@@ -8,6 +8,9 @@ export const profilesTable = pgTable("profiles", {
   email: text("email").notNull(),
   isPremium: boolean("is_premium").notNull().default(false),
   credits: integer("credits").notNull().default(0),
+  // Power package: unlimited applications, perfect capped at 50 lifetime
+  isUnlimited: boolean("is_unlimited").notNull().default(false),
+  perfectCount: integer("perfect_count").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id"),
   savedProfile: jsonb("saved_profile"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

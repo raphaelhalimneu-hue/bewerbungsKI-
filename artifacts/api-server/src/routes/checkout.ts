@@ -26,9 +26,18 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
     const plan = (req.body as { plan?: string })?.plan === "power" ? "power" : "premium";
     const PLANS = {
       premium: { amount: 999, name: "BewerbungsKI Premium", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
-      power: { amount: 2990, name: "BewerbungsKI Power", description: "50 Bewerbungen – Einmalzahlung, kein Abo" },
+      power: { amount: 2990, name: "BewerbungsKI Power", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
     } as const;
     const cfg = PLANS[plan];
+
+    // A Power (unlimited) account gains nothing from buying again — block it.
+    if (plan === "power") {
+      const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
+      if (prof?.isUnlimited) {
+        res.status(400).json({ error: "already_unlimited" });
+        return;
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -91,8 +100,7 @@ router.post("/webhook/stripe", async (req, res) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
       if (userId) {
-        // Each completed checkout grants credits per plan (stackable packages):
-        // premium = 10 applications, power = 50 applications.
+        // premium = +10 applications (stackable); power = unlimited applications.
         // Idempotent: record the Stripe event id first; if it was already
         // processed (redelivery), the insert is a no-op and no credits are added.
         await db.transaction(async (tx) => {
@@ -102,14 +110,29 @@ router.post("/webhook/stripe", async (req, res) => {
             .onConflictDoNothing()
             .returning();
           if (inserted.length === 0) return; // duplicate delivery
-          const grant = session.metadata?.plan === "power" ? 50 : 10;
-          await tx
-            .update(profilesTable)
-            .set({
-              isPremium: true,
-              credits: sql`${profilesTable.credits} + ${grant}`,
-            })
-            .where(eq(profilesTable.userId, userId));
+          // Upsert so a missing profile row can never swallow a paid purchase.
+          const email = session.customer_details?.email || "";
+          if (session.metadata?.plan === "power") {
+            // Power: unlimited applications, perfect capped separately
+            await tx
+              .insert(profilesTable)
+              .values({ userId, email, isPremium: true, isUnlimited: true })
+              .onConflictDoUpdate({
+                target: profilesTable.userId,
+                set: { isPremium: true, isUnlimited: true },
+              });
+          } else {
+            await tx
+              .insert(profilesTable)
+              .values({ userId, email, isPremium: true, credits: 10 })
+              .onConflictDoUpdate({
+                target: profilesTable.userId,
+                set: {
+                  isPremium: true,
+                  credits: sql`${profilesTable.credits} + 10`,
+                },
+              });
+          }
         });
       }
     }

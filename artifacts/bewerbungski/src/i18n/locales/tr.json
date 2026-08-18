@@ -149,8 +149,9 @@
     "power": "POWER",
     "bestValue": "En avantajlı",
     "powerPrice": "29,90 €",
-    "oneTimePower": "Tek seferlik — 50 başvuru",
-    "powerFeat1": "50 başvuru oluşturun"
+    "oneTimePower": "Tek seferlik — Sınırsız başvuru",
+    "powerFeat1": "Sınırsız başvuru oluşturun",
+    "powerFeat2": "50× yapay zekâ ile mükemmelleştirme"
   },
   "docs": {
     "title": "📄 Belgelerim",
@@ -475,7 +476,8 @@
     "styleBusy": "Yapay zekâ tasarımı okuyor …",
     "styleError": "Tasarım algılanamadı. Lütfen başka bir fotoğraf/PDF deneyin.",
     "improvedTitle": "İyileştirilmiş metnin",
-    "dailyLimit": "Günlük sınıra ulaşıldı (kötüye kullanım koruması). Yarın tekrar deneyin."
+    "dailyLimit": "Günlük sınıra ulaşıldı (kötüye kullanım koruması). Yarın tekrar deneyin.",
+    "perfectLimit": "Mükemmelleştirme hakkınız (50×) tükendi."
   },
   "fileImport": {
     "button": "Dosya yükle (PDF, Word, fotoğraf)",

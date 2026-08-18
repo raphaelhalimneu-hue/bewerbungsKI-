@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { isFreeQuotaLocked } from "../lib/freeLock";
+import { db, profilesTable } from "@workspace/db";
+import { and, eq, lt, sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -158,6 +160,33 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
+    // Power package: 50 perfect uses total (lifetime cap, part of the offer).
+    // Reserve the use atomically BEFORE calling the model (no check-then-act
+    // race); if the model call fails, the reservation is released below.
+    let reservedPowerUse = false;
+    if (!unlimitedP) {
+      const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
+      if (prof?.isUnlimited) {
+        const reserved = await db
+          .update(profilesTable)
+          .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
+          .where(and(eq(profilesTable.userId, req.userId!), eq(profilesTable.isUnlimited, true), lt(profilesTable.perfectCount, 50)))
+          .returning({ perfectCount: profilesTable.perfectCount });
+        if (reserved.length === 0) {
+          res.status(429).json({ error: "perfect_limit_reached" });
+          return;
+        }
+        reservedPowerUse = true;
+      }
+    }
+    const releasePowerUse = async () => {
+      if (!reservedPowerUse) return;
+      await db
+        .update(profilesTable)
+        .set({ perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)` })
+        .where(eq(profilesTable.userId, req.userId!))
+        .catch(() => {});
+    };
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
     const systemPrompt = isCvMode
@@ -184,10 +213,11 @@ Alle Texte in der Sprache mit Code "${lang}".`;
     const userPrompt = `${isCvMode ? "LEBENSLAUF" : "ANSCHREIBEN"}:\n${letterText.slice(0, MAX_INPUT)}${profileText ? `\n\nPROFIL-STATEMENT:\n${String(profileText).slice(0, 3000)}` : ""}${cvText ? `\n\nLEBENSLAUF (Kontext, nicht umschreiben):\n${String(cvText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\n\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
-    if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }
+    if (text === null) { await releasePowerUse(); res.status(503).json({ error: "busy_try_again" }); return; }
     const parsed = parseJson(text);
     if (!parsed || typeof parsed.letter !== "string" || parsed.letter.trim().length < 80) {
       req.log.error({ text: text.slice(0, 500) }, "perfect: unparseable model output");
+      await releasePowerUse();
       res.status(500).json({ error: "perfect_failed" });
       return;
     }

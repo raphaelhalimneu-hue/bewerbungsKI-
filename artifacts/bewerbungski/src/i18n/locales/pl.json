@@ -149,8 +149,9 @@
     "power": "POWER",
     "bestValue": "Najlepsza oferta",
     "powerPrice": "29,90 €",
-    "oneTimePower": "Jednorazowo — 50 aplikacji",
-    "powerFeat1": "Utwórz 50 aplikacji"
+    "oneTimePower": "Jednorazowo — Nielimitowane aplikacje",
+    "powerFeat1": "Twórz nielimitowane aplikacje",
+    "powerFeat2": "50× udoskonalanie AI"
   },
   "docs": {
     "title": "📄 Moje dokumenty",
@@ -475,7 +476,8 @@
     "styleBusy": "AI odczytuje wygląd …",
     "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF.",
     "improvedTitle": "Twój ulepszony tekst",
-    "dailyLimit": "Osiągnięto dzienny limit (ochrona przed nadużyciami). Spróbuj ponownie jutro."
+    "dailyLimit": "Osiągnięto dzienny limit (ochrona przed nadużyciami). Spróbuj ponownie jutro.",
+    "perfectLimit": "Twój limit udoskonalania (50×) został wyczerpany."
   },
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",

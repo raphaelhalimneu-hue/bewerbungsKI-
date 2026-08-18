@@ -77,6 +77,16 @@ vi.mock("@workspace/db", () => {
                 },
               };
             },
+            onConflictDoUpdate({ set }: any) {
+              // Upsert on profiles (webhook fulfillment)
+              if (table === profilesTable) {
+                if (typeof set.isPremium === "boolean") state.profile.isPremium = set.isPremium;
+                if (typeof set.isUnlimited === "boolean") state.profile.isUnlimited = set.isUnlimited;
+                // credits is a sql`` increment expression → interpret as +20
+                if (set.credits !== undefined) state.profile.credits += 20;
+              }
+              return Promise.resolve([]);
+            },
             returning: () => Promise.resolve([v]),
             then: (onOk: any, onErr: any) => Promise.resolve([v]).then(onOk, onErr),
           };

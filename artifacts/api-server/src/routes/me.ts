@@ -31,8 +31,9 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
     res.json({
       email: profile.email,
       is_premium: unlimited ? true : profile.isPremium,
+      is_unlimited: unlimited ? true : profile.isUnlimited,
       credits: profile.credits,
-      document_limit: unlimited ? 999999 : 1 + profile.credits,
+      document_limit: unlimited || profile.isUnlimited ? 999999 : 1 + profile.credits,
       documents_count: Number(docCount) || 0,
     });
   } catch (err) {

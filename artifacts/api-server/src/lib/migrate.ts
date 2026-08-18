@@ -11,6 +11,14 @@ export async function runStartupMigrations(): Promise<void> {
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits integer NOT NULL DEFAULT 0`,
   );
 
+  // Power package (29.90): unlimited applications + 50 lifetime perfect uses
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_unlimited boolean NOT NULL DEFAULT false`,
+  );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS perfect_count integer NOT NULL DEFAULT 0`,
+  );
+
   // Idempotency ledger for Stripe webhook events
   await pool.query(
     `CREATE TABLE IF NOT EXISTS stripe_events (

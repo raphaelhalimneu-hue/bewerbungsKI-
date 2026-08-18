@@ -149,8 +149,9 @@
     "power": "POWER",
     "bestValue": "Mejor oferta",
     "powerPrice": "29,90 €",
-    "oneTimePower": "Pago único — 50 candidaturas",
-    "powerFeat1": "Crear 50 candidaturas"
+    "oneTimePower": "Pago único — Candidaturas ilimitadas",
+    "powerFeat1": "Crea candidaturas ilimitadas",
+    "powerFeat2": "50× perfeccionamiento con IA"
   },
   "docs": {
     "title": "📄 Mis documentos",
@@ -475,7 +476,8 @@
     "styleBusy": "La IA está leyendo el diseño …",
     "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF.",
     "improvedTitle": "Tu texto mejorado",
-    "dailyLimit": "Límite diario alcanzado (protección contra abusos). Inténtalo de nuevo mañana."
+    "dailyLimit": "Límite diario alcanzado (protección contra abusos). Inténtalo de nuevo mañana.",
+    "perfectLimit": "Tu cuota de perfeccionamiento (50×) está agotada."
   },
   "fileImport": {
     "button": "Subir archivo (PDF, Word, foto)",

@@ -116,7 +116,7 @@ export default function Preview() {
         return;
       }
     } catch (e: any) {
-      setAiError(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
+      setAiError(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : e?.data?.error === "perfect_limit_reached" ? t("scanner.perfectLimit") : t("scanner.error"));
     }
     finally { setPerfecting(false); }
   }

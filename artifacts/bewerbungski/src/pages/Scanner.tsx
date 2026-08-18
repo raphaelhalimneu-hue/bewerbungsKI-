@@ -113,7 +113,7 @@ export default function Scanner() {
         setErrorMsg(t("scanner.error"));
       }
     } catch (e: any) {
-      setErrorMsg(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
+      setErrorMsg(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : e?.data?.error === "perfect_limit_reached" ? t("scanner.perfectLimit") : t("scanner.error"));
     } finally {
       setPerfecting(false);
     }

@@ -1,9 +1,21 @@
 import { Router } from "express";
 import { db, profilesTable, documentsTable } from "@workspace/db";
-import { eq, count } from "drizzle-orm";
+import { and, count, eq, gte } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router = Router();
+
+// Silent fair-use limit for Power (unlimited) users: 10 generations/day.
+const genUsage = new Map<string, { day: string; n: number }>();
+function checkDailyGenQuota(userId: string): boolean {
+  const day = new Date().toISOString().slice(0, 10);
+  let u = genUsage.get(userId);
+  if (!u || u.day !== day) { u = { day, n: 0 }; genUsage.set(userId, u); }
+  if (u.n >= 10) return false;
+  u.n++;
+  if (genUsage.size > 10000) genUsage.clear();
+  return true;
+}
 
 router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
@@ -25,10 +37,27 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
     const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
-    const limit = 1 + credits; // 1 free + 10 per purchased package
-    if (!unlimited && value >= limit) {
-      res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
-      return;
+    if (profile?.isUnlimited && !unlimited) {
+      // Power package: unlimited applications, but a silent fair-use cap of
+      // 10 new generations per day protects the AI budget from abuse.
+      // Durable part: documents actually saved today (survives restarts);
+      // the in-memory counter additionally covers generate-without-save.
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const [{ value: todayCount }] = await db
+        .select({ value: count() })
+        .from(documentsTable)
+        .where(and(eq(documentsTable.userId, userId), gte(documentsTable.createdAt, todayStart)));
+      if (Number(todayCount) >= 10 || !checkDailyGenQuota(userId)) {
+        res.status(429).json({ error: "daily_limit_reached" });
+        return;
+      }
+    } else if (!unlimited) {
+      const limit = 1 + credits; // 1 free + 10 per purchased package
+      if (value >= limit) {
+        res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
+        return;
+      }
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

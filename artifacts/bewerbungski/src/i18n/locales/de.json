@@ -149,8 +149,9 @@
     "power": "POWER",
     "bestValue": "Bester Deal",
     "powerPrice": "29,90 €",
-    "oneTimePower": "Einmalig — 50 Bewerbungen",
-    "powerFeat1": "50 Bewerbungen erstellen"
+    "oneTimePower": "Einmalig — Unbegrenzt Bewerbungen",
+    "powerFeat1": "Unbegrenzt Bewerbungen erstellen",
+    "powerFeat2": "50× KI-Perfektionieren"
   },
   "docs": {
     "title": "📄 Meine Dokumente",
@@ -518,7 +519,8 @@
     "styleBusy": "KI liest das Design …",
     "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen.",
     "improvedTitle": "Dein verbesserter Text",
-    "dailyLimit": "Tageslimit erreicht (Schutz vor Missbrauch). Morgen geht es weiter."
+    "dailyLimit": "Tageslimit erreicht (Schutz vor Missbrauch). Morgen geht es weiter.",
+    "perfectLimit": "Dein Perfektionieren-Kontingent (50×) ist aufgebraucht."
   },
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",

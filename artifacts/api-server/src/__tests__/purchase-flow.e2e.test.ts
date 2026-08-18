@@ -83,6 +83,15 @@ vi.mock("@workspace/db", () => {
                 },
               };
             },
+            onConflictDoUpdate({ set }: any) {
+              // Upsert on profiles (webhook fulfillment)
+              if (table === profilesTable) {
+                if (typeof set.isPremium === "boolean") state.profile.isPremium = set.isPremium;
+                if (typeof set.isUnlimited === "boolean") state.profile.isUnlimited = set.isUnlimited;
+                if (set.credits !== undefined) state.profile.credits += 10; // sql`credits + 10`
+              }
+              return Promise.resolve([]);
+            },
             returning() {
               if (table === documentsTable) {
                 const doc = { id: `doc-${state.docs.length + 1}`, createdAt: new Date(), ...v };

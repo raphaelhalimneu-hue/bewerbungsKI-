@@ -18,3 +18,7 @@ description: BewerbungsKI pricing since 2026-08-13 — credits model, limits, an
 
 ## Perfektionieren-Vorschau (2026-08-18)
 Gratis-Nutzer dürfen /perfect nutzen und das Ergebnis ANSEHEN (Scanner + Preview), aber nicht speichern/exportieren: PATCH /documents, POST /documents, POST cv.docx sind für gesperrte Gratis-Nutzer 403; ?text=-Override bei cover-letter PDF/DOCX wird für sie ignoriert (nur gespeichertes Original). Der 1 freie Download (Original) bleibt frei. /analyze bleibt gesperrt.
+
+
+## Power-Paket (2026-08-18)
+Zweites Paket: 29,90 € einmalig = unbegrenzt Bewerbungen + 50× Perfektionieren (lifetime, atomar reserviert via perfect_count/is_unlimited in profiles) + stilles Fair-Use-Limit 10 Generierungen/Tag (DB-Zählung docs heute + In-Memory). Webhook upsertet Profile (kein verlorener Kauf), Doppelkauf von Power wird im /checkout mit 400 already_unlimited geblockt. Premium bleibt 9,99 € = +10 Credits.
