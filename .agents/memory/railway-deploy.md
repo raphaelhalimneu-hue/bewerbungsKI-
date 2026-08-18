@@ -12,3 +12,6 @@ description: How to deploy this project to Railway (the only production environm
 **2026-08-13:** Uploads können bei Railway stundenlang in INITIALIZING hängen (deploymentEvents zeigt nur SNAPSHOT_CODE, kein Build startet); ältere hängende Deploys kippen später auf FAILED ("no associated build"). Plattformseitig — erneutes Hochladen hilft nicht sofort; warten oder später neu deployen.
 
 - 2026-08-13 evening: platform-wide Railway incident — deploys stuck in INITIALIZING for hours (only SNAPSHOT_CODE event, no build). deploymentCancel of queued deploys + fresh upload does NOT help; only waiting for Railway recovery works. Old version keeps serving meanwhile.
+
+**Prod-DB-Zugriff für Tests:** Railway-Postgres ist nur intern erreichbar; temporär per GraphQL `tcpProxyCreate` (applicationPort 5432) einen TCP-Proxy anlegen, mit POSTGRES_PASSWORD des Postgres-Service verbinden, danach `tcpProxyDelete`. So lassen sich z. B. E-Mail-Codes für E2E-Tests auslesen.
+**E2E-Test-Konten:** Gmail-Plus-Aliase (halimraphael9+xyz@gmail.com) + Supabase-REST-signup mit Anon-Key liefern echte Prod-Accounts; Bash: Variable UID ist readonly, anderen Namen nehmen.
