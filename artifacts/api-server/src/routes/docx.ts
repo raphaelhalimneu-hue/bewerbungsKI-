@@ -7,6 +7,7 @@ import {
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -349,6 +350,13 @@ function isValidCvJson(cv: unknown): boolean {
 // ── CV DOCX from editor (cv_json) ────────────────────────────────────────────
 router.post("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    // Editor export with client-supplied content — locked free users may not
+    // export edited/perfected content (their GET download of the stored
+    // original stays free).
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const [doc] = await db
       .select()
       .from(documentsTable)
@@ -517,8 +525,10 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const theme = themeFor(doc.template, (doc.profileData as any));
     const H = headingsFor(doc.profileData as any);
 
-    // Use edited text if provided via query param (client sends updated text), else stored text
-    const letterText: string = (req.query.text as string) || doc.coverLetter || "";
+    // Use edited text if provided via query param (client sends updated text), else stored text.
+    // Locked free users may only export the stored original.
+    const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
+    const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
     const children: any[] = [];

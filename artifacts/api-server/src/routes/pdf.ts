@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -199,8 +200,11 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
 
-    // Accept edited text from query param (same pattern as cover-letter.docx)
-    const letterText: string = (req.query.text as string) || doc.coverLetter || "";
+    // Accept edited text from query param (same pattern as cover-letter.docx).
+    // Locked free users may only export the stored original — never edited/
+    // perfected text passed from the client.
+    const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
+    const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
     const pd = (doc.profileData as any) || {};

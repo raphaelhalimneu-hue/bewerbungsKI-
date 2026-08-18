@@ -158,6 +158,10 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 
 router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany, language } = req.body;
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
       res.status(400).json({ error: "Invalid template" });

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { templateDeco } from "@workspace/template-deco";
+import { useAuth } from "../context/AuthContext";
 import { AnalysisCard } from "./Scanner";
 
 /** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
@@ -29,6 +30,13 @@ export default function Preview() {
   const [analysis, setAnalysis] = useState<any>(null);
   const [perfecting, setPerfecting] = useState(false);
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
+  // True once the letter shown is the AI-perfected version (this session)
+  const [perfectedApplied, setPerfectedApplied] = useState(false);
+  const { profile } = useAuth();
+  const pAuth = profile as any;
+  const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
+  // Free users may VIEW the perfected version, but downloading it requires a purchase
+  const letterDlLocked = freeUser && perfectedApplied;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -87,6 +95,7 @@ export default function Preview() {
       });
       if (res?.letter) {
         setEditedLetter(res.letter);
+        setPerfectedApplied(true);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         // Show the improved letter right away
         setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
@@ -194,6 +203,7 @@ export default function Preview() {
 
   // Cover letter PDF: server-side so edited text is forwarded correctly
   async function handleDownloadLetterPdf() {
+    if (letterDlLocked) { navigate("/pricing"); return; }
     setExporting("letter-pdf");
     try {
       let url = `/api/documents/${params.id}/download/cover-letter.pdf`;
@@ -212,6 +222,7 @@ export default function Preview() {
   }
 
   async function downloadDocx(type: "cv" | "cover-letter") {
+    if (type === "cover-letter" && letterDlLocked) { navigate("/pricing"); return; }
     const key = type === "cv" ? "cv-docx" : "letter-docx";
     setExporting(key as any);
     try {
@@ -257,10 +268,10 @@ export default function Preview() {
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
                     <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
+                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{letterDlLocked ? "🔒 " : ""}{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
-                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>⬇ Bewerbung .docx</>}
+                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{letterDlLocked ? "🔒" : "⬇"} Bewerbung .docx</>}
                     </button>
                   </>
                 )}

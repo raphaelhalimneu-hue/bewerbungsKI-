@@ -14,3 +14,7 @@ description: BewerbungsKI pricing since 2026-08-13 — credits model, limits, an
 - Prod-DB direkt erreichbar via temporärem Railway tcpProxyCreate auf den Postgres-Service (danach tcpProxyDelete); DATABASE_URL ist internal-only.
 
 - Betreiber-Konto (halimraphael9@gmail.com) hat unbegrenzt: Dokument-Limit und Tages-Quoten (analyze/perfect) werden per E-Mail-Check umgangen (env UNLIMITED_EMAILS, Default = Betreiber-Mail; in generate.ts, me.ts, analyze.ts). Seit 2026-08-16.
+
+
+## Perfektionieren-Vorschau (2026-08-18)
+Gratis-Nutzer dürfen /perfect nutzen und das Ergebnis ANSEHEN (Scanner + Preview), aber nicht speichern/exportieren: PATCH /documents, POST /documents, POST cv.docx sind für gesperrte Gratis-Nutzer 403; ?text=-Override bei cover-letter PDF/DOCX wird für sie ignoriert (nur gespeichertes Original). Der 1 freie Download (Original) bleibt frei. /analyze bleibt gesperrt.
