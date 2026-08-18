@@ -560,5 +560,11 @@
     "text": "Du hast deine kostenlose Bewerbung bereits erstellt. Hol dir 10 weitere Bewerbungen, um den Scanner und den Editor weiter zu nutzen.",
     "editorText": "Dein kostenloses Kontingent ist verbraucht — zum Bearbeiten und Speichern brauchst du ein Upgrade. Ansehen und Herunterladen bleibt frei.",
     "cta": "Jetzt freischalten"
+  },
+  "rating": {
+    "title": "Wie gefällt dir BewerbungsKI?",
+    "commentPlaceholder": "Möchtest du uns noch etwas mitteilen? (optional)",
+    "send": "Bewertung absenden",
+    "thanks": "Danke für deine Bewertung!"
   }
 }

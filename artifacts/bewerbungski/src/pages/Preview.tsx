@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import { templateDeco } from "@workspace/template-deco";
 import { useAuth } from "../context/AuthContext";
 import { AnalysisCard } from "./Scanner";
+import { RatingCard } from "../components/RatingCard";
 
 /** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
 function letterDecoHtml(doc: any): string {
@@ -236,6 +237,43 @@ export default function Preview() {
     return `${name ? name + " – " : ""}${suffix}`;
   }
 
+  // Printing is always allowed (also for free users — only saving is gated).
+  function printCv() {
+    const el = cvRef.current;
+    if (!el) return;
+    // Sanitize the stored CV HTML before re-parsing it in the popup:
+    // remove active content and event handlers (document.write would execute them).
+    const clone = el.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll("script,iframe,object,embed,form,link,meta").forEach(n => n.remove());
+    clone.querySelectorAll("*").forEach(n => {
+      for (const a of Array.from((n as Element).attributes)) {
+        if (/^on/i.test(a.name) || (/^(href|src|xlink:href)$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) {
+          (n as Element).removeAttribute(a.name);
+        }
+      }
+    });
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.opener = null;
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(n => n.outerHTML)
+      .join("");
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">${styles}<style>body{margin:0;background:#fff}.cv-sheet{zoom:1 !important;box-shadow:none !important;margin:0 auto}</style></head><body>${clone.outerHTML}</body></html>`);
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 500);
+  }
+
+  function printLetter() {
+    const text = editedLetter || (doc as any)?.cover_letter || "";
+    if (!text) return;
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;line-height:1.7;margin:2.5cm;white-space:pre-wrap}</style></head><body></body></html>`);
+    w.document.body.textContent = text;
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 400);
+  }
+
   // CV PDF: client-side via html2canvas so contentEditable edits are captured
   async function handleDownloadCvPdf() {
     if (cvDlLocked) { navigate("/pricing"); return; }
@@ -334,6 +372,18 @@ export default function Preview() {
                 {(doc as any).name}
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
+                {freeUser && (
+                  <>
+                    <button className="btn btn-p btn-sm" onClick={printCv}>
+                      {t("preview.print")} · {t("preview.cv")}
+                    </button>
+                    {((doc as any)?.cover_letter || editedLetter) && (
+                      <button className="btn btn-p btn-sm" onClick={printLetter}>
+                        {t("preview.print")} · {t("preview.coverLetter")}
+                      </button>
+                    )}
+                  </>
+                )}
                 <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
                   {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{cvDlLocked ? "🔒 " : ""}{t("preview.downloadCv")}</>}
                 </button>
@@ -493,6 +543,8 @@ export default function Preview() {
                 </div>
               </div>
             )}
+
+            <RatingCard />
           </>
         )}
       </div>

@@ -560,5 +560,11 @@
     "text": "You have already created your free application. Get 10 more applications to keep using the scanner and editor.",
     "editorText": "Your free quota is used up — upgrade to edit and save. Viewing and downloading stays free.",
     "cta": "Unlock now"
+  },
+  "rating": {
+    "title": "How do you like BewerbungsKI?",
+    "commentPlaceholder": "Anything else you'd like to tell us? (optional)",
+    "send": "Submit rating",
+    "thanks": "Thanks for your rating!"
   }
 }

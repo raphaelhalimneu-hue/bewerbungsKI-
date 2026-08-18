@@ -12,6 +12,7 @@ import pdfRouter from "./pdf";
 import parseLinkedinRouter from "./parse-linkedin";
 import analyzeRouter from "./analyze";
 import extractRouter from "./extract";
+import ratingsRouter from "./ratings";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(pdfRouter);
 router.use(parseLinkedinRouter);
 router.use(analyzeRouter);
 router.use(extractRouter);
+router.use(ratingsRouter);
 
 export default router;

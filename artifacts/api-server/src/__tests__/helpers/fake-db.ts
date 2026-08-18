@@ -11,10 +11,16 @@ import { randomUUID } from "crypto";
 
 export type FakeDoc = Record<string, any>;
 
-export const store: { docs: FakeDoc[] } = { docs: [] };
+export const store: { docs: FakeDoc[]; profile: Record<string, any> } = {
+  docs: [],
+  // Downloads are purchase-gated — default to a paying profile so the
+  // download regression tests exercise the happy path.
+  profile: { userId: "user-1", isPremium: true, credits: 0 },
+};
 
 export function resetStore() {
   store.docs = [];
+  store.profile = { userId: "user-1", isPremium: true, credits: 0 };
 }
 
 export function seedDoc(doc: Partial<FakeDoc>): FakeDoc {
@@ -46,7 +52,15 @@ function thenable(resolve: () => any) {
 }
 
 export const fakeDb = {
-  select: (..._args: any[]) => thenable(() => store.docs),
+  select: (..._args: any[]) => {
+    const chain = thenable(() => store.docs);
+    const origFrom = chain.from;
+    chain.from = (table: any) => {
+      if (table === fakeTables.profilesTable) return thenable(() => [store.profile]);
+      return origFrom(table);
+    };
+    return chain;
+  },
   insert: (_table: any) => {
     const chain: any = {};
     chain.values = (v: any) => ({

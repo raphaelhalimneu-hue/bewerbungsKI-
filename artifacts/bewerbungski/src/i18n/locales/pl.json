@@ -517,5 +517,11 @@
     "text": "Utworzyłeś już swoją darmową aplikację. Zdobądź 10 kolejnych aplikacji, aby dalej korzystać ze skanera i edytora.",
     "editorText": "Twój darmowy limit został wykorzystany — ulepsz plan, aby edytować i zapisywać. Podgląd i pobieranie pozostają darmowe.",
     "cta": "Odblokuj teraz"
+  },
+  "rating": {
+    "title": "Jak podoba Ci się BewerbungsKI?",
+    "commentPlaceholder": "Chcesz nam coś jeszcze przekazać? (opcjonalnie)",
+    "send": "Wyślij ocenę",
+    "thanks": "Dziękujemy za ocenę!"
   }
 }

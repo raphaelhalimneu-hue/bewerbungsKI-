@@ -27,6 +27,18 @@ export async function runStartupMigrations(): Promise<void> {
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_cv_html text`,
   );
 
+  // In-app ratings (stars 1-5, optional comment, one per user)
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS app_ratings (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id text NOT NULL UNIQUE,
+      stars integer NOT NULL,
+      comment text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`,
+  );
+
   // Idempotency ledger for Stripe webhook events
   await pool.query(
     `CREATE TABLE IF NOT EXISTS stripe_events (

@@ -517,5 +517,11 @@
     "text": "Ücretsiz başvurunuzu zaten oluşturdunuz. Tarayıcıyı ve düzenleyiciyi kullanmaya devam etmek için 10 başvuru daha alın.",
     "editorText": "Ücretsiz hakkınız doldu — düzenlemek ve kaydetmek için yükseltme gerekli. Görüntüleme ve indirme ücretsiz kalır.",
     "cta": "Şimdi aç"
+  },
+  "rating": {
+    "title": "BewerbungsKI'yi nasıl buldunuz?",
+    "commentPlaceholder": "Bize iletmek istediğiniz bir şey var mı? (isteğe bağlı)",
+    "send": "Değerlendirmeyi gönder",
+    "thanks": "Değerlendirmeniz için teşekkürler!"
   }
 }

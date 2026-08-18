@@ -517,5 +517,11 @@
     "text": "Ya has creado tu solicitud gratuita. Consigue 10 solicitudes más para seguir usando el escáner y el editor.",
     "editorText": "Tu cuota gratuita se ha agotado: actualiza para editar y guardar. Ver y descargar sigue siendo gratis.",
     "cta": "Desbloquear ahora"
+  },
+  "rating": {
+    "title": "¿Qué te parece BewerbungsKI?",
+    "commentPlaceholder": "¿Algo más que quieras contarnos? (opcional)",
+    "send": "Enviar valoración",
+    "thanks": "¡Gracias por tu valoración!"
   }
 }

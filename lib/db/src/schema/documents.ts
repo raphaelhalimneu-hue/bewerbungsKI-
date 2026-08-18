@@ -49,3 +49,13 @@ export type Profile = typeof profilesTable.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type Document = typeof documentsTable.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+
+// In-app ratings: one rating per user (stars 1-5, optional comment)
+export const appRatingsTable = pgTable("app_ratings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().unique(),
+  stars: integer("stars").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
