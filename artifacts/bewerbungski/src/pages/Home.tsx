@@ -2,7 +2,8 @@ import { Layout } from "../components/Layout";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload, FiCamera } from "react-icons/fi";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { customFetch } from "@workspace/api-client-react";
 import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
@@ -416,6 +417,24 @@ function ExampleCVShowcase() {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
+  // Keep the SEO aggregate rating (JSON-LD) in sync with real in-app ratings
+  useEffect(() => {
+    customFetch("/api/ratings/summary")
+      .then((r: any) => {
+        if (!r?.count) return;
+        const script = document.querySelector('script[type="application/ld+json"]');
+        if (!script) return;
+        try {
+          const data = JSON.parse(script.textContent || "{}");
+          if (data.aggregateRating) {
+            data.aggregateRating.ratingValue = String(r.avg);
+            data.aggregateRating.ratingCount = String(r.count);
+            script.textContent = JSON.stringify(data);
+          }
+        } catch { /* leave static values */ }
+      })
+      .catch(() => {});
+  }, []);
   const { t, i18n } = useTranslation();
 
   const features = [
