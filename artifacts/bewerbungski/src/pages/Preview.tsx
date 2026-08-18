@@ -38,37 +38,10 @@ export default function Preview() {
   const { profile } = useAuth();
   const pAuth = profile as any;
   const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
-  // Free users may VIEW the perfected version, but downloading it requires a purchase
-  const letterDlLocked = freeUser && perfectedApplied;
-  const cvDlLocked = freeUser && cvPerfectedApplied;
-  // Free trial: PDF download stays free, Word (DOCX) requires a purchase
+  // Free accounts: the one (perfected) application is downloadable and
+  // printable without limits — but it cannot be EDITED. Word stays paid.
   const docxLocked = freeUser;
-  // Free trial: exactly ONE PDF download and ONE print per part (CV / letter).
-  // Counted server-side so re-perfecting never resets the allowance.
-  const [exportUsed, setExportUsed] = useState<Record<string, number>>({});
-  const cvPdfUsed = freeUser && (exportUsed.cv_pdf || 0) >= 1;
-  const letterPdfUsed = freeUser && (exportUsed.letter_pdf || 0) >= 1;
-  const cvPrintUsed = freeUser && (exportUsed.cv_print || 0) >= 1;
-  const letterPrintUsed = freeUser && (exportUsed.letter_print || 0) >= 1;
-
-  // One server round-trip that consumes a free export slot. Returns true when
-  // the action may proceed (paid accounts: always true).
-  async function consumeExport(kind: "cv_pdf" | "letter_pdf" | "cv_print" | "letter_print"): Promise<boolean> {
-    if (!freeUser) return true;
-    try {
-      const r: any = await customFetch(`/api/documents/${params.id}/export-event`, {
-        method: "POST",
-        body: JSON.stringify({ kind }),
-      });
-      if (r?.allowed) {
-        setExportUsed((u) => ({ ...u, [kind]: (u[kind] || 0) + 1 }));
-        return true;
-      }
-    } catch { /* treat errors as not allowed */ }
-    setExportUsed((u) => ({ ...u, [kind]: 1 }));
-    navigate("/pricing");
-    return false;
-  }
+  const editLocked = freeUser;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -179,14 +152,6 @@ export default function Preview() {
     finally { setPerfecting(false); }
   }
 
-  // Load already-used free exports so the locks survive a reload
-  useEffect(() => {
-    if (!freeUser || !params.id) return;
-    customFetch(`/api/documents/${params.id}/export-counters`)
-      .then((r: any) => { if (r?.counts) setExportUsed(r.counts); })
-      .catch(() => {});
-  }, [params.id, freeUser]);
-
   // Initialise cover letter textarea from loaded doc. A stored perfected copy
   // is shown to free users (view-only — downloads keep serving the original).
   useEffect(() => {
@@ -271,9 +236,8 @@ export default function Preview() {
     return `${name ? name + " – " : ""}${suffix}`;
   }
 
-  // Free trial: one print per part — afterwards the buttons lock.
-  async function printCv() {
-    if (!(await consumeExport("cv_print"))) return;
+  // Printing is always allowed (also for free users).
+  function printCv() {
     const el = cvRef.current;
     if (!el) return;
     // Sanitize the stored CV HTML before re-parsing it in the popup:
@@ -298,10 +262,9 @@ export default function Preview() {
     setTimeout(() => { w.focus(); w.print(); }, 500);
   }
 
-  async function printLetter() {
+  function printLetter() {
     const text = editedLetter || (doc as any)?.cover_letter || "";
     if (!text) return;
-    if (!(await consumeExport("letter_print"))) return;
     const w = window.open("", "_blank");
     if (!w) return;
     w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;line-height:1.7;margin:2.5cm;white-space:pre-wrap}</style></head><body></body></html>`);
@@ -312,9 +275,7 @@ export default function Preview() {
 
   // CV PDF: client-side via html2canvas so contentEditable edits are captured
   async function handleDownloadCvPdf() {
-    if (cvDlLocked || cvPdfUsed) { navigate("/pricing"); return; }
     if (!cvRef.current) return;
-    if (!(await consumeExport("cv_pdf"))) return;
     setExporting("cv-pdf");
     try {
       const el = cvRef.current;
@@ -352,7 +313,6 @@ export default function Preview() {
 
   // Cover letter PDF: server-side so edited text is forwarded correctly
   async function handleDownloadLetterPdf() {
-    if (letterDlLocked || letterPdfUsed) { navigate("/pricing"); return; }
     setExporting("letter-pdf");
     try {
       let url = `/api/documents/${params.id}/download/cover-letter.pdf`;
@@ -366,20 +326,12 @@ export default function Preview() {
       a.click();
       a.remove();
       URL.revokeObjectURL(objUrl);
-      if (freeUser) setExportUsed((u) => ({ ...u, letter_pdf: (u.letter_pdf || 0) + 1 }));
-    } catch (e: any) {
-      if (e?.status === 403 || e?.data?.error === "download_limit_reached") {
-        setExportUsed((u) => ({ ...u, letter_pdf: 1 }));
-        navigate("/pricing");
-      } else console.error("Letter PDF download failed", e);
-    }
+    } catch (e) { console.error("Letter PDF download failed", e); }
     finally { setExporting(null); }
   }
 
   async function downloadDocx(type: "cv" | "cover-letter") {
     if (docxLocked) { navigate("/pricing"); return; }
-    if (type === "cover-letter" && letterDlLocked) { navigate("/pricing"); return; }
-    if (type === "cv" && cvDlLocked) { navigate("/pricing"); return; }
     const key = type === "cv" ? "cv-docx" : "letter-docx";
     setExporting(key as any);
     try {
@@ -406,8 +358,8 @@ export default function Preview() {
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <button className="btn btn-g" onClick={() => navigate("/documents")}>{t("preview.back")}</button>
           {doc && (doc as any).cv_json && (
-            <button className="btn btn-p btn-sm" onClick={() => navigate(`/documents/${params.id}/edit`)}>
-              ✏️ {t("editor.editInEditor") || "Live-Editor"}
+            <button className="btn btn-p btn-sm" onClick={() => (editLocked ? navigate("/pricing") : navigate(`/documents/${params.id}/edit`))} style={editLocked ? { opacity: 0.6 } : undefined}>
+              {editLocked ? "🔒" : "✏️"} {t("editor.editInEditor") || "Live-Editor"}
             </button>
           )}
           {doc && (
@@ -418,29 +370,29 @@ export default function Preview() {
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
                 {freeUser && (
                   <>
-                    <button className="btn btn-p btn-sm" onClick={() => (cvPrintUsed ? navigate("/pricing") : printCv())} style={cvPrintUsed ? { opacity: 0.6 } : undefined}>
-                      {cvPrintUsed ? "🔒 " : ""}{t("preview.print")} · {t("preview.cv")}
+                    <button className="btn btn-p btn-sm" onClick={printCv}>
+                      {t("preview.print")} · {t("preview.cv")}
                     </button>
                     {((doc as any)?.cover_letter || editedLetter) && (
-                      <button className="btn btn-p btn-sm" onClick={() => (letterPrintUsed ? navigate("/pricing") : printLetter())} style={letterPrintUsed ? { opacity: 0.6 } : undefined}>
-                        {letterPrintUsed ? "🔒 " : ""}{t("preview.print")} · {t("preview.coverLetter")}
+                      <button className="btn btn-p btn-sm" onClick={printLetter}>
+                        {t("preview.print")} · {t("preview.coverLetter")}
                       </button>
                     )}
                   </>
                 )}
                 <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{cvDlLocked || cvPdfUsed ? "🔒 " : ""}{t("preview.downloadCv")}</>}
+                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
                 </button>
                 <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
-                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked || cvDlLocked ? "🔒" : "⬇"} CV .docx</>}
+                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV .docx</>}
                 </button>
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
                     <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{letterDlLocked || letterPdfUsed ? "🔒 " : ""}{t("preview.downloadLetter")}</>}
+                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
-                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked || letterDlLocked ? "🔒" : "⬇"} Bewerbung .docx</>}
+                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} Bewerbung .docx</>}
                     </button>
                   </>
                 )}
@@ -519,9 +471,10 @@ export default function Preview() {
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.cv")}</h3>
                 <button
                   className={editingCv ? "btn btn-p btn-sm" : "btn btn-g btn-sm"}
-                  onClick={toggleEditCv}
+                  onClick={() => (editLocked ? navigate("/pricing") : toggleEditCv())}
+                  style={editLocked ? { opacity: 0.6 } : undefined}
                 >
-                  {editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
+                  {editLocked ? "🔒 " : ""}{editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
                 </button>
               </div>
               <div className="cv-wrap" ref={cvWrapRef}>
@@ -575,7 +528,8 @@ export default function Preview() {
                   />
                   <textarea
                     value={editedLetter}
-                    onChange={e => setEditedLetter(e.target.value)}
+                    readOnly={editLocked}
+                    onChange={e => { if (!editLocked) setEditedLetter(e.target.value); }}
                     style={{
                       whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                       width: "100%", border: "none", outline: "none", resize: "vertical",

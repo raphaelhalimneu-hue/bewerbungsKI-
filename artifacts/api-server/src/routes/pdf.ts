@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isFreeAccount, consumeExportQuota } from "../lib/freeLock";
+import { isFreeQuotaLocked, isFreeAccount } from "../lib/freeLock";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -174,15 +174,13 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
-    // Free trial: one CV PDF download per document
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      if (!(await consumeExportQuota(req.userId!, doc.id, "cv_pdf"))) {
-        res.status(403).json({ error: "download_limit_reached" });
-        return;
-      }
-    }
+    // Free accounts download the stored (perfected) version unlimited times —
+    // they just cannot edit it. Buyers download the real document fields.
+    const cvHtml = (await isFreeAccount(req.userId!, req.userEmail)) && doc.perfectedCvHtml
+      ? doc.perfectedCvHtml
+      : doc.cvHtml;
 
-    const pdfBuffer = await htmlToPdf(wrapHtml(doc.cvHtml));
+    const pdfBuffer = await htmlToPdf(wrapHtml(cvHtml));
 
     const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
     const filename = `${safeName} – Lebenslauf.pdf`;
@@ -212,16 +210,13 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     // Locked free users may only export the stored original — never edited/
     // perfected text passed from the client.
     const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
-    const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
+    // Free accounts: client-passed text is ignored (no edits for free users),
+    // but the stored perfected version IS downloadable — unlimited times.
+    const letterText: string = (allowOverride && (req.query.text as string))
+      || doc.perfectedLetter
+      || doc.coverLetter
+      || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
-
-    // Free trial: one cover-letter PDF download per document
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      if (!(await consumeExportQuota(req.userId!, doc.id, "letter_pdf"))) {
-        res.status(403).json({ error: "download_limit_reached" });
-        return;
-      }
-    }
 
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};

@@ -76,17 +76,6 @@ export async function runStartupMigrations(): Promise<void> {
     )`,
   );
 
-  // Free-tier export limits: one PDF download and one print per document part.
-  await pool.query(
-    `CREATE TABLE IF NOT EXISTS export_counters (
-      user_id text NOT NULL,
-      doc_id text NOT NULL,
-      kind text NOT NULL,
-      count integer NOT NULL DEFAULT 0,
-      PRIMARY KEY (user_id, doc_id, kind)
-    )`,
-  );
-
   // Backfill: legacy premium buyers (boolean is_premium, no credits yet) keep
   // their purchased 30-application package. Safe to re-run: after this change,
   // is_premium=true always comes with credits>0, so only legacy rows match.
