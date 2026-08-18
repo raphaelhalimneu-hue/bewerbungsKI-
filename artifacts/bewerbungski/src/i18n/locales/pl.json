@@ -469,7 +469,8 @@
     "useStyle": "Użyj wyglądu tego pliku",
     "styleBusy": "AI odczytuje wygląd …",
     "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF.",
-    "improvedTitle": "Twój ulepszony tekst"
+    "improvedTitle": "Twój ulepszony tekst",
+    "dailyLimit": "Osiągnięto dzienny limit (ochrona przed nadużyciami). Spróbuj ponownie jutro."
   },
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",

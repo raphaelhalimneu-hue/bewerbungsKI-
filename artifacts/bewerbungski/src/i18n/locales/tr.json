@@ -469,7 +469,8 @@
     "useStyle": "Bu dosyanın tasarımını kullan",
     "styleBusy": "Yapay zekâ tasarımı okuyor …",
     "styleError": "Tasarım algılanamadı. Lütfen başka bir fotoğraf/PDF deneyin.",
-    "improvedTitle": "İyileştirilmiş metnin"
+    "improvedTitle": "İyileştirilmiş metnin",
+    "dailyLimit": "Günlük sınıra ulaşıldı (kötüye kullanım koruması). Yarın tekrar deneyin."
   },
   "fileImport": {
     "button": "Dosya yükle (PDF, Word, fotoğraf)",

@@ -112,8 +112,8 @@ export default function Scanner() {
       } else {
         setErrorMsg(t("scanner.error"));
       }
-    } catch {
-      setErrorMsg(t("scanner.error"));
+    } catch (e: any) {
+      setErrorMsg(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
     } finally {
       setPerfecting(false);
     }
@@ -151,8 +151,10 @@ export default function Scanner() {
         }),
       });
       setResult(res as AnalyzeResult);
-    } catch {
-      setErrorMsg(t("scanner.error"));
+    } catch (e: any) {
+      const code = (e as any)?.data?.error;
+      if (code === "upgrade_required") { navigate("/pricing"); return; }
+      setErrorMsg(code === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
     } finally {
       setBusy(false);
     }

@@ -512,7 +512,8 @@
     "useStyle": "Use this file's design",
     "styleBusy": "AI is reading the design …",
     "styleError": "Could not detect the design. Please try another photo/PDF.",
-    "improvedTitle": "Your improved text"
+    "improvedTitle": "Your improved text",
+    "dailyLimit": "Daily limit reached (abuse protection). Try again tomorrow."
   },
   "fileImport": {
     "button": "Upload file (PDF, Word, photo)",

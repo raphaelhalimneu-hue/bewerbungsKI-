@@ -80,7 +80,12 @@ export default function Preview() {
         body: JSON.stringify({ cvText: mainText, docType: isLetter ? "letter" : "cv", jobText: jobText || undefined, contextText: isLetter && cvText.length >= 80 ? cvText : undefined, language: i18n.resolvedLanguage || "de" }),
       });
       setAnalysis(res);
-    } catch { setAiError(t("scanner.error")); }
+    } catch (e: any) {
+      const code = e?.data?.error;
+      if (code === "upgrade_required") { navigate("/pricing"); }
+      else if (code === "daily_limit_reached") setAiError(t("scanner.dailyLimit"));
+      else setAiError(t("scanner.error"));
+    }
     finally { setChecking(false); }
   }
 
@@ -105,10 +110,14 @@ export default function Preview() {
           body: JSON.stringify({ cover_letter: res.letter }),
         }).catch(() => {});
         setPerfecting(false);
-        await runCheck(res.letter, true);
+        // Free users cannot use /analyze — skip the automatic re-check so the
+        // perfected letter is shown without a misleading error message.
+        if (!freeUser) await runCheck(res.letter, true);
         return;
       }
-    } catch { setAiError(t("scanner.error")); }
+    } catch (e: any) {
+      setAiError(e?.data?.error === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
+    }
     finally { setPerfecting(false); }
   }
 
@@ -319,8 +328,8 @@ export default function Preview() {
         {doc && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <button className="btn btn-p btn-sm" onClick={() => runCheck()} disabled={checking || perfecting}>
-                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
+              <button className="btn btn-p btn-sm" onClick={() => (freeUser ? navigate("/pricing") : runCheck())} disabled={checking || perfecting} style={freeUser ? { opacity: 0.6 } : undefined}>
+                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>{freeUser ? "🔒" : "🔎"} {t("preview.checkBtn")}</>}
               </button>
               {((doc as any)?.cover_letter || editedLetter) && (
                 <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting}>

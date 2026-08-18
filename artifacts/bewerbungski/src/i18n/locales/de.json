@@ -512,7 +512,8 @@
     "useStyle": "Design der Datei übernehmen",
     "styleBusy": "KI liest das Design …",
     "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen.",
-    "improvedTitle": "Dein verbesserter Text"
+    "improvedTitle": "Dein verbesserter Text",
+    "dailyLimit": "Tageslimit erreicht (Schutz vor Missbrauch). Morgen geht es weiter."
   },
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",
