@@ -145,7 +145,12 @@
     "errorTitle": "Помилка",
     "questions": "Є запитання? Напиши нам: support@bewerbungski.de",
     "buyMore": "Купити ще 10 заявок →",
-    "limitReachedHint": "Ви використали всі заявки. Купіть ще один пакет із 10 заявок."
+    "limitReachedHint": "Ви використали всі заявки. Купіть ще один пакет із 10 заявок.",
+    "power": "POWER",
+    "bestValue": "Найвигідніше",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Разово — 50 заявок",
+    "powerFeat1": "Створіть 50 заявок"
   },
   "docs": {
     "title": "📄 Мої документи",

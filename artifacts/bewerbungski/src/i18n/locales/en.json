@@ -145,7 +145,12 @@
     "errorTitle": "Error",
     "questions": "Questions? Write to us: support@bewerbungski.de",
     "buyMore": "Buy 10 more applications →",
-    "limitReachedHint": "You've used all your applications. Buy another package of 10 applications."
+    "limitReachedHint": "You've used all your applications. Buy another package of 10 applications.",
+    "power": "POWER",
+    "bestValue": "Best value",
+    "powerPrice": "€29.90",
+    "oneTimePower": "One-time — 50 applications",
+    "powerFeat1": "Create 50 applications"
   },
   "docs": {
     "title": "📄 My documents",

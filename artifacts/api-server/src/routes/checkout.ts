@@ -22,6 +22,14 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
 
     const appUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
+    // Two one-time packages: premium (10 applications, 9.99) and power (50 applications, 29.90)
+    const plan = (req.body as { plan?: string })?.plan === "power" ? "power" : "premium";
+    const PLANS = {
+      premium: { amount: 999, name: "BewerbungsKI Premium", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
+      power: { amount: 2990, name: "BewerbungsKI Power", description: "50 Bewerbungen – Einmalzahlung, kein Abo" },
+    } as const;
+    const cfg = PLANS[plan];
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -29,10 +37,10 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
           price_data: {
             currency: "eur",
             product_data: {
-              name: "BewerbungsKI Premium",
-              description: "10 Bewerbungen – Einmalzahlung, kein Abo",
+              name: cfg.name,
+              description: cfg.description,
             },
-            unit_amount: 999,
+            unit_amount: cfg.amount,
           },
           quantity: 1,
         },
@@ -40,7 +48,7 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
       mode: "payment",
       success_url: `${appUrl}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/`,
-      metadata: { userId: req.userId! },
+      metadata: { userId: req.userId!, plan },
     });
 
     res.json({ url: session.url });
@@ -83,7 +91,8 @@ router.post("/webhook/stripe", async (req, res) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
       if (userId) {
-        // Each completed checkout grants 10 more applications (stackable packages).
+        // Each completed checkout grants credits per plan (stackable packages):
+        // premium = 10 applications, power = 50 applications.
         // Idempotent: record the Stripe event id first; if it was already
         // processed (redelivery), the insert is a no-op and no credits are added.
         await db.transaction(async (tx) => {
@@ -93,11 +102,12 @@ router.post("/webhook/stripe", async (req, res) => {
             .onConflictDoNothing()
             .returning();
           if (inserted.length === 0) return; // duplicate delivery
+          const grant = session.metadata?.plan === "power" ? 50 : 10;
           await tx
             .update(profilesTable)
             .set({
               isPremium: true,
-              credits: sql`${profilesTable.credits} + 10`,
+              credits: sql`${profilesTable.credits} + ${grant}`,
             })
             .where(eq(profilesTable.userId, userId));
         });

@@ -145,7 +145,12 @@
     "errorTitle": "Fehler",
     "questions": "Fragen? Schreib uns: support@bewerbungski.de",
     "buyMore": "Weitere 10 Bewerbungen kaufen →",
-    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 10 Bewerbungen."
+    "limitReachedHint": "Du hast alle Bewerbungen verbraucht. Kaufe ein weiteres Paket mit 10 Bewerbungen.",
+    "power": "POWER",
+    "bestValue": "Bester Deal",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Einmalig — 50 Bewerbungen",
+    "powerFeat1": "50 Bewerbungen erstellen"
   },
   "docs": {
     "title": "📄 Meine Dokumente",

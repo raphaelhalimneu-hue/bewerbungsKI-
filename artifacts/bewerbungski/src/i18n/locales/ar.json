@@ -145,7 +145,12 @@
     "errorTitle": "خطأ",
     "questions": "لديك أسئلة؟ راسلنا: support@bewerbungski.de",
     "buyMore": "← اشترِ 10 طلبًا إضافيًا",
-    "limitReachedHint": "لقد استخدمت كل طلباتك. اشترِ حزمة أخرى من 10 طلبًا."
+    "limitReachedHint": "لقد استخدمت كل طلباتك. اشترِ حزمة أخرى من 10 طلبًا.",
+    "power": "POWER",
+    "bestValue": "أفضل قيمة",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "دفعة واحدة — 50 طلب توظيف",
+    "powerFeat1": "أنشئ 50 طلب توظيف"
   },
   "docs": {
     "title": "📄 مستنداتي",

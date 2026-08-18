@@ -10,11 +10,11 @@ export default function Pricing() {
   const { t } = useTranslation();
   const checkoutMutation = useCreateCheckout();
 
-  async function handleUpgrade() {
+  async function handleUpgrade(plan: "premium" | "power" = "premium") {
     if (!user) { setShowAuthModal(true); return; }
     try {
       toast({ title: t("pricing.redirect") });
-      const res = await checkoutMutation.mutateAsync({ data: { plan: "premium" } });
+      const res = await checkoutMutation.mutateAsync({ data: { plan } });
       if ((res as any).url) window.location.href = (res as any).url;
     } catch (e: any) {
       toast({ title: t("pricing.errorTitle"), description: e.message, variant: "destructive" });
@@ -23,6 +23,7 @@ export default function Pricing() {
 
   const freeFeats = [t("pricing.freeFeat1"), t("pricing.freeFeat2"), t("pricing.freeFeat3"), t("pricing.freeFeat4")];
   const premFeats = [t("pricing.premFeat1"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
+  const powerFeats = [t("pricing.powerFeat1"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
 
   return (
     <Layout>
@@ -34,7 +35,7 @@ export default function Pricing() {
           <p style={{ fontSize: 17, color: "var(--muted)" }}>{t("pricing.subtitle")}</p>
         </div>
 
-        <div className="grid2" style={{ maxWidth: 700, margin: "0 auto", gap: 20 }}>
+        <div style={{ maxWidth: 1020, margin: "0 auto", gap: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
           {/* Free */}
           <div className="pc">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 16 }}>{t("pricing.free")}</div>
@@ -89,7 +90,7 @@ export default function Pricing() {
                   )}
                   <button
                     className="btn btn-p btn-full btn-lg"
-                    onClick={handleUpgrade}
+                    onClick={() => handleUpgrade("premium")}
                     disabled={checkoutMutation.isPending}
                   >
                     {checkoutMutation.isPending ? <span className="spin" /> : null}
@@ -102,6 +103,31 @@ export default function Pricing() {
                 </>
               );
             })()}
+          </div>
+
+          {/* Power — 50 applications */}
+          <div className="pc">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", letterSpacing: ".08em" }}>{t("pricing.power")}</div>
+              <span className="tag tag-w">{t("pricing.bestValue")}</span>
+            </div>
+            <div className="price-num">{t("pricing.powerPrice")}</div>
+            <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>{t("pricing.oneTimePower")}</div>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
+              {powerFeats.map(f => (
+                <li key={f} style={{ display: "flex", gap: 10, fontSize: 14 }}>
+                  <span style={{ color: "var(--ok)", flexShrink: 0 }}>✓</span>{f}
+                </li>
+              ))}
+            </ul>
+            <button
+              className="btn btn-p btn-full btn-lg"
+              onClick={() => handleUpgrade("power")}
+              disabled={checkoutMutation.isPending}
+            >
+              {checkoutMutation.isPending ? <span className="spin" /> : null}
+              {checkoutMutation.isPending ? t("pricing.loading") : t("pricing.upgradeNow")}
+            </button>
           </div>
         </div>
 

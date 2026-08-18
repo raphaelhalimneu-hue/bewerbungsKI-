@@ -145,7 +145,12 @@
     "errorTitle": "Hata",
     "questions": "Sorun mu var? Bize yaz: support@bewerbungski.de",
     "buyMore": "10 başvuru daha satın al →",
-    "limitReachedHint": "Tüm başvurularını kullandın. 10 başvuruluk yeni bir paket satın al."
+    "limitReachedHint": "Tüm başvurularını kullandın. 10 başvuruluk yeni bir paket satın al.",
+    "power": "POWER",
+    "bestValue": "En avantajlı",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Tek seferlik — 50 başvuru",
+    "powerFeat1": "50 başvuru oluşturun"
   },
   "docs": {
     "title": "📄 Belgelerim",

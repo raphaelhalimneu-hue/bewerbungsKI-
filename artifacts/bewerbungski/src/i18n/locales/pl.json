@@ -145,7 +145,12 @@
     "errorTitle": "Błąd",
     "questions": "Masz pytania? Napisz do nas: support@bewerbungski.de",
     "buyMore": "Kup kolejne 10 aplikacji →",
-    "limitReachedHint": "Wykorzystałeś wszystkie aplikacje. Kup kolejny pakiet 10 aplikacji."
+    "limitReachedHint": "Wykorzystałeś wszystkie aplikacje. Kup kolejny pakiet 10 aplikacji.",
+    "power": "POWER",
+    "bestValue": "Najlepsza oferta",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Jednorazowo — 50 aplikacji",
+    "powerFeat1": "Utwórz 50 aplikacji"
   },
   "docs": {
     "title": "📄 Moje dokumenty",

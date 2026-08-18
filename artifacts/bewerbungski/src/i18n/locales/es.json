@@ -145,7 +145,12 @@
     "errorTitle": "Error",
     "questions": "¿Preguntas? Escríbenos: support@bewerbungski.de",
     "buyMore": "Comprar 10 solicitudes más →",
-    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 10 solicitudes."
+    "limitReachedHint": "Has usado todas tus solicitudes. Compra otro paquete de 10 solicitudes.",
+    "power": "POWER",
+    "bestValue": "Mejor oferta",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Pago único — 50 candidaturas",
+    "powerFeat1": "Crear 50 candidaturas"
   },
   "docs": {
     "title": "📄 Mis documentos",

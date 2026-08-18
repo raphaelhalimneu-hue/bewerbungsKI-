@@ -145,7 +145,12 @@
     "errorTitle": "Ошибка",
     "questions": "Есть вопросы? Напиши нам: support@bewerbungski.de",
     "buyMore": "Купить ещё 10 заявок →",
-    "limitReachedHint": "Вы использовали все заявки. Купите ещё один пакет из 10 заявок."
+    "limitReachedHint": "Вы использовали все заявки. Купите ещё один пакет из 10 заявок.",
+    "power": "POWER",
+    "bestValue": "Выгоднее всего",
+    "powerPrice": "29,90 €",
+    "oneTimePower": "Разово — 50 откликов",
+    "powerFeat1": "Создайте 50 откликов"
   },
   "docs": {
     "title": "📄 Мои документы",
