@@ -58,8 +58,6 @@ export default function Scanner() {
   const [, navigate] = useLocation();
   const { user, profile, setShowAuthModal } = useAuth();
   const p = profile as any;
-  const isFree = !!user && !!p && !p.is_premium && (p.credits || 0) === 0;
-  const locked = isFree && (p.documents_count || 0) >= 1;
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -109,8 +107,7 @@ export default function Scanner() {
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
         setPerfecting(false);
-        // Free accounts see the perfected text, but not its score
-        if (!isFree) void analyze(res.letter);
+        void analyze(res.letter);
       } else {
         setErrorMsg(t("scanner.error"));
       }
@@ -139,7 +136,6 @@ export default function Scanner() {
 
   async function analyze(textOverride?: string) {
     if (!user) { setShowAuthModal(true); return; }
-    if (locked) return;
     const text = (textOverride ?? cvText).trim();
     if (text.length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setBusy(true); setResult(null);
@@ -167,15 +163,6 @@ export default function Scanner() {
       <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 16px 60px" }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>🔎 {mode === "letter" ? t("scanner.letterTitle") : t("scanner.title")}</h1>
         <p style={{ color: "var(--muted)", fontSize: 14.5, lineHeight: 1.6, marginBottom: 16 }}>{mode === "letter" ? t("scanner.letterSubtitle") : t("scanner.subtitle")}</p>
-
-        {locked && (
-          <div className="card" style={{ marginBottom: 16, textAlign: "center", padding: "26px 18px" }}>
-            <div style={{ fontSize: 34, marginBottom: 8 }}>🔒</div>
-            <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 6 }}>{t("locked.title")}</div>
-            <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6, marginBottom: 14 }}>{t("locked.text")}</p>
-            <button className="btn btn-p" onClick={() => navigate("/pricing")}>{t("locked.cta")}</button>
-          </div>
-        )}
 
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           {(["cv", "letter"] as const).map((m) => (
@@ -209,8 +196,8 @@ export default function Scanner() {
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button className="btn btn-p" onClick={() => (locked ? navigate("/pricing") : analyze())} disabled={busy || perfecting || cvText.trim().length < 80} style={locked ? { opacity: 0.6 } : undefined}>
-              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : <>{locked ? "🔒 " : ""}{t("scanner.analyze")}</>}
+            <button className="btn btn-p" onClick={() => analyze()} disabled={busy || perfecting || cvText.trim().length < 80}>
+              {busy ? <><span className="spin" /> {t("scanner.analyzing")}</> : <>{t("scanner.analyze")}</>}
             </button>
             <button className="btn btn-g" onClick={runPerfect} disabled={busy || perfecting || cvText.trim().length < 80}>
               {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}

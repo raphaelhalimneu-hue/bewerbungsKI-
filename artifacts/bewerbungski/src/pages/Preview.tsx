@@ -144,9 +144,7 @@ export default function Preview() {
           ),
         }).catch(() => {});
         setPerfecting(false);
-        // Free users cannot use /analyze — skip the automatic re-check so the
-        // perfected letter is shown without a misleading error message.
-        if (!freeUser) await runCheck(res.letter, true);
+        await runCheck(res.letter, true);
         return;
       }
     } catch (e: any) {
@@ -447,8 +445,8 @@ export default function Preview() {
         {doc && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <button className="btn btn-p btn-sm" onClick={() => (freeUser ? navigate("/pricing") : runCheck())} disabled={checking || perfecting} style={freeUser ? { opacity: 0.6 } : undefined}>
-                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>{freeUser ? "🔒" : "🔎"} {t("preview.checkBtn")}</>}
+              <button className="btn btn-p btn-sm" onClick={() => runCheck()} disabled={checking || perfecting}>
+                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
               </button>
               {((doc as any)?.cover_letter || editedLetter) && (
                 <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting}>
