@@ -60,6 +60,8 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       profile_data: doc.profileData,
       job_title: doc.jobTitle,
       job_company: doc.jobCompany,
+      perfected_letter: doc.perfectedLetter,
+      perfected_cv_html: doc.perfectedCvHtml,
       created_at: doc.createdAt,
     });
   } catch (err) {
@@ -104,12 +106,33 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const { cv_html, cv_json, template, cover_letter, perfected_letter, perfected_cv_html } = req.body;
+
+    // Perfected copies: view-only fields shown in the preview; no download
+    // endpoint ever reads them. Locked free users may save ONLY these
+    // (string to set, null to clear); everything else stays purchase-gated.
+    for (const [key, val] of [["perfected_letter", perfected_letter], ["perfected_cv_html", perfected_cv_html]] as const) {
+      if (val !== undefined && val !== null && typeof val !== "string") {
+        res.status(400).json({ error: `${key} must be a string or null` }); return;
+      }
+    }
     if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
+      if (perfected_letter === undefined && perfected_cv_html === undefined) {
+        res.status(403).json({ error: "upgrade_required" });
+        return;
+      }
+      const [owned] = await db
+        .select()
+        .from(documentsTable)
+        .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      if (!owned) { res.status(404).json({ error: "Not found" }); return; }
+      const lockedUpdates: Record<string, any> = {};
+      if (perfected_letter !== undefined) lockedUpdates.perfectedLetter = perfected_letter;
+      if (perfected_cv_html !== undefined) lockedUpdates.perfectedCvHtml = perfected_cv_html;
+      await db.update(documentsTable).set(lockedUpdates).where(eq(documentsTable.id, req.params.id));
+      res.json({ ok: true });
       return;
     }
-
-    const { cv_html, cv_json, template, cover_letter } = req.body;
 
     // Validate template against allowlist
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
@@ -147,6 +170,8 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
       const pd = (existing.profileData as any) || {};
       updates.profileData = { ...pd, cv_json };
     }
+    if (perfected_letter !== undefined) updates.perfectedLetter = perfected_letter;
+    if (perfected_cv_html !== undefined) updates.perfectedCvHtml = perfected_cv_html;
 
     await db.update(documentsTable).set(updates).where(eq(documentsTable.id, req.params.id));
     res.json({ ok: true });

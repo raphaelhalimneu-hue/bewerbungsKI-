@@ -17,6 +17,8 @@ export async function runStartupMigrations(): Promise<void> {
   );
   await pool.query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS perfect_count integer NOT NULL DEFAULT 0`,
+    `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_letter text`,
+    `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_cv_html text`,
   );
 
   // Idempotency ledger for Stripe webhook events

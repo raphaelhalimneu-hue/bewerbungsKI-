@@ -27,6 +27,10 @@ export const documentsTable = pgTable("documents", {
   profileData: jsonb("profile_data"),
   jobTitle: text("job_title"),
   jobCompany: text("job_company"),
+  // AI-perfected copies for locked free accounts: visible in the preview,
+  // never used by any download endpoint (those read cvHtml/coverLetter only).
+  perfectedLetter: text("perfected_letter"),
+  perfectedCvHtml: text("perfected_cv_html"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -123,14 +123,22 @@ export default function Preview() {
             cvHtmlToSave = cvRef.current.innerHTML;
           }
         }
-        // Save + compute the new score in the background (the server rejects
-        // the save for locked free accounts — view-only stays enforced)
+        // Save + compute the new score in the background. Free accounts save
+        // into the view-only perfected fields (visible after reload, never
+        // used by downloads); buyers save into the real document.
         customFetch(`/api/documents/${params.id}`, {
           method: "PATCH",
-          body: JSON.stringify({
-            cover_letter: res.letter,
-            ...(cvHtmlToSave ? { cv_html: cvHtmlToSave, cv_json: { ...cvJson, profile: res.profile } } : {}),
-          }),
+          body: JSON.stringify(
+            freeUser
+              ? {
+                  perfected_letter: res.letter,
+                  ...(cvHtmlToSave ? { perfected_cv_html: cvHtmlToSave } : {}),
+                }
+              : {
+                  cover_letter: res.letter,
+                  ...(cvHtmlToSave ? { cv_html: cvHtmlToSave, cv_json: { ...cvJson, profile: res.profile } } : {}),
+                },
+          ),
         }).catch(() => {});
         setPerfecting(false);
         // Free users cannot use /analyze — skip the automatic re-check so the
@@ -144,17 +152,50 @@ export default function Preview() {
     finally { setPerfecting(false); }
   }
 
-  // Initialise cover letter textarea from loaded doc
+  // Initialise cover letter textarea from loaded doc. A stored perfected copy
+  // is shown to free users (view-only — downloads keep serving the original).
   useEffect(() => {
-    if ((doc as any)?.cover_letter) setEditedLetter((doc as any).cover_letter);
-  }, [(doc as any)?.id]);
+    const d: any = doc;
+    if (!d) return;
+    if (freeUser && d.perfected_letter) {
+      setEditedLetter(d.perfected_letter);
+      setPerfectedApplied(true);
+    } else if (d.cover_letter) {
+      setEditedLetter(d.cover_letter);
+    }
+  }, [(doc as any)?.id, freeUser]);
 
   // Set CV HTML via ref so contentEditable edits are preserved across re-renders
   useEffect(() => {
-    if (cvRef.current && (doc as any)?.cv_html) {
-      cvRef.current.innerHTML = (doc as any).cv_html;
+    const d: any = doc;
+    if (!cvRef.current || !d) return;
+    if (freeUser && d.perfected_cv_html) {
+      cvRef.current.innerHTML = d.perfected_cv_html;
+      setCvPerfectedApplied(true);
+    } else if (d.cv_html) {
+      cvRef.current.innerHTML = d.cv_html;
     }
-  }, [(doc as any)?.id]);
+  }, [(doc as any)?.id, freeUser]);
+
+  // Buyers: promote a perfected copy saved while the account was still free
+  // into the real document (they paid — downloads should include it).
+  useEffect(() => {
+    const d: any = doc;
+    if (!d || !pAuth || freeUser) return;
+    if (!d.perfected_letter && !d.perfected_cv_html) return;
+    customFetch(`/api/documents/${params.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        ...(d.perfected_letter ? { cover_letter: d.perfected_letter } : {}),
+        ...(d.perfected_cv_html ? { cv_html: d.perfected_cv_html } : {}),
+        perfected_letter: null,
+        perfected_cv_html: null,
+      }),
+    }).then(() => {
+      if (d.perfected_letter) setEditedLetter(d.perfected_letter);
+      if (d.perfected_cv_html && cvRef.current) cvRef.current.innerHTML = d.perfected_cv_html;
+    }).catch(() => {});
+  }, [(doc as any)?.id, freeUser]);
 
   // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets).
   // While editing, show at 100% with horizontal scroll — mobile browsers misplace the
