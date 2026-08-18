@@ -207,6 +207,16 @@ export default function CVEditor() {
   // ── PDF export ───────────────────────────────────────────────────────────
   async function handleDownloadPdf() {
     if (!cvSheetRef.current) return;
+    // Free trial: one CV PDF download per document (shared counter with the preview page)
+    if (docxLocked && params.id) {
+      try {
+        const r: any = await customFetch(`/api/documents/${params.id}/export-event`, {
+          method: "POST",
+          body: JSON.stringify({ kind: "cv_pdf" }),
+        });
+        if (!r?.allowed) { navigate("/pricing"); return; }
+      } catch { navigate("/pricing"); return; }
+    }
     setExporting("pdf");
     try {
       const el = cvSheetRef.current;

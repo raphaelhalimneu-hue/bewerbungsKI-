@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked } from "../lib/freeLock";
+import { isFreeQuotaLocked, isFreeAccount, consumeExportQuota } from "../lib/freeLock";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -174,6 +174,14 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
+    // Free trial: one CV PDF download per document
+    if (await isFreeAccount(req.userId!, req.userEmail)) {
+      if (!(await consumeExportQuota(req.userId!, doc.id, "cv_pdf"))) {
+        res.status(403).json({ error: "download_limit_reached" });
+        return;
+      }
+    }
+
     const pdfBuffer = await htmlToPdf(wrapHtml(doc.cvHtml));
 
     const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
@@ -206,6 +214,14 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
     const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
+
+    // Free trial: one cover-letter PDF download per document
+    if (await isFreeAccount(req.userId!, req.userEmail)) {
+      if (!(await consumeExportQuota(req.userId!, doc.id, "letter_pdf"))) {
+        res.status(403).json({ error: "download_limit_reached" });
+        return;
+      }
+    }
 
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};

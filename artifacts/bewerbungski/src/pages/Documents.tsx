@@ -46,6 +46,7 @@ export default function Documents() {
       a.remove();
       URL.revokeObjectURL(objUrl);
     } catch (e: any) {
+      if (e?.status === 403 || e?.data?.error === "download_limit_reached") { navigate("/pricing"); return; }
       toast({ title: t("docs.downloadError"), description: e.message, variant: "destructive" });
     } finally {
       setDownloading(null);
