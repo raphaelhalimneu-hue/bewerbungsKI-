@@ -10,3 +10,4 @@
 - [Briefkopf-Vorlagen](letterhead-templates.md) — 19 user-designte PNG-Briefköpfe ersetzen die alte 14er-Auswahl (2026-08-17); alte IDs bleiben für Bestandsdokumente renderbar; PDF-Puppeteer erlaubt nur /letterheads/*.png von Disk.
 - [DOCX/PDF-Export-Fallstricke](docx-export-quirks.md) — DOCX: nur DXA-Tabellenbreiten + cleanText für Unicode-Spaces (Mobile-Viewer); PDF: CSS-zoom vor html2canvas auf 1.
 - [Features Aug 2026](features-overview.md) — profil-save (savedProfile jsonb), inline-edit (contentEditable CV + textarea letter), DOCX export (/api/documents/:id/download/cv.docx + cover-letter.docx), Mobile Expo app.
+- [Perfektionierungs-Vorschau](perfected-preview-gating.md) — Gratis-Nutzer erhalten nur serverseitig gekürzte Vorschauen; Volltexte bleiben generation-gebunden bis zum Kauf.

@@ -212,7 +212,11 @@
     "noLetterText": "No cover letter has been created for this document yet. Create it now with one click — it will be saved automatically.",
     "createLetterNow": "✉️ Create cover letter now",
     "creatingLetter": "Creating cover letter …",
-    "letterCreateError": "The cover letter could not be created. Please try again."
+    "letterCreateError": "The cover letter could not be created. Please try again.",
+    "unlockPerfected": "Unlock the full text",
+    "unlockPerfectedHint": "Your text is fully optimized. Upgrade to view, edit, copy, print and download the complete version.",
+    "previewOnly": "Short preview",
+    "profilePreview": "Preview of the improved profile"
   },
   "editor": {
     "save": "💾 Save",

@@ -33,6 +33,7 @@ export const documentsTable = pgTable("documents", {
   // never used by any download endpoint (those read cvHtml/coverLetter only).
   perfectedLetter: text("perfected_letter"),
   perfectedCvHtml: text("perfected_cv_html"),
+  perfectedGenerationId: uuid("perfected_generation_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

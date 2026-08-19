@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isEmailUnverified } from "../lib/freeLock";
-import { db, profilesTable } from "@workspace/db";
-import { and, eq, lt, sql } from "drizzle-orm";
+import { isEmailUnverified, isFreeAccount } from "../lib/freeLock";
+import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
+import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { createPerfectedPreview } from "../lib/perfectedText";
 
 const router = Router();
 
@@ -63,6 +64,36 @@ function parseJson(text: string): any | null {
   const match = cleaned.match(/\{[\s\S]*\}/);
   if (match) { try { return JSON.parse(match[0]); } catch { /* ignore */ } }
   return null;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function generationPayload(
+  generation: {
+    id: string;
+    fullText: string;
+    previewText: string;
+    fullProfile: string | null;
+    previewProfile: string | null;
+    changes: string[] | null;
+  },
+  locked: boolean,
+) {
+  if (locked) {
+    return {
+      generationId: generation.id,
+      preview: generation.previewText,
+      profilePreview: generation.previewProfile,
+      locked: true,
+    };
+  }
+  return {
+    generationId: generation.id,
+    letter: generation.fullText,
+    profile: generation.fullProfile,
+    changes: Array.isArray(generation.changes) ? generation.changes : [],
+    locked: false,
+  };
 }
 
 /**
@@ -135,14 +166,77 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
   }
 });
 
+router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const documentType = req.query.type;
+    if (documentType !== "cv" && documentType !== "letter") {
+      res.status(400).json({ error: "invalid_document_type" });
+      return;
+    }
+    const [generation] = await db
+      .select()
+      .from(perfectedGenerationsTable)
+      .where(and(
+        eq(perfectedGenerationsTable.userId, req.userId!),
+        isNull(perfectedGenerationsTable.documentId),
+        eq(perfectedGenerationsTable.documentType, documentType),
+      ))
+      .orderBy(desc(perfectedGenerationsTable.createdAt))
+      .limit(1);
+
+    if (!generation) {
+      res.status(404).json({ error: "not_found" });
+      return;
+    }
+
+    const locked = await isFreeAccount(req.userId!, req.userEmail);
+    res.json(generationPayload(generation, locked));
+  } catch (err) {
+    req.log.error({ err }, "GET /perfect/latest error");
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/perfect/:id/full", requireAuth, async (req: AuthenticatedRequest, res) => {
+  try {
+    const id = String(req.params.id);
+    if (!UUID_RE.test(id)) {
+      res.status(400).json({ error: "invalid_generation_id" });
+      return;
+    }
+
+    const [generation] = await db
+      .select()
+      .from(perfectedGenerationsTable)
+      .where(and(
+        eq(perfectedGenerationsTable.id, id),
+        eq(perfectedGenerationsTable.userId, req.userId!),
+      ));
+
+    if (!generation) {
+      res.status(404).json({ error: "not_found" });
+      return;
+    }
+    if (await isFreeAccount(req.userId!, req.userEmail)) {
+      res.status(402).json({ error: "purchase_required" });
+      return;
+    }
+
+    res.json(generationPayload(generation, false));
+  } catch (err) {
+    req.log.error({ err }, "GET /perfect/:id/full error");
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 /**
  * POST /perfect — rewrite a cover letter (and CV profile statement) applying improvements.
  * Returns improved texts; the client saves them to the document.
  */
 router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const { cvText, letterText, jobText, profileText, language, docType } = req.body as {
-      cvText?: string; letterText?: string; jobText?: string; profileText?: string; language?: string; docType?: string;
+    const { cvText, letterText, jobText, profileText, language, docType, documentId } = req.body as {
+      cvText?: string; letterText?: string; jobText?: string; profileText?: string; language?: string; docType?: string; documentId?: string;
     };
     const isCvMode = docType === "cv";
     if (!letterText || typeof letterText !== "string" || letterText.trim().length < 80) {
@@ -153,13 +247,28 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
+    if (documentId !== undefined) {
+      if (typeof documentId !== "string" || !UUID_RE.test(documentId)) {
+        res.status(400).json({ error: "invalid_document_id" });
+        return;
+      }
+      const [ownedDocument] = await db
+        .select({ id: documentsTable.id })
+        .from(documentsTable)
+        .where(and(
+          eq(documentsTable.id, documentId),
+          eq(documentsTable.userId, req.userId!),
+        ));
+      if (!ownedDocument) {
+        res.status(404).json({ error: "document_not_found" });
+        return;
+      }
+    }
     const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    // Free users MAY perfect and view the result on screen; downloads and
-    // prints always serve the ORIGINAL version (paid feature, policy 2026-08-19).
     if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
@@ -228,7 +337,52 @@ Alle Texte in der Sprache mit Code "${lang}".`;
       res.status(500).json({ error: "perfect_failed" });
       return;
     }
-    res.json(parsed);
+
+    const fullText = parsed.letter.trim();
+    const fullProfile = typeof parsed.profile === "string" && parsed.profile.trim()
+      ? parsed.profile.trim()
+      : null;
+    const changes = Array.isArray(parsed.changes)
+      ? parsed.changes.filter((change: unknown): change is string => typeof change === "string").slice(0, 10)
+      : [];
+    const locked = await isFreeAccount(req.userId!, req.userEmail);
+    const generationValues = {
+      userId: req.userId!,
+      documentId: documentId ?? null,
+      documentType: isCvMode ? "cv" : "letter",
+      fullText,
+      previewText: createPerfectedPreview(fullText),
+      fullProfile,
+      previewProfile: fullProfile ? createPerfectedPreview(fullProfile) : null,
+      changes,
+    };
+    let generation: typeof perfectedGenerationsTable.$inferSelect;
+    if (locked && documentId) {
+      generation = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(perfectedGenerationsTable)
+          .values(generationValues)
+          .returning();
+        await tx
+          .update(documentsTable)
+          .set({
+            perfectedLetter: fullText,
+            perfectedGenerationId: created.id,
+          })
+          .where(and(
+            eq(documentsTable.id, documentId),
+            eq(documentsTable.userId, req.userId!),
+          ));
+        return created;
+      });
+    } else {
+      [generation] = await db
+        .insert(perfectedGenerationsTable)
+        .values(generationValues)
+        .returning();
+    }
+
+    res.json(generationPayload(generation, locked));
   } catch (err) {
     req.log.error({ err }, "POST /perfect error");
     res.status(500).json({ error: "Server error" });

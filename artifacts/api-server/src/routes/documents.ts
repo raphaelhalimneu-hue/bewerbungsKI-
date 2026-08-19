@@ -1,13 +1,32 @@
 import { Router } from "express";
-import { db, documentsTable } from "@workspace/db";
+import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
-import { isFreeQuotaLocked } from "../lib/freeLock";
+import { isFreeAccount } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
+import { createPerfectedPreview } from "../lib/perfectedText";
 
 const router = Router();
+
+function escapeHtmlText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function replaceProfileText(cvHtml: string | null, oldProfile: string, newProfile: string): string | null {
+  if (!cvHtml || !oldProfile) return cvHtml;
+  const escapedOld = escapeHtmlText(oldProfile);
+  const escapedNew = escapeHtmlText(newProfile);
+  if (cvHtml.includes(escapedOld)) return cvHtml.replace(escapedOld, escapedNew);
+  if (cvHtml.includes(oldProfile)) return cvHtml.replace(oldProfile, escapedNew);
+  return cvHtml;
+}
 
 router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
@@ -35,12 +54,14 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
 
 router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const [doc] = await db
+    const rawId = req.params.id;
+    const documentId = Array.isArray(rawId) ? rawId[0] : rawId;
+    let [doc] = await db
       .select()
       .from(documentsTable)
       .where(
         and(
-          eq(documentsTable.id, req.params.id),
+          eq(documentsTable.id, documentId),
           eq(documentsTable.userId, req.userId!)
         )
       );
@@ -50,6 +71,78 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       return;
     }
 
+    const freeAccount = await isFreeAccount(req.userId!, req.userEmail);
+    const [pendingGeneration] = doc.perfectedGenerationId
+      ? await db
+          .select()
+          .from(perfectedGenerationsTable)
+          .where(and(
+            eq(perfectedGenerationsTable.id, doc.perfectedGenerationId),
+            eq(perfectedGenerationsTable.documentId, doc.id),
+            eq(perfectedGenerationsTable.userId, req.userId!),
+          ))
+          .limit(1)
+      : [undefined];
+
+    // A verified buyer atomically promotes the exact pending generation. The
+    // conditional marker prevents concurrent GETs from applying a different
+    // generation or replaying an already-promoted result.
+    if (!freeAccount && pendingGeneration && doc.perfectedGenerationId) {
+      const currentProfileData = (doc.profileData as any) || {};
+      const currentCvJson = currentProfileData.cv_json || null;
+      const oldProfile = typeof currentCvJson?.profile === "string" ? currentCvJson.profile : "";
+      const promotedProfileData = pendingGeneration.fullProfile && currentCvJson
+        ? {
+            ...currentProfileData,
+            cv_json: { ...currentCvJson, profile: pendingGeneration.fullProfile },
+          }
+        : currentProfileData;
+      const promotedCvHtml = pendingGeneration.fullProfile && oldProfile
+        ? replaceProfileText(doc.cvHtml, oldProfile, pendingGeneration.fullProfile)
+        : doc.cvHtml;
+      const [promoted] = await db
+        .update(documentsTable)
+        .set({
+          coverLetter: pendingGeneration.fullText,
+          cvHtml: promotedCvHtml,
+          profileData: promotedProfileData,
+          perfectedLetter: null,
+          perfectedCvHtml: null,
+          perfectedGenerationId: null,
+        })
+        .where(and(
+          eq(documentsTable.id, doc.id),
+          eq(documentsTable.userId, req.userId!),
+          eq(documentsTable.perfectedGenerationId, pendingGeneration.id),
+        ))
+        .returning();
+      if (promoted) doc = promoted;
+    } else if (!freeAccount && doc.perfectedLetter && !doc.perfectedGenerationId) {
+      // Legacy perfected copies predate generation IDs. Promote them once for
+      // existing buyers while keeping the new ID-bound path strict.
+      const [promoted] = await db
+        .update(documentsTable)
+        .set({
+          coverLetter: doc.perfectedLetter,
+          cvHtml: doc.perfectedCvHtml || doc.cvHtml,
+          perfectedLetter: null,
+          perfectedCvHtml: null,
+        })
+        .where(and(
+          eq(documentsTable.id, doc.id),
+          eq(documentsTable.userId, req.userId!),
+        ))
+        .returning();
+      if (promoted) doc = promoted;
+    }
+
+    const storedPerfectedLetter = doc.perfectedLetter;
+    const visiblePerfectedLetter = freeAccount && storedPerfectedLetter
+      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter))
+      : null;
+    const visiblePerfectedProfile = freeAccount && storedPerfectedLetter && pendingGeneration?.fullProfile
+      ? (pendingGeneration.previewProfile || createPerfectedPreview(pendingGeneration.fullProfile))
+      : null;
     const pd = (doc.profileData as any) || {};
     res.json({
       id: doc.id,
@@ -61,8 +154,11 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       profile_data: doc.profileData,
       job_title: doc.jobTitle,
       job_company: doc.jobCompany,
-      perfected_letter: doc.perfectedLetter,
-      perfected_cv_html: doc.perfectedCvHtml,
+      perfected_letter: visiblePerfectedLetter,
+      perfected_cv_html: null,
+      perfected_profile: visiblePerfectedProfile,
+      perfected_generation_id: freeAccount ? (pendingGeneration?.id ?? null) : null,
+      perfected_locked: freeAccount && Boolean(storedPerfectedLetter),
       created_at: doc.createdAt,
     });
   } catch (err) {

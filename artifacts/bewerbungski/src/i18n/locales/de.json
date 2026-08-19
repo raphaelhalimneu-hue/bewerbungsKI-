@@ -212,7 +212,11 @@
     "noLetterText": "Zu diesem Dokument wurde noch keine Bewerbung erstellt. Erstelle es jetzt mit einem Klick — es wird automatisch gespeichert.",
     "createLetterNow": "✉️ Bewerbung jetzt erstellen",
     "creatingLetter": "Bewerbung wird erstellt …",
-    "letterCreateError": "Die Bewerbung konnte nicht erstellt werden. Bitte versuche es erneut."
+    "letterCreateError": "Die Bewerbung konnte nicht erstellt werden. Bitte versuche es erneut.",
+    "unlockPerfected": "Vollständigen Text freischalten",
+    "unlockPerfectedHint": "Dein Text ist fertig optimiert. Mit dem Upgrade kannst du ihn vollständig sehen, bearbeiten, kopieren, drucken und herunterladen.",
+    "previewOnly": "Gekürzte Vorschau",
+    "profilePreview": "Vorschau des verbesserten Kurzprofils"
   },
   "editor": {
     "save": "💾 Speichern",

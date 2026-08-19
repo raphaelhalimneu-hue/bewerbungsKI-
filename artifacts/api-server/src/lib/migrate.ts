@@ -26,6 +26,34 @@ export async function runStartupMigrations(): Promise<void> {
   await pool.query(
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_cv_html text`,
   );
+  await pool.query(
+    `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_generation_id uuid`,
+  );
+
+  // Server-owned perfected text. Free clients receive only preview_text;
+  // full_text is released only after the account purchase is verified.
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS perfected_generations (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id text NOT NULL,
+      document_id uuid,
+      document_type text NOT NULL,
+      full_text text NOT NULL,
+      preview_text text NOT NULL,
+      full_profile text,
+      preview_profile text,
+      changes jsonb NOT NULL DEFAULT '[]'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`,
+  );
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS perfected_generations_user_created_idx
+     ON perfected_generations (user_id, created_at DESC)`,
+  );
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS perfected_generations_document_created_idx
+     ON perfected_generations (document_id, created_at DESC)`,
+  );
 
   // In-app ratings (stars 1-5, optional comment, one per user)
   await pool.query(

@@ -66,20 +66,20 @@ export default function Scanner() {
   const [perfecting, setPerfecting] = useState(false);
   const [perfectChanges, setPerfectChanges] = useState<string[] | null>(null);
   const [perfectedText, setPerfectedText] = useState<string | null>(null);
+  const [perfectedLocked, setPerfectedLocked] = useState(false);
   const [lastFile, setLastFile] = useState<UploadedFile | null>(null);
   const [wizardBusy, setWizardBusy] = useState(false);
   const cvInputRef = useRef<HTMLTextAreaElement>(null);
   const perfectedTextRef = useRef<HTMLDivElement>(null);
   const freeUser = !!p && !p.is_premium && (p.credits || 0) === 0;
-  const perfectedCopyLocked = freeUser && !!perfectedText;
+  const perfectedCopyLocked = perfectedLocked && !!perfectedText;
 
   function blockCopy(e: ClipboardEvent<HTMLElement>) {
     e.preventDefault();
   }
 
-  // The perfected result is also copied into the input field on this page.
   // Capture clipboard events globally because Android's selection toolbar does
-  // not reliably bubble copy/cut/contextmenu events from textareas.
+  // not reliably bubble copy/cut/contextmenu events from the preview.
   useEffect(() => {
     if (!perfectedCopyLocked) return;
     const isInside = (node: Node | null, container: HTMLElement | null) =>
@@ -94,7 +94,7 @@ export default function Scanner() {
         selection?.anchorNode ?? null,
         selection?.focusNode ?? null,
       ].some((candidate) =>
-        isInside(candidate, cvInputRef.current) || isInside(candidate, perfectedTextRef.current),
+        isInside(candidate, perfectedTextRef.current),
       );
     };
     const preventClipboard = (event: Event) => {
@@ -116,6 +116,29 @@ export default function Scanner() {
       document.removeEventListener("keydown", preventShortcut, true);
     };
   }, [perfectedCopyLocked]);
+
+  // Scanner generations are persisted server-side. A reload receives only the
+  // preview for free accounts; after a purchase the same request returns full text.
+  useEffect(() => {
+    if (!user || !p) return;
+    let cancelled = false;
+    customFetch(`/api/perfect/latest?type=${mode}`)
+      .then((res: any) => {
+        if (cancelled) return;
+        if (res?.locked && typeof res.preview === "string") {
+          setPerfectedText(res.preview);
+          setPerfectedLocked(true);
+          setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        } else if (typeof res?.letter === "string") {
+          setPerfectedText(res.letter);
+          setPerfectedLocked(false);
+          setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+          setCvText((current) => current || res.letter);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user, p, freeUser, mode]);
 
   async function goWizard() {
     try { sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
@@ -149,9 +172,15 @@ export default function Scanner() {
           language: i18n.resolvedLanguage || "de",
         }),
       });
-      if (res?.letter) {
+      if (res?.locked && typeof res.preview === "string") {
+        setPerfectedText(res.preview);
+        setPerfectedLocked(true);
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        setResult(null);
+      } else if (typeof res?.letter === "string") {
         setCvText(res.letter);
         setPerfectedText(res.letter);
+        setPerfectedLocked(false);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
         setPerfecting(false);
@@ -216,7 +245,7 @@ export default function Scanner() {
           {(["cv", "letter"] as const).map((m) => (
             <button
               key={m}
-              onClick={() => { setMode(m); setResult(null); setErrorMsg(""); setPerfectedText(null); setPerfectChanges(null); }}
+              onClick={() => { setMode(m); setResult(null); setErrorMsg(""); setPerfectedText(null); setPerfectedLocked(false); setPerfectChanges(null); }}
               className="btn"
               style={{
                 fontWeight: 700, fontSize: 13.5, padding: "8px 16px", borderRadius: 999,
@@ -233,18 +262,15 @@ export default function Scanner() {
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <label style={{ fontWeight: 700, fontSize: 14 }}>{mode === "letter" ? t("scanner.letterLabel") : t("scanner.cvLabel")}</label>
-            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} onFile={setLastFile} />
+            <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectedLocked(false); setPerfectChanges(null); }} onFile={setLastFile} />
           </div>
           <textarea
             ref={cvInputRef}
             value={cvText}
             onChange={(e) => { setCvText(e.target.value); if (errorMsg) setErrorMsg(""); }}
-            onCopy={perfectedCopyLocked ? blockCopy : undefined}
-            onCut={perfectedCopyLocked ? blockCopy : undefined}
-            onContextMenu={perfectedCopyLocked ? e => e.preventDefault() : undefined}
             placeholder={mode === "letter" ? t("scanner.letterPlaceholder") : t("scanner.cvPlaceholder")}
             rows={10}
-            style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)", userSelect: perfectedCopyLocked ? "none" : undefined, WebkitUserSelect: perfectedCopyLocked ? "none" : undefined }}
+            style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)" }}
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
@@ -263,7 +289,7 @@ export default function Scanner() {
         </div>
 
         {perfectedText && (
-            <div ref={perfectedTextRef} className="card" style={{ marginTop: 16 }}>
+            <div ref={perfectedTextRef} className="card" style={{ marginTop: 16, position: "relative", overflow: "hidden" }}>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>✨ {t("scanner.improvedTitle")}</div>
               <div
                 onCopy={perfectedCopyLocked ? blockCopy : undefined}
@@ -273,6 +299,17 @@ export default function Scanner() {
               >
               {perfectedText}
             </div>
+            {perfectedLocked && (
+              <div style={{ marginTop: 12, textAlign: "center" }}>
+                <div style={{ height: 42, marginTop: -54, position: "relative", background: "linear-gradient(to bottom, transparent, var(--card, #fff))", pointerEvents: "none" }} />
+                <button className="btn btn-p" onClick={() => navigate("/pricing")}>
+                  🔒 {t("preview.unlockPerfected")}
+                </button>
+                <p style={{ margin: "8px auto 0", maxWidth: 560, fontSize: 12.5, lineHeight: 1.55, color: "var(--muted)" }}>
+                  {t("preview.unlockPerfectedHint")}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

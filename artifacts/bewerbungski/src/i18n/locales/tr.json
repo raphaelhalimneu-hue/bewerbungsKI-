@@ -211,7 +211,11 @@
     "noLetterText": "Bu belge için henüz bir ön yazı oluşturulmadı. Tek tıkla şimdi oluşturun — otomatik olarak kaydedilir.",
     "createLetterNow": "✉️ Ön yazıyı şimdi oluştur",
     "creatingLetter": "Ön yazı oluşturuluyor …",
-    "letterCreateError": "Ön yazı oluşturulamadı. Lütfen tekrar deneyin."
+    "letterCreateError": "Ön yazı oluşturulamadı. Lütfen tekrar deneyin.",
+    "unlockPerfected": "Tam metnin kilidini aç",
+    "unlockPerfectedHint": "Metnin tamamen iyileştirildi. Tamamını görmek, düzenlemek, kopyalamak, yazdırmak ve indirmek için yükselt.",
+    "previewOnly": "Kısaltılmış önizleme",
+    "profilePreview": "İyileştirilmiş profil önizlemesi"
   },
   "wizard": {
     "steps": {

@@ -19,7 +19,7 @@ export default function Preview() {
   const { t } = useTranslation();
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
+  const { data: doc, isLoading, error, refetch: refetchDocument } = useGetDocument(params.id ?? "");
   const cvRef = useRef<HTMLDivElement>(null);
   const cvWrapRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLDivElement>(null);
@@ -36,6 +36,8 @@ export default function Preview() {
   const [perfectedApplied, setPerfectedApplied] = useState(false);
   // True once the CV shown contains the AI-perfected profile (this session)
   const [cvPerfectedApplied, setCvPerfectedApplied] = useState(false);
+  const [perfectedServerLocked, setPerfectedServerLocked] = useState(false);
+  const [perfectedProfilePreview, setPerfectedProfilePreview] = useState<string | null>(null);
   const { profile } = useAuth();
   const pAuth = profile as any;
   const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
@@ -50,7 +52,7 @@ export default function Preview() {
   const pdfLocked = freeUser;
   // Free users can read every text, but may not copy AI-perfected or manually
   // edited versions. Paid users keep unrestricted clipboard access.
-  const letterCopyLocked = freeUser && (perfectedApplied || letterManuallyEdited);
+  const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
   const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
@@ -171,11 +173,22 @@ export default function Preview() {
     try {
       const res: any = await customFetch("/api/perfect", {
         method: "POST",
-        body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, profileText, language: i18n.resolvedLanguage || "de" }),
+        body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, profileText, documentId: params.id, language: i18n.resolvedLanguage || "de" }),
       });
-      if (res?.letter) {
+      if (res?.locked && typeof res.preview === "string") {
+        setEditedLetter(res.preview);
+        setPerfectedApplied(true);
+        setPerfectedServerLocked(true);
+        setPerfectedProfilePreview(typeof res.profilePreview === "string" ? res.profilePreview : null);
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        return;
+      }
+      if (typeof res?.letter === "string") {
         setEditedLetter(res.letter);
         setPerfectedApplied(true);
+        setPerfectedServerLocked(false);
+        setPerfectedProfilePreview(null);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         // Show the improved letter right away
         setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
@@ -192,22 +205,14 @@ export default function Preview() {
             cvHtmlToSave = cvRef.current.innerHTML;
           }
         }
-        // Save + compute the new score in the background. Free accounts save
-        // into the view-only perfected fields (visible after reload, never
-        // used by downloads); buyers save into the real document.
+        // Paid responses contain the full result and can be saved into the real
+        // document. Free responses return above and are persisted by the server.
         customFetch(`/api/documents/${params.id}`, {
           method: "PATCH",
-          body: JSON.stringify(
-            freeUser || !pAuth
-              ? {
-                  perfected_letter: res.letter,
-                  ...(cvHtmlToSave ? { perfected_cv_html: cvHtmlToSave } : {}),
-                }
-              : {
-                  cover_letter: res.letter,
-                  ...(cvHtmlToSave ? { cv_html: cvHtmlToSave, cv_json: { ...cvJson, profile: res.profile } } : {}),
-                },
-          ),
+          body: JSON.stringify({
+            cover_letter: res.letter,
+            ...(cvHtmlToSave ? { cv_html: cvHtmlToSave, cv_json: { ...cvJson, profile: res.profile } } : {}),
+          }),
         }).catch(() => {});
         setPerfecting(false);
         await runCheck(res.letter, true);
@@ -232,45 +237,38 @@ export default function Preview() {
   useEffect(() => {
     const d: any = doc;
     if (!d) return;
-    if (freeUser && d.perfected_letter) {
+    if (d.perfected_letter) {
       setEditedLetter(d.perfected_letter);
       setPerfectedApplied(true);
+      setPerfectedServerLocked(Boolean(d.perfected_locked));
+      setPerfectedProfilePreview(typeof d.perfected_profile === "string" ? d.perfected_profile : null);
     } else if (d.cover_letter) {
       setEditedLetter(d.cover_letter);
+      setPerfectedServerLocked(false);
+      setPerfectedProfilePreview(null);
     }
-  }, [(doc as any)?.id, freeUser]);
+  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked]);
 
   // Set CV HTML via ref so contentEditable edits are preserved across re-renders
   useEffect(() => {
     const d: any = doc;
     if (!cvRef.current || !d) return;
-    if (freeUser && d.perfected_cv_html) {
+    if (d.perfected_cv_html) {
       cvRef.current.innerHTML = d.perfected_cv_html;
       setCvPerfectedApplied(true);
     } else if (d.cv_html) {
       cvRef.current.innerHTML = d.cv_html;
     }
-  }, [(doc as any)?.id, freeUser]);
+  }, [(doc as any)?.id, (doc as any)?.perfected_cv_html]);
 
-  // Buyers: promote a perfected copy saved while the account was still free
-  // into the real document (they paid — downloads should include it).
+  // If this query was cached while the account was free, refetch after purchase.
+  // The server atomically promotes the exact pending generation; the browser
+  // must never PATCH its cached (shortened) preview into the real document.
   useEffect(() => {
     const d: any = doc;
-    if (!d || !pAuth || freeUser) return;
-    if (!d.perfected_letter && !d.perfected_cv_html) return;
-    customFetch(`/api/documents/${params.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        ...(d.perfected_letter ? { cover_letter: d.perfected_letter } : {}),
-        ...(d.perfected_cv_html ? { cv_html: d.perfected_cv_html } : {}),
-        perfected_letter: null,
-        perfected_cv_html: null,
-      }),
-    }).then(() => {
-      if (d.perfected_letter) setEditedLetter(d.perfected_letter);
-      if (d.perfected_cv_html && cvRef.current) cvRef.current.innerHTML = d.perfected_cv_html;
-    }).catch(() => {});
-  }, [(doc as any)?.id, freeUser, !!pAuth, (doc as any)?.perfected_letter, (doc as any)?.perfected_cv_html]);
+    if (!d || !pAuth || freeUser || !d.perfected_locked) return;
+    void refetchDocument();
+  }, [(doc as any)?.id, (doc as any)?.perfected_locked, freeUser, !!pAuth, refetchDocument]);
 
   // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets).
   // While editing, show at 100% with horizontal scroll — mobile browsers misplace the
@@ -553,7 +551,7 @@ export default function Preview() {
                 {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
               </button>
               {((doc as any)?.cover_letter || editedLetter) && (
-                <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting}>
+                <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting || perfectedServerLocked}>
                   {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
                 </button>
               )}
@@ -567,6 +565,28 @@ export default function Preview() {
                     {perfectChanges.map((c, i) => <li key={i}>{c}</li>)}
                   </ul>
                 )}
+              </div>
+            )}
+            {perfectedProfilePreview && (
+              <div style={{ marginTop: 12, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px" }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 5 }}>
+                  ✨ {t("preview.profilePreview")}
+                </div>
+                <div
+                  onCopy={perfectedServerLocked ? blockCopy : undefined}
+                  onCut={perfectedServerLocked ? blockCopy : undefined}
+                  onContextMenu={perfectedServerLocked ? e => e.preventDefault() : undefined}
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    color: "var(--text2)",
+                    userSelect: perfectedServerLocked ? "none" : undefined,
+                    WebkitUserSelect: perfectedServerLocked ? "none" : undefined,
+                  }}
+                >
+                  {perfectedProfilePreview}
+                </div>
               </div>
             )}
             {analysis && <AnalysisCard result={analysis} />}
@@ -627,7 +647,7 @@ export default function Preview() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.coverLetter")}</h3>
                   <span style={{ fontSize: 12, color: "var(--muted)", background: "var(--bg2)", padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>
-                    {t("preview.editLetterHint")}
+                    {perfectedServerLocked ? `🔒 ${t("preview.previewOnly")}` : t("preview.editLetterHint")}
                   </span>
                 </div>
                 <div
@@ -645,7 +665,7 @@ export default function Preview() {
                   />
                   <textarea
                     value={editedLetter}
-                    readOnly={editLocked}
+                    readOnly={editLocked || perfectedServerLocked}
                     onChange={e => {
                       if (!editLocked) {
                         setEditedLetter(e.target.value);
@@ -665,6 +685,17 @@ export default function Preview() {
                       WebkitUserSelect: letterCopyLocked ? "none" : undefined,
                     }}
                   />
+                  {perfectedServerLocked && (
+                    <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 18px 18px", background: "#fff" }}>
+                      <div style={{ height: 50, margin: "-50px -18px 0", background: "linear-gradient(to bottom, transparent, #fff)", pointerEvents: "none" }} />
+                      <button className="btn btn-p" onClick={() => navigate("/pricing")}>
+                        🔒 {t("preview.unlockPerfected")}
+                      </button>
+                      <p style={{ margin: "8px auto 0", maxWidth: 580, fontSize: 12.5, lineHeight: 1.55, color: "var(--muted)" }}>
+                        {t("preview.unlockPerfectedHint")}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -211,7 +211,11 @@
     "noLetterText": "Do tego dokumentu nie utworzono jeszcze listu motywacyjnego. Utwórz go teraz jednym kliknięciem — zostanie zapisany automatycznie.",
     "createLetterNow": "✉️ Utwórz list motywacyjny teraz",
     "creatingLetter": "Tworzenie listu motywacyjnego …",
-    "letterCreateError": "Nie udało się utworzyć listu motywacyjnego. Spróbuj ponownie."
+    "letterCreateError": "Nie udało się utworzyć listu motywacyjnego. Spróbuj ponownie.",
+    "unlockPerfected": "Odblokuj pełny tekst",
+    "unlockPerfectedHint": "Twój tekst jest już w pełni poprawiony. Wykup dostęp, aby zobaczyć, edytować, kopiować, drukować i pobierać całość.",
+    "previewOnly": "Skrócony podgląd",
+    "profilePreview": "Podgląd ulepszonego profilu"
   },
   "wizard": {
     "steps": {

@@ -211,7 +211,11 @@
     "noLetterText": "Todavía no se ha creado una carta de presentación para este documento. Créala ahora con un clic — se guardará automáticamente.",
     "createLetterNow": "✉️ Crear carta de presentación ahora",
     "creatingLetter": "Creando carta de presentación …",
-    "letterCreateError": "No se pudo crear la carta de presentación. Inténtalo de nuevo."
+    "letterCreateError": "No se pudo crear la carta de presentación. Inténtalo de nuevo.",
+    "unlockPerfected": "Desbloquear el texto completo",
+    "unlockPerfectedHint": "Tu texto está totalmente optimizado. Mejora tu plan para verlo, editarlo, copiarlo, imprimirlo y descargarlo completo.",
+    "previewOnly": "Vista previa abreviada",
+    "profilePreview": "Vista previa del perfil mejorado"
   },
   "wizard": {
     "steps": {
