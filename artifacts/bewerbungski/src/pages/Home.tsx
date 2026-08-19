@@ -577,7 +577,7 @@ export default function Home() {
             />
             <img
               src="/google-reactions.jpg"
-              alt={t("home.socialProofGoogleAlt")}
+              alt={t("home.socialProofCommentsAlt")}
               loading="lazy"
               style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
             />
