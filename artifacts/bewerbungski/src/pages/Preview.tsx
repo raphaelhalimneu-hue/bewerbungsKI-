@@ -41,10 +41,10 @@ export default function Preview() {
   const { profile } = useAuth();
   const pAuth = profile as any;
   const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
-  // Free accounts may try everything on screen, but download and print are
-  // paid-only (policy 2026-08-19). Server enforces the same rules.
+  // Free accounts can read their saved document, but editing, download and
+  // print are paid-only. The server enforces the same rules.
   const docxLocked = freeUser;
-  const editLocked = false; // everything is open except download & print
+  const editLocked = freeUser;
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
   void printUsed;
   const cvPrintLocked = freeUser;
@@ -489,8 +489,8 @@ export default function Preview() {
                     )}
                   </>
                 )}
-                <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                  {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
+                  <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
+                    {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{pdfLocked ? "🔒 " : ""}{t("preview.downloadCv")}</>}
                 </button>
                 <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
                   {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV .docx</>}
@@ -498,7 +498,7 @@ export default function Preview() {
                 {((doc as any)?.cover_letter || editedLetter) && (
                   <>
                     <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
-                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
+                      {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{pdfLocked ? "🔒 " : ""}{t("preview.downloadLetter")}</>}
                     </button>
                     <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
                       {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} Bewerbung .docx</>}

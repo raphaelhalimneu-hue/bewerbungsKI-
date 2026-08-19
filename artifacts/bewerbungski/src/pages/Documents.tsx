@@ -98,7 +98,7 @@ export default function Documents() {
           <div className="card" style={{ marginBottom: 16, borderColor: "var(--brand)", background: "#eff6ff" }}>
             <strong style={{ display: "block", marginBottom: 4 }}>Deine Bewerbung ist sicher gespeichert.</strong>
             <span style={{ color: "var(--muted)", fontSize: 14 }}>
-              Du kannst sie weiterhin ansehen. Für Bearbeitung, Download und weitere Bewerbungen bitte freischalten.
+               Du kannst sie weiterhin ansehen. Für Bearbeitung, Drucken, Download und weitere Bewerbungen bitte freischalten.
             </span>
           </div>
         )}
