@@ -369,7 +369,10 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
 
       toast({ title: t("wizard.success") });
       refetchProfile();
-      navigate("/pricing");
+      // Keep the completed first application visible. Locked actions inside
+      // Documents/Preview still route to pricing, but the saved CV and letter
+      // must never disappear behind the upgrade page.
+      navigate("/documents");
     } catch (e: any) {
       if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {
         navigate("/pricing");
