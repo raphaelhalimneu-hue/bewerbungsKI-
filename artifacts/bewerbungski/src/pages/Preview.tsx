@@ -50,8 +50,8 @@ export default function Preview() {
   const cvPrintLocked = freeUser;
   const letterPrintLocked = freeUser;
   const pdfLocked = freeUser;
-  // Free users can read every text, but may not copy AI-perfected or manually
-  // edited versions. Paid users keep unrestricted clipboard access.
+  // Free users can read their originals, but server-locked perfected text is
+  // only ever rendered as the shortened preview.
   const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
   const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
   const showLockedCvPreview = freeUser && perfectedServerLocked;
@@ -233,15 +233,16 @@ export default function Preview() {
       .catch(() => {});
   }, [params.id, freeUser]);
 
-  // Initialise cover letter textarea from loaded doc. A stored perfected copy
-  // is shown to free users (view-only — downloads keep serving the original).
+  // Initialise the cover letter from the server-authoritative document state.
+  // A locked generation must win even if a legacy write did not retain its
+  // duplicate perfected_letter field.
   useEffect(() => {
     const d: any = doc;
     if (!d) return;
-    if (d.perfected_letter) {
-      setEditedLetter(d.perfected_letter);
+    if (d.perfected_locked) {
+      setEditedLetter(typeof d.perfected_letter === "string" ? d.perfected_letter : "");
       setPerfectedApplied(true);
-      setPerfectedServerLocked(Boolean(d.perfected_locked));
+      setPerfectedServerLocked(true);
       setPerfectedProfilePreview(typeof d.perfected_profile === "string" ? d.perfected_profile : null);
     } else if (d.cover_letter) {
       setEditedLetter(d.cover_letter);
@@ -699,28 +700,43 @@ export default function Preview() {
                     aria-hidden
                     dangerouslySetInnerHTML={{ __html: letterDecoHtml(doc) }}
                   />
-                  <textarea
-                    value={editedLetter}
-                    readOnly={editLocked || perfectedServerLocked}
-                    onChange={e => {
-                      if (!editLocked) {
-                        setEditedLetter(e.target.value);
-                        setLetterManuallyEdited(true);
-                      }
-                    }}
-                    onCopy={letterCopyLocked ? blockCopy : undefined}
-                    onCut={letterCopyLocked ? blockCopy : undefined}
-                    onContextMenu={letterCopyLocked ? e => e.preventDefault() : undefined}
-                    style={{
-                      whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
-                      width: "100%", border: "none", outline: "none", resize: "vertical",
-                      minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
-                      background: "transparent", display: "block", boxSizing: "border-box",
-                      position: "relative", zIndex: 1,
-                      userSelect: letterCopyLocked ? "none" : undefined,
-                      WebkitUserSelect: letterCopyLocked ? "none" : undefined,
-                    }}
-                  />
+                  {perfectedServerLocked ? (
+                    <div
+                      onCopy={blockCopy}
+                      onCut={blockCopy}
+                      onContextMenu={e => e.preventDefault()}
+                      style={{
+                        whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
+                        minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
+                        position: "relative", zIndex: 1, userSelect: "none", WebkitUserSelect: "none",
+                      }}
+                    >
+                      {editedLetter || t("preview.unlockPerfectedHint")}
+                    </div>
+                  ) : (
+                    <textarea
+                      value={editedLetter}
+                      readOnly={editLocked}
+                      onChange={e => {
+                        if (!editLocked) {
+                          setEditedLetter(e.target.value);
+                          setLetterManuallyEdited(true);
+                        }
+                      }}
+                      onCopy={letterCopyLocked ? blockCopy : undefined}
+                      onCut={letterCopyLocked ? blockCopy : undefined}
+                      onContextMenu={letterCopyLocked ? e => e.preventDefault() : undefined}
+                      style={{
+                        whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
+                        width: "100%", border: "none", outline: "none", resize: "vertical",
+                        minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
+                        background: "transparent", display: "block", boxSizing: "border-box",
+                        position: "relative", zIndex: 1,
+                        userSelect: letterCopyLocked ? "none" : undefined,
+                        WebkitUserSelect: letterCopyLocked ? "none" : undefined,
+                      }}
+                    />
+                  )}
                   {perfectedServerLocked && (
                     <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 18px 18px", background: "#fff" }}>
                       <div style={{ height: 50, margin: "-50px -18px 0", background: "linear-gradient(to bottom, transparent, #fff)", pointerEvents: "none" }} />

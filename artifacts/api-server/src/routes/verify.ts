@@ -8,9 +8,11 @@ import { sendVerificationEmail } from "../lib/email";
 const router = Router();
 
 function isUnlimited(email?: string): boolean {
-  return (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
+  return (process.env.UNLIMITED_EMAILS || "")
     .toLowerCase()
     .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
     .includes((email || "").toLowerCase());
 }
 

@@ -6,6 +6,15 @@ export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
 /** Free accounts: max 1 print per part (CV / letter) per document. */
 export const FREE_PRINT_LIMIT = 1;
 
+function isUnlimitedEmail(email?: string): boolean {
+  const allowlist = (process.env.UNLIMITED_EMAILS || "")
+    .toLowerCase()
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return allowlist.includes((email || "").toLowerCase());
+}
+
 /**
  * Atomically consume one print for a free account. Returns true while the
  * limit is not yet reached (and counts it), false when it is used up.
@@ -43,11 +52,7 @@ export async function getPrintCounts(userId: string, docId: string): Promise<Rec
  * (PDF/DOCX downloads) requires a purchase.
  */
 export async function isFreeAccount(userId: string, email?: string): Promise<boolean> {
-  const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
-    .toLowerCase()
-    .split(",")
-    .includes((email || "").toLowerCase());
-  if (unlimited) return false;
+  if (isUnlimitedEmail(email)) return false;
 
   const [profile] = await db
     .select()
@@ -58,11 +63,7 @@ export async function isFreeAccount(userId: string, email?: string): Promise<boo
 
 /** True when the account still has to confirm its email address (new signups). */
 export async function isEmailUnverified(userId: string, email?: string): Promise<boolean> {
-  const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
-    .toLowerCase()
-    .split(",")
-    .includes((email || "").toLowerCase());
-  if (unlimited) return false;
+  if (isUnlimitedEmail(email)) return false;
   const [profile] = await db
     .select()
     .from(profilesTable)
@@ -71,11 +72,7 @@ export async function isEmailUnverified(userId: string, email?: string): Promise
 }
 
 export async function isFreeQuotaLocked(userId: string, email?: string): Promise<boolean> {
-  const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com")
-    .toLowerCase()
-    .split(",")
-    .includes((email || "").toLowerCase());
-  if (unlimited) return false;
+  if (isUnlimitedEmail(email)) return false;
 
   const [profile] = await db
     .select()

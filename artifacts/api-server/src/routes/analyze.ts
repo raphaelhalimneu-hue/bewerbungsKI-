@@ -118,7 +118,7 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    const unlimitedA = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    const unlimitedA = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
@@ -264,7 +264,7 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
         return;
       }
     }
-    const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    const unlimitedP = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
       return;

@@ -30,9 +30,9 @@ const state = {
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     auth: {
-      getUser: async (token: string) =>
-        token === "test-token"
-          ? { data: { user: { id: "user-1", email: "test@example.com" } }, error: null }
+        getUser: async (token: string) =>
+          token === "test-token" || token === "owner-token"
+            ? { data: { user: { id: "user-1", email: token === "owner-token" ? "halimraphael9@gmail.com" : "test@example.com" } }, error: null }
           : { data: { user: null }, error: { message: "invalid token" } },
     },
   }),
@@ -58,6 +58,7 @@ vi.mock("@workspace/db", () => {
     userId: {},
     documentId: {},
     documentType: {},
+    fullText: {},
     createdAt: {},
   };
   const stripeEventsTable = { __name: "stripe_events", id: {} };
@@ -160,6 +161,7 @@ global.fetch = (async (input: any, init?: any) => {
 import app from "../app";
 
 const auth = { Authorization: "Bearer test-token" };
+const ownerAuth = { Authorization: "Bearer owner-token" };
 
 describe("perfected text preview gating", () => {
   beforeEach(() => {
@@ -193,6 +195,22 @@ describe("perfected text preview gating", () => {
     expect(response.body).not.toHaveProperty("changes");
     expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
     expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
+  });
+
+  it("does not silently treat a hard-coded email address as a paid account", async () => {
+    delete process.env.UNLIMITED_EMAILS;
+    const response = await request(app)
+      .post("/api/perfect")
+      .set(ownerAuth)
+      .send({
+        letterText: "Ausgangstext ".repeat(20),
+        docType: "letter",
+        language: "de",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.locked).toBe(true);
+    expect(response.body).not.toHaveProperty("letter");
   });
 
   it("blocks the full-text route until the server sees a purchase", async () => {
@@ -291,6 +309,43 @@ describe("perfected text preview gating", () => {
     expect(paidResponse.body.perfected_profile).toBeNull();
     expect(paidResponse.body.cover_letter).toBe(FULL_TEXT);
     expect(paidResponse.body.profile_data.cv_json.profile).toBe(FULL_PROFILE);
+  });
+
+  it("re-locks a legacy perfected letter that was previously saved as the document text", async () => {
+    const documentId = "33333333-3333-4333-8333-333333333333";
+    state.documents = [{
+      id: documentId,
+      userId: "user-1",
+      name: "Ältere Bewerbung",
+      template: "modern",
+      cvHtml: "<div>Original CV</div>",
+      coverLetter: FULL_TEXT,
+      perfectedLetter: null,
+      perfectedCvHtml: null,
+      perfectedGenerationId: null,
+      profileData: { cv_json: { profile: "Originalprofil" } },
+      jobTitle: null,
+      jobCompany: null,
+      createdAt: new Date(),
+    }];
+    state.generations = [{
+      id: "44444444-4444-4444-8444-444444444444",
+      userId: "user-1",
+      documentId,
+      documentType: "letter",
+      fullText: FULL_TEXT,
+      previewText: "sichere nachträgliche Vorschau […]",
+      fullProfile: null,
+      previewProfile: null,
+      changes: [],
+      createdAt: new Date(),
+    }];
+
+    const response = await request(app).get(`/api/documents/${documentId}`).set(auth);
+    expect(response.status).toBe(200);
+    expect(response.body.perfected_locked).toBe(true);
+    expect(response.body.perfected_letter).toBe("sichere nachträgliche Vorschau […]");
+    expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
   });
 
   it("keeps one-token model output and changes from leaking through a locked payload", async () => {

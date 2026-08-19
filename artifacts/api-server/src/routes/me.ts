@@ -27,7 +27,7 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
 
-    const unlimited = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
+    const unlimited = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(value => value.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     res.json({
       email: profile.email,
       is_premium: unlimited ? true : profile.isPremium,

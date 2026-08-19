@@ -72,7 +72,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     }
 
     const freeAccount = await isFreeAccount(req.userId!, req.userEmail);
-    const [pendingGeneration] = doc.perfectedGenerationId
+    let [pendingGeneration] = doc.perfectedGenerationId
       ? await db
           .select()
           .from(perfectedGenerationsTable)
@@ -83,6 +83,25 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
           ))
           .limit(1)
       : [undefined];
+
+    // Before server-side preview gating existed, an allowlisted account could
+    // save a perfected result into cover_letter. If that account is now free,
+    // recover the matching persisted generation and treat it as locked instead
+    // of exposing the same full text as if it were the user's original.
+    if (freeAccount && !pendingGeneration && doc.coverLetter) {
+      const [legacyGeneration] = await db
+        .select()
+        .from(perfectedGenerationsTable)
+        .where(and(
+          eq(perfectedGenerationsTable.documentId, doc.id),
+          eq(perfectedGenerationsTable.userId, req.userId!),
+          eq(perfectedGenerationsTable.documentType, "letter"),
+          eq(perfectedGenerationsTable.fullText, doc.coverLetter),
+        ))
+        .orderBy(desc(perfectedGenerationsTable.createdAt))
+        .limit(1);
+      if (legacyGeneration) pendingGeneration = legacyGeneration;
+    }
 
     // A verified buyer atomically promotes the exact pending generation. The
     // conditional marker prevents concurrent GETs from applying a different
@@ -136,11 +155,15 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       if (promoted) doc = promoted;
     }
 
+    // The generation relation is the source of truth for locked content.
+    // Do not use the legacy copy as the lock signal: it can be absent on an
+    // interrupted/older write even though the full generation is still linked.
+    const hasLockedGeneration = freeAccount && Boolean(pendingGeneration);
     const storedPerfectedLetter = doc.perfectedLetter;
-    const visiblePerfectedLetter = freeAccount && storedPerfectedLetter
-      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter))
+    const visiblePerfectedLetter = hasLockedGeneration
+      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter || ""))
       : null;
-    const visiblePerfectedProfile = freeAccount && storedPerfectedLetter && pendingGeneration?.fullProfile
+    const visiblePerfectedProfile = hasLockedGeneration && pendingGeneration?.fullProfile
       ? (pendingGeneration.previewProfile || createPerfectedPreview(pendingGeneration.fullProfile))
       : null;
     const pd = (doc.profileData as any) || {};
@@ -150,15 +173,19 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       template: doc.template,
       cv_html: doc.cvHtml,
       cv_json: pd.cv_json ?? null,
-      cover_letter: doc.coverLetter,
+       // A recovered legacy generation may have been written into cover_letter
+       // before preview gating existed. Never send that matching full text to a
+       // free account; the dedicated perfected_letter field above is its safe
+       // replacement.
+       cover_letter: hasLockedGeneration ? null : doc.coverLetter,
       profile_data: doc.profileData,
       job_title: doc.jobTitle,
       job_company: doc.jobCompany,
       perfected_letter: visiblePerfectedLetter,
       perfected_cv_html: null,
       perfected_profile: visiblePerfectedProfile,
-      perfected_generation_id: freeAccount ? (pendingGeneration?.id ?? null) : null,
-      perfected_locked: freeAccount && Boolean(storedPerfectedLetter),
+       perfected_generation_id: hasLockedGeneration ? pendingGeneration!.id : null,
+       perfected_locked: hasLockedGeneration,
       created_at: doc.createdAt,
     });
   } catch (err) {
