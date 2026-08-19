@@ -357,7 +357,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
       } catch { /* ignore */ }
 
       setGenPhase(t("wizard.genSaving"));
-      await createMutation.mutateAsync({ data: {
+      const created = await createMutation.mutateAsync({ data: {
         name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
         template: form.template,
         profileData: { ...form, atsScore: ats, cv_json: cvContent, language: docLang } as unknown as Record<string, unknown>,
@@ -369,10 +369,11 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
 
       toast({ title: t("wizard.success") });
       refetchProfile();
-      // Keep the completed first application visible. Locked actions inside
-      // Documents/Preview still route to pricing, but the saved CV and letter
-      // must never disappear behind the upgrade page.
-      navigate("/documents");
+      // Open the exact document that was just saved. This avoids a race where
+      // the profile refresh activates the free lock before the document list
+      // has refreshed, and keeps the saved CV and letter visible read-only.
+      const documentId = (created as any)?.id;
+      navigate(documentId ? `/preview/${documentId}` : "/documents");
     } catch (e: any) {
       if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {
         navigate("/pricing");

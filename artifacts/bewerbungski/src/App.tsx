@@ -71,7 +71,7 @@ function LocaleHeadSync() {
  */
 function FreeFeatureGate({ children }: { children: React.ReactNode }) {
   const { user, profile } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const p = profile as any;
   const isLocked = Boolean(
     user &&
@@ -83,10 +83,21 @@ function FreeFeatureGate({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (isLocked) navigate("/pricing");
-  }, [isLocked, navigate]);
+    // A profile refresh may complete immediately after a successful save. By
+    // then the user can already be on /documents or /preview, which must stay
+    // read-only but visible. Only redirect while still on the gated route.
+    if (isLocked && (location === "/wizard" || location.startsWith("/documents/") || location === "/scanner" || location === "/import")) {
+      navigate("/pricing");
+    }
+  }, [isLocked, location, navigate]);
 
-  return isLocked ? null : <>{children}</>;
+  const isCurrentRouteGated =
+    location === "/wizard" ||
+    location.startsWith("/documents/") ||
+    location === "/scanner" ||
+    location === "/import";
+
+  return isLocked && isCurrentRouteGated ? null : <>{children}</>;
 }
 
 function RestrictedWizard() {
