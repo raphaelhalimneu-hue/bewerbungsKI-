@@ -53,6 +53,13 @@ export function AnalysisCard({ result }: { result: AnalyzeResult }) {
   );
 }
 
+function createClientPreview(text: string): string {
+  const normalized = text.trim();
+  if (!normalized) return "";
+  const visibleLength = Math.max(1, Math.min(500, Math.max(24, Math.ceil(normalized.length * 0.35)), normalized.length - 1));
+  return `${normalized.slice(0, visibleLength).trimEnd()} […]`;
+}
+
 export default function Scanner() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
@@ -130,6 +137,10 @@ export default function Scanner() {
           setPerfectedText(res.preview);
           setPerfectedLocked(true);
           setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        } else if (freeUser && typeof res?.letter === "string") {
+          setPerfectedText(createClientPreview(res.letter));
+          setPerfectedLocked(true);
+          setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         } else if (typeof res?.letter === "string") {
           setPerfectedText(res.letter);
           setPerfectedLocked(false);
@@ -175,6 +186,11 @@ export default function Scanner() {
       });
       if (res?.locked && typeof res.preview === "string") {
         setPerfectedText(res.preview);
+        setPerfectedLocked(true);
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        setResult(null);
+      } else if (freeUser && typeof res?.letter === "string") {
+        setPerfectedText(createClientPreview(res.letter));
         setPerfectedLocked(true);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);

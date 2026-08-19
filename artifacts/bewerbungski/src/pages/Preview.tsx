@@ -15,6 +15,13 @@ function letterDecoHtml(doc: any): string {
   return templateDeco(doc?.template, doc?.profile_data?.customStyle?.accent);
 }
 
+function createClientPreview(text: string): string {
+  const normalized = text.trim();
+  if (!normalized) return "";
+  const visibleLength = Math.max(1, Math.min(500, Math.max(24, Math.ceil(normalized.length * 0.35)), normalized.length - 1));
+  return `${normalized.slice(0, visibleLength).trimEnd()} […]`;
+}
+
 export default function Preview() {
   const { t } = useTranslation();
   const params = useParams<{ id: string }>();
@@ -183,6 +190,15 @@ export default function Preview() {
         setPerfectedApplied(true);
         setPerfectedServerLocked(true);
         setPerfectedProfilePreview(typeof res.profilePreview === "string" ? res.profilePreview : null);
+        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
+        setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        return;
+      }
+      if (freeUser && typeof res?.letter === "string") {
+        setEditedLetter(createClientPreview(res.letter));
+        setPerfectedApplied(true);
+        setPerfectedServerLocked(true);
+        setPerfectedProfilePreview(typeof res.profile === "string" ? createClientPreview(res.profile) : null);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
         return;
