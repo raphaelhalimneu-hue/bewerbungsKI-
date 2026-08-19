@@ -408,9 +408,11 @@ describe("perfected text preview gating", () => {
 
     expect(response.status).toBe(200);
     expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
-    expect(response.body.cv_html).toContain("Sichere Profil-Vorschau […]");
-    expect(response.body.cv_json.profile).toBe("Sichere Profil-Vorschau […]");
-    expect(response.body.profile_data.cv_json.profile).toBe("Sichere Profil-Vorschau […]");
+    expect(response.body.cv_html).toBeNull();
+    expect(response.body.cv_json).toBeNull();
+    expect(response.body.perfected_cv_html).toContain("profil-1");
+    expect(response.body.perfected_cv_html).toContain("[…]");
+    expect(response.body.profile_data.cv_json).toBeNull();
   });
 
   it("keeps legacy documents readable without leaking their perfected full text", async () => {
