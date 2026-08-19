@@ -58,6 +58,7 @@ export default function Pricing() {
             <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>{t("pricing.singleOneTime")}</div>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.singleFeat1")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.singleFeat6")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat2")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat4")}</li>
             </ul>
@@ -73,6 +74,7 @@ export default function Pricing() {
             <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>{t("pricing.starterOneTime")}</div>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat1")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat6")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat2")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat4")}</li>
             </ul>
