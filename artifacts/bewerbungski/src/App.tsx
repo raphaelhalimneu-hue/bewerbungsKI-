@@ -66,7 +66,7 @@ function LocaleHeadSync() {
 }
 
 /**
- * Free accounts receive one complete application. Once it has been saved,
+ * Free accounts receive one complete assessment. Once it has completed,
  * application surfaces are no longer mounted, so they cannot briefly fetch
  * protected data while the server remains the authoritative enforcement.
  */
@@ -80,7 +80,7 @@ function FreeFeatureGate({ children }: { children: React.ReactNode }) {
     !p.is_premium &&
     !p.is_unlimited &&
     Number(p.credits || 0) === 0 &&
-    Number(p.documents_count || 0) >= 1,
+    (Number(p.documents_count || 0) >= 1 || p.assessment_completed === true || Number(p.document_limit) === 0),
   );
 
   useEffect(() => {

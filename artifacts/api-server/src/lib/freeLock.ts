@@ -68,6 +68,7 @@ export async function isFreeQuotaLocked(userId: string, email?: string): Promise
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
   if (profile?.isPremium || (profile?.credits ?? 0) > 0) return false;
+  if (profile?.firstAnalysisAt) return true;
 
   const [{ value }] = await db
     .select({ value: count() })

@@ -163,6 +163,22 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
     // Model is instructed to rate 0-10; UI shows 0-100. Values slightly above 10 are treated as 0-10 overflow.
     const scaled = rawScore <= 15 ? Math.min(rawScore, 10) * 10 : rawScore;
     parsed.score = Math.max(0, Math.min(100, Math.round(scaled)));
+
+    // The first successfully completed assessment ends the free trial.
+    // Persist this only for genuinely free accounts; paid and owner profiles
+    // retain their normal access.
+    if (!unlimitedA) {
+      const [profile] = await db
+        .select()
+        .from(profilesTable)
+        .where(eq(profilesTable.userId, req.userId!));
+      if (profile && !profile.isPremium && (profile.credits ?? 0) === 0 && !profile.firstAnalysisAt) {
+        await db
+          .update(profilesTable)
+          .set({ firstAnalysisAt: new Date() })
+          .where(eq(profilesTable.userId, req.userId!));
+      }
+    }
     res.json(parsed);
   } catch (err) {
     req.log.error({ err }, "POST /analyze error");

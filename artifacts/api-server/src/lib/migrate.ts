@@ -18,6 +18,9 @@ export async function runStartupMigrations(): Promise<void> {
   await pool.query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS perfect_count integer NOT NULL DEFAULT 0`,
   );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS first_analysis_at timestamptz`,
+  );
 
   // Perfected view-only copies for locked free accounts
   await pool.query(

@@ -3,8 +3,8 @@ name: Kontofreigaben
 description: Regel für Ausnahmezugänge bei Kauf- und Vorschau-Sperren
 ---
 
-E-Mail-Ausnahmen für Kauf-, Vorschau- oder Verifikationssperren dürfen nie als Standardwert im Code hinterlegt werden. Sonderzugriff ist nur erlaubt, wenn die serverseitige Allowlist `UNLIMITED_EMAILS` ihn explizit konfiguriert.
+Der Sonderzugriff für das Eigentümerprofil ist absichtlich auf genau ein explizit festgelegtes Konto begrenzt; beliebige E-Mail-Adressen oder eine frei befüllbare Produktions-Allowlist dürfen keine Kauf-, Vorschau- oder Verifikationssperren umgehen.
 
-**Why:** Ein fest eingebauter Standard umgeht in Produktion alle Sperren für dieses Konto und lässt Fehler beim Testen wie eine funktionierende Kaufprüfung aussehen.
+**Why:** Eine zu breite Allowlist hatte in Produktion alle Gratis-Konten wie Power-Konten behandelt und damit die Sperren unwirksam gemacht.
 
-**How to apply:** Bei neuen Berechtigungsprüfungen eine leere Allowlist als Standard verwenden. Testkonten müssen die normale Gratis- und Käuferlogik durchlaufen, sofern keine bewusste Server-Konfiguration gesetzt ist.
+**How to apply:** Neue Berechtigungsprüfungen müssen dieselbe zentrale Owner-Prüfung verwenden. Alle anderen Konten müssen die normale Gratis- und Käuferlogik durchlaufen.

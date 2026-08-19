@@ -14,6 +14,8 @@ export const profilesTable = pgTable("profiles", {
   stripeCustomerId: text("stripe_customer_id"),
   // Null = email not yet confirmed (accounts created before this feature were backfilled)
   emailVerifiedAt: timestamp("email_verified_at"),
+  // Set when a free user's first AI assessment has completed successfully.
+  firstAnalysisAt: timestamp("first_analysis_at"),
   savedProfile: jsonb("saved_profile"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
