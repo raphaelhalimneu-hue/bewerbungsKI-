@@ -15,7 +15,8 @@
     "language": "Language",
     "toggleTheme": "Toggle light/dark mode",
     "remaining": "{{remaining}} of {{limit}} applications left",
-    "lowRemainingHint": "Almost used up – get more applications now"
+    "lowRemainingHint": "Almost used up – get more applications now",
+    "documentsLockedHint": "Available again after purchase"
   },
   "home": {
     "badge": "🚀 CV + cover letter in 3 minutes",

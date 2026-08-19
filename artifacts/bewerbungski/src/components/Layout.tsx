@@ -130,7 +130,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     }
                   }}
                 >
-                  {item.icon} {item.label} {item.locked && <FiLock size={13} style={{ marginLeft: "auto" }} />}
+                  {item.icon} {item.label}
+                  {item.locked && item.href === "/documents" && (
+                    <span className="text-[11px] text-[var(--muted)] ml-auto">{t("nav.documentsLockedHint")}</span>
+                  )}
+                  {item.locked && <FiLock size={13} />}
                 </button>
               </Link>
             ))}
@@ -163,7 +167,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   }
                 }}
               >
-                {item.icon} {item.label} {item.locked && <FiLock size={13} style={{ marginLeft: "auto" }} />}
+                {item.icon} {item.label}
+                {item.locked && item.href === "/documents" && (
+                  <span className="text-[11px] text-[var(--muted)] ml-auto">{t("nav.documentsLockedHint")}</span>
+                )}
+                {item.locked && <FiLock size={13} />}
               </button>
             </Link>
           ))}

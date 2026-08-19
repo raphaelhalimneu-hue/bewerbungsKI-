@@ -15,7 +15,8 @@
     "language": "Dil",
     "toggleTheme": "Açık/koyu modu değiştir",
     "remaining": "{{limit}} başvurudan {{remaining}} tanesi kaldı",
-    "lowRemainingHint": "Neredeyse bitti – hemen daha fazla başvuru edinin"
+    "lowRemainingHint": "Neredeyse bitti – hemen daha fazla başvuru edinin",
+    "documentsLockedHint": "Satın aldıktan sonra tekrar kullanılabilir"
   },
   "home": {
     "badge": "🚀 CV + ön yazı 3 dakikada",

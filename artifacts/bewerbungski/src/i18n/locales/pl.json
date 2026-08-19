@@ -15,7 +15,8 @@
     "language": "Język",
     "toggleTheme": "Przełącz tryb jasny/ciemny",
     "remaining": "Pozostało {{remaining}} z {{limit}} aplikacji",
-    "lowRemainingHint": "Prawie wyczerpane – zdobądź więcej aplikacji"
+    "lowRemainingHint": "Prawie wyczerpane – zdobądź więcej aplikacji",
+    "documentsLockedHint": "Ponownie dostępne po zakupie"
   },
   "home": {
     "badge": "🚀 CV + list motywacyjny w 3 minuty",

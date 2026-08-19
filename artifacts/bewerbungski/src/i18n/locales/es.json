@@ -15,7 +15,8 @@
     "language": "Idioma",
     "toggleTheme": "Cambiar modo claro/oscuro",
     "remaining": "Te quedan {{remaining}} de {{limit}} candidaturas",
-    "lowRemainingHint": "Casi agotado – consigue más candidaturas"
+    "lowRemainingHint": "Casi agotado – consigue más candidaturas",
+    "documentsLockedHint": "Disponible de nuevo después de la compra"
   },
   "home": {
     "badge": "🚀 CV + carta de presentación en 3 minutos",
