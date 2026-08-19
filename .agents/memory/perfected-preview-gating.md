@@ -16,3 +16,11 @@ Ein Gratisdokument mit irgendeiner gespeicherten Perfektionierung muss gesperrt 
 **Why:** Ältere Clients oder unterbrochene Writes können einen Volltext speichern, ohne den zugehörigen Sperrmarker zuverlässig zu hinterlassen. Eine reine Abfrage über die aktuelle Verknüpfung würde dann den Volltext als vermeintlichen Originaltext ausliefern.
 
 **How to apply:** Bei der Dokumentauslieferung für Gratisnutzer auch vorhandene Perfektionierungsnachweise des Dokuments und ältere Marker berücksichtigen; immer die sichere Vorschau ausliefern, nie den gespeicherten Volltext.
+
+## Aktive Kaufberechtigung
+
+Ein veraltetes Premium-Kennzeichen ohne aktives Guthaben ist keine Kaufberechtigung und darf keine Volltexte freigeben.
+
+**Why:** Abgebrochene oder historische Zahlungszustände können das alte Kennzeichen zurücklassen. Es ist kein belastbarer Nachweis dafür, dass ein Konto aktuell ein Paket besitzt.
+
+**How to apply:** Zugriffsentscheidungen für perfektionierte Inhalte, Generierung und die Kontoanzeige ausschließlich aus aktivem Guthaben oder dem Power-Zugang ableiten; alte Kennzeichen höchstens als Migrationshilfe behandeln.

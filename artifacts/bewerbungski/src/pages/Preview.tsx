@@ -272,6 +272,14 @@ export default function Preview() {
     void refetchDocument();
   }, [(doc as any)?.id, (doc as any)?.perfected_locked, freeUser, !!pAuth, refetchDocument]);
 
+  // Do not keep a document response that was cached before its entitlement was
+  // corrected. Free accounts always refresh this sensitive view from the
+  // server, which is the source of truth for preview redaction.
+  useEffect(() => {
+    if (!doc || !pAuth || !freeUser) return;
+    void refetchDocument();
+  }, [(doc as any)?.id, freeUser, !!pAuth, refetchDocument]);
+
   // Scale cv-sheet to fit narrow mobile viewports using zoom (preserves touch targets).
   // While editing, show at 100% with horizontal scroll — mobile browsers misplace the
   // text caret inside zoomed contentEditable areas.

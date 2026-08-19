@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, profilesTable, documentsTable } from "@workspace/db";
 import { and, count, eq, gte } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isUnlimitedEmail } from "../lib/freeLock";
+import { hasPaidEntitlement, isUnlimitedEmail } from "../lib/freeLock";
 
 const router = Router();
 
@@ -38,6 +38,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
     const unlimited = isUnlimitedEmail(req.userEmail);
+    const paid = hasPaidEntitlement(profile);
     if (!unlimited && !profile?.emailVerifiedAt) {
       // New signups must confirm their email address before generating
       res.status(403).json({ error: "email_unverified" });
@@ -58,7 +59,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         res.status(429).json({ error: "daily_limit_reached" });
         return;
       }
-    } else if (!unlimited && (credits > 0 || profile?.isPremium)) {
+    } else if (!unlimited && paid) {
       const limit = 1 + credits; // buyers: 10 per purchased package
       if (value >= limit) {
         res.status(403).json({ error: "premium_limit_reached" });

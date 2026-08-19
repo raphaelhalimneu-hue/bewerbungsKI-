@@ -201,6 +201,30 @@ describe("perfected text preview gating", () => {
     expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
   });
 
+  it("does not treat a stale premium marker without credits as paid access", async () => {
+    state.profile.isPremium = true;
+    state.profile.isUnlimited = false;
+    state.profile.credits = 0;
+
+    const response = await request(app)
+      .post("/api/perfect")
+      .set(auth)
+      .send({
+        letterText: "Ausgangstext ".repeat(20),
+        profileText: "Profiltext ".repeat(10),
+        docType: "letter",
+        language: "de",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.locked).toBe(true);
+    expect(response.body.preview).toContain("[…]");
+    expect(response.body).not.toHaveProperty("letter");
+    expect(response.body).not.toHaveProperty("profile");
+    expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
+    expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
+  });
+
   it("grants unlimited access only to the exact owner profile", async () => {
     const response = await request(app)
       .post("/api/perfect")
@@ -309,6 +333,45 @@ describe("perfected text preview gating", () => {
     expect(paidResponse.body.perfected_profile).toBeNull();
     expect(paidResponse.body.cover_letter).toBe(FULL_TEXT);
     expect(paidResponse.body.profile_data.cv_json.profile).toBe(FULL_PROFILE);
+  });
+
+  it("redacts a perfected profile that was previously saved into the CV fields", async () => {
+    const documentId = "66666666-6666-4666-8666-666666666666";
+    state.documents = [{
+      id: documentId,
+      userId: "user-1",
+      name: "Legacy CV-Volltext",
+      template: "modern",
+      cvHtml: `<div><p>${FULL_PROFILE}</p><p>Originale Berufserfahrung</p></div>`,
+      coverLetter: FULL_TEXT,
+      perfectedLetter: FULL_TEXT,
+      perfectedCvHtml: null,
+      perfectedGenerationId: "11111111-1111-4111-8111-111111111111",
+      profileData: { cv_json: { profile: FULL_PROFILE, experience: [] } },
+      jobTitle: null,
+      jobCompany: null,
+      createdAt: new Date(),
+    }];
+    state.generations = [{
+      id: "11111111-1111-4111-8111-111111111111",
+      userId: "user-1",
+      documentId,
+      documentType: "letter",
+      fullText: FULL_TEXT,
+      previewText: "Sichere Anschreiben-Vorschau […]",
+      fullProfile: FULL_PROFILE,
+      previewProfile: "Sichere Profil-Vorschau […]",
+      changes: [],
+      createdAt: new Date(),
+    }];
+
+    const response = await request(app).get(`/api/documents/${documentId}`).set(auth);
+
+    expect(response.status).toBe(200);
+    expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
+    expect(response.body.cv_html).toContain("Sichere Profil-Vorschau […]");
+    expect(response.body.cv_json.profile).toBe("Sichere Profil-Vorschau […]");
+    expect(response.body.profile_data.cv_json.profile).toBe("Sichere Profil-Vorschau […]");
   });
 
   it("keeps legacy documents readable without leaking their perfected full text", async () => {

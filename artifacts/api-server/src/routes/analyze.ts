@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isEmailUnverified, isFreeAccount, isFreeQuotaLocked, isUnlimitedEmail } from "../lib/freeLock";
+import { hasPaidEntitlement, isEmailUnverified, isFreeAccount, isFreeQuotaLocked, isUnlimitedEmail } from "../lib/freeLock";
 import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -294,7 +294,7 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
     let reservedPowerUse = false;
     if (!unlimitedP) {
       const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
-      const cap = prof?.isUnlimited ? 50 : (prof?.isPremium || (prof?.credits ?? 0) > 0) ? (prof?.credits ?? 0) : 0;
+       const cap = prof?.isUnlimited ? 50 : hasPaidEntitlement(prof) ? (prof?.credits ?? 0) : 0;
       if (prof && cap > 0) {
       const reserved = await db
         .update(profilesTable)

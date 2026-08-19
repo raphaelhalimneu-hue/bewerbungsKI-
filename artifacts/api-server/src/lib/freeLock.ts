@@ -14,6 +14,18 @@ export function isUnlimitedEmail(email?: string): boolean {
 }
 
 /**
+ * A paid entitlement requires an active package balance or the Power package.
+ * `isPremium` alone is deliberately not sufficient: it is a legacy marker
+ * that can survive an incomplete checkout or an exhausted/old account.
+ */
+export function hasPaidEntitlement(profile?: {
+  credits?: number | null;
+  isUnlimited?: boolean | null;
+} | null): boolean {
+  return Boolean(profile?.isUnlimited || (profile?.credits ?? 0) > 0);
+}
+
+/**
  * Atomically consume one print for a free account. Returns true while the
  * limit is not yet reached (and counts it), false when it is used up.
  */
@@ -40,7 +52,7 @@ export async function getPrintCounts(userId: string, docId: string): Promise<Rec
 }
 
 /**
- * True when the account has never purchased (no premium, no credits).
+ * True when the account has no active paid entitlement.
  */
 export async function isFreeAccount(userId: string, email?: string): Promise<boolean> {
   if (isUnlimitedEmail(email)) return false;
@@ -48,7 +60,7 @@ export async function isFreeAccount(userId: string, email?: string): Promise<boo
     .select()
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
-  return !(profile?.isPremium || (profile?.credits ?? 0) > 0);
+  return !hasPaidEntitlement(profile);
 }
 
 /** True when the account still has to confirm its email address (new signups). */
@@ -67,7 +79,7 @@ export async function isFreeQuotaLocked(userId: string, email?: string): Promise
     .select()
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
-  if (profile?.isPremium || (profile?.credits ?? 0) > 0) return false;
+  if (hasPaidEntitlement(profile)) return false;
 
   const [{ value }] = await db
     .select({ value: count() })

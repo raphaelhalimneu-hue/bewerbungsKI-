@@ -169,18 +169,37 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       ? (pendingGeneration.previewProfile || createPerfectedPreview(pendingGeneration.fullProfile))
       : null;
     const pd = (doc.profileData as any) || {};
+    // A stale premium marker could previously let the browser save the
+    // perfected profile straight into the original CV fields. When that
+    // account is now correctly classified as free, replace that stored
+    // perfected fragment before serializing the document. The complete
+    // profile must not survive in `cv_html`, `cv_json` or `profile_data`.
+    const visibleCvJson = visiblePerfectedProfile && pendingGeneration?.fullProfile && pd.cv_json
+      ? {
+          ...pd.cv_json,
+          profile: String(pd.cv_json.profile || "").trim() === pendingGeneration.fullProfile
+            ? visiblePerfectedProfile
+            : pd.cv_json.profile,
+        }
+      : (pd.cv_json ?? null);
+    const visibleCvHtml = visiblePerfectedProfile && pendingGeneration?.fullProfile
+      ? replaceProfileText(doc.cvHtml, pendingGeneration.fullProfile, visiblePerfectedProfile)
+      : doc.cvHtml;
+    const visibleProfileData = visibleCvJson !== pd.cv_json
+      ? { ...pd, cv_json: visibleCvJson }
+      : doc.profileData;
     res.json({
       id: doc.id,
       name: doc.name,
       template: doc.template,
-      cv_html: doc.cvHtml,
-      cv_json: pd.cv_json ?? null,
+      cv_html: visibleCvHtml,
+      cv_json: visibleCvJson,
        // A recovered legacy generation may have been written into cover_letter
        // before preview gating existed. Never send that matching full text to a
        // free account; the dedicated perfected_letter field above is its safe
        // replacement.
        cover_letter: hasLockedGeneration ? null : doc.coverLetter,
-      profile_data: doc.profileData,
+       profile_data: visibleProfileData,
       job_title: doc.jobTitle,
       job_company: doc.jobCompany,
       perfected_letter: visiblePerfectedLetter,
