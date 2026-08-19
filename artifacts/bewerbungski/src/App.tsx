@@ -83,17 +83,16 @@ function FreeFeatureGate({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    // A profile refresh may complete immediately after a successful save. By
-    // then the user can already be on /documents or /preview, which must stay
-    // read-only but visible. Only redirect while still on the gated route.
-    if (isLocked && (location === "/wizard" || location.startsWith("/documents/") || location === "/scanner" || location === "/import")) {
+    if (isLocked && (location === "/wizard" || location === "/documents" || location.startsWith("/documents/") || location.startsWith("/preview/") || location === "/scanner" || location === "/import")) {
       navigate("/pricing");
     }
   }, [isLocked, location, navigate]);
 
   const isCurrentRouteGated =
     location === "/wizard" ||
+    location === "/documents" ||
     location.startsWith("/documents/") ||
+    location.startsWith("/preview/") ||
     location === "/scanner" ||
     location === "/import";
 
@@ -104,10 +103,10 @@ function RestrictedWizard() {
   return <FreeFeatureGate><Wizard /></FreeFeatureGate>;
 }
 function RestrictedDocuments() {
-  return <Documents />;
+  return <FreeFeatureGate><Documents /></FreeFeatureGate>;
 }
 function RestrictedPreview() {
-  return <Preview />;
+  return <FreeFeatureGate><Preview /></FreeFeatureGate>;
 }
 function RestrictedEditor() {
   return <FreeFeatureGate><CVEditor /></FreeFeatureGate>;
