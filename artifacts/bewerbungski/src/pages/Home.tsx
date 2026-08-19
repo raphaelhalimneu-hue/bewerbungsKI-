@@ -581,6 +581,12 @@ export default function Home() {
               loading="lazy"
               style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
             />
+            <img
+              src="/facebook-comments.jpg"
+              alt={t("home.socialProofCommentsAlt")}
+              loading="lazy"
+              style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
+            />
           </div>
         </div>
       </section>
