@@ -98,3 +98,17 @@ uri = "file://bewerbungski-code.zip"
 type = "unspecified"
 title = "BewerbungsKI – Quellcode"
 description = "Kompletter Projektcode ohne node_modules (1,1 MB). Enthält API-Server, Web-App, alle Routen, i18n-Dateien und Tests."
+
+[[outputs]]
+id = "n7iu71KYMeXg_hD_Vt7Ti"
+uri = "file://attached_assets/facebook-social-proof-anonymized.jpg"
+type = "image"
+title = "Facebook-Screenshot anonymisiert"
+description = "Alle sichtbaren Gesichter und Profilbilder wurden unkenntlich gemacht."
+
+[[outputs]]
+id = "x7M17tXUl0T6gVBa4mPoG"
+uri = "file://attached_assets/google-reactions-anonymized.jpg"
+type = "image"
+title = "Google-Reaktionen anonymisiert"
+description = "Alle sichtbaren Gesichter und Profilbilder wurden unkenntlich gemacht."
