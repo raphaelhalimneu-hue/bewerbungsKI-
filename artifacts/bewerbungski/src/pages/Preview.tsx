@@ -626,7 +626,15 @@ export default function Preview() {
                     <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 10 }}>
                       🔒 {t("preview.previewOnly")}
                     </div>
-                    {perfectedProfilePreview ? (
+                    {(doc as any)?.perfected_cv_html ? (
+                      <div
+                        onCopy={blockCopy}
+                        onCut={blockCopy}
+                        onContextMenu={e => e.preventDefault()}
+                        dangerouslySetInnerHTML={{ __html: (doc as any).perfected_cv_html }}
+                        style={{ fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
+                      />
+                    ) : perfectedProfilePreview ? (
                       <>
                         <div style={{ fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>
                           {t("preview.profilePreview")}
