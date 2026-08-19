@@ -546,6 +546,45 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── SOCIAL PROOF ── */}
+      <section style={{ marginBottom: 64 }} aria-labelledby="social-proof-title">
+        <div style={{
+          maxWidth: 920, margin: "0 auto", padding: "28px 20px 24px",
+          background: "var(--bg2)", border: "1px solid var(--border)",
+          borderRadius: 18, textAlign: "center",
+        }}>
+          <h2 id="social-proof-title" style={{
+            fontFamily: "var(--fd)", fontSize: "clamp(22px,3.5vw,30px)",
+            fontWeight: 700, marginBottom: 10, letterSpacing: "-.01em",
+          }}>
+            {t("home.socialProofTitle")}
+          </h2>
+          <p style={{ color: "var(--brand)", fontWeight: 700, fontSize: 16, marginBottom: 6 }}>
+            {t("home.socialProofText")}
+          </p>
+          <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 22 }}>
+            {t("home.socialProofNote")}
+          </p>
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: 16, alignItems: "start",
+          }}>
+            <img
+              src="/facebook-social-proof.jpg"
+              alt={t("home.socialProofFacebookAlt")}
+              loading="lazy"
+              style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
+            />
+            <img
+              src="/google-reactions.jpg"
+              alt={t("home.socialProofGoogleAlt")}
+              loading="lazy"
+              style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ── BEFORE / AFTER ── */}
       <section style={{ marginBottom: 64 }}>
         <h2 style={{
