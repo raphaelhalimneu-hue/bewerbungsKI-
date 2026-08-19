@@ -570,12 +570,6 @@ export default function Home() {
             gap: 16, alignItems: "start",
           }}>
             <img
-              src="/facebook-social-proof.jpg"
-              alt={t("home.socialProofFacebookAlt")}
-              loading="lazy"
-              style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }}
-            />
-            <img
               src="/facebook-comments.jpg"
               alt={t("home.socialProofCommentsAlt")}
               loading="lazy"
