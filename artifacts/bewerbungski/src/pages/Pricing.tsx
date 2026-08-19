@@ -1,4 +1,5 @@
 import { Layout } from "../components/Layout";
+import { ExampleCVShowcase } from "./Home";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -180,9 +181,18 @@ export default function Pricing() {
           <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 22 }}>{t("home.socialProofNote")}</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16, alignItems: "start" }}>
             <img src="/facebook-comments.jpg" alt={t("home.socialProofCommentsAlt")} loading="lazy" style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }} />
-            <img src="/facebook-ad.jpg" alt={t("home.socialProofCommentsAlt")} loading="lazy" style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }} />
             <img src="/google-reactions.jpg" alt={t("home.socialProofCommentsAlt")} loading="lazy" style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }} />
           </div>
+        </section>
+
+        <section style={{ maxWidth: 920, margin: "44px auto 0" }}>
+          <h2 style={{ fontFamily: "var(--fd)", fontSize: "clamp(22px,3.5vw,30px)", fontWeight: 700, marginBottom: 12, letterSpacing: "-.01em", textAlign: "center" }}>
+            {t("home.ba.title")}
+          </h2>
+          <p style={{ textAlign: "center", color: "var(--muted)", fontSize: 14, marginBottom: 28 }}>
+            {t("home.ba.subtitle")}
+          </p>
+          <ExampleCVShowcase />
         </section>
 
         <p style={{ textAlign: "center", marginTop: 28, fontSize: 13, color: "var(--muted)" }}>
