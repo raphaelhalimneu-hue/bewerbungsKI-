@@ -7,24 +7,11 @@ import { sendVerificationEmail } from "../lib/email";
 
 const router = Router();
 
-function isUnlimited(email?: string): boolean {
-  return (process.env.UNLIMITED_EMAILS || "")
-    .toLowerCase()
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .includes((email || "").toLowerCase());
-}
-
 /** POST /verify/send — email a 6-digit code (60s resend cooldown, 15min validity). */
 router.post("/verify/send", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.userId!;
     const email = req.userEmail || "";
-    if (isUnlimited(email)) {
-      res.json({ verified: true });
-      return;
-    }
     let [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, userId));
     if (!profile) {
       [profile] = await db.insert(profilesTable).values({ userId, email }).returning();

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, profilesTable, documentsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isUnlimitedEmail } from "../lib/freeLock";
 
 const router = Router();
 
@@ -27,17 +28,17 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
 
-    const unlimited = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(value => value.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
+    const unlimited = isUnlimitedEmail(req.userEmail);
     res.json({
       email: profile.email,
-      is_premium: unlimited ? true : profile.isPremium,
-      is_unlimited: unlimited ? true : profile.isUnlimited,
+      is_premium: unlimited || profile.isPremium,
+      is_unlimited: unlimited || profile.isUnlimited,
       credits: profile.credits,
       // A free account receives one complete application. Every further app
       // action is purchase-gated; buyers keep their package limit.
       document_limit: unlimited || profile.isUnlimited ? 999999 : (!profile.isPremium && profile.credits === 0) ? 1 : 1 + profile.credits,
       documents_count: Number(docCount) || 0,
-      email_verified: unlimited ? true : !!profile.emailVerifiedAt,
+      email_verified: unlimited || !!profile.emailVerifiedAt,
     });
   } catch (err) {
     req.log.error({ err }, "GET /me error");

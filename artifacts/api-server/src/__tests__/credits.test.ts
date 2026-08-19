@@ -16,12 +16,13 @@ type ProfileRow = {
   userId: string;
   email: string;
   isPremium: boolean;
+  isUnlimited?: boolean;
   credits: number;
   emailVerifiedAt?: Date | null;
 };
 
 const state = {
-  profile: { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0, emailVerifiedAt: new Date() } as ProfileRow,
+  profile: { userId: "user-1", email: "t@example.com", isPremium: false, isUnlimited: false, credits: 0, emailVerifiedAt: new Date() } as ProfileRow,
   docCount: 0,
   processedEvents: new Set<string>(),
 };
@@ -165,8 +166,14 @@ function postGenerate() {
     .send({ type: "cv", systemPrompt: "s", userPrompt: "u" });
 }
 
+function getMe() {
+  return request(app)
+    .get("/api/me")
+    .set("Authorization", "Bearer test-token");
+}
+
 beforeEach(() => {
-  state.profile = { userId: "user-1", email: "t@example.com", isPremium: false, credits: 0, emailVerifiedAt: new Date() };
+  state.profile = { userId: "user-1", email: "t@example.com", isPremium: false, isUnlimited: false, credits: 0, emailVerifiedAt: new Date() };
   state.docCount = 0;
   state.processedEvents.clear();
 });
@@ -184,6 +191,28 @@ describe("quota: 1 free + credits", () => {
     const res = await postGenerate();
     expect(res.status).toBe(403);
     expect(res.body.error).toBe("free_limit_reached");
+  });
+
+  it("does not let a legacy email allowlist bypass free limits", async () => {
+    const previous = process.env.UNLIMITED_EMAILS;
+    process.env.UNLIMITED_EMAILS = "t@example.com";
+    try {
+      const profile = await getMe();
+      expect(profile.status).toBe(200);
+      expect(profile.body).toMatchObject({
+        is_premium: false,
+        is_unlimited: false,
+        document_limit: 1,
+      });
+
+      state.docCount = 1;
+      const blocked = await postGenerate();
+      expect(blocked.status).toBe(403);
+      expect(blocked.body.error).toBe("free_limit_reached");
+    } finally {
+      if (previous === undefined) delete process.env.UNLIMITED_EMAILS;
+      else process.env.UNLIMITED_EMAILS = previous;
+    }
   });
 
   it("premium user with credits under limit passes", async () => {

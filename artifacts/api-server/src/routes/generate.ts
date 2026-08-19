@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, profilesTable, documentsTable } from "@workspace/db";
 import { and, count, eq, gte } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isUnlimitedEmail } from "../lib/freeLock";
 
 const router = Router();
 
@@ -36,7 +37,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
     const credits = profile?.credits ?? 0;
-    const unlimited = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
+    const unlimited = isUnlimitedEmail(req.userEmail);
     if (!unlimited && !profile?.emailVerifiedAt) {
       // New signups must confirm their email address before generating
       res.status(403).json({ error: "email_unverified" });

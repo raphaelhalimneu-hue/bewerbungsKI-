@@ -6,14 +6,11 @@ export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
 /** Free accounts: max 1 print per part (CV / letter) per document. */
 export const FREE_PRINT_LIMIT = 1;
 const freeApplicationCreateLocks = new Map<string, Promise<void>>();
+const UNLIMITED_PROFILE_EMAIL = "halimraphael9@gmail.com";
 
-function isUnlimitedEmail(email?: string): boolean {
-  const allowlist = (process.env.UNLIMITED_EMAILS || "")
-    .toLowerCase()
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-  return allowlist.includes((email || "").toLowerCase());
+/** Only the explicitly requested owner profile receives unlimited access. */
+export function isUnlimitedEmail(email?: string): boolean {
+  return (email || "").trim().toLowerCase() === UNLIMITED_PROFILE_EMAIL;
 }
 
 /**
@@ -47,7 +44,6 @@ export async function getPrintCounts(userId: string, docId: string): Promise<Rec
  */
 export async function isFreeAccount(userId: string, email?: string): Promise<boolean> {
   if (isUnlimitedEmail(email)) return false;
-
   const [profile] = await db
     .select()
     .from(profilesTable)
@@ -67,7 +63,6 @@ export async function isEmailUnverified(userId: string, email?: string): Promise
 
 export async function isFreeQuotaLocked(userId: string, email?: string): Promise<boolean> {
   if (isUnlimitedEmail(email)) return false;
-
   const [profile] = await db
     .select()
     .from(profilesTable)

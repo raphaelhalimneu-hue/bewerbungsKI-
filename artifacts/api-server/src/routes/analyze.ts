@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isEmailUnverified, isFreeAccount, isFreeQuotaLocked } from "../lib/freeLock";
+import { isEmailUnverified, isFreeAccount, isFreeQuotaLocked, isUnlimitedEmail } from "../lib/freeLock";
 import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -122,7 +122,7 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
-    const unlimitedA = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
+    const unlimitedA = isUnlimitedEmail(req.userEmail);
     if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
@@ -272,7 +272,6 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
         return;
       }
     }
-    const unlimitedP = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
       return;
@@ -281,6 +280,7 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
+    const unlimitedP = isUnlimitedEmail(req.userEmail);
     if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
@@ -295,16 +295,16 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
       const cap = prof?.isUnlimited ? 50 : (prof?.isPremium || (prof?.credits ?? 0) > 0) ? (prof?.credits ?? 0) : 0;
       if (prof && cap > 0) {
-        const reserved = await db
-          .update(profilesTable)
-          .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
-          .where(and(eq(profilesTable.userId, req.userId!), lt(profilesTable.perfectCount, cap)))
-          .returning({ perfectCount: profilesTable.perfectCount });
-        if (reserved.length === 0) {
-          res.status(429).json({ error: "perfect_limit_reached" });
-          return;
-        }
-        reservedPowerUse = true;
+      const reserved = await db
+        .update(profilesTable)
+        .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
+        .where(and(eq(profilesTable.userId, req.userId!), lt(profilesTable.perfectCount, cap)))
+        .returning({ perfectCount: profilesTable.perfectCount });
+      if (reserved.length === 0) {
+        res.status(429).json({ error: "perfect_limit_reached" });
+        return;
+      }
+      reservedPowerUse = true;
       }
     }
     const releasePowerUse = async () => {
