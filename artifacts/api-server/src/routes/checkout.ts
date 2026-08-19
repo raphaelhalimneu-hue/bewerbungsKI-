@@ -22,10 +22,16 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
 
     const appUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
-    // Two one-time packages: premium (10 applications, 9.99) and power (50 applications, 29.90)
-    const plan = (req.body as { plan?: string })?.plan === "power" ? "power" : "premium";
+    // One-time packages: single (1 application, 2.99), starter (5, 9.99),
+    // premium (10, 14.99), and power (unlimited, 29.90).
+    const requestedPlan = (req.body as { plan?: string })?.plan;
+    const plan = requestedPlan === "single" || requestedPlan === "starter" || requestedPlan === "power"
+      ? requestedPlan
+      : "premium";
     const PLANS = {
-      premium: { amount: 999, name: "BewerbungsKI Premium", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
+      single: { amount: 299, credits: 1, name: "BewerbungsKI Einzelbewerbung", description: "1 Bewerbung – Einmalzahlung, kein Abo" },
+      starter: { amount: 999, credits: 5, name: "BewerbungsKI 5er-Paket", description: "5 Bewerbungen – Einmalzahlung, kein Abo" },
+      premium: { amount: 1499, credits: 10, name: "BewerbungsKI 10er-Paket", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
       power: { amount: 2990, name: "BewerbungsKI Power", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
     } as const;
     const cfg = PLANS[plan];
@@ -113,7 +119,7 @@ router.post("/webhook/stripe", async (req, res) => {
           // Upsert so a missing profile row can never swallow a paid purchase.
           const email = session.customer_details?.email || "";
           if (session.metadata?.plan === "power") {
-            // Power: unlimited applications, perfect capped separately
+            // Power: unlimited applications, perfect capped separately.
             await tx
               .insert(profilesTable)
               .values({ userId, email, isPremium: true, isUnlimited: true })
@@ -124,12 +130,12 @@ router.post("/webhook/stripe", async (req, res) => {
           } else {
             await tx
               .insert(profilesTable)
-              .values({ userId, email, isPremium: true, credits: 10 })
+              .values({ userId, email, isPremium: true, credits: PLANS[session.metadata?.plan === "single" || session.metadata?.plan === "starter" || session.metadata?.plan === "premium" ? session.metadata.plan : "premium"].credits })
               .onConflictDoUpdate({
                 target: profilesTable.userId,
                 set: {
                   isPremium: true,
-                  credits: sql`${profilesTable.credits} + 10`,
+                  credits: sql`${profilesTable.credits} + ${PLANS[session.metadata?.plan === "single" || session.metadata?.plan === "starter" || session.metadata?.plan === "premium" ? session.metadata.plan : "premium"].credits}`,
                 },
               });
           }
