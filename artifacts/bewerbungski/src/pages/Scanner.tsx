@@ -71,7 +71,8 @@ export default function Scanner() {
   const [wizardBusy, setWizardBusy] = useState(false);
   const cvInputRef = useRef<HTMLTextAreaElement>(null);
   const perfectedTextRef = useRef<HTMLDivElement>(null);
-  const freeUser = !!p && !p.is_premium && (p.credits || 0) === 0;
+  // Match the server entitlement rule; a stale is_premium flag is not payment.
+  const freeUser = !!p && !p.is_unlimited && Number(p.credits || 0) <= 0;
   const perfectedCopyLocked = perfectedLocked && !!perfectedText;
 
   function blockCopy(e: ClipboardEvent<HTMLElement>) {

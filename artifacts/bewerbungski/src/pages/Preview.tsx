@@ -40,7 +40,9 @@ export default function Preview() {
   const [perfectedProfilePreview, setPerfectedProfilePreview] = useState<string | null>(null);
   const { profile } = useAuth();
   const pAuth = profile as any;
-  const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
+  // The API treats stale is_premium markers as unpaid. Mirror that rule here
+  // so an old client status can never make a perfected full text visible.
+  const freeUser = !!pAuth && !pAuth.is_unlimited && Number(pAuth.credits || 0) <= 0;
   // Free accounts can read their saved document, but editing, download and
   // print are paid-only. The server enforces the same rules.
   const docxLocked = freeUser;
