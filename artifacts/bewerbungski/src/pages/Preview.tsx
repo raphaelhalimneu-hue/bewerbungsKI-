@@ -54,6 +54,7 @@ export default function Preview() {
   // edited versions. Paid users keep unrestricted clipboard access.
   const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
   const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
+  const showLockedCvPreview = freeUser && perfectedServerLocked;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -606,23 +607,58 @@ export default function Preview() {
                   {editLocked ? "🔒 " : ""}{editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
                 </button>
               </div>
-              <div className="cv-wrap" ref={cvWrapRef}>
-                <div
-                  ref={cvRef}
-                  className="cv-sheet"
-                  contentEditable={editingCv}
-                  suppressContentEditableWarning
-                  onInput={() => { if (editingCv) setCvManuallyEdited(true); }}
-                  onCopy={cvCopyLocked ? blockCopy : undefined}
-                  onCut={cvCopyLocked ? blockCopy : undefined}
-                  onContextMenu={cvCopyLocked ? e => e.preventDefault() : undefined}
-                  style={{
-                    outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none",
-                    userSelect: cvCopyLocked ? "none" : undefined,
-                    WebkitUserSelect: cvCopyLocked ? "none" : undefined,
-                  }}
-                />
-              </div>
+              {showLockedCvPreview ? (
+                <div className="cv-wrap">
+                  <div className="cv-sheet" style={{ padding: "32px 28px", minHeight: 280, position: "relative", overflow: "hidden" }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 10 }}>
+                      🔒 {t("preview.previewOnly")}
+                    </div>
+                    {perfectedProfilePreview ? (
+                      <>
+                        <div style={{ fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>
+                          {t("preview.profilePreview")}
+                        </div>
+                        <div
+                          onCopy={blockCopy}
+                          onCut={blockCopy}
+                          onContextMenu={e => e.preventDefault()}
+                          style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
+                        >
+                          {perfectedProfilePreview}
+                        </div>
+                      </>
+                    ) : (
+                      <p style={{ color: "var(--muted)", lineHeight: 1.6, margin: 0 }}>
+                        {t("preview.unlockPerfectedHint")}
+                      </p>
+                    )}
+                    <div style={{ height: 42, margin: "0 -28px -32px", background: "linear-gradient(to bottom, transparent, #fff)" }} />
+                    <div style={{ textAlign: "center", marginTop: 10 }}>
+                      <button className="btn btn-p" onClick={() => navigate("/pricing")}>
+                        🔒 {t("preview.unlockPerfected")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="cv-wrap" ref={cvWrapRef}>
+                  <div
+                    ref={cvRef}
+                    className="cv-sheet"
+                    contentEditable={editingCv}
+                    suppressContentEditableWarning
+                    onInput={() => { if (editingCv) setCvManuallyEdited(true); }}
+                    onCopy={cvCopyLocked ? blockCopy : undefined}
+                    onCut={cvCopyLocked ? blockCopy : undefined}
+                    onContextMenu={cvCopyLocked ? e => e.preventDefault() : undefined}
+                    style={{
+                      outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none",
+                      userSelect: cvCopyLocked ? "none" : undefined,
+                      WebkitUserSelect: cvCopyLocked ? "none" : undefined,
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {!((doc as any)?.cover_letter || editedLetter) && (
