@@ -64,9 +64,12 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         return;
       }
     } else if (!unlimited) {
-      // Free accounts: unlimited creation on screen (policy 2026-08-19) with a
-      // silent daily fair-use cap protecting the AI budget; downloads/prints
-      // stay paid.
+      // One complete application is free. Once it is saved, all further
+      // generation is purchase-gated.
+      if (Number(value) >= 1) {
+        res.status(403).json({ error: "free_limit_reached" });
+        return;
+      }
       if (!checkDailyGenQuota(userId)) {
         res.status(429).json({ error: "daily_limit_reached" });
         return;

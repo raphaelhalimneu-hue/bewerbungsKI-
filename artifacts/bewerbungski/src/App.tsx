@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import i18n, { updateLocaleHead } from "./i18n";
 import { appBase, appPath, pathLang, pathForLang } from "./lib/basePath";
 import NotFound from "@/pages/not-found";
@@ -65,16 +65,60 @@ function LocaleHeadSync() {
   return null;
 }
 
+/**
+ * Free accounts receive one complete application. Once it has been saved,
+ * application surfaces are no longer mounted, so they cannot briefly fetch
+ * protected data while the server remains the authoritative enforcement.
+ */
+function FreeFeatureGate({ children }: { children: React.ReactNode }) {
+  const { user, profile } = useAuth();
+  const [, navigate] = useLocation();
+  const p = profile as any;
+  const isLocked = Boolean(
+    user &&
+    p &&
+    !p.is_premium &&
+    !p.is_unlimited &&
+    Number(p.credits || 0) === 0 &&
+    Number(p.documents_count || 0) >= 1,
+  );
+
+  useEffect(() => {
+    if (isLocked) navigate("/pricing");
+  }, [isLocked, navigate]);
+
+  return isLocked ? null : <>{children}</>;
+}
+
+function RestrictedWizard() {
+  return <FreeFeatureGate><Wizard /></FreeFeatureGate>;
+}
+function RestrictedDocuments() {
+  return <FreeFeatureGate><Documents /></FreeFeatureGate>;
+}
+function RestrictedPreview() {
+  return <FreeFeatureGate><Preview /></FreeFeatureGate>;
+}
+function RestrictedEditor() {
+  return <FreeFeatureGate><CVEditor /></FreeFeatureGate>;
+}
+function RestrictedScanner() {
+  return <FreeFeatureGate><Scanner /></FreeFeatureGate>;
+}
+function RestrictedImport() {
+  return <FreeFeatureGate><ImportPage /></FreeFeatureGate>;
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/wizard" component={Wizard} />
-      <Route path="/documents" component={Documents} />
-      <Route path="/preview/:id" component={Preview} />
-      <Route path="/documents/:id/edit" component={CVEditor} />
-      <Route path="/scanner" component={Scanner} />
-      <Route path="/import" component={ImportPage} />
+      <Route path="/wizard" component={RestrictedWizard} />
+      <Route path="/documents" component={RestrictedDocuments} />
+      <Route path="/preview/:id" component={RestrictedPreview} />
+      <Route path="/documents/:id/edit" component={RestrictedEditor} />
+      <Route path="/scanner" component={RestrictedScanner} />
+      <Route path="/import" component={RestrictedImport} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />

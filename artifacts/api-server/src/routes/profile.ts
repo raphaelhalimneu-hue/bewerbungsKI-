@@ -2,11 +2,16 @@ import { Router } from "express";
 import { db, profilesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
 router.get("/saved-profile", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const [profile] = await db
       .select({ savedProfile: profilesTable.savedProfile })
       .from(profilesTable)
@@ -21,6 +26,10 @@ router.get("/saved-profile", requireAuth, async (req: AuthenticatedRequest, res)
 
 router.put("/saved-profile", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { savedProfile } = req.body;
     await db
       .update(profilesTable)

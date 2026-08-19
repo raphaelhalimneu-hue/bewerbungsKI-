@@ -5,6 +5,7 @@ export type PrintKind = "cv_print" | "letter_print";
 export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
 /** Free accounts: max 1 print per part (CV / letter) per document. */
 export const FREE_PRINT_LIMIT = 1;
+const freeApplicationCreateLocks = new Map<string, Promise<void>>();
 
 function isUnlimitedEmail(email?: string): boolean {
   const allowlist = (process.env.UNLIMITED_EMAILS || "")
@@ -42,14 +43,7 @@ export async function getPrintCounts(userId: string, docId: string): Promise<Rec
 }
 
 /**
- * Premium features (Scanner/Analyse, Perfektionieren, Live-Editor-Speichern)
- * are locked for free users once their single free application has been
- * generated. Viewing and downloading existing documents stays free.
- */
-/**
  * True when the account has never purchased (no premium, no credits).
- * Free trial users may view and PRINT their application, but saving files
- * (PDF/DOCX downloads) requires a purchase.
  */
 export async function isFreeAccount(userId: string, email?: string): Promise<boolean> {
   if (isUnlimitedEmail(email)) return false;
@@ -85,4 +79,37 @@ export async function isFreeQuotaLocked(userId: string, email?: string): Promise
     .from(documentsTable)
     .where(eq(documentsTable.userId, userId));
   return value >= 1;
+}
+
+/**
+ * Serializes first-document creation per account. The in-process queue keeps
+ * local calls ordered, while PostgreSQL's advisory lock coordinates concurrent
+ * API instances. The callback must perform the quota check and insert itself.
+ */
+export async function withFreeApplicationCreateLock<T>(userId: string, callback: () => Promise<T>): Promise<T> {
+  const previous = freeApplicationCreateLocks.get(userId) || Promise.resolve();
+  let releaseQueue!: () => void;
+  const waitForCurrent = new Promise<void>((resolve) => { releaseQueue = resolve; });
+  const queued = previous.then(() => waitForCurrent);
+  freeApplicationCreateLocks.set(userId, queued);
+  await previous;
+
+  let client: { query: (text: string, values?: unknown[]) => Promise<unknown>; release: () => void } | undefined;
+  try {
+    if (typeof (pool as any).connect === "function") {
+      client = await (pool as any).connect();
+      await client.query("SELECT pg_advisory_lock(hashtext($1))", [userId]);
+    }
+    return await callback();
+  } finally {
+    try {
+      if (client) await client.query("SELECT pg_advisory_unlock(hashtext($1))", [userId]);
+    } finally {
+      client?.release();
+      releaseQueue();
+      if (freeApplicationCreateLocks.get(userId) === queued) {
+        freeApplicationCreateLocks.delete(userId);
+      }
+    }
+  }
 }

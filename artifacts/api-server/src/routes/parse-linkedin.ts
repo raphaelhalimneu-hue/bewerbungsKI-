@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -71,6 +72,10 @@ function normalize(raw: any) {
 
 router.post("/parse-linkedin", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     if (rateLimited(req.userId!)) {
       res.status(429).json({ error: "rate_limited" });
       return;
@@ -133,6 +138,10 @@ router.post("/parse-linkedin", requireAuth, requireVerifiedEmail, async (req: Au
 // ── Free-text CV parsing: user writes about themselves in plain language ─────
 router.post("/parse-freetext", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     if (rateLimited(req.userId!)) {
       res.status(429).json({ error: "rate_limited" });
       return;

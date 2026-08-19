@@ -6,6 +6,7 @@ import { eq, sql } from "drizzle-orm";
 const BASE_COUNT = 253;
 const BASE_AVG = 4.9;
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router: IRouter = Router();
 
@@ -30,6 +31,10 @@ router.get("/ratings/summary", async (req, res) => {
 // The user's own rating (used to prefill / hide the rating card)
 router.get("/ratings/me", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const [rating] = await db
       .select()
       .from(appRatingsTable)
@@ -44,6 +49,10 @@ router.get("/ratings/me", requireAuth, async (req: AuthenticatedRequest, res) =>
 // Create or update the user's rating (stars 1-5, optional comment)
 router.post("/ratings", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { stars, comment } = req.body || {};
     if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
       res.status(400).json({ error: "stars must be an integer between 1 and 5" });

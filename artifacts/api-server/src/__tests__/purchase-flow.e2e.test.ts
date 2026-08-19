@@ -5,8 +5,8 @@
  * Express app (real routes, real quota math, real webhook handler):
  *
  *   1. Fresh user: /me shows limit 1, 0 documents
- *   2. Generates + saves 3 documents (Claude mocked at fetch level)
- *   3. 2nd generate → still allowed (policy 2026-08-19: only download/print paid)
+ *   2. Generates and verifies parallel free saves still create only one document
+ *   3. 2nd generate → purchase required
  *   4. POST /checkout → Stripe Checkout session (metadata.userId set)
  *   5. Stripe webhook checkout.session.completed → is_premium=true, credits=10
  *   6. /me shows limit 11; generating works again
@@ -202,31 +202,34 @@ const webhook = (eventId: string) =>
 // ---------------------------------------------------------------------------
 
 describe("E2E: 1 gratis → Kauf → 10 weitere → Limit 11", () => {
-  it("step 1: fresh user sees open creation and 0 documents", async () => {
+  it("step 1: fresh user sees one free application and 0 documents", async () => {
     const res = await getMe();
     expect(res.status).toBe(200);
-    // Policy 2026-08-19: free accounts create without a document cap
     expect(res.body).toMatchObject({
       is_premium: false,
       credits: 0,
-      document_limit: 999999,
+      document_limit: 1,
       documents_count: 0,
     });
   });
 
-  it("step 2: generates and saves 1 free document", async () => {
+  it("step 2: generates once and permits only one of two parallel free saves", async () => {
     const gen = await generate();
     expect(gen.status).toBe(200);
     expect(gen.body.result).toContain("Generierter Lebenslauf");
-    const save = await saveDocument(1);
-    expect(save.status).toBe(201);
+
+    const [first, second] = await Promise.all([saveDocument(1), saveDocument(2)]);
+    expect([first.status, second.status].sort()).toEqual([201, 403]);
+    expect([first.body.error, second.body.error]).toContain("free_limit_reached");
+
     const me = await getMe();
     expect(me.body.documents_count).toBe(1);
   });
 
-  it("step 3: 2nd generation still works (downloads stay paid)", async () => {
+  it("step 3: a second generation requires a purchase", async () => {
     const res = await generate();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe("free_limit_reached");
   });
 
   it("step 4: checkout creates a Stripe session tagged with the user id", async () => {

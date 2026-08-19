@@ -33,9 +33,9 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       is_premium: unlimited ? true : profile.isPremium,
       is_unlimited: unlimited ? true : profile.isUnlimited,
       credits: profile.credits,
-      // Free accounts create without a document cap (downloads/prints are the
-      // paid part); buyers keep their purchased package limit.
-      document_limit: unlimited || profile.isUnlimited || (!profile.isPremium && profile.credits === 0) ? 999999 : 1 + profile.credits,
+      // A free account receives one complete application. Every further app
+      // action is purchase-gated; buyers keep their package limit.
+      document_limit: unlimited || profile.isUnlimited ? 999999 : (!profile.isPremium && profile.credits === 0) ? 1 : 1 + profile.credits,
       documents_count: Number(docCount) || 0,
       email_verified: unlimited ? true : !!profile.emailVerifiedAt,
     });

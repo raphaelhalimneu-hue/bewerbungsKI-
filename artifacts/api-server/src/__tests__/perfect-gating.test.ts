@@ -84,9 +84,13 @@ vi.mock("@workspace/db", () => {
   }
 
   const db = {
-    select: () => ({
+    select: (selection?: Record<string, unknown>) => ({
       from: (table: any) => ({
-        where: () => queryChain(selectRows(table)),
+        where: () => queryChain(
+          table === documentsTable && selection && "value" in selection
+            ? [{ value: state.documents.length }]
+            : selectRows(table),
+        ),
       }),
     }),
     insert: (table: any) => ({
@@ -257,7 +261,7 @@ describe("perfected text preview gating", () => {
     expect(latest.body).not.toHaveProperty("letter");
   });
 
-  it("sanitizes perfected document fields for free accounts", async () => {
+  it("blocks document retrieval for a free account after its application is saved", async () => {
     const documentId = "22222222-2222-4222-8222-222222222222";
     state.documents = [{
       id: documentId,
@@ -290,13 +294,8 @@ describe("perfected text preview gating", () => {
     const freeResponse = await request(app)
       .get(`/api/documents/${documentId}`)
       .set(auth);
-    expect(freeResponse.status).toBe(200);
-    expect(freeResponse.body.perfected_locked).toBe(true);
-    expect(freeResponse.body.perfected_letter).toBe("gekürzte sichere Vorschau […]");
-    expect(freeResponse.body.perfected_profile).toBe("gekürztes Profil […]");
-    expect(freeResponse.body.perfected_cv_html).toBeNull();
-    expect(JSON.stringify(freeResponse.body)).not.toContain(FULL_TEXT);
-    expect(JSON.stringify(freeResponse.body)).not.toContain(FULL_PROFILE);
+    expect(freeResponse.status).toBe(403);
+    expect(freeResponse.body.error).toBe("upgrade_required");
 
     state.profile.isPremium = true;
     state.profile.credits = 10;
@@ -311,7 +310,7 @@ describe("perfected text preview gating", () => {
     expect(paidResponse.body.profile_data.cv_json.profile).toBe(FULL_PROFILE);
   });
 
-  it("re-locks a legacy perfected letter that was previously saved as the document text", async () => {
+  it("also blocks access to legacy documents for a locked free account", async () => {
     const documentId = "33333333-3333-4333-8333-333333333333";
     state.documents = [{
       id: documentId,
@@ -342,10 +341,8 @@ describe("perfected text preview gating", () => {
     }];
 
     const response = await request(app).get(`/api/documents/${documentId}`).set(auth);
-    expect(response.status).toBe(200);
-    expect(response.body.perfected_locked).toBe(true);
-    expect(response.body.perfected_letter).toBe("sichere nachträgliche Vorschau […]");
-    expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe("upgrade_required");
   });
 
   it("keeps one-token model output and changes from leaking through a locked payload", async () => {

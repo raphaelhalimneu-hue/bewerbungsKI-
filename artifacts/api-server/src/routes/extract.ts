@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -52,6 +53,10 @@ async function ocrWithClaude(mimeType: string, base64: string): Promise<string |
 
 router.post("/extract", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { mimeType, data } = req.body || {};
     if (typeof mimeType !== "string" || typeof data !== "string" || data.length === 0) {
       res.status(400).json({ error: "invalid_request" });
@@ -113,6 +118,10 @@ router.post("/extract", requireAuth, requireVerifiedEmail, async (req: Authentic
 // ── Design analysis: extract a color/font style from an uploaded CV (image or PDF) ──
 router.post("/design", requireAuth, requireVerifiedEmail, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { mimeType, data } = req.body || {};
     if (typeof mimeType !== "string" || typeof data !== "string" || data.length === 0) {
       res.status(400).json({ error: "invalid_request" });

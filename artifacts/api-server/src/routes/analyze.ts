@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isEmailUnverified, isFreeAccount } from "../lib/freeLock";
+import { isEmailUnverified, isFreeAccount, isFreeQuotaLocked } from "../lib/freeLock";
 import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -118,6 +118,10 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const unlimitedA = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
@@ -168,6 +172,10 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
 
 router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const documentType = req.query.type;
     if (documentType !== "cv" && documentType !== "letter") {
       res.status(400).json({ error: "invalid_document_type" });
@@ -267,6 +275,10 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
     const unlimitedP = (process.env.UNLIMITED_EMAILS || "").toLowerCase().split(",").map(email => email.trim()).filter(Boolean).includes((req.userEmail || "").toLowerCase());
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
+      return;
+    }
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
       return;
     }
     if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {

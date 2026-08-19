@@ -347,6 +347,15 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         letterText = letterRes.result;
       }
 
+      // Save the profile while the initial free application is still open.
+      // From the completed document onwards, all free app actions are locked.
+      try {
+        await customFetch("/api/saved-profile", {
+          method: "PUT",
+          body: JSON.stringify({ savedProfile: { personal: form.personal, school: form.school, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
+        });
+      } catch { /* ignore */ }
+
       setGenPhase(t("wizard.genSaving"));
       await createMutation.mutateAsync({ data: {
         name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
@@ -358,16 +367,9 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         jobCompany: form.jobad.company,
       } });
 
-      // Auto-save profile for next time (silently)
-      try {
-        await customFetch("/api/saved-profile", {
-          method: "PUT",
-          body: JSON.stringify({ savedProfile: { personal: form.personal, school: form.school, experience: form.experience, education: form.education, skills: form.skills, languages: form.languages } }),
-        });
-      } catch { /* ignore */ }
       toast({ title: t("wizard.success") });
       refetchProfile();
-      navigate("/documents");
+      navigate("/pricing");
     } catch (e: any) {
       if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {
         navigate("/pricing");

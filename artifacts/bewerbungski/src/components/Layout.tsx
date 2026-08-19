@@ -46,16 +46,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const freeLimitReached = Boolean(
+    user &&
+    p &&
+    !p.is_premium &&
+    !p.is_unlimited &&
+    Number(p.credits || 0) === 0 &&
+    Number(p.documents_count || 0) >= 1,
+  );
 
   // Close the mobile menu on navigation
   React.useEffect(() => { setMobileMenuOpen(false); }, [location]);
 
   const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean }[] = [
     { href: "/", icon: <FiHome size={18} />, label: t("nav.home"), active: location === "/" },
-    { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard") },
-    { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
-    { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner") },
-    { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import") },
+    ...(!freeLimitReached ? [
+      { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard") },
+      { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
+      { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner") },
+      { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import") },
+    ] : []),
     { href: "/pricing", icon: <FiStar size={18} />, label: p?.is_premium ? t("nav.premiumActive") : t("nav.getPremium"), active: location === "/pricing" },
   ];
 
@@ -136,26 +146,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <FiHome size={18} /> {t("nav.home")}
             </button>
           </Link>
-          <Link href="/wizard">
-            <button className={`si ${location.startsWith("/wizard") ? "on" : ""}`}>
-              <FiPlusCircle size={18} /> {t("nav.createNew")}
-            </button>
-          </Link>
-          <Link href="/documents">
-            <button className={`si ${location.startsWith("/documents") || location.startsWith("/preview") ? "on" : ""}`}>
-              <FiFileText size={18} /> {t("nav.myDocuments")}
-            </button>
-          </Link>
-          <Link href="/scanner">
-            <button className={`si ${location.startsWith("/scanner") ? "on" : ""}`}>
-              <FiSearch size={18} /> {t("scanner.nav")}
-            </button>
-          </Link>
-          <Link href="/import">
-            <button className={`si ${location.startsWith("/import") ? "on" : ""}`}>
-              <FiUpload size={18} /> {t("importPage.nav")}
-            </button>
-          </Link>
+          {!freeLimitReached && (
+            <>
+              <Link href="/wizard">
+                <button className={`si ${location.startsWith("/wizard") ? "on" : ""}`}>
+                  <FiPlusCircle size={18} /> {t("nav.createNew")}
+                </button>
+              </Link>
+              <Link href="/documents">
+                <button className={`si ${location.startsWith("/documents") || location.startsWith("/preview") ? "on" : ""}`}>
+                  <FiFileText size={18} /> {t("nav.myDocuments")}
+                </button>
+              </Link>
+              <Link href="/scanner">
+                <button className={`si ${location.startsWith("/scanner") ? "on" : ""}`}>
+                  <FiSearch size={18} /> {t("scanner.nav")}
+                </button>
+              </Link>
+              <Link href="/import">
+                <button className={`si ${location.startsWith("/import") ? "on" : ""}`}>
+                  <FiUpload size={18} /> {t("importPage.nav")}
+                </button>
+              </Link>
+            </>
+          )}
 
           <div className="mt-auto pt-4">
             <Link href="/pricing">

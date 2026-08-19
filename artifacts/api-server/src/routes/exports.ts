@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeAccount, consumePrintQuota, getPrintCounts, PRINT_KINDS, FREE_PRINT_LIMIT, type PrintKind } from "../lib/freeLock";
+import { isFreeAccount, isFreeQuotaLocked, consumePrintQuota, getPrintCounts, PRINT_KINDS, FREE_PRINT_LIMIT, type PrintKind } from "../lib/freeLock";
 
 const router: IRouter = Router();
 
@@ -13,6 +13,10 @@ function paramId(v: unknown): string {
 // Current print counters for one document (free accounts only)
 router.get("/documents/:id/export-counters", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const docId = paramId(req.params.id);
     if (!(await isFreeAccount(req.userId!, req.userEmail))) {
       res.json({ free: false });
@@ -30,6 +34,10 @@ router.get("/documents/:id/export-counters", requireAuth, async (req: Authentica
 // Consume one print. Paid accounts: always allowed, nothing is counted.
 router.post("/documents/:id/export-event", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const docId = paramId(req.params.id);
     const kind = req.body?.kind as PrintKind;
     if (!PRINT_KINDS.includes(kind)) {

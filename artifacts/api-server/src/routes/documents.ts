@@ -3,7 +3,7 @@ import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
-import { isFreeAccount } from "../lib/freeLock";
+import { isFreeAccount, isFreeQuotaLocked, withFreeApplicationCreateLock } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -30,6 +30,10 @@ function replaceProfileText(cvHtml: string | null, oldProfile: string, newProfil
 
 router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const docs = await db
       .select({
         id: documentsTable.id,
@@ -54,6 +58,10 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
 
 router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const rawId = req.params.id;
     const documentId = Array.isArray(rawId) ? rawId[0] : rawId;
     let [doc] = await db
@@ -230,6 +238,10 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     const { cv_html, cv_json, template, cover_letter, perfected_letter, perfected_cv_html } = req.body;
 
     // Perfected copies: view-only fields shown in the preview; no download
@@ -240,9 +252,6 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
         res.status(400).json({ error: `${key} must be a string or null` }); return;
       }
     }
-    // Free accounts may edit and save everything (policy 2026-08-19):
-    // only downloads and printing stay purchase-gated.
-
     // Validate template against allowlist
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
       res.status(400).json({ error: "Invalid template" }); return;
@@ -292,27 +301,33 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 
 router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    // Free accounts may create unlimited applications (policy 2026-08-19):
-    // everything is open except downloads and printing, which stay paid.
     const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany, language } = req.body;
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
       res.status(400).json({ error: "Invalid template" });
       return;
     }
 
-    const [doc] = await db
-      .insert(documentsTable)
-      .values({
-        userId: req.userId!,
-        name,
-        template: template || "modern",
-        profileData,
-        cvHtml,
-        coverLetter,
-        jobTitle,
-        jobCompany,
-      })
-      .returning();
+    const doc = await withFreeApplicationCreateLock(req.userId!, async () => {
+      if (await isFreeQuotaLocked(req.userId!, req.userEmail)) return null;
+      const [created] = await db
+        .insert(documentsTable)
+        .values({
+          userId: req.userId!,
+          name,
+          template: template || "modern",
+          profileData,
+          cvHtml,
+          coverLetter,
+          jobTitle,
+          jobCompany,
+        })
+        .returning();
+      return created;
+    });
+    if (!doc) {
+      res.status(403).json({ error: "free_limit_reached" });
+      return;
+    }
 
     res.status(201).json(doc);
 
@@ -391,10 +406,14 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
       return;
     }
     letterRegenInFlight.add(docId);
-    hist.push(now);
-    letterRegenHistory.set(req.userId!, hist);
 
     try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
+    hist.push(now);
+    letterRegenHistory.set(req.userId!, hist);
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       res.status(503).json({ error: "AI generation not configured. Please set ANTHROPIC_API_KEY." });
@@ -528,6 +547,10 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`;
 
 router.delete("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
     await db
       .delete(documentsTable)
       .where(
