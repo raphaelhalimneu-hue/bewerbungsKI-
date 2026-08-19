@@ -201,8 +201,7 @@ describe("perfected text preview gating", () => {
     expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
   });
 
-  it("does not silently treat a hard-coded email address as a paid account", async () => {
-    delete process.env.UNLIMITED_EMAILS;
+  it("grants unlimited access only to the exact owner profile", async () => {
     const response = await request(app)
       .post("/api/perfect")
       .set(ownerAuth)
@@ -213,8 +212,8 @@ describe("perfected text preview gating", () => {
       });
 
     expect(response.status).toBe(200);
-    expect(response.body.locked).toBe(true);
-    expect(response.body).not.toHaveProperty("letter");
+    expect(response.body.locked).toBe(false);
+    expect(response.body.letter).toBe(FULL_TEXT);
   });
 
   it("blocks the full-text route until the server sees a purchase", async () => {
