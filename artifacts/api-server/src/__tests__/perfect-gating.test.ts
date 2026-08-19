@@ -348,6 +348,37 @@ describe("perfected text preview gating", () => {
     expect(response.body.cover_letter).toBeNull();
   });
 
+  it("keeps a legacy perfected marker locked even when its generation relation is missing", async () => {
+    const documentId = "55555555-5555-4555-8555-555555555555";
+    state.documents = [{
+      id: documentId,
+      userId: "user-1",
+      name: "Unterbrochene Perfektionierung",
+      template: "modern",
+      cvHtml: "<div>Original CV</div>",
+      // A legacy client wrote both values before the generation marker was
+      // persisted. The complete text must still never be returned for free.
+      coverLetter: FULL_TEXT,
+      perfectedLetter: FULL_TEXT,
+      perfectedCvHtml: null,
+      perfectedGenerationId: null,
+      profileData: { cv_json: { profile: "Originalprofil" } },
+      jobTitle: null,
+      jobCompany: null,
+      createdAt: new Date(),
+    }];
+    state.generations = [];
+
+    const response = await request(app).get(`/api/documents/${documentId}`).set(auth);
+
+    expect(response.status).toBe(200);
+    expect(response.body.perfected_locked).toBe(true);
+    expect(response.body.cover_letter).toBeNull();
+    expect(response.body.perfected_letter).toContain("[…]");
+    expect(response.body.perfected_letter).not.toBe(FULL_TEXT);
+    expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
+  });
+
   it("keeps one-token model output and changes from leaking through a locked payload", async () => {
     state.modelLetter = "L".repeat(240);
     state.modelProfile = "P".repeat(160);

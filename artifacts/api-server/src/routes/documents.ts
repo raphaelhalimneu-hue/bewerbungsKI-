@@ -84,19 +84,18 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
           .limit(1)
       : [undefined];
 
-    // Before server-side preview gating existed, an allowlisted account could
-    // save a perfected result into cover_letter. If that account is now free,
-    // recover the matching persisted generation and treat it as locked instead
-    // of exposing the same full text as if it were the user's original.
-    if (freeAccount && !pendingGeneration && doc.coverLetter) {
+    // Older or interrupted writes can be missing the document's generation ID.
+    // For a free account, any persisted perfection belonging to this document
+    // must be treated as locked. Do not require its full text to match the
+    // current cover letter: legacy clients could have formatted or saved it
+    // differently, which would otherwise expose the complete perfected text.
+    if (freeAccount && !pendingGeneration) {
       const [legacyGeneration] = await db
         .select()
         .from(perfectedGenerationsTable)
         .where(and(
           eq(perfectedGenerationsTable.documentId, doc.id),
           eq(perfectedGenerationsTable.userId, req.userId!),
-          eq(perfectedGenerationsTable.documentType, "letter"),
-          eq(perfectedGenerationsTable.fullText, doc.coverLetter),
         ))
         .orderBy(desc(perfectedGenerationsTable.createdAt))
         .limit(1);
@@ -158,10 +157,13 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     // The generation relation is the source of truth for locked content.
     // Do not use the legacy copy as the lock signal: it can be absent on an
     // interrupted/older write even though the full generation is still linked.
-    const hasLockedGeneration = freeAccount && Boolean(pendingGeneration);
+    // `perfectedLetter` is a second legacy marker. It is enough to keep the
+    // document locked even if a database write lost its generation relation.
+    // The browser must never receive this full text for a free account.
+    const hasLockedGeneration = freeAccount && Boolean(pendingGeneration || doc.perfectedLetter);
     const storedPerfectedLetter = doc.perfectedLetter;
     const visiblePerfectedLetter = hasLockedGeneration
-      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter || ""))
+      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter || doc.coverLetter || ""))
       : null;
     const visiblePerfectedProfile = hasLockedGeneration && pendingGeneration?.fullProfile
       ? (pendingGeneration.previewProfile || createPerfectedPreview(pendingGeneration.fullProfile))
@@ -184,7 +186,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       perfected_letter: visiblePerfectedLetter,
       perfected_cv_html: null,
       perfected_profile: visiblePerfectedProfile,
-       perfected_generation_id: hasLockedGeneration ? pendingGeneration!.id : null,
+        perfected_generation_id: hasLockedGeneration ? pendingGeneration?.id ?? null : null,
        perfected_locked: hasLockedGeneration,
       created_at: doc.createdAt,
     });
