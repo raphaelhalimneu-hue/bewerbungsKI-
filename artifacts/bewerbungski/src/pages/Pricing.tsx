@@ -59,7 +59,9 @@ export default function Pricing() {
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.singleFeat1")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat2")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat3")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat4")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat5")}</li>
             </ul>
             <button className="btn btn-s btn-full btn-lg" onClick={() => handleUpgrade("single")} disabled={checkoutMutation.isPending}>
               {checkoutMutation.isPending ? <span className="spin" /> : null}{t("pricing.buySingle")}
@@ -75,7 +77,9 @@ export default function Pricing() {
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat1")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat6")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat2")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat3")}</li>
               <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat4")}</li>
+              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat5")}</li>
             </ul>
             <button className="btn btn-s btn-full btn-lg" onClick={() => handleUpgrade("starter")} disabled={checkoutMutation.isPending}>
               {checkoutMutation.isPending ? <span className="spin" /> : null}{t("pricing.buyStarter")}
