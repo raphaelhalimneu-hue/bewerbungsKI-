@@ -14,6 +14,13 @@ export default function Documents() {
   const pA = profile as any;
   // Free trial: PDF stays free, Word (DOCX) requires a purchase
   const docxLocked = !!pA && !pA.is_premium && (pA.credits || 0) === 0;
+  const freeLocked = Boolean(
+    user &&
+    !pA?.is_premium &&
+    !pA?.is_unlimited &&
+    Number(pA?.credits || 0) === 0 &&
+    Number(pA?.documents_count || 0) >= 1,
+  );
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const { data: docs = [], refetch } = useListDocuments({ query: { enabled: !!user } as any });
@@ -65,7 +72,9 @@ export default function Documents() {
       <div className="fade">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <h2 style={{ fontFamily: "var(--fd)", fontSize: 24, fontWeight: 700 }}>{t("docs.title")}</h2>
-          <button className="btn btn-p" onClick={() => navigate("/wizard")}>{t("docs.newDoc")}</button>
+          <button className="btn btn-p" onClick={() => navigate(freeLocked ? "/pricing" : "/wizard")}>
+            {freeLocked ? "Upgrade" : t("docs.newDoc")}
+          </button>
         </div>
 
         {user && typeof p?.document_limit === "number" && (() => {
@@ -84,6 +93,15 @@ export default function Documents() {
             </div>
           );
         })()}
+
+        {freeLocked && (
+          <div className="card" style={{ marginBottom: 16, borderColor: "var(--brand)", background: "#eff6ff" }}>
+            <strong style={{ display: "block", marginBottom: 4 }}>Deine Bewerbung ist sicher gespeichert.</strong>
+            <span style={{ color: "var(--muted)", fontSize: 14 }}>
+              Du kannst sie weiterhin ansehen. Für Bearbeitung, Download und weitere Bewerbungen bitte freischalten.
+            </span>
+          </div>
+        )}
 
         {!user ? (
           <div className="card" style={{ textAlign: "center", padding: 40 }}>
@@ -118,8 +136,7 @@ export default function Documents() {
                         </span>
                       )}
                     </div>
-                    {/* Download buttons row */}
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+                    {!freeLocked && <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
                       {/* CV downloads */}
                       <button
                         className="btn btn-p btn-sm"
@@ -162,12 +179,12 @@ export default function Documents() {
                           </button>
                         </>
                       )}
-                    </div>
+                    </div>}
                   </div>
                   <div style={{ display: "flex", gap: 8, flexShrink: 0, flexDirection: "column" }}>
-                    <button className="btn btn-p btn-sm" onClick={() => navigate(`/documents/${doc.id}/edit`)} style={{ justifyContent: "center" }}>✏️ {t("docs.edit") || "Bearbeiten"}</button>
+                    <button className="btn btn-p btn-sm" onClick={() => navigate(freeLocked ? "/pricing" : `/documents/${doc.id}/edit`)} style={{ justifyContent: "center" }}>✏️ {t("docs.edit") || "Bearbeiten"}</button>
                     <button className="btn btn-s btn-sm" onClick={() => navigate(`/preview/${doc.id}`)} style={{ justifyContent: "center" }}>{t("docs.view")}</button>
-                    <button className="btn btn-d btn-sm" onClick={() => handleDelete(doc.id)} style={{ justifyContent: "center" }}>{t("docs.delete")}</button>
+                    {!freeLocked && <button className="btn btn-d btn-sm" onClick={() => handleDelete(doc.id)} style={{ justifyContent: "center" }}>{t("docs.delete")}</button>}
                   </div>
                 </div>
               );

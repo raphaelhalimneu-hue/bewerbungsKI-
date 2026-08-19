@@ -137,6 +137,18 @@ export default function Pricing() {
           </div>
         </div>
 
+        <section style={{ maxWidth: 920, margin: "44px auto 0", padding: "28px 20px 24px", background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 18, textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--fd)", fontSize: "clamp(22px,3.5vw,30px)", fontWeight: 700, marginBottom: 10, letterSpacing: "-.01em" }}>
+            {t("home.socialProofTitle")}
+          </h2>
+          <p style={{ color: "var(--brand)", fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{t("home.socialProofText")}</p>
+          <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 22 }}>{t("home.socialProofNote")}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16, alignItems: "start" }}>
+            <img src="/facebook-comments.jpg" alt={t("home.socialProofCommentsAlt")} loading="lazy" style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }} />
+            <img src="/google-reactions.jpg" alt={t("home.socialProofGoogleAlt")} loading="lazy" style={{ width: "100%", maxHeight: 520, objectFit: "contain", borderRadius: 12, background: "var(--bg)" }} />
+          </div>
+        </section>
+
         <p style={{ textAlign: "center", marginTop: 28, fontSize: 13, color: "var(--muted)" }}>
           {t("pricing.questions")}
         </p>

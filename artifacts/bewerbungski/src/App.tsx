@@ -66,9 +66,8 @@ function LocaleHeadSync() {
 }
 
 /**
- * Free accounts receive one complete perfected application. Once it has completed,
- * application surfaces are no longer mounted, so they cannot briefly fetch
- * protected data while the server remains the authoritative enforcement.
+ * Free accounts receive one complete application. Once it is saved, new work
+ * and changes are purchase-gated while the completed document remains viewable.
  */
 function FreeFeatureGate({ children }: { children: React.ReactNode }) {
   const { user, profile } = useAuth();
@@ -94,10 +93,10 @@ function RestrictedWizard() {
   return <FreeFeatureGate><Wizard /></FreeFeatureGate>;
 }
 function RestrictedDocuments() {
-  return <FreeFeatureGate><Documents /></FreeFeatureGate>;
+  return <Documents />;
 }
 function RestrictedPreview() {
-  return <FreeFeatureGate><Preview /></FreeFeatureGate>;
+  return <Preview />;
 }
 function RestrictedEditor() {
   return <FreeFeatureGate><CVEditor /></FreeFeatureGate>;

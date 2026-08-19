@@ -293,8 +293,10 @@ describe("perfected text preview gating", () => {
     const freeResponse = await request(app)
       .get(`/api/documents/${documentId}`)
       .set(auth);
-    expect(freeResponse.status).toBe(403);
-    expect(freeResponse.body.error).toBe("upgrade_required");
+    expect(freeResponse.status).toBe(200);
+    expect(freeResponse.body.perfected_locked).toBe(true);
+    expect(freeResponse.body.perfected_letter).toBe("gekürzte sichere Vorschau […]");
+    expect(freeResponse.body.cover_letter).toBeNull();
 
     state.profile.isPremium = true;
     state.profile.credits = 10;
@@ -309,7 +311,7 @@ describe("perfected text preview gating", () => {
     expect(paidResponse.body.profile_data.cv_json.profile).toBe(FULL_PROFILE);
   });
 
-  it("also blocks access to legacy documents for a locked free account", async () => {
+  it("keeps legacy documents readable without leaking their perfected full text", async () => {
     const documentId = "33333333-3333-4333-8333-333333333333";
     state.documents = [{
       id: documentId,
@@ -340,8 +342,10 @@ describe("perfected text preview gating", () => {
     }];
 
     const response = await request(app).get(`/api/documents/${documentId}`).set(auth);
-    expect(response.status).toBe(403);
-    expect(response.body.error).toBe("upgrade_required");
+    expect(response.status).toBe(200);
+    expect(response.body.perfected_locked).toBe(true);
+    expect(response.body.perfected_letter).toBe("sichere nachträgliche Vorschau […]");
+    expect(response.body.cover_letter).toBeNull();
   });
 
   it("keeps one-token model output and changes from leaking through a locked payload", async () => {

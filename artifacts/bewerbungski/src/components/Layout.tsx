@@ -10,7 +10,7 @@ import { ExitIntentPopup } from "./ExitIntentPopup";
 import { RatingCard } from "./RatingCard";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
-import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX } from "react-icons/fi";
+import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX, FiLock } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -58,14 +58,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   // Close the mobile menu on navigation
   React.useEffect(() => { setMobileMenuOpen(false); }, [location]);
 
-  const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean }[] = [
+  const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean; locked?: boolean }[] = [
     { href: "/", icon: <FiHome size={18} />, label: t("nav.home"), active: location === "/" },
-    ...(!freeLimitReached ? [
-      { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard") },
-      { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
-      { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner") },
-      { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import") },
-    ] : []),
+    { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard"), locked: freeLimitReached },
+    { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
+    { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner"), locked: freeLimitReached },
+    { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import"), locked: freeLimitReached },
     { href: "/pricing", icon: <FiStar size={18} />, label: p?.is_premium ? t("nav.premiumActive") : t("nav.getPremium"), active: location === "/pricing" },
   ];
 
@@ -124,7 +122,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {menuItems.map(item => (
               <Link key={item.href} href={item.href}>
                 <button className={`si w-full ${item.active ? "on" : ""}`}>
-                  {item.icon} {item.label}
+                  {item.icon} {item.label} {item.locked && <FiLock size={13} style={{ marginLeft: "auto" }} />}
                 </button>
               </Link>
             ))}
@@ -146,30 +144,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <FiHome size={18} /> {t("nav.home")}
             </button>
           </Link>
-          {!freeLimitReached && (
-            <>
-              <Link href="/wizard">
-                <button className={`si ${location.startsWith("/wizard") ? "on" : ""}`}>
-                  <FiPlusCircle size={18} /> {t("nav.createNew")}
-                </button>
-              </Link>
-              <Link href="/documents">
-                <button className={`si ${location.startsWith("/documents") || location.startsWith("/preview") ? "on" : ""}`}>
-                  <FiFileText size={18} /> {t("nav.myDocuments")}
-                </button>
-              </Link>
-              <Link href="/scanner">
-                <button className={`si ${location.startsWith("/scanner") ? "on" : ""}`}>
-                  <FiSearch size={18} /> {t("scanner.nav")}
-                </button>
-              </Link>
-              <Link href="/import">
-                <button className={`si ${location.startsWith("/import") ? "on" : ""}`}>
-                  <FiUpload size={18} /> {t("importPage.nav")}
-                </button>
-              </Link>
-            </>
-          )}
+          {menuItems.slice(1, 5).map(item => (
+            <Link key={item.href} href={item.href}>
+              <button className={`si ${item.active ? "on" : ""}`}>
+                {item.icon} {item.label} {item.locked && <FiLock size={13} style={{ marginLeft: "auto" }} />}
+              </button>
+            </Link>
+          ))}
 
           <div className="mt-auto pt-4">
             <Link href="/pricing">

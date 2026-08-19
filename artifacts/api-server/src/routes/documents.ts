@@ -30,10 +30,6 @@ function replaceProfileText(cvHtml: string | null, oldProfile: string, newProfil
 
 router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const docs = await db
       .select({
         id: documentsTable.id,
@@ -58,10 +54,6 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
 
 router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const rawId = req.params.id;
     const documentId = Array.isArray(rawId) ? rawId[0] : rawId;
     let [doc] = await db
