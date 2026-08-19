@@ -561,8 +561,13 @@ export default function Preview() {
                 {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
               </button>
               {((doc as any)?.cover_letter || editedLetter) && (
-                <button className="btn btn-g btn-sm" onClick={runPerfect} disabled={checking || perfecting || perfectedServerLocked}>
-                  {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
+                <button
+                  className="btn btn-g btn-sm"
+                  onClick={() => (freeUser ? navigate("/pricing") : runPerfect())}
+                  disabled={checking || perfecting || perfectedServerLocked}
+                  style={freeUser ? { opacity: 0.6 } : undefined}
+                >
+                  {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>{freeUser ? "🔒 " : "✨ "}{t("preview.perfectBtn")}</>}
                 </button>
               )}
             </div>
