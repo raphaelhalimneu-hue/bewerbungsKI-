@@ -524,7 +524,9 @@
     "title": "ما رأيك في BewerbungsKI؟",
     "commentPlaceholder": "هل تود إخبارنا بشيء آخر؟ (اختياري)",
     "send": "إرسال التقييم",
-    "thanks": "شكرًا لتقييمك!"
+    "thanks": "شكرًا لتقييمك!",
+    "summary": "{{rating}} نجوم · {{count}} تقييمًا",
+    "summaryAria": "{{rating}} من 5 نجوم من {{count}} تقييمًا"
   },
   "verify": {
     "title": "أكّد بريدك الإلكتروني",

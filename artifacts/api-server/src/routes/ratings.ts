@@ -3,13 +3,13 @@ import { db, appRatingsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 
 // Historic baseline shown before in-app ratings existed
-const BASE_COUNT = 127;
-const BASE_AVG = 4.8;
+const BASE_COUNT = 253;
+const BASE_AVG = 4.9;
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-// Public aggregate: baseline (127 × 4.8) combined with real in-app ratings
+// Public aggregate: baseline (253 × 4.9) combined with real in-app ratings
 router.get("/ratings/summary", async (req, res) => {
   try {
     const [r] = await db

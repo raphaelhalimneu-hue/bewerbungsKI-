@@ -567,7 +567,9 @@
     "title": "Wie gefällt dir BewerbungsKI?",
     "commentPlaceholder": "Möchtest du uns noch etwas mitteilen? (optional)",
     "send": "Bewertung absenden",
-    "thanks": "Danke für deine Bewertung!"
+    "thanks": "Danke für deine Bewertung!",
+    "summary": "{{rating}} Sterne · {{count}} Bewertungen",
+    "summaryAria": "{{rating}} von 5 Sternen aus {{count}} Bewertungen"
   },
   "verify": {
     "title": "E-Mail bestätigen",

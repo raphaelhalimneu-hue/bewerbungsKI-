@@ -567,7 +567,9 @@
     "title": "How do you like BewerbungsKI?",
     "commentPlaceholder": "Anything else you'd like to tell us? (optional)",
     "send": "Submit rating",
-    "thanks": "Thanks for your rating!"
+    "thanks": "Thanks for your rating!",
+    "summary": "{{rating}} stars · {{count}} reviews",
+    "summaryAria": "{{rating}} out of 5 stars from {{count}} reviews"
   },
   "verify": {
     "title": "Confirm your email",

@@ -70,6 +70,7 @@ export function RatingCard() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ stars, comment: comment.trim() || null }),
                   });
+                   window.dispatchEvent(new Event("rating-updated"));
                   setDone(true);
                 } catch (e) {
                   console.error("Rating failed", e);

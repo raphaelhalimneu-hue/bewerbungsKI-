@@ -524,7 +524,9 @@
     "title": "Як вам BewerbungsKI?",
     "commentPlaceholder": "Хочете щось додати? (необов'язково)",
     "send": "Надіслати оцінку",
-    "thanks": "Дякуємо за вашу оцінку!"
+    "thanks": "Дякуємо за вашу оцінку!",
+    "summary": "{{rating}} зірки · {{count}} відгуків",
+    "summaryAria": "{{rating}} з 5 зірок на основі {{count}} відгуків"
   },
   "verify": {
     "title": "Підтвердьте e-mail",

@@ -524,7 +524,9 @@
     "title": "Jak podoba Ci się BewerbungsKI?",
     "commentPlaceholder": "Chcesz nam coś jeszcze przekazać? (opcjonalnie)",
     "send": "Wyślij ocenę",
-    "thanks": "Dziękujemy za ocenę!"
+    "thanks": "Dziękujemy za ocenę!",
+    "summary": "{{rating}} gwiazdek · {{count}} opinie",
+    "summaryAria": "{{rating}} na 5 gwiazdek z {{count}} opinii"
   },
   "verify": {
     "title": "Potwierdź e-mail",

@@ -9,7 +9,6 @@ import jsPDF from "jspdf";
 import { templateDeco } from "@workspace/template-deco";
 import { useAuth } from "../context/AuthContext";
 import { AnalysisCard } from "./Scanner";
-import { RatingCard } from "../components/RatingCard";
 
 /** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
 function letterDecoHtml(doc: any): string {
@@ -607,7 +606,6 @@ export default function Preview() {
               </div>
             )}
 
-            <RatingCard />
           </>
         )}
       </div>

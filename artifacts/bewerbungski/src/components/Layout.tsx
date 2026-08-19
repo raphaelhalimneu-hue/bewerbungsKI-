@@ -7,6 +7,8 @@ import { AuthModal } from "./AuthModal";
 import { VerifyEmailModal } from "./VerifyEmailModal";
 import { InAppBrowserBanner } from "./InAppBrowserBanner";
 import { ExitIntentPopup } from "./ExitIntentPopup";
+import { RatingSummary } from "./RatingSummary";
+import { RatingCard } from "./RatingCard";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
 import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX } from "react-icons/fi";
@@ -198,6 +200,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <main className="main flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8 min-w-0">
           <div className="max-w-[880px] mx-auto min-w-0">
             {children}
+            <RatingSummary />
+            <RatingCard />
           </div>
         </main>
       </div>

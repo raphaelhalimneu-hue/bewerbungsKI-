@@ -524,7 +524,9 @@
     "title": "¿Qué te parece BewerbungsKI?",
     "commentPlaceholder": "¿Algo más que quieras contarnos? (opcional)",
     "send": "Enviar valoración",
-    "thanks": "¡Gracias por tu valoración!"
+    "thanks": "¡Gracias por tu valoración!",
+    "summary": "{{rating}} estrellas · {{count}} reseñas",
+    "summaryAria": "{{rating}} de 5 estrellas de {{count}} reseñas"
   },
   "verify": {
     "title": "Confirma tu correo",

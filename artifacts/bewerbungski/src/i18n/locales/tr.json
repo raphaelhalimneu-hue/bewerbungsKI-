@@ -524,7 +524,9 @@
     "title": "BewerbungsKI'yi nasıl buldunuz?",
     "commentPlaceholder": "Bize iletmek istediğiniz bir şey var mı? (isteğe bağlı)",
     "send": "Değerlendirmeyi gönder",
-    "thanks": "Değerlendirmeniz için teşekkürler!"
+    "thanks": "Değerlendirmeniz için teşekkürler!",
+    "summary": "{{rating}} yıldız · {{count}} değerlendirme",
+    "summaryAria": "{{count}} değerlendirmeden 5 üzerinden {{rating}} yıldız"
   },
   "verify": {
     "title": "E-postanı doğrula",
