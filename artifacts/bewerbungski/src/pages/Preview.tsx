@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, type ClipboardEvent } from "react";
 import { useParams, useLocation } from "wouter";
 import { Layout } from "../components/Layout";
 import { useGetDocument } from "@workspace/api-client-react";
@@ -47,9 +47,15 @@ export default function Preview() {
   const cvPrintLocked = freeUser;
   const letterPrintLocked = freeUser;
   const pdfLocked = freeUser;
+  const letterCopyLocked = freeUser && perfectedApplied;
+  const cvCopyLocked = freeUser && cvPerfectedApplied;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
+
+  function blockCopy(e: ClipboardEvent<HTMLElement>) {
+    e.preventDefault();
+  }
 
   async function handleCreateLetter() {
     setCreatingLetter(true);
@@ -530,7 +536,14 @@ export default function Preview() {
                   className="cv-sheet"
                   contentEditable={editingCv}
                   suppressContentEditableWarning
-                  style={{ outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none" }}
+                  onCopy={cvCopyLocked ? blockCopy : undefined}
+                  onCut={cvCopyLocked ? blockCopy : undefined}
+                  onContextMenu={cvCopyLocked ? e => e.preventDefault() : undefined}
+                  style={{
+                    outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none",
+                    userSelect: cvCopyLocked ? "none" : undefined,
+                    WebkitUserSelect: cvCopyLocked ? "none" : undefined,
+                  }}
                 />
               </div>
             </div>
@@ -577,12 +590,17 @@ export default function Preview() {
                     value={editedLetter}
                     readOnly={editLocked}
                     onChange={e => { if (!editLocked) setEditedLetter(e.target.value); }}
+                    onCopy={letterCopyLocked ? blockCopy : undefined}
+                    onCut={letterCopyLocked ? blockCopy : undefined}
+                    onContextMenu={letterCopyLocked ? e => e.preventDefault() : undefined}
                     style={{
                       whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                       width: "100%", border: "none", outline: "none", resize: "vertical",
                       minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
                       background: "transparent", display: "block", boxSizing: "border-box",
                       position: "relative", zIndex: 1,
+                      userSelect: letterCopyLocked ? "none" : undefined,
+                      WebkitUserSelect: letterCopyLocked ? "none" : undefined,
                     }}
                   />
                 </div>
