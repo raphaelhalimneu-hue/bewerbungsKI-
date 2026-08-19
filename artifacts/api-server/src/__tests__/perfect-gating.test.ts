@@ -225,6 +225,45 @@ describe("perfected text preview gating", () => {
     expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
   });
 
+  it("returns only a preview when a free user perfects an already saved document", async () => {
+    const documentId = "77777777-7777-4777-8777-777777777777";
+    state.documents = [{
+      id: documentId,
+      userId: "user-1",
+      name: "Gespeicherte Bewerbung",
+      template: "modern",
+      cvHtml: "<div>Original CV</div>",
+      coverLetter: "Originale Bewerbung",
+      perfectedLetter: null,
+      perfectedCvHtml: null,
+      perfectedGenerationId: null,
+      profileData: { cv_json: { profile: "Originalprofil" } },
+      jobTitle: null,
+      jobCompany: null,
+      createdAt: new Date(),
+    }];
+
+    const response = await request(app)
+      .post("/api/perfect")
+      .set(auth)
+      .send({
+        documentId,
+        letterText: "Ausgangstext ".repeat(20),
+        profileText: "Profiltext ".repeat(10),
+        docType: "letter",
+        language: "de",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.locked).toBe(true);
+    expect(response.body.preview).toContain("[…]");
+    expect(response.body.profilePreview).toContain("[…]");
+    expect(response.body).not.toHaveProperty("letter");
+    expect(response.body).not.toHaveProperty("profile");
+    expect(JSON.stringify(response.body)).not.toContain(FULL_TEXT);
+    expect(JSON.stringify(response.body)).not.toContain(FULL_PROFILE);
+  });
+
   it("grants unlimited access only to the exact owner profile", async () => {
     const response = await request(app)
       .post("/api/perfect")
