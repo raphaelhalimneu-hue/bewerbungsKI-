@@ -27,12 +27,11 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       .select({ value: count() })
       .from(documentsTable)
       .where(eq(documentsTable.userId, userId));
-
     const unlimited = isUnlimitedEmail(req.userEmail);
-    const freeAssessmentFinished = !unlimited &&
+    const freeApplicationFinished = !unlimited &&
       !profile.isPremium &&
       (profile.credits ?? 0) === 0 &&
-      !!profile.firstAnalysisAt;
+      Number(docCount) >= 1;
     res.json({
       email: profile.email,
       is_premium: unlimited || profile.isPremium,
@@ -40,8 +39,7 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       credits: profile.credits,
       // A free account receives one complete application. Every further app
       // action is purchase-gated; buyers keep their package limit.
-      document_limit: unlimited || profile.isUnlimited ? 999999 : freeAssessmentFinished ? 0 : (!profile.isPremium && profile.credits === 0) ? 1 : 1 + profile.credits,
-      assessment_completed: !!profile.firstAnalysisAt,
+      document_limit: unlimited || profile.isUnlimited ? 999999 : freeApplicationFinished ? 0 : (!profile.isPremium && profile.credits === 0) ? 1 : 1 + profile.credits,
       documents_count: Number(docCount) || 0,
       email_verified: unlimited || !!profile.emailVerifiedAt,
     });
