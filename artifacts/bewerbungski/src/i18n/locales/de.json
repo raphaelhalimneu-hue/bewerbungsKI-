@@ -20,7 +20,7 @@
   },
   "home": {
     "badge": "🚀 Lebenslauf + Bewerbung in 3 Minuten",
-    "freeBadge": "Kostenlos erstellen & testen — Download ab 9,99 €",
+    "freeBadge": "Kostenlos erstellen & testen — Pakete ab 2,99 €",
     "titlePre": "Deine Bewerbung –",
     "titleEm": "professionell & fertig.",
     "subtitle": "Profil eingeben, Stellenanzeige einfügen – KI schreibt deinen Lebenslauf und deine Bewerbung in 3 Minuten. Auf Deutsch oder in 7 weiteren Sprachen.",
@@ -60,7 +60,7 @@
     "feat6Desc": "Professionelles Bewerbungsfoto direkt im Lebenslauf integrieren – optional.",
     "faqTitle": "Häufige Fragen",
     "faq1Q": "Was kostet BewerbungsKI?",
-    "faq1A": "Erstellen, ansehen und testen ist komplett kostenlos. Zum Herunterladen und Drucken deiner fertigen Bewerbung zahlst du einmalig 9,99 € (10 Bewerbungen).",
+    "faq1A": "Erstellen, ansehen und testen ist komplett kostenlos. Weitere Bewerbungen gibt es ab 2,99 € pro Bewerbung – einmalig, ohne Abo.",
     "faq2Q": "Wie gut ist die Qualität?",
     "faq2A": "Die KI analysiert dein Profil und die Stellenanzeige und schreibt echten, individuellen Text – keine Bausteinbriefe, keine Floskeln.",
     "faq3Q": "Was passiert mit meinen Daten?",
@@ -68,7 +68,7 @@
     "faq4Q": "Kann ich die Dokumente bearbeiten?",
     "faq4A": "Ja – nach der Generierung kannst du Lebenslauf und Bewerbung direkt in der App bearbeiten und erneut herunterladen.",
     "ctaBottomTitle": "Deine Traumstelle wartet.",
-    "ctaBottomSub": "Kostenlos erstellen & ansehen — keine Kreditkarte, kein Abo. Download & Druck ab 9,99 €.",
+    "ctaBottomSub": "Kostenlos erstellen & ansehen — keine Kreditkarte, kein Abo. Weitere Bewerbungen ab 2,99 €.",
     "ctaBottom": "Jetzt kostenlos starten",
     "germanNote": "Deine Bewerbung in 8 Sprachen – z. B. auf Deutsch, perfekt für den deutschen Arbeitsmarkt.",
     "ba": {
@@ -580,7 +580,7 @@
   },
   "locked": {
     "title": "Kostenlose Bewerbung verbraucht",
-    "text": "Herunterladen und Drucken gibt es mit dem Paket: 10 Bewerbungen für einmalig 9,99 €.",
+    "text": "Weitere Bewerbungen gibt es ab 2,99 € einzeln oder im Paket günstiger.",
     "editorText": "Erstellen, Bearbeiten und Ansehen sind kostenlos. Zum Herunterladen und Drucken brauchst du das Upgrade.",
     "cta": "Jetzt freischalten"
   },

@@ -6,6 +6,15 @@ import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router = Router();
 
+const PLANS = {
+  single: { amount: 299, credits: 1, name: "BewerbungsKI Einzelbewerbung", description: "1 Bewerbung – Einmalzahlung, kein Abo" },
+  starter: { amount: 999, credits: 5, name: "BewerbungsKI 5er-Paket", description: "5 Bewerbungen – Einmalzahlung, kein Abo" },
+  premium: { amount: 1499, credits: 10, name: "BewerbungsKI 10er-Paket", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
+  power: { amount: 2990, name: "BewerbungsKI Power", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
+} as const;
+
+type CreditPlan = keyof Pick<typeof PLANS, "single" | "starter" | "premium">;
+
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
@@ -28,12 +37,6 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
     const plan = requestedPlan === "single" || requestedPlan === "starter" || requestedPlan === "power"
       ? requestedPlan
       : "premium";
-    const PLANS = {
-      single: { amount: 299, credits: 1, name: "BewerbungsKI Einzelbewerbung", description: "1 Bewerbung – Einmalzahlung, kein Abo" },
-      starter: { amount: 999, credits: 5, name: "BewerbungsKI 5er-Paket", description: "5 Bewerbungen – Einmalzahlung, kein Abo" },
-      premium: { amount: 1499, credits: 10, name: "BewerbungsKI 10er-Paket", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
-      power: { amount: 2990, name: "BewerbungsKI Power", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
-    } as const;
     const cfg = PLANS[plan];
 
     // A Power (unlimited) account gains nothing from buying again — block it.
@@ -128,14 +131,21 @@ router.post("/webhook/stripe", async (req, res) => {
                 set: { isPremium: true, isUnlimited: true },
               });
           } else {
+            const creditPlan: CreditPlan =
+              session.metadata?.plan === "single" ||
+              session.metadata?.plan === "starter" ||
+              session.metadata?.plan === "premium"
+                ? session.metadata.plan
+                : "premium";
+            const credits = PLANS[creditPlan].credits;
             await tx
               .insert(profilesTable)
-              .values({ userId, email, isPremium: true, credits: PLANS[session.metadata?.plan === "single" || session.metadata?.plan === "starter" || session.metadata?.plan === "premium" ? session.metadata.plan : "premium"].credits })
+              .values({ userId, email, isPremium: true, credits })
               .onConflictDoUpdate({
                 target: profilesTable.userId,
                 set: {
                   isPremium: true,
-                  credits: sql`${profilesTable.credits} + ${PLANS[session.metadata?.plan === "single" || session.metadata?.plan === "starter" || session.metadata?.plan === "premium" ? session.metadata.plan : "premium"].credits}`,
+                  credits: sql`${profilesTable.credits} + ${credits}`,
                 },
               });
           }

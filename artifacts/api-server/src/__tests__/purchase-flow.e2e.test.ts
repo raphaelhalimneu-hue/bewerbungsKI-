@@ -239,7 +239,7 @@ describe("E2E: 1 gratis → Kauf → 10 weitere → Limit 11", () => {
     const session = createdSessions.at(-1);
     expect(session.mode).toBe("payment");
     expect(session.metadata.userId).toBe("e2e-user");
-    expect(session.line_items[0].price_data.unit_amount).toBe(999);
+    expect(session.line_items[0].price_data.unit_amount).toBe(1499);
   });
 
   it("step 5: webhook fulfillment unlocks premium with +10 credits", async () => {
