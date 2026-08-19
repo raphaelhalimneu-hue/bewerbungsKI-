@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ClipboardEvent } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
@@ -68,6 +68,54 @@ export default function Scanner() {
   const [perfectedText, setPerfectedText] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<UploadedFile | null>(null);
   const [wizardBusy, setWizardBusy] = useState(false);
+  const cvInputRef = useRef<HTMLTextAreaElement>(null);
+  const perfectedTextRef = useRef<HTMLDivElement>(null);
+  const freeUser = !!p && !p.is_premium && (p.credits || 0) === 0;
+  const perfectedCopyLocked = freeUser && !!perfectedText;
+
+  function blockCopy(e: ClipboardEvent<HTMLElement>) {
+    e.preventDefault();
+  }
+
+  // The perfected result is also copied into the input field on this page.
+  // Capture clipboard events globally because Android's selection toolbar does
+  // not reliably bubble copy/cut/contextmenu events from textareas.
+  useEffect(() => {
+    if (!perfectedCopyLocked) return;
+    const isInside = (node: Node | null, container: HTMLElement | null) =>
+      !!node && !!container && (node === container || container.contains(node));
+    const isLockedTarget = (target: EventTarget | null) => {
+      const node = target instanceof Node ? target : null;
+      const active = document.activeElement;
+      const selection = window.getSelection();
+      return [
+        node,
+        active,
+        selection?.anchorNode ?? null,
+        selection?.focusNode ?? null,
+      ].some((candidate) =>
+        isInside(candidate, cvInputRef.current) || isInside(candidate, perfectedTextRef.current),
+      );
+    };
+    const preventClipboard = (event: Event) => {
+      if (isLockedTarget(event.target)) event.preventDefault();
+    };
+    const preventShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && ["c", "x"].includes(event.key.toLowerCase()) && isLockedTarget(event.target)) {
+        event.preventDefault();
+      }
+    };
+    document.addEventListener("copy", preventClipboard, true);
+    document.addEventListener("cut", preventClipboard, true);
+    document.addEventListener("contextmenu", preventClipboard, true);
+    document.addEventListener("keydown", preventShortcut, true);
+    return () => {
+      document.removeEventListener("copy", preventClipboard, true);
+      document.removeEventListener("cut", preventClipboard, true);
+      document.removeEventListener("contextmenu", preventClipboard, true);
+      document.removeEventListener("keydown", preventShortcut, true);
+    };
+  }, [perfectedCopyLocked]);
 
   async function goWizard() {
     try { sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
@@ -188,11 +236,15 @@ export default function Scanner() {
             <FileImportButton onText={(txt) => { setCvText(txt); setErrorMsg(""); setResult(null); setPerfectedText(null); setPerfectChanges(null); }} onFile={setLastFile} />
           </div>
           <textarea
+            ref={cvInputRef}
             value={cvText}
             onChange={(e) => { setCvText(e.target.value); if (errorMsg) setErrorMsg(""); }}
+            onCopy={perfectedCopyLocked ? blockCopy : undefined}
+            onCut={perfectedCopyLocked ? blockCopy : undefined}
+            onContextMenu={perfectedCopyLocked ? e => e.preventDefault() : undefined}
             placeholder={mode === "letter" ? t("scanner.letterPlaceholder") : t("scanner.cvPlaceholder")}
             rows={10}
-            style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)" }}
+            style={{ width: "100%", resize: "vertical", fontSize: 13.5, lineHeight: 1.6, padding: 12, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg2)", color: "var(--text)", userSelect: perfectedCopyLocked ? "none" : undefined, WebkitUserSelect: perfectedCopyLocked ? "none" : undefined }}
           />
           {errorMsg && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{errorMsg}</div>}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
@@ -211,9 +263,14 @@ export default function Scanner() {
         </div>
 
         {perfectedText && (
-          <div className="card" style={{ marginTop: 16 }}>
+            <div ref={perfectedTextRef} className="card" style={{ marginTop: 16 }}>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>✨ {t("scanner.improvedTitle")}</div>
-            <div style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}>
+              <div
+                onCopy={perfectedCopyLocked ? blockCopy : undefined}
+                onCut={perfectedCopyLocked ? blockCopy : undefined}
+                onContextMenu={perfectedCopyLocked ? e => e.preventDefault() : undefined}
+                style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", userSelect: perfectedCopyLocked ? "none" : undefined, WebkitUserSelect: perfectedCopyLocked ? "none" : undefined }}
+              >
               {perfectedText}
             </div>
           </div>
