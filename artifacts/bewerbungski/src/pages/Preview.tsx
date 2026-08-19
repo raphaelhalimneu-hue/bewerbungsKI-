@@ -26,6 +26,8 @@ export default function Preview() {
   const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
   const [editingCv, setEditingCv] = useState(false);
+  const [letterManuallyEdited, setLetterManuallyEdited] = useState(false);
+  const [cvManuallyEdited, setCvManuallyEdited] = useState(false);
   const [checking, setChecking] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [perfecting, setPerfecting] = useState(false);
@@ -46,8 +48,10 @@ export default function Preview() {
   const cvPrintLocked = freeUser;
   const letterPrintLocked = freeUser;
   const pdfLocked = freeUser;
-  const letterCopyLocked = freeUser && perfectedApplied;
-  const cvCopyLocked = freeUser && cvPerfectedApplied;
+  // Free users can read every text, but may not copy AI-perfected or manually
+  // edited versions. Paid users keep unrestricted clipboard access.
+  const letterCopyLocked = freeUser && (perfectedApplied || letterManuallyEdited);
+  const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -55,6 +59,59 @@ export default function Preview() {
   function blockCopy(e: ClipboardEvent<HTMLElement>) {
     e.preventDefault();
   }
+
+  // Textareas and contentEditable elements don't consistently bubble clipboard
+  // events on mobile browsers. Capture them at the document level too, so the
+  // Android selection toolbar and Ctrl/Cmd+C cannot bypass the local handlers.
+  useEffect(() => {
+    if (!letterCopyLocked && !cvCopyLocked) return;
+
+    const isInside = (node: Node | null, container: HTMLElement | null) =>
+      !!node && !!container && (node === container || container.contains(node));
+
+    const targetsLockedContent = (eventTarget: EventTarget | null) => {
+      const target = eventTarget instanceof Node ? eventTarget : null;
+      const active = document.activeElement;
+      const selection = window.getSelection();
+      const inLetter = letterCopyLocked && (
+        isInside(target, letterRef.current) ||
+        isInside(active, letterRef.current) ||
+        isInside(selection?.anchorNode ?? null, letterRef.current) ||
+        isInside(selection?.focusNode ?? null, letterRef.current)
+      );
+      const inCv = cvCopyLocked && (
+        isInside(target, cvRef.current) ||
+        isInside(active, cvRef.current) ||
+        isInside(selection?.anchorNode ?? null, cvRef.current) ||
+        isInside(selection?.focusNode ?? null, cvRef.current)
+      );
+      return inLetter || inCv;
+    };
+
+    const preventClipboard = (event: Event) => {
+      if (targetsLockedContent(event.target)) event.preventDefault();
+    };
+    const preventShortcut = (event: KeyboardEvent) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        ["c", "x"].includes(event.key.toLowerCase()) &&
+        targetsLockedContent(event.target)
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("copy", preventClipboard, true);
+    document.addEventListener("cut", preventClipboard, true);
+    document.addEventListener("contextmenu", preventClipboard, true);
+    document.addEventListener("keydown", preventShortcut, true);
+    return () => {
+      document.removeEventListener("copy", preventClipboard, true);
+      document.removeEventListener("cut", preventClipboard, true);
+      document.removeEventListener("contextmenu", preventClipboard, true);
+      document.removeEventListener("keydown", preventShortcut, true);
+    };
+  }, [letterCopyLocked, cvCopyLocked]);
 
   async function handleCreateLetter() {
     setCreatingLetter(true);
@@ -535,6 +592,7 @@ export default function Preview() {
                   className="cv-sheet"
                   contentEditable={editingCv}
                   suppressContentEditableWarning
+                  onInput={() => { if (editingCv) setCvManuallyEdited(true); }}
                   onCopy={cvCopyLocked ? blockCopy : undefined}
                   onCut={cvCopyLocked ? blockCopy : undefined}
                   onContextMenu={cvCopyLocked ? e => e.preventDefault() : undefined}
@@ -588,7 +646,12 @@ export default function Preview() {
                   <textarea
                     value={editedLetter}
                     readOnly={editLocked}
-                    onChange={e => { if (!editLocked) setEditedLetter(e.target.value); }}
+                    onChange={e => {
+                      if (!editLocked) {
+                        setEditedLetter(e.target.value);
+                        setLetterManuallyEdited(true);
+                      }
+                    }}
                     onCopy={letterCopyLocked ? blockCopy : undefined}
                     onCut={letterCopyLocked ? blockCopy : undefined}
                     onContextMenu={letterCopyLocked ? e => e.preventDefault() : undefined}
