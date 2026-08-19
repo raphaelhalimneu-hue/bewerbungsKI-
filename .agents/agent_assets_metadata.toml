@@ -91,3 +91,10 @@ uri = "file://attached_assets/BewerbungsKI_Uebergabe.html"
 type = "text"
 title = "BewerbungsKI – Übergabe-Dokument"
 description = "Alle Infos für einen anderen Assistenten: App, Preismodell, Technik, Dateien, Deployment, Regeln und Stolperfallen (ohne Passwörter/Schlüssel)."
+
+[[outputs]]
+id = "ydtQ6522ybXMbIWdm9BRr"
+uri = "file://bewerbungski-code.zip"
+type = "unspecified"
+title = "BewerbungsKI – Quellcode"
+description = "Kompletter Projektcode ohne node_modules (1,1 MB). Enthält API-Server, Web-App, alle Routen, i18n-Dateien und Tests."
