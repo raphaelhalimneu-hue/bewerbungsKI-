@@ -22,6 +22,16 @@ function createClientPreview(text: string): string {
   return `${normalized.slice(0, visibleLength).trimEnd()} […]`;
 }
 
+function createClientHtmlPreview(html: string): string {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const preview = createClientPreview(text);
+  return `<div style="white-space: pre-wrap;">${preview
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")}</div>`;
+}
+
 export default function Preview() {
   const { t } = useTranslation();
   const params = useParams<{ id: string }>();
@@ -64,6 +74,9 @@ export default function Preview() {
   const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
   const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
   const showLockedCvPreview = freeUser && perfectedServerLocked;
+  const visibleLetter = freeUser && perfectedApplied && !perfectedServerLocked
+    ? createClientPreview(editedLetter)
+    : editedLetter;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -257,29 +270,34 @@ export default function Preview() {
   useEffect(() => {
     const d: any = doc;
     if (!d) return;
-    if (d.perfected_locked) {
-      setEditedLetter(typeof d.perfected_letter === "string" ? d.perfected_letter : "");
+    if (d.perfected_locked || (freeUser && typeof d.perfected_letter === "string")) {
+      const letter = typeof d.perfected_letter === "string" ? d.perfected_letter : "";
+      setEditedLetter(freeUser ? createClientPreview(letter) : letter);
       setPerfectedApplied(true);
-      setPerfectedServerLocked(true);
-      setPerfectedProfilePreview(typeof d.perfected_profile === "string" ? d.perfected_profile : null);
+      setPerfectedServerLocked(freeUser || Boolean(d.perfected_locked));
+      setPerfectedProfilePreview(typeof d.perfected_profile === "string"
+        ? (freeUser ? createClientPreview(d.perfected_profile) : d.perfected_profile)
+        : null);
     } else if (d.cover_letter) {
       setEditedLetter(d.cover_letter);
       setPerfectedServerLocked(false);
       setPerfectedProfilePreview(null);
     }
-  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked]);
+  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked, freeUser]);
 
   // Set CV HTML via ref so contentEditable edits are preserved across re-renders
   useEffect(() => {
     const d: any = doc;
     if (!cvRef.current || !d) return;
     if (d.perfected_cv_html) {
-      cvRef.current.innerHTML = d.perfected_cv_html;
+      cvRef.current.innerHTML = freeUser
+        ? createClientHtmlPreview(d.perfected_cv_html)
+        : d.perfected_cv_html;
       setCvPerfectedApplied(true);
     } else if (d.cv_html) {
       cvRef.current.innerHTML = d.cv_html;
     }
-  }, [(doc as any)?.id, (doc as any)?.perfected_cv_html]);
+  }, [(doc as any)?.id, (doc as any)?.perfected_cv_html, freeUser]);
 
   // If this query was cached while the account was free, refetch after purchase.
   // The server atomically promotes the exact pending generation; the browser
@@ -649,7 +667,11 @@ export default function Preview() {
                         onCopy={blockCopy}
                         onCut={blockCopy}
                         onContextMenu={e => e.preventDefault()}
-                        dangerouslySetInnerHTML={{ __html: (doc as any).perfected_cv_html }}
+                        dangerouslySetInnerHTML={{
+                          __html: freeUser
+                            ? createClientHtmlPreview((doc as any).perfected_cv_html)
+                            : (doc as any).perfected_cv_html,
+                        }}
                         style={{ fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
                       />
                     ) : perfectedProfilePreview ? (
@@ -749,11 +771,11 @@ export default function Preview() {
                         position: "relative", zIndex: 1, userSelect: "none", WebkitUserSelect: "none",
                       }}
                     >
-                      {editedLetter || t("preview.unlockPerfectedHint")}
+                      {visibleLetter || t("preview.unlockPerfectedHint")}
                     </div>
                   ) : (
                     <textarea
-                      value={editedLetter}
+                      value={visibleLetter}
                       readOnly={editLocked}
                       onChange={e => {
                         if (!editLocked) {
