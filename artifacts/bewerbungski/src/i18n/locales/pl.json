@@ -33,8 +33,8 @@
     "step3Title": "Pobierz CV i list",
     "step3Text": "Oba dokumenty gotowe od razu – profesjonalne, spersonalizowane, do wysyłki. Pobierz jako DOCX.",
     "germanNote": "Twoja aplikacja w 8 językach – np. po niemiecku, idealna na niemiecki rynek pracy.",
-    "freeBadge": "1 aplikacja za darmo – bez karty kredytowej",
-    "trustFree": "Wypróbuj 1 za darmo",
+    "freeBadge": "Twórz i testuj za darmo — pobieranie od 9,99 €",
+    "trustFree": "Testuj za darmo",
     "trustNoCard": "Bez karty kredytowej",
     "trustGdpr": "Zgodność z RODO",
     "trustFast": "Gotowe w 3 minuty",
@@ -54,7 +54,7 @@
     "feat6Desc": "Dodaj profesjonalne zdjęcie bezpośrednio do CV – opcjonalnie.",
     "faqTitle": "Często zadawane pytania",
     "faq1Q": "Ile kosztuje BewerbungsKI?",
-    "faq1A": "1 aplikacja jest na zawsze darmowa – bez karty. Potem jednorazowo 9,99 € za 10 kolejnych aplikacji.",
+    "faq1A": "Tworzenie, przeglądanie i testowanie jest całkowicie darmowe. Za pobranie i wydruk gotowej aplikacji płacisz jednorazowo 9,99 € (10 aplikacji).",
     "faq2Q": "Jak dobra jest jakość?",
     "faq2A": "AI analizuje Twój profil i ofertę pracy i pisze prawdziwy, indywidualny tekst – bez szablonów, bez frazesów.",
     "faq3Q": "Co dzieje się z moimi danymi?",
@@ -62,7 +62,7 @@
     "faq4Q": "Czy mogę edytować dokumenty?",
     "faq4A": "Tak – po wygenerowaniu możesz edytować CV i list bezpośrednio w aplikacji i ponownie je pobrać.",
     "ctaBottomTitle": "Twoja wymarzona praca czeka.",
-    "ctaBottomSub": "1 aplikacja za darmo – bez karty, bez abonamentu.",
+    "ctaBottomSub": "Twórz i przeglądaj za darmo — bez karty, bez abonamentu. Pobieranie i druk od 9,99 €.",
     "ctaBottom": "Zacznij za darmo",
     "ba": {
       "title": "Z surowych danych do wymarzonej aplikacji",
@@ -124,10 +124,10 @@
     "free": "Darmowy",
     "freePrice": "0 €",
     "freeForever": "Za darmo na zawsze",
-    "freeFeat1": "Utwórz 1 aplikację za darmo",
+    "freeFeat1": "Twórz, przeglądaj i testuj aplikacje — za darmo",
     "freeFeat2": "Wszystkie szablony i papiery firmowe",
     "freeFeat3": "CV i list motywacyjny z AI",
-    "freeFeat4": "Bezpiecznie zapisane",
+    "freeFeat4": "Pobieranie i drukowanie: tylko Premium",
     "currentPlan": "Bieżący plan",
     "premium": "Premium",
     "popular": "Popularne",
@@ -136,7 +136,7 @@
     "premFeat1": "Utwórz 10 aplikacji",
     "premFeat2": "Wszystkie szablony i papiery firmowe",
     "premFeat3": "CV i list motywacyjny z AI",
-    "premFeat4": "Priorytetowe wsparcie",
+    "premFeat4": "Pobieranie PDF i Word + drukowanie",
     "premFeat5": "Wszystkie przyszłe funkcje",
     "premiumActive": "✓ Premium aktywne",
     "upgradeNow": "Ulepsz teraz →",
@@ -487,7 +487,8 @@
     "noText": "Nie znaleziono tekstu w pliku.",
     "limit": "Osiągnięto dzienny limit przesyłania. Spróbuj jutro.",
     "error": "Nie udało się odczytać pliku.",
-    "verifyFirst": "Najpierw potwierdź swój adres e-mail — sprawdź też folder spam."
+    "verifyFirst": "Najpierw potwierdź swój adres e-mail — sprawdź też folder spam.",
+    "upgradeRequired": "Twoja darmowa aplikacja została wykorzystana. Ulepsz plan, aby tworzyć kolejne."
   },
   "importPage": {
     "nav": "Import pliku",
@@ -509,14 +510,14 @@
   },
   "exitPopup": {
     "title": "Poczekaj chwilę!",
-    "text": "Twoja pierwsza aplikacja jest całkowicie darmowa – CV i list motywacyjny w 3 minuty, bez karty kredytowej.",
+    "text": "Stwórz kompletną aplikację za darmo — CV i list w 3 minuty, bez karty. Płacisz tylko za pobranie.",
     "cta": "Utwórz teraz za darmo",
     "dismiss": "Nie, dziękuję"
   },
   "locked": {
     "title": "Darmowa aplikacja wykorzystana",
-    "text": "Utworzyłeś już swoją darmową aplikację. Zdobądź 10 kolejnych aplikacji, aby dalej korzystać ze skanera i edytora.",
-    "editorText": "Twój darmowy limit został wykorzystany — ulepsz plan, aby edytować i zapisywać. Podgląd i pobieranie pozostają darmowe.",
+    "text": "Pobieranie i drukowanie w pakiecie: 10 aplikacji za jednorazowe 9,99 €.",
+    "editorText": "Tworzenie, edycja i podgląd są darmowe. Pobieranie i drukowanie wymagają ulepszenia.",
     "cta": "Odblokuj teraz"
   },
   "rating": {

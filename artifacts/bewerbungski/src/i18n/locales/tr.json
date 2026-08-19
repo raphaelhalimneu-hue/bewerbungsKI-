@@ -33,8 +33,8 @@
     "step3Title": "CV ve ön yazıyı indir",
     "step3Text": "Her iki belge anında hazır – profesyonel, kişiselleştirilmiş, gönderilebilir. DOCX olarak indir.",
     "germanNote": "Başvurun 8 dilde – örneğin Almanca, Alman iş piyasası için mükemmel.",
-    "freeBadge": "1 başvuru ücretsiz – kredi kartı gerekmez",
-    "trustFree": "1 kez ücretsiz dene",
+    "freeBadge": "Ücretsiz oluştur ve dene — indirme 9,99 €'dan",
+    "trustFree": "Ücretsiz dene",
     "trustNoCard": "Kredi kartı yok",
     "trustGdpr": "GDPR uyumlu",
     "trustFast": "3 dakikada hazır",
@@ -54,7 +54,7 @@
     "feat6Desc": "Profesyonel fotoğrafını doğrudan CV'ye ekle – isteğe bağlı.",
     "faqTitle": "Sık sorulan sorular",
     "faq1Q": "BewerbungsKI ne kadar?",
-    "faq1A": "1 başvuru kalıcı olarak ücretsizdir – kart gerekmez. Sonrasında 10 ek başvuru için tek seferlik 9,99 €.",
+    "faq1A": "Oluşturma, görüntüleme ve deneme tamamen ücretsiz. Bitmiş başvurunu indirmek ve yazdırmak için tek seferlik 9,99 € ödersin (10 başvuru).",
     "faq2Q": "Kalite ne kadar iyi?",
     "faq2A": "Yapay zekâ profilini ve iş ilanını analiz eder ve gerçek, bireysel metin yazar – şablon yok, klişe yok.",
     "faq3Q": "Verilerime ne olur?",
@@ -62,7 +62,7 @@
     "faq4Q": "Belgeleri düzenleyebilir miyim?",
     "faq4A": "Evet – oluşturulduktan sonra CV ve ön yazıyı doğrudan uygulamada düzenleyip tekrar indirebilirsiniz.",
     "ctaBottomTitle": "Hayalindeki iş seni bekliyor.",
-    "ctaBottomSub": "1 başvuru ücretsiz – kart yok, abonelik yok.",
+    "ctaBottomSub": "Ücretsiz oluştur ve görüntüle — kart yok, abonelik yok. İndirme ve yazdırma 9,99 €'dan.",
     "ctaBottom": "Ücretsiz başla",
     "ba": {
       "title": "Ham verilerden mükemmel başvuruya",
@@ -124,10 +124,10 @@
     "free": "Ücretsiz",
     "freePrice": "0 €",
     "freeForever": "Sonsuza dek ücretsiz",
-    "freeFeat1": "1 başvuruyu ücretsiz oluştur",
+    "freeFeat1": "Başvuruları oluştur, görüntüle ve dene — ücretsiz",
     "freeFeat2": "Tüm tasarım şablonları ve antetler",
     "freeFeat3": "Yapay zekâ özgeçmiş ve ön yazı",
-    "freeFeat4": "Güvenle saklanır",
+    "freeFeat4": "İndirme ve yazdırma: yalnızca Premium",
     "currentPlan": "Mevcut plan",
     "premium": "Premium",
     "popular": "Popüler",
@@ -136,7 +136,7 @@
     "premFeat1": "10 başvuru oluşturun",
     "premFeat2": "Tüm tasarım şablonları ve antetler",
     "premFeat3": "Yapay zekâ özgeçmiş ve ön yazı",
-    "premFeat4": "Öncelikli destek",
+    "premFeat4": "PDF ve Word indirme + yazdırma",
     "premFeat5": "Gelecekteki tüm özellikler",
     "premiumActive": "✓ Premium etkin",
     "upgradeNow": "Şimdi yükselt →",
@@ -487,7 +487,8 @@
     "noText": "Dosyada metin bulunamadı.",
     "limit": "Günlük yükleme sınırına ulaşıldı. Yarın tekrar dene.",
     "error": "Dosya okunamadı.",
-    "verifyFirst": "Lütfen önce e-posta adresini onayla — spam klasörünü de kontrol et."
+    "verifyFirst": "Lütfen önce e-posta adresini onayla — spam klasörünü de kontrol et.",
+    "upgradeRequired": "Ücretsiz başvurun kullanıldı. Daha fazlası için yükseltme yap."
   },
   "importPage": {
     "nav": "Dosya içe aktar",
@@ -509,14 +510,14 @@
   },
   "exitPopup": {
     "title": "Bir saniye bekle!",
-    "text": "İlk başvurun tamamen ücretsiz – 3 dakikada CV ve ön yazı, kredi kartı gerekmez.",
+    "text": "Tam başvurunu ücretsiz oluştur — CV ve ön yazı 3 dakikada, kart gerekmez. Yalnızca indirme için ödersin.",
     "cta": "Şimdi ücretsiz oluştur",
     "dismiss": "Hayır, teşekkürler"
   },
   "locked": {
     "title": "Ücretsiz başvuru kullanıldı",
-    "text": "Ücretsiz başvurunuzu zaten oluşturdunuz. Tarayıcıyı ve düzenleyiciyi kullanmaya devam etmek için 10 başvuru daha alın.",
-    "editorText": "Ücretsiz hakkınız doldu — düzenlemek ve kaydetmek için yükseltme gerekli. Görüntüleme ve indirme ücretsiz kalır.",
+    "text": "İndirme ve yazdırma pakete dahil: tek seferlik 9,99 €'ya 10 başvuru.",
+    "editorText": "Oluşturma, düzenleme ve görüntüleme ücretsiz. İndirme ve yazdırma için yükseltme gerekir.",
     "cta": "Şimdi aç"
   },
   "rating": {

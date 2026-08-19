@@ -179,11 +179,12 @@ describe("quota: 1 free + credits", () => {
     expect(res.status).toBe(503);
   });
 
-  it("free user at 1 document → free_limit_reached", async () => {
+  it("free user at 1 document may keep generating (downloads stay paid)", async () => {
     state.docCount = 1;
     const res = await postGenerate();
-    expect(res.status).toBe(403);
-    expect(res.body.error).toBe("free_limit_reached");
+    // Policy 2026-08-19: creation is open for free users; quota passes and
+    // the route fails on the missing AI key instead.
+    expect(res.status).toBe(503);
   });
 
   it("premium user with credits under limit passes", async () => {

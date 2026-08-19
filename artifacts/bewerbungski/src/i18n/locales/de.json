@@ -19,11 +19,11 @@
   },
   "home": {
     "badge": "🚀 Lebenslauf + Bewerbung in 3 Minuten",
-    "freeBadge": "1 Bewerbung kostenlos – keine Kreditkarte nötig",
+    "freeBadge": "Kostenlos erstellen & testen — Download ab 9,99 €",
     "titlePre": "Deine Bewerbung –",
     "titleEm": "professionell & fertig.",
     "subtitle": "Profil eingeben, Stellenanzeige einfügen – KI schreibt deinen Lebenslauf und deine Bewerbung in 3 Minuten. Auf Deutsch oder in 7 weiteren Sprachen.",
-    "trustFree": "1× kostenlos testen",
+    "trustFree": "Kostenlos testen",
     "trustNoCard": "Keine Kreditkarte",
     "trustGdpr": "DSGVO-konform",
     "trustFast": "Fertig in 3 Minuten",
@@ -53,7 +53,7 @@
     "feat6Desc": "Professionelles Bewerbungsfoto direkt im Lebenslauf integrieren – optional.",
     "faqTitle": "Häufige Fragen",
     "faq1Q": "Was kostet BewerbungsKI?",
-    "faq1A": "1 Bewerbung ist dauerhaft kostenlos – ohne Kreditkarte. Danach einmalig 9,99 € für 10 weitere Bewerbungen.",
+    "faq1A": "Erstellen, ansehen und testen ist komplett kostenlos. Zum Herunterladen und Drucken deiner fertigen Bewerbung zahlst du einmalig 9,99 € (10 Bewerbungen).",
     "faq2Q": "Wie gut ist die Qualität?",
     "faq2A": "Die KI analysiert dein Profil und die Stellenanzeige und schreibt echten, individuellen Text – keine Bausteinbriefe, keine Floskeln.",
     "faq3Q": "Was passiert mit meinen Daten?",
@@ -61,7 +61,7 @@
     "faq4Q": "Kann ich die Dokumente bearbeiten?",
     "faq4A": "Ja – nach der Generierung kannst du Lebenslauf und Bewerbung direkt in der App bearbeiten und erneut herunterladen.",
     "ctaBottomTitle": "Deine Traumstelle wartet.",
-    "ctaBottomSub": "1 Bewerbung kostenlos – keine Kreditkarte, kein Abo.",
+    "ctaBottomSub": "Kostenlos erstellen & ansehen — keine Kreditkarte, kein Abo. Download & Druck ab 9,99 €.",
     "ctaBottom": "Jetzt kostenlos starten",
     "germanNote": "Deine Bewerbung in 8 Sprachen – z. B. auf Deutsch, perfekt für den deutschen Arbeitsmarkt.",
     "ba": {
@@ -124,10 +124,10 @@
     "free": "Free",
     "freePrice": "0 €",
     "freeForever": "Für immer kostenlos",
-    "freeFeat1": "1 Bewerbung kostenlos erstellen",
+    "freeFeat1": "Bewerbungen erstellen, ansehen & testen — kostenlos",
     "freeFeat2": "Alle Design-Vorlagen & Briefköpfe",
     "freeFeat3": "KI-Lebenslauf & Bewerbung",
-    "freeFeat4": "Sicher gespeichert",
+    "freeFeat4": "Download & Druck: erst mit Premium",
     "currentPlan": "Aktueller Plan",
     "premium": "Premium",
     "popular": "Beliebt",
@@ -136,7 +136,7 @@
     "premFeat1": "10 Bewerbungen erstellen",
     "premFeat2": "Alle Design-Vorlagen & Briefköpfe",
     "premFeat3": "KI-Lebenslauf & Bewerbung",
-    "premFeat4": "Prioritäts-Support",
+    "premFeat4": "PDF- & Word-Download + Drucken",
     "premFeat5": "Alle zukünftigen Features",
     "premiumActive": "✓ Premium aktiv",
     "upgradeNow": "Jetzt upgraden →",
@@ -530,7 +530,8 @@
     "noText": "Kein Text in der Datei gefunden.",
     "limit": "Tageslimit für Datei-Uploads erreicht. Versuch es morgen wieder.",
     "error": "Datei konnte nicht gelesen werden.",
-    "verifyFirst": "Bitte bestätige zuerst deine E-Mail-Adresse — prüfe auch deinen Spam-Ordner."
+    "verifyFirst": "Bitte bestätige zuerst deine E-Mail-Adresse — prüfe auch deinen Spam-Ordner.",
+    "upgradeRequired": "Deine Gratis-Bewerbung ist bereits verbraucht. Hol dir das Upgrade, um weitere zu erstellen."
   },
   "importPage": {
     "nav": "Datei-Import",
@@ -552,14 +553,14 @@
   },
   "exitPopup": {
     "title": "Warte kurz!",
-    "text": "Deine erste Bewerbung ist komplett kostenlos – Lebenslauf und Anschreiben in 3 Minuten, keine Kreditkarte nötig.",
+    "text": "Erstelle deine komplette Bewerbung kostenlos — Lebenslauf und Anschreiben in 3 Minuten, keine Kreditkarte nötig. Bezahlt wird nur fürs Herunterladen.",
     "cta": "Jetzt kostenlos erstellen",
     "dismiss": "Nein danke"
   },
   "locked": {
     "title": "Kostenlose Bewerbung verbraucht",
-    "text": "Du hast deine kostenlose Bewerbung bereits erstellt. Hol dir 10 weitere Bewerbungen, um den Scanner und den Editor weiter zu nutzen.",
-    "editorText": "Dein kostenloses Kontingent ist verbraucht — zum Bearbeiten und Speichern brauchst du ein Upgrade. Ansehen und Herunterladen bleibt frei.",
+    "text": "Herunterladen und Drucken gibt es mit dem Paket: 10 Bewerbungen für einmalig 9,99 €.",
+    "editorText": "Erstellen, Bearbeiten und Ansehen sind kostenlos. Zum Herunterladen und Drucken brauchst du das Upgrade.",
     "cta": "Jetzt freischalten"
   },
   "rating": {

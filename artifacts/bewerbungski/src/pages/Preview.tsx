@@ -38,14 +38,15 @@ export default function Preview() {
   const { profile } = useAuth();
   const pAuth = profile as any;
   const freeUser = !!pAuth && !pAuth.is_premium && (pAuth.credits || 0) === 0;
-  // Free accounts: the one (perfected) application is downloadable and
-  // printable without limits — but it cannot be EDITED. Word stays paid.
+  // Free accounts may try everything on screen, but download and print are
+  // paid-only (policy 2026-08-19). Server enforces the same rules.
   const docxLocked = freeUser;
-  const editLocked = freeUser;
-  // Free accounts: ONE print per part (CV / letter), counted on the server
+  const editLocked = false; // everything is open except download & print
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
-  const cvPrintLocked = freeUser && (printUsed.cv_print || 0) >= 1;
-  const letterPrintLocked = freeUser && (printUsed.letter_print || 0) >= 1;
+  void printUsed;
+  const cvPrintLocked = freeUser;
+  const letterPrintLocked = freeUser;
+  const pdfLocked = freeUser;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -267,7 +268,14 @@ export default function Preview() {
   }
 
   async function printCv() {
-    const el = cvRef.current;
+    let el: HTMLElement | null = cvRef.current;
+    // Free accounts: the screen may show the perfected version, but prints
+    // always use the stored ORIGINAL (perfected output is paid-only).
+    if (freeUser && (doc as any)?.cv_html) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = (doc as any).cv_html;
+      el = tmp;
+    }
     if (!el) return;
     // Sanitize the stored CV HTML before re-parsing it in the popup:
     // remove active content and event handlers (document.write would execute them).
@@ -293,7 +301,11 @@ export default function Preview() {
   }
 
   async function printLetter() {
-    const text = editedLetter || (doc as any)?.cover_letter || "";
+    // Free accounts always print the stored ORIGINAL letter — the perfected
+    // version shown on screen is paid-only.
+    const text = freeUser
+      ? ((doc as any)?.cover_letter || "")
+      : (editedLetter || (doc as any)?.cover_letter || "");
     if (!text) return;
     const w = window.open("", "_blank");
     if (!w) return;
@@ -306,6 +318,8 @@ export default function Preview() {
 
   // CV PDF: client-side via html2canvas so contentEditable edits are captured
   async function handleDownloadCvPdf() {
+    // Downloads are paid-only for free accounts
+    if (pdfLocked) { navigate("/pricing"); return; }
     if (!cvRef.current) return;
     setExporting("cv-pdf");
     try {
@@ -344,6 +358,8 @@ export default function Preview() {
 
   // Cover letter PDF: server-side so edited text is forwarded correctly
   async function handleDownloadLetterPdf() {
+    // Downloads are paid-only for free accounts
+    if (pdfLocked) { navigate("/pricing"); return; }
     setExporting("letter-pdf");
     try {
       let url = `/api/documents/${params.id}/download/cover-letter.pdf`;

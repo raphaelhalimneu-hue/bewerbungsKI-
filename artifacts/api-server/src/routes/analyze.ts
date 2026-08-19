@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isEmailUnverified } from "../lib/freeLock";
+import { isEmailUnverified } from "../lib/freeLock";
 import { db, profilesTable } from "@workspace/db";
 import { and, eq, lt, sql } from "drizzle-orm";
 
@@ -153,13 +153,13 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(413).json({ error: "input_too_large" });
       return;
     }
-    // Perfecting is allowed for free users too — they can view the improved
-    // version, but saving/downloading it stays behind the purchase.
     const unlimitedP = (process.env.UNLIMITED_EMAILS || "halimraphael9@gmail.com").toLowerCase().split(",").includes((req.userEmail || "").toLowerCase());
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
+    // Free users MAY perfect and view the result on screen; downloads and
+    // prints always serve the ORIGINAL version (paid feature, policy 2026-08-19).
     if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;

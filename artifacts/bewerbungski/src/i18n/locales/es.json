@@ -33,8 +33,8 @@
     "step3Title": "Descarga CV y carta",
     "step3Text": "Ambos documentos listos al instante – profesionales, personalizados, listos para enviar. Descarga en DOCX.",
     "germanNote": "Tu solicitud en 8 idiomas – p. ej. en alemán, perfecta para el mercado laboral alemán.",
-    "freeBadge": "1 candidatura gratis – sin tarjeta de crédito",
-    "trustFree": "Prueba 1 gratis",
+    "freeBadge": "Crea y prueba gratis — descarga desde 9,99 €",
+    "trustFree": "Prueba gratis",
     "trustNoCard": "Sin tarjeta de crédito",
     "trustGdpr": "Conforme al RGPD",
     "trustFast": "Listo en 3 minutos",
@@ -54,7 +54,7 @@
     "feat6Desc": "Añade una foto profesional directamente en tu CV – opcional.",
     "faqTitle": "Preguntas frecuentes",
     "faq1Q": "¿Cuánto cuesta BewerbungsKI?",
-    "faq1A": "1 candidatura es gratis para siempre – sin tarjeta. Después, un pago único de 9,99 € por 10 candidaturas más.",
+    "faq1A": "Crear, ver y probar es totalmente gratis. Para descargar e imprimir tu candidatura terminada pagas 9,99 € una sola vez (10 candidaturas).",
     "faq2Q": "¿Qué calidad tiene el resultado?",
     "faq2A": "La IA analiza tu perfil y la oferta de trabajo y escribe texto genuino e individual – sin plantillas ni frases vacías.",
     "faq3Q": "¿Qué pasa con mis datos?",
@@ -62,7 +62,7 @@
     "faq4Q": "¿Puedo editar los documentos?",
     "faq4A": "Sí – tras la generación puedes editar el CV y la carta directamente en la app y volver a descargarlos.",
     "ctaBottomTitle": "Tu trabajo soñado te espera.",
-    "ctaBottomSub": "1 candidatura gratis – sin tarjeta, sin suscripción.",
+    "ctaBottomSub": "Crea y visualiza gratis — sin tarjeta, sin suscripción. Descarga e impresión desde 9,99 €.",
     "ctaBottom": "Empezar gratis",
     "ba": {
       "title": "De datos brutos a una solicitud perfecta",
@@ -124,10 +124,10 @@
     "free": "Gratis",
     "freePrice": "0 €",
     "freeForever": "Gratis para siempre",
-    "freeFeat1": "Crea 1 candidatura gratis",
+    "freeFeat1": "Crea, visualiza y prueba candidaturas — gratis",
     "freeFeat2": "Todas las plantillas y membretes",
     "freeFeat3": "CV y carta de presentación con IA",
-    "freeFeat4": "Guardado de forma segura",
+    "freeFeat4": "Descarga e impresión: solo Premium",
     "currentPlan": "Plan actual",
     "premium": "Premium",
     "popular": "Popular",
@@ -136,7 +136,7 @@
     "premFeat1": "Crea 10 candidaturas",
     "premFeat2": "Todas las plantillas y membretes",
     "premFeat3": "CV y carta de presentación con IA",
-    "premFeat4": "Soporte prioritario",
+    "premFeat4": "Descarga PDF y Word + impresión",
     "premFeat5": "Todas las funciones futuras",
     "premiumActive": "✓ Premium activo",
     "upgradeNow": "Mejorar ahora →",
@@ -487,7 +487,8 @@
     "noText": "No se encontró texto en el archivo.",
     "limit": "Límite diario de subidas alcanzado. Inténtalo mañana.",
     "error": "No se pudo leer el archivo.",
-    "verifyFirst": "Confirma primero tu correo electrónico; revisa también la carpeta de spam."
+    "verifyFirst": "Confirma primero tu correo electrónico; revisa también la carpeta de spam.",
+    "upgradeRequired": "Ya has usado tu solicitud gratuita. Mejora tu plan para crear más."
   },
   "importPage": {
     "nav": "Importar archivo",
@@ -509,14 +510,14 @@
   },
   "exitPopup": {
     "title": "¡Espera un momento!",
-    "text": "Tu primera candidatura es totalmente gratis: CV y carta de presentación en 3 minutos, sin tarjeta de crédito.",
+    "text": "Crea tu candidatura completa gratis — CV y carta en 3 minutos, sin tarjeta. Solo pagas para descargar.",
     "cta": "Crear gratis ahora",
     "dismiss": "No, gracias"
   },
   "locked": {
     "title": "Solicitud gratuita utilizada",
-    "text": "Ya has creado tu solicitud gratuita. Consigue 10 solicitudes más para seguir usando el escáner y el editor.",
-    "editorText": "Tu cuota gratuita se ha agotado: actualiza para editar y guardar. Ver y descargar sigue siendo gratis.",
+    "text": "La descarga y la impresión vienen con el paquete: 10 candidaturas por 9,99 € una sola vez.",
+    "editorText": "Crear, editar y ver es gratis. Descargar e imprimir requieren la mejora.",
     "cta": "Desbloquear ahora"
   },
   "rating": {

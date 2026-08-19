@@ -117,23 +117,8 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
         res.status(400).json({ error: `${key} must be a string or null` }); return;
       }
     }
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      if (perfected_letter === undefined && perfected_cv_html === undefined) {
-        res.status(403).json({ error: "upgrade_required" });
-        return;
-      }
-      const [owned] = await db
-        .select()
-        .from(documentsTable)
-        .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
-      if (!owned) { res.status(404).json({ error: "Not found" }); return; }
-      const lockedUpdates: Record<string, any> = {};
-      if (perfected_letter !== undefined) lockedUpdates.perfectedLetter = perfected_letter;
-      if (perfected_cv_html !== undefined) lockedUpdates.perfectedCvHtml = perfected_cv_html;
-      await db.update(documentsTable).set(lockedUpdates).where(eq(documentsTable.id, req.params.id));
-      res.json({ ok: true });
-      return;
-    }
+    // Free accounts may edit and save everything (policy 2026-08-19):
+    // only downloads and printing stay purchase-gated.
 
     // Validate template against allowlist
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
@@ -184,10 +169,8 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 
 router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
+    // Free accounts may create unlimited applications (policy 2026-08-19):
+    // everything is open except downloads and printing, which stay paid.
     const { name, template, profileData, cvHtml, coverLetter, jobTitle, jobCompany, language } = req.body;
     if (template !== undefined && !VALID_TEMPLATES.has(template)) {
       res.status(400).json({ error: "Invalid template" });

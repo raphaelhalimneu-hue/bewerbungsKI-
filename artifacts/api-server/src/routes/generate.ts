@@ -57,10 +57,18 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         res.status(429).json({ error: "daily_limit_reached" });
         return;
       }
-    } else if (!unlimited) {
-      const limit = 1 + credits; // 1 free + 10 per purchased package
+    } else if (!unlimited && (credits > 0 || profile?.isPremium)) {
+      const limit = 1 + credits; // buyers: 10 per purchased package
       if (value >= limit) {
-        res.status(403).json({ error: credits > 0 ? "premium_limit_reached" : "free_limit_reached" });
+        res.status(403).json({ error: "premium_limit_reached" });
+        return;
+      }
+    } else if (!unlimited) {
+      // Free accounts: unlimited creation on screen (policy 2026-08-19) with a
+      // silent daily fair-use cap protecting the AI budget; downloads/prints
+      // stay paid.
+      if (!checkDailyGenQuota(userId)) {
+        res.status(429).json({ error: "daily_limit_reached" });
         return;
       }
     }

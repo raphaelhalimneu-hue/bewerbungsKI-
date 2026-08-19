@@ -57,7 +57,7 @@ export function FileImportButton({ onText, onFile }: { onText: (text: string) =>
     } catch (e: any) {
       const msg = String(e?.message || "");
       const status = e?.status ?? (msg.match(/\b(4\d\d|5\d\d)\b/)?.[1] ? Number(msg.match(/\b(4\d\d|5\d\d)\b/)![1]) : 0);
-      setErr(status === 429 ? t("fileImport.limit") : status === 422 ? t("fileImport.noText") : status === 413 ? t("fileImport.tooLarge") : status === 403 || status === 401 ? t("fileImport.verifyFirst") : t("fileImport.error"));
+      setErr(status === 429 ? t("fileImport.limit") : status === 422 ? t("fileImport.noText") : status === 413 ? t("fileImport.tooLarge") : /upgrade_required/.test(msg) ? t("fileImport.upgradeRequired") : status === 403 || status === 401 ? t("fileImport.verifyFirst") : t("fileImport.error"));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";

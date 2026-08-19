@@ -18,8 +18,9 @@ router.get("/documents/:id/export-counters", requireAuth, async (req: Authentica
       res.json({ free: false });
       return;
     }
+    // Printing is paid-only since 2026-08-19: free accounts get limit 0.
     const counts = await getPrintCounts(req.userId!, docId);
-    res.json({ free: true, limit: FREE_PRINT_LIMIT, counts });
+    res.json({ free: true, limit: 0, counts });
   } catch (err) {
     req.log.error({ err }, "GET export-counters error");
     res.status(500).json({ error: "Server error" });
@@ -47,8 +48,8 @@ router.post("/documents/:id/export-event", requireAuth, async (req: Authenticate
       res.status(404).json({ error: "Not found" });
       return;
     }
-    const allowed = await consumePrintQuota(req.userId!, docId, kind);
-    res.json({ allowed });
+    // Printing is paid-only since 2026-08-19: free accounts are never allowed.
+    res.json({ allowed: false });
   } catch (err) {
     req.log.error({ err }, "POST export-event error");
     res.status(500).json({ error: "Server error" });

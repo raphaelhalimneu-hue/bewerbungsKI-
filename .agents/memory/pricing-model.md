@@ -1,28 +1,18 @@
 ---
 name: Pricing model
-description: BewerbungsKI pricing since 2026-08-13 — credits model, limits, and where they are enforced
+description: Free vs. paid boundaries for BewerbungsKI (policy of 2026-08-19)
 ---
 
-- Modell: 3 Bewerbungen kostenlos, danach 9,99 € einmalig (Stripe one-time, inline price_data, keine Price-ID) pro Paket mit 10 WEITEREN Bewerbungen (bis 2026-08-16: erst 30, dann kurz 20; Bestandskäufer behalten ihre alten credits). Pakete sind stapelbar (Nachkauf am Limit möglich).
-- Guthaben-Modell (seit 2026-08-13): `credits`-Spalte in profiles; Limit = 3 + credits. Webhook checkout.session.completed: +10 credits, idempotent über stripe_events-Tabelle (Event-ID als PK, Insert-first in Transaktion). is_premium bleibt als Anzeige-Flag.
-- Enforcement serverseitig in generate.ts: docCount ≥ Limit → `premium_limit_reached` wenn credits>0, sonst `free_limit_reached`.
-- Schema-Änderungen shippen als idempotente Startup-Migration im API-Server (lib/migrate.ts läuft vor listen), weil drizzle push nur die Dev-DB trifft; Backfill: legacy is_premium mit credits=0 → 30.
-- **Why:** Nutzer wollte hartes Limit statt "unbegrenzt/Lifetime"; Review verlangte Idempotenz (Stripe redelivert Events) und Erhalt der Alt-Käufer-Ansprüche beim Modellwechsel.
-- **How to apply:** Bei Preis-/Limit-Änderungen alle Stellen synchron halten: checkout.ts (unit_amount + Beschreibung), generate.ts (Limit-Formel), me.ts (credits/document_limit), openapi.yaml + orval codegen, 8 i18n-Dateien (premiumPrice/oneTime/buyMore/limitReachedHint), index.html (Meta + JSON-LD), Mobile-App (noch alt, siehe Task).
+# Preismodell (Stand 2026-08-19, Nutzer-Entscheidung, mehrfach bekräftigt)
 
-- 2026-08-16: Stripe-Webhook in Produktion end-to-end verifiziert (rotierter Endpoint-Secret, signiertes Testevent → +10 credits + stripe_events-Row). Secret-Rotation: neuen Endpoint anlegen (Secret nur in Create-Response), Railway-Var setzen, redeployen, alten Endpoint löschen.
-- Prod-DB direkt erreichbar via temporärem Railway tcpProxyCreate auf den Postgres-Service (danach tcpProxyDelete); DATABASE_URL ist internal-only.
+**Regel: ALLES ist für Gratis-Nutzer offen — erstellen (unbegrenzt), importieren, prüfen, perfektionieren, bearbeiten, ansehen. NUR Downloads (PDF/Word) und Drucken sind kaufpflichtig.**
 
-- Betreiber-Konto (halimraphael9@gmail.com) hat unbegrenzt: Dokument-Limit und Tages-Quoten (analyze/perfect) werden per E-Mail-Check umgangen (env UNLIMITED_EMAILS, Default = Betreiber-Mail; in generate.ts, me.ts, analyze.ts). Seit 2026-08-16.
+- Käufer: 9,99 € einmalig → 10 Bewerbungen (Paket-Limit `1+credits` gilt nur noch für Käufer).
+- Gratis: `document_limit` in /me = 999999; Erstellen ohne Dokument-Limit, aber stille Fair-Use-Tagesquote (checkDailyGenQuota) in generate.ts schützt das KI-Budget.
+- Server-Sperren nur noch: pdf.ts (beide Routen 403 upgrade_required für isFreeAccount), docx.ts (isFreeAccount), exports.ts (Druck: allowed:false für Gratis, limit 0).
+- Alle isFreeQuotaLocked-Gates aus documents/extract/analyze/parse-linkedin ENTFERNT — nicht wieder einbauen ohne Nutzer-OK.
+- Client Preview.tsx: editLocked=false; pdfLocked/cvPrintLocked/letterPrintLocked/docxLocked = freeUser → /pricing.
+- Beschreibungen (8 Sprachen) angepasst: home.freeBadge/faq1A/ctaBottomSub, pricing.freeFeat1/4, premFeat4, locked.*, exitPopup.text.
 
-
-## Perfektionieren-Vorschau (2026-08-18)
-Gratis-Nutzer dürfen /perfect nutzen und das Ergebnis ANSEHEN (Scanner + Preview), aber nicht speichern/exportieren: PATCH /documents, POST /documents, POST cv.docx sind für gesperrte Gratis-Nutzer 403; ?text=-Override bei cover-letter PDF/DOCX wird für sie ignoriert (nur gespeichertes Original). Der 1 freie Download (Original) bleibt frei. /analyze bleibt gesperrt.
-
-
-## Power-Paket (2026-08-18)
-Zweites Paket: 29,90 € einmalig = unbegrenzt Bewerbungen + 50× Perfektionieren (lifetime, atomar reserviert via perfect_count/is_unlimited in profiles) + stilles Fair-Use-Limit 10 Generierungen/Tag (DB-Zählung docs heute + In-Memory). Webhook upsertet Profile (kein verlorener Kauf), Doppelkauf von Power wird im /checkout mit 400 already_unlimited geblockt. Premium bleibt 9,99 € = +10 Credits; seit 2026-08-18 zusätzlich 10× Perfektionieren pro 10er-Paket (Cap = credits, gleiche perfect_count-Reservierung). Gratis-Nutzer behalten den Tages-Teaser (5/Tag, view-only).
-
-- Entscheidung 2026-08-18: Die 1 Gratis-Bewerbung darf heruntergeladen werden (bewusst, als Werbung/Conversion). Nur die KI-perfektionierte Fassung bleibt für Gratis-Nutzer download-gesperrt (nur ansehen/drucken). Eine komplette Download-Sperre für Gratis-Nutzer wurde gebaut und auf Nutzerwunsch wieder entfernt. Finale Regel (2026-08-18): Gratis = PDF-Download frei, Word/DOCX nur nach Kauf (Server-Guard isFreeAccount auf allen 3 DOCX-Endpoints, Client-🔒 in Preview/CVEditor/Documents).
-
-- **Export-Politik (2026-08-18):** Gratis = die EINE (auch perfektionierte) Bewerbung unbegrenzt drucken + als PDF laden (Server liefert perfected_* Felder); dafür ist BEARBEITEN gesperrt (Live-Editor, CV-contentEditable, Brief-Textarea readonly; Editor-Exporte gesperrt). Download-Zähler-Ansatz wurde verworfen (клиент-seitig umgehbar, Review bestätigte). DOCX bleibt kaufpflichtig.
+**Why:** Nutzer will maximale Conversion: „Alle Funktionen auf lassen, außer Downloads und Drucken" — die Leute sollen ihr Ergebnis sehen, zahlen nur fürs Mitnehmen.
+**How to apply:** Jede neue Funktion ist gratis nutzbar; nur Export-Endpunkte (PDF/DOCX/Druck) gegen isFreeAccount sperren.

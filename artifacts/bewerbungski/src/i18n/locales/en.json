@@ -33,8 +33,8 @@
     "step3Title": "Download CV & cover letter",
     "step3Text": "Both documents ready instantly – professional, personalised, application-ready. Download as DOCX.",
     "germanNote": "Your application in 8 languages – e.g. in German, perfect for the German job market.",
-    "freeBadge": "1 application free – no credit card needed",
-    "trustFree": "Try 1 for free",
+    "freeBadge": "Create & try for free — download from €9.99",
+    "trustFree": "Try for free",
     "trustNoCard": "No credit card",
     "trustGdpr": "GDPR-compliant",
     "trustFast": "Done in 3 minutes",
@@ -54,7 +54,7 @@
     "feat6Desc": "Add a professional photo directly to your CV – optional.",
     "faqTitle": "Frequently asked questions",
     "faq1Q": "What does BewerbungsKI cost?",
-    "faq1A": "1 application is free forever – no credit card. After that, a one-time €9.99 for 10 more applications.",
+    "faq1A": "Creating, viewing and trying is completely free. To download and print your finished application you pay a one-time €9.99 (10 applications).",
     "faq2Q": "How good is the quality?",
     "faq2A": "The AI analyses your profile and the job listing and writes genuine, individual text – no templates, no filler phrases.",
     "faq3Q": "What happens to my data?",
@@ -62,7 +62,7 @@
     "faq4Q": "Can I edit the documents?",
     "faq4A": "Yes – after generation you can edit the CV and cover letter directly in the app and download them again.",
     "ctaBottomTitle": "Your dream job is waiting.",
-    "ctaBottomSub": "1 application free – no credit card, no subscription.",
+    "ctaBottomSub": "Create & view for free — no credit card, no subscription. Download & print from €9.99.",
     "ctaBottom": "Start for free",
     "ba": {
       "title": "Raw data becomes a top application",
@@ -124,10 +124,10 @@
     "free": "Free",
     "freePrice": "0 €",
     "freeForever": "Free forever",
-    "freeFeat1": "Create 1 application for free",
+    "freeFeat1": "Create, view & try applications — free",
     "freeFeat2": "All design templates & letterheads",
     "freeFeat3": "AI CV & cover letter",
-    "freeFeat4": "Stored securely",
+    "freeFeat4": "Download & print: Premium only",
     "currentPlan": "Current plan",
     "premium": "Premium",
     "popular": "Popular",
@@ -136,7 +136,7 @@
     "premFeat1": "Create 10 applications",
     "premFeat2": "All design templates & letterheads",
     "premFeat3": "AI CV & cover letter",
-    "premFeat4": "Priority support",
+    "premFeat4": "PDF & Word download + printing",
     "premFeat5": "All future features",
     "premiumActive": "✓ Premium active",
     "upgradeNow": "Upgrade now →",
@@ -530,7 +530,8 @@
     "noText": "No text found in the file.",
     "limit": "Daily upload limit reached. Try again tomorrow.",
     "error": "Could not read the file.",
-    "verifyFirst": "Please confirm your email address first — also check your spam folder."
+    "verifyFirst": "Please confirm your email address first — also check your spam folder.",
+    "upgradeRequired": "Your free application has been used. Upgrade to create more."
   },
   "importPage": {
     "nav": "File import",
@@ -552,14 +553,14 @@
   },
   "exitPopup": {
     "title": "Wait a second!",
-    "text": "Your first application is completely free – CV and cover letter in 3 minutes, no credit card needed.",
+    "text": "Create your complete application for free — CV and cover letter in 3 minutes, no credit card needed. You only pay to download.",
     "cta": "Create for free now",
     "dismiss": "No thanks"
   },
   "locked": {
     "title": "Free application used",
-    "text": "You have already created your free application. Get 10 more applications to keep using the scanner and editor.",
-    "editorText": "Your free quota is used up — upgrade to edit and save. Viewing and downloading stays free.",
+    "text": "Downloading and printing come with the package: 10 applications for a one-time €9.99.",
+    "editorText": "Creating, editing and viewing are free. Downloading and printing require the upgrade.",
     "cta": "Unlock now"
   },
   "rating": {

@@ -6,7 +6,7 @@
  *
  *   1. Fresh user: /me shows limit 1, 0 documents
  *   2. Generates + saves 3 documents (Claude mocked at fetch level)
- *   3. 2nd generate → 403 free_limit_reached
+ *   3. 2nd generate → still allowed (policy 2026-08-19: only download/print paid)
  *   4. POST /checkout → Stripe Checkout session (metadata.userId set)
  *   5. Stripe webhook checkout.session.completed → is_premium=true, credits=10
  *   6. /me shows limit 11; generating works again
@@ -202,13 +202,14 @@ const webhook = (eventId: string) =>
 // ---------------------------------------------------------------------------
 
 describe("E2E: 1 gratis → Kauf → 10 weitere → Limit 11", () => {
-  it("step 1: fresh user sees limit 1 and 0 documents", async () => {
+  it("step 1: fresh user sees open creation and 0 documents", async () => {
     const res = await getMe();
     expect(res.status).toBe(200);
+    // Policy 2026-08-19: free accounts create without a document cap
     expect(res.body).toMatchObject({
       is_premium: false,
       credits: 0,
-      document_limit: 1,
+      document_limit: 999999,
       documents_count: 0,
     });
   });
@@ -223,10 +224,9 @@ describe("E2E: 1 gratis → Kauf → 10 weitere → Limit 11", () => {
     expect(me.body.documents_count).toBe(1);
   });
 
-  it("step 3: 2nd generation is blocked with free_limit_reached", async () => {
+  it("step 3: 2nd generation still works (downloads stay paid)", async () => {
     const res = await generate();
-    expect(res.status).toBe(403);
-    expect(res.body.error).toBe("free_limit_reached");
+    expect(res.status).toBe(200);
   });
 
   it("step 4: checkout creates a Stripe session tagged with the user id", async () => {

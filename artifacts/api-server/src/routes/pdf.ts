@@ -174,11 +174,13 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
-    // Free accounts download the stored (perfected) version unlimited times —
-    // they just cannot edit it. Buyers download the real document fields.
-    const cvHtml = (await isFreeAccount(req.userId!, req.userEmail)) && doc.perfectedCvHtml
-      ? doc.perfectedCvHtml
-      : doc.cvHtml;
+    // Downloads are paid-only: free accounts can try everything on screen,
+    // but PDF export requires a purchase (policy 2026-08-19).
+    if (await isFreeAccount(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
+    const cvHtml = doc.perfectedCvHtml || doc.cvHtml;
 
     const pdfBuffer = await htmlToPdf(wrapHtml(cvHtml));
 
@@ -209,13 +211,13 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     // Accept edited text from query param (same pattern as cover-letter.docx).
     // Locked free users may only export the stored original — never edited/
     // perfected text passed from the client.
-    const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
-    // Free accounts: client-passed text is ignored (no edits for free users),
-    // but the stored perfected version IS downloadable — unlimited times.
-    const letterText: string = (allowOverride && (req.query.text as string))
-      || doc.perfectedLetter
-      || doc.coverLetter
-      || "";
+    // Downloads are paid-only: free accounts can try everything on screen,
+    // but PDF export requires a purchase (policy 2026-08-19).
+    if (await isFreeAccount(req.userId!, req.userEmail)) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
+    const letterText: string = (req.query.text as string) || doc.perfectedLetter || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
     const pd = (doc.profileData as any) || {};
