@@ -86,8 +86,8 @@ export default function Scanner() {
     e.preventDefault();
   }
 
-  // Capture clipboard events globally because Android's selection toolbar does
-  // not reliably bubble copy/cut/contextmenu events from the preview.
+  // Capture copy/cut events globally because Android's selection toolbar does
+  // not reliably bubble clipboard events from the preview.
   useEffect(() => {
     if (!perfectedCopyLocked) return;
     const isInside = (node: Node | null, container: HTMLElement | null) =>
@@ -115,12 +115,10 @@ export default function Scanner() {
     };
     document.addEventListener("copy", preventClipboard, true);
     document.addEventListener("cut", preventClipboard, true);
-    document.addEventListener("contextmenu", preventClipboard, true);
     document.addEventListener("keydown", preventShortcut, true);
     return () => {
       document.removeEventListener("copy", preventClipboard, true);
       document.removeEventListener("cut", preventClipboard, true);
-      document.removeEventListener("contextmenu", preventClipboard, true);
       document.removeEventListener("keydown", preventShortcut, true);
     };
   }, [perfectedCopyLocked]);
@@ -311,7 +309,6 @@ export default function Scanner() {
               <div
                 onCopy={perfectedCopyLocked ? blockCopy : undefined}
                 onCut={perfectedCopyLocked ? blockCopy : undefined}
-                onContextMenu={perfectedCopyLocked ? e => e.preventDefault() : undefined}
                 style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", userSelect: perfectedCopyLocked ? "none" : undefined, WebkitUserSelect: perfectedCopyLocked ? "none" : undefined }}
               >
               {perfectedText}

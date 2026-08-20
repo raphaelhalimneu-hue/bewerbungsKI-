@@ -87,8 +87,8 @@ export default function Preview() {
   }
 
   // Textareas and contentEditable elements don't consistently bubble clipboard
-  // events on mobile browsers. Capture them at the document level too, so the
-  // Android selection toolbar and Ctrl/Cmd+C cannot bypass the local handlers.
+  // events on mobile browsers. Capture copy/cut at the document level too, so
+  // the Android selection toolbar and Ctrl/Cmd+C cannot bypass the local handlers.
   useEffect(() => {
     if (!letterCopyLocked && !cvCopyLocked) return;
 
@@ -129,12 +129,10 @@ export default function Preview() {
 
     document.addEventListener("copy", preventClipboard, true);
     document.addEventListener("cut", preventClipboard, true);
-    document.addEventListener("contextmenu", preventClipboard, true);
     document.addEventListener("keydown", preventShortcut, true);
     return () => {
       document.removeEventListener("copy", preventClipboard, true);
       document.removeEventListener("cut", preventClipboard, true);
-      document.removeEventListener("contextmenu", preventClipboard, true);
       document.removeEventListener("keydown", preventShortcut, true);
     };
   }, [letterCopyLocked, cvCopyLocked]);
@@ -626,7 +624,6 @@ export default function Preview() {
                 <div
                   onCopy={perfectedServerLocked ? blockCopy : undefined}
                   onCut={perfectedServerLocked ? blockCopy : undefined}
-                  onContextMenu={perfectedServerLocked ? e => e.preventDefault() : undefined}
                   style={{
                     whiteSpace: "pre-wrap",
                     fontSize: 13,
@@ -667,7 +664,6 @@ export default function Preview() {
                       <div
                         onCopy={blockCopy}
                         onCut={blockCopy}
-                        onContextMenu={e => e.preventDefault()}
                         dangerouslySetInnerHTML={{
                           __html: freeUser
                             ? createClientHtmlPreview((doc as any).perfected_cv_html)
@@ -683,7 +679,6 @@ export default function Preview() {
                         <div
                           onCopy={blockCopy}
                           onCut={blockCopy}
-                          onContextMenu={e => e.preventDefault()}
                           style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
                         >
                           {perfectedProfilePreview}
@@ -712,7 +707,6 @@ export default function Preview() {
                     onInput={() => { if (editingCv) setCvManuallyEdited(true); }}
                     onCopy={cvCopyLocked ? blockCopy : undefined}
                     onCut={cvCopyLocked ? blockCopy : undefined}
-                    onContextMenu={cvCopyLocked ? e => e.preventDefault() : undefined}
                     style={{
                       outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none",
                       userSelect: cvCopyLocked ? "none" : undefined,
@@ -765,7 +759,6 @@ export default function Preview() {
                     <div
                       onCopy={blockCopy}
                       onCut={blockCopy}
-                      onContextMenu={e => e.preventDefault()}
                       style={{
                         whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                         minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
@@ -786,7 +779,6 @@ export default function Preview() {
                       }}
                       onCopy={letterCopyLocked ? blockCopy : undefined}
                       onCut={letterCopyLocked ? blockCopy : undefined}
-                      onContextMenu={letterCopyLocked ? e => e.preventDefault() : undefined}
                       style={{
                         whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                         width: "100%", border: "none", outline: "none", resize: "vertical",
