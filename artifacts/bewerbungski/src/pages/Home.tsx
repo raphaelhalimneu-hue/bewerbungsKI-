@@ -224,6 +224,66 @@ const TEMPLATE_WORD_BY_LANG: Record<string, string> = {
   de: "Vorlage", en: "Template", tr: "Şablon", ar: "القالب",
   es: "Plantilla", pl: "Szablon", ru: "Шаблон", uk: "Шаблон",
 };
+type TransformationCopy = {
+  before: string;
+  after: string;
+  beforeTitle: string;
+  afterTitle: string;
+  heading: string;
+  raw: string;
+  improvements: string[];
+};
+
+const TRANSFORMATION_BY_LANG: Record<string, TransformationCopy> = {
+  de: {
+    before: "Vorher", after: "Nachher", beforeTitle: "Stichpunkte & Rohtext", afterTitle: "Perfektionierte Bewerbung",
+    heading: "Aus wenigen Angaben wird eine Bewerbung, die überzeugt.",
+    raw: "„Ich bin Pflegefachkraft und arbeite seit mehreren Jahren in einem Heim. Ich kann mit Menschen gut umgehen und suche eine neue Stelle in Hannover.“",
+    improvements: ["klare fachliche Positionierung", "Erfolge statt allgemeiner Aussagen", "passend zur Stelle formuliert"],
+  },
+  en: {
+    before: "Before", after: "After", beforeTitle: "Notes & raw text", afterTitle: "Polished application",
+    heading: "A few details become an application that makes an impression.",
+    raw: "“I am a care nurse and have worked in a care home for several years. I work well with people and am looking for a new role in Hanover.”",
+    improvements: ["a clear professional profile", "real achievements, not generic claims", "tailored to the role"],
+  },
+  tr: {
+    before: "Önce", after: "Sonra", beforeTitle: "Notlar ve taslak", afterTitle: "Güçlendirilmiş başvuru",
+    heading: "Birkaç bilgi, güçlü bir başvuruya dönüşür.",
+    raw: "“Hemşireyim ve birkaç yıldır bir bakım evinde çalışıyorum. İnsanlarla iyi anlaşırım ve Hannover'de yeni bir iş arıyorum.”",
+    improvements: ["net mesleki konumlandırma", "genel ifadeler yerine başarılar", "pozisyona göre uyarlanmış anlatım"],
+  },
+  ar: {
+    before: "قبل", after: "بعد", beforeTitle: "ملاحظات ومسودة", afterTitle: "طلب توظيف مُحسَّن",
+    heading: "بضع معلومات تتحول إلى طلب توظيف مقنع.",
+    raw: "«أنا ممرضة وأعمل منذ عدة سنوات في دار رعاية. أتعامل جيدًا مع الناس وأبحث عن وظيفة جديدة في هانوفر.»",
+    improvements: ["صورة مهنية واضحة", "إنجازات بدل العبارات العامة", "صياغة تناسب الوظيفة"],
+  },
+  es: {
+    before: "Antes", after: "Después", beforeTitle: "Notas y texto inicial", afterTitle: "Candidatura perfeccionada",
+    heading: "Unos pocos datos se convierten en una candidatura convincente.",
+    raw: "“Soy enfermera y trabajo desde hace varios años en una residencia. Se me da bien tratar con las personas y busco un nuevo puesto en Hannover.”",
+    improvements: ["perfil profesional claro", "logros en lugar de frases genéricas", "texto adaptado al puesto"],
+  },
+  pl: {
+    before: "Przed", after: "Po", beforeTitle: "Notatki i szkic", afterTitle: "Dopracowana aplikacja",
+    heading: "Kilka informacji zmienia się w przekonującą aplikację.",
+    raw: "„Jestem pielęgniarką i od kilku lat pracuję w domu opieki. Dobrze dogaduję się z ludźmi i szukam nowej pracy w Hanowerze.”",
+    improvements: ["jasny profil zawodowy", "osiągnięcia zamiast ogólników", "tekst dopasowany do stanowiska"],
+  },
+  ru: {
+    before: "До", after: "После", beforeTitle: "Заметки и черновик", afterTitle: "Улучшенное заявление",
+    heading: "Несколько деталей превращаются в убедительное заявление.",
+    raw: "«Я медсестра и уже несколько лет работаю в доме ухода. Я хорошо лажу с людьми и ищу новую работу в Ганновере.»",
+    improvements: ["чёткий профессиональный профиль", "достижения вместо общих фраз", "текст под конкретную вакансию"],
+  },
+  uk: {
+    before: "До", after: "Після", beforeTitle: "Нотатки та чернетка", afterTitle: "Удосконалена заявка",
+    heading: "Кілька деталей перетворюються на переконливу заявку.",
+    raw: "«Я медсестра й уже кілька років працюю в будинку догляду. Добре ладнаю з людьми та шукаю нову роботу в Ганновері.»",
+    improvements: ["чіткий професійний профіль", "досягнення замість загальних фраз", "текст для конкретної вакансії"],
+  },
+};
 type ExampleLetter = {
   label: string;        // small heading above the letter page ("Bewerbung", "Cover letter", …)
   cvLabel: string;      // small heading above the CV page
@@ -379,9 +439,36 @@ function buildLetterHTML(cv: CVContent, letter: ExampleLetter): string {
 </div>`;
 }
 
+function buildBeforeCV(cv: CVContent): CVContent {
+  return {
+    ...cv,
+    profile: cv.profile.split(". ").slice(0, 1).join(". ") + ".",
+    experience: cv.experience.map(item => ({
+      ...item,
+      bullets: item.bullets.slice(0, 1),
+    })),
+    skills: cv.skills.slice(0, 5),
+    languages: cv.languages.slice(0, 2),
+  };
+}
+
+function buildBeforeLetter(cv: CVContent, letter: ExampleLetter, lang: string): ExampleLetter {
+  const copy = TRANSFORMATION_BY_LANG[lang] || TRANSFORMATION_BY_LANG.de;
+  return {
+    ...letter,
+    subject: letter.subject.split(" ").slice(0, 5).join(" "),
+    paragraphs: [
+      copy.raw.replace(/^["„«]|["”»]$/g, ""),
+      lang === "de"
+        ? "Ich würde mich über eine Chance freuen und erzähle Ihnen gern mehr über mich."
+        : "I would be happy to tell you more about myself in an interview.",
+    ],
+  };
+}
+
 function ShowcasePage({ label, html }: { label: string; html: string }) {
   return (
-    <div>
+    <div style={{ minWidth: 0 }}>
       <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 10 }}>{label}</p>
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", padding: "4px 2px 12px" }}>
         <div style={{
@@ -400,14 +487,32 @@ function ShowcasePage({ label, html }: { label: string; html: string }) {
 export function ExampleCVShowcase() {
   const { i18n } = useTranslation();
   const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
+  const beforeCVHtml = useMemo(() => renderCVContent(buildBeforeCV(EXAMPLE_BY_LANG[lang]), "blobs", undefined, lang), [lang]);
   const cvHtml = useMemo(() => renderCVContent(EXAMPLE_BY_LANG[lang], "blobs", undefined, lang), [lang]);
+  const beforeLetterHtml = useMemo(() => buildLetterHTML(EXAMPLE_BY_LANG[lang], buildBeforeLetter(EXAMPLE_BY_LANG[lang], LETTER_BY_LANG[lang], lang)), [lang]);
   const letterHtml = useMemo(() => buildLetterHTML(EXAMPLE_BY_LANG[lang], LETTER_BY_LANG[lang]), [lang]);
+  const copy = TRANSFORMATION_BY_LANG[lang] || TRANSFORMATION_BY_LANG.de;
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", display: "grid", gap: 28 }}>
-      {/* Original size (794px wide, like the PDF) — scrolls horizontally on small screens */}
-      <ShowcasePage label={LETTER_BY_LANG[lang].label} html={letterHtml} />
-      <ShowcasePage label={LETTER_BY_LANG[lang].cvLabel} html={cvHtml} />
+    <div style={{ width: "100%", minWidth: 0, maxWidth: 860, margin: "0 auto", display: "grid", gap: 28 }}>
+      <div style={{ textAlign: "center", background: "linear-gradient(135deg,#fffbeb,#eff6ff)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 18px 16px" }}>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "var(--brand)", marginBottom: 5 }}>{copy.heading}</div>
+        <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
+          {copy.before} = Ausgangsversion · {copy.after} = von BewerbungsKI perfektionierte Version
+        </div>
+      </div>
+      {/* Each side is a complete application: cover letter + CV. Documents stay at
+          their original PDF width and scroll horizontally on narrow screens. */}
+      <div style={{ border: "1px solid #fde68a", borderRadius: 18, padding: "22px 12px 8px", background: "#fffbeb", minWidth: 0 }}>
+        <h3 style={{ textAlign: "center", color: "#92400e", fontSize: 18, margin: "0 0 20px" }}>◌ {copy.before}: Ausgangsbewerbung</h3>
+        <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].label}`} html={beforeLetterHtml} />
+        <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].cvLabel}`} html={beforeCVHtml} />
+      </div>
+      <div style={{ border: "1px solid #bfdbfe", borderRadius: 18, padding: "22px 12px 8px", background: "linear-gradient(135deg,#eff6ff,#f0fdf4)", minWidth: 0, boxShadow: "0 14px 34px rgba(37,99,235,.12)" }}>
+        <h3 style={{ textAlign: "center", color: "var(--brand)", fontSize: 18, margin: "0 0 20px" }}>✨ {copy.after}: perfektionierte Bewerbung</h3>
+        <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].label}`} html={letterHtml} />
+        <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].cvLabel}`} html={cvHtml} />
+      </div>
       <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: -8, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
         <span aria-hidden>✨</span> {CAPTION_BY_LANG[lang]} <strong style={{ color: "var(--brand)" }}>bewerbungski.com</strong> — {TEMPLATE_WORD_BY_LANG[lang]} „Elegant“
       </p>
