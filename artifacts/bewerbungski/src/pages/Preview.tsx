@@ -620,15 +620,15 @@ export default function Preview() {
                   ✨ {t("preview.profilePreview")}
                 </div>
                 <div
-                  onCopy={perfectedServerLocked ? blockCopy : undefined}
-                  onCut={perfectedServerLocked ? blockCopy : undefined}
+                  onCopy={documentLocked ? blockCopy : undefined}
+                  onCut={documentLocked ? blockCopy : undefined}
                   style={{
                     whiteSpace: "pre-wrap",
                     fontSize: 13,
                     lineHeight: 1.6,
                     color: "var(--text2)",
-                    userSelect: perfectedServerLocked ? "none" : undefined,
-                    WebkitUserSelect: perfectedServerLocked ? "none" : undefined,
+                    userSelect: documentLocked ? "none" : undefined,
+                    WebkitUserSelect: documentLocked ? "none" : undefined,
                   }}
                 >
                   {perfectedProfilePreview}
