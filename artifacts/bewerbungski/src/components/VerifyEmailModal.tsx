@@ -18,16 +18,24 @@ export function VerifyEmailModal() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [verifiedLocally, setVerifiedLocally] = useState(false);
   const sentRef = useRef(false);
 
-  const open = !!session && !!profile && profile.email_verified === false;
+  const needsVerification = !!session && !!profile && profile.email_verified === false;
+  const open = needsVerification && !verifiedLocally;
+
+  // Reset the local dismissal for a different account. The dialog still
+  // reappears if the server says that the new account needs verification.
+  useEffect(() => {
+    setVerifiedLocally(false);
+  }, [session?.user?.id]);
 
   useEffect(() => {
-    if (!open) { sentRef.current = false; return; }
+    if (!needsVerification || verifiedLocally) { sentRef.current = false; return; }
     if (sentRef.current) return;
     sentRef.current = true;
     sendCode();
-  }, [open]);
+  }, [needsVerification, verifiedLocally]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -62,6 +70,10 @@ export function VerifyEmailModal() {
         body: JSON.stringify({ code }),
       });
       toast({ title: t("verify.success") });
+      // Close immediately after the server accepted the code. The profile
+      // refetch below remains the source of truth for subsequent renders.
+      setVerifiedLocally(true);
+      setCode("");
       refetchProfile();
     } catch {
       setError(t("verify.wrongCode"));
