@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Stripe from "stripe";
-import { db, profilesTable, stripeEventsTable } from "@workspace/db";
+import { db, profilesTable, documentsTable, stripeEventsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
@@ -149,6 +149,10 @@ router.post("/webhook/stripe", async (req, res) => {
                 },
               });
           }
+          await tx
+            .update(documentsTable)
+            .set({ bezahlt: true })
+            .where(eq(documentsTable.userId, userId));
         });
       }
     }

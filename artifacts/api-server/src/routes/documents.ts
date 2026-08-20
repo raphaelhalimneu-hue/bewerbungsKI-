@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
+import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
-import { isFreeAccount, isFreeQuotaLocked, withFreeApplicationCreateLock } from "../lib/freeLock";
+import { hasPaidEntitlement, isFreeAccount, isFreeQuotaLocked, withFreeApplicationCreateLock } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -350,6 +350,10 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
       res.status(400).json({ error: "Invalid template" });
       return;
     }
+    const [profile] = await db
+      .select()
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, req.userId!));
 
     const doc = await withFreeApplicationCreateLock(req.userId!, async () => {
       if (await isFreeQuotaLocked(req.userId!, req.userEmail)) return null;
@@ -364,6 +368,7 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
           coverLetter,
           jobTitle,
           jobCompany,
+          bezahlt: hasPaidEntitlement(profile),
         })
         .returning();
       return created;
