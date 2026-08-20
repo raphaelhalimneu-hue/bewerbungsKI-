@@ -6,6 +6,20 @@ import { logger } from "./logger";
  * (dev and production use separate databases; drizzle push only runs in dev).
  */
 export async function runStartupMigrations(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS generation_results (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id text NOT NULL,
+      batch_id text NOT NULL,
+      type text NOT NULL,
+      full_text text NOT NULL,
+      created_at timestamp NOT NULL DEFAULT now()
+    )
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS generation_results_user_batch_idx
+    ON generation_results (user_id, batch_id)
+  `);
   // Credits model: limit = 3 free + purchased credits (30 per package)
   await pool.query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits integer NOT NULL DEFAULT 0`,

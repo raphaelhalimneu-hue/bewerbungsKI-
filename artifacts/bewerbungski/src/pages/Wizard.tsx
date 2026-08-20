@@ -236,6 +236,7 @@ export default function Wizard() {
         uk: { name: "Ukrainisch", locale: "uk-UA", conventions: "Ukrainische Resume-Standards." },
       };
       const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
+      const batchId = crypto.randomUUID();
       const ts = styleFor(form);
       const sz = (n: number) => Math.round(n * ts.scale * 10) / 10;
       const usePhoto = !!form.personal.photo && docLang !== "en";
@@ -247,6 +248,7 @@ export default function Wizard() {
       // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
+        batchId,
         systemPrompt: `Du bist ein professioneller Bewerbungsexperte. Antworte NUR mit validem JSON — kein Markdown, kein Wrapper, keine Erklärungen.
 
 Gib exakt dieses JSON-Schema zurück:
@@ -300,6 +302,7 @@ PFLICHTREGELN:
         setGenPhase(t("wizard.genLetter"));
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
+          batchId,
           systemPrompt: `Du bist Experte für Bewerbungsanschreiben. Schreibe wie ein echter, gut ausgebildeter Mensch — nicht wie eine KI.
 
 TON: ${tone === "formell"
@@ -363,6 +366,9 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         profileData: { ...form, atsScore: ats, cv_json: cvContent, language: docLang } as unknown as Record<string, unknown>,
         cvHtml,
         coverLetter: letterText,
+        generationBatchId: batchId,
+        cvGenerationId: cvRes.generationId,
+        letterGenerationId: letterRes.generationId,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
       } });

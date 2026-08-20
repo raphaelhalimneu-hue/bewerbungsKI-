@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, profilesTable, documentsTable } from "@workspace/db";
+import { db, profilesTable, documentsTable, generationResultsTable } from "@workspace/db";
 import { and, count, eq, gte } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { hasPaidEntitlement, isUnlimitedEmail } from "../lib/freeLock";
@@ -18,14 +18,25 @@ function checkDailyGenQuota(userId: string): boolean {
   return true;
 }
 
+function previewText(text: string): string {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const visibleWords = Math.max(1, Math.ceil(words.length * 0.25));
+  return `${words.slice(0, visibleWords).join(" ")} […]`;
+}
+
 router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.userId!;
-    const { type, systemPrompt, userPrompt } = req.body as {
+    const { type, systemPrompt, userPrompt, batchId } = req.body as {
       type: "cv" | "letter";
       systemPrompt: string;
       userPrompt: string;
+      batchId: string;
     };
+    if (!batchId || !["cv", "letter"].includes(type)) {
+      res.status(400).json({ error: "Invalid generation request" });
+      return;
+    }
 
     const [profile] = await db
       .select()
@@ -132,7 +143,26 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .replace(/^```(?:html|xml)?\s*/i, "")
       .replace(/\s*```\s*$/i, "")
       .trim();
-    res.json({ result });
+
+    const [stored] = await db
+      .insert(generationResultsTable)
+      .values({ userId, batchId, type, fullText: result })
+      .returning({ id: generationResultsTable.id });
+
+    // The wizard generates CV first and letter second. Increment once after
+    // the letter so both parts of the first free application stay complete.
+    const firstFreeTrial = (profile?.freeTrialsUsed ?? 0) === 0;
+    if (firstFreeTrial && type === "letter") {
+      await db
+        .update(profilesTable)
+        .set({ freeTrialsUsed: 1 })
+        .where(and(eq(profilesTable.userId, userId), eq(profilesTable.freeTrialsUsed, 0)));
+    }
+
+    res.json({
+      result: firstFreeTrial ? result : previewText(result),
+      generationId: stored.id,
+    });
   } catch (err) {
     req.log.error({ err }, "POST /generate error");
     res.status(500).json({ error: "Generation failed" });
