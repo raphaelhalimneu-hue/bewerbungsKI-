@@ -10,6 +10,9 @@ export async function runStartupMigrations(): Promise<void> {
   await pool.query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits integer NOT NULL DEFAULT 0`,
   );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS free_trials_used integer NOT NULL DEFAULT 0`,
+  );
 
   // Power package (29.90): unlimited applications + 50 lifetime perfect uses
   await pool.query(
@@ -28,6 +31,9 @@ export async function runStartupMigrations(): Promise<void> {
   );
   await pool.query(
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_generation_id uuid`,
+  );
+  await pool.query(
+    `ALTER TABLE documents ADD COLUMN IF NOT EXISTS bezahlt boolean NOT NULL DEFAULT false`,
   );
 
   // Server-owned perfected text. Free clients receive only preview_text;

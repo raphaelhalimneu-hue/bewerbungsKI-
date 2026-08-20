@@ -8,6 +8,7 @@ export const profilesTable = pgTable("profiles", {
   email: text("email").notNull(),
   isPremium: boolean("is_premium").notNull().default(false),
   credits: integer("credits").notNull().default(0),
+  freeTrialsUsed: integer("free_trials_used").notNull().default(0),
   // Power package: unlimited applications, perfect capped at 50 lifetime
   isUnlimited: boolean("is_unlimited").notNull().default(false),
   perfectCount: integer("perfect_count").notNull().default(0),
@@ -34,6 +35,7 @@ export const documentsTable = pgTable("documents", {
   perfectedLetter: text("perfected_letter"),
   perfectedCvHtml: text("perfected_cv_html"),
   perfectedGenerationId: uuid("perfected_generation_id"),
+  bezahlt: boolean("bezahlt").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
