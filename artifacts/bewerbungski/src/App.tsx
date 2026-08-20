@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import i18n, { updateLocaleHead } from "./i18n";
 import { appBase, appPath, pathLang, pathForLang } from "./lib/basePath";
 import NotFound from "@/pages/not-found";
@@ -70,30 +70,9 @@ function LocaleHeadSync() {
  * and changes are purchase-gated while the completed document remains viewable.
  */
 function FreeFeatureGate({ children }: { children: React.ReactNode }) {
-  const { user, profile } = useAuth();
-  const [location, navigate] = useLocation();
-  const p = profile as any;
-  const isLocked = Boolean(
-    user &&
-    p &&
-    !p.is_premium &&
-    !p.is_unlimited &&
-    Number(p.credits || 0) === 0 &&
-    (Number(p.documents_count || 0) >= 1 || Number(p.document_limit) === 0),
-  );
-
-  useEffect(() => {
-    if (isLocked && (location === "/wizard" || location === "/scanner" || location === "/import")) {
-      navigate("/pricing");
-    }
-  }, [isLocked, location, navigate]);
-
-  const isCurrentRouteGated =
-    location === "/wizard" ||
-    location === "/scanner" ||
-    location === "/import";
-
-  return isLocked && isCurrentRouteGated ? null : <>{children}</>;
+  // Feature access is enforced at the action/API level, not by hiding whole
+  // pages. Free users must be able to create, check, and import documents.
+  return <>{children}</>;
 }
 
 function RestrictedWizard() {

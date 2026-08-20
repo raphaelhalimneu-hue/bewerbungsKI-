@@ -10,7 +10,7 @@ import { ExitIntentPopup } from "./ExitIntentPopup";
 import { RatingCard } from "./RatingCard";
 import { LANGUAGES } from "../i18n";
 import { appBase, pathForLang } from "../lib/basePath";
-import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX, FiLock } from "react-icons/fi";
+import { FiHome, FiPlusCircle, FiFileText, FiStar, FiSun, FiMoon, FiLogOut, FiLogIn, FiGlobe, FiSearch, FiUpload, FiMenu, FiX } from "react-icons/fi";
 
 function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -46,24 +46,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const freeLimitReached = Boolean(
-    user &&
-    p &&
-    !p.is_premium &&
-    !p.is_unlimited &&
-    Number(p.credits || 0) === 0 &&
-    Number(p.documents_count || 0) >= 1,
-  );
-
   // Close the mobile menu on navigation
   React.useEffect(() => { setMobileMenuOpen(false); }, [location]);
 
-  const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean; locked?: boolean }[] = [
+  const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean }[] = [
     { href: "/", icon: <FiHome size={18} />, label: t("nav.home"), active: location === "/" },
-    { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard"), locked: freeLimitReached },
+    { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard") },
     { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
-    { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner"), locked: freeLimitReached },
-    { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import"), locked: freeLimitReached },
+    { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner") },
+    { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import") },
     { href: "/pricing", icon: <FiStar size={18} />, label: p?.is_premium ? t("nav.premiumActive") : t("nav.getPremium"), active: location === "/pricing" },
   ];
 
@@ -121,20 +112,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           >
             {menuItems.map(item => (
               <Link key={item.href} href={item.href}>
-                <button
-                  className={`si w-full ${item.active ? "on" : ""}`}
-                  onClick={event => {
-                    if (item.locked) {
-                      event.preventDefault();
-                      navigate("/pricing");
-                    }
-                  }}
-                >
+                <button className={`si w-full ${item.active ? "on" : ""}`}>
                   {item.icon} {item.label}
-                  {item.locked && item.href === "/documents" && (
-                    <span className="text-[11px] text-[var(--muted)] ml-auto">{t("nav.documentsLockedHint")}</span>
-                  )}
-                  {item.locked && <FiLock size={13} />}
                 </button>
               </Link>
             ))}
@@ -158,20 +137,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Link>
           {menuItems.slice(1, 5).map(item => (
             <Link key={item.href} href={item.href}>
-              <button
-                className={`si ${item.active ? "on" : ""}`}
-                onClick={event => {
-                  if (item.locked) {
-                    event.preventDefault();
-                    navigate("/pricing");
-                  }
-                }}
-              >
+              <button className={`si ${item.active ? "on" : ""}`}>
                 {item.icon} {item.label}
-                {item.locked && item.href === "/documents" && (
-                  <span className="text-[11px] text-[var(--muted)] ml-auto">{t("nav.documentsLockedHint")}</span>
-                )}
-                {item.locked && <FiLock size={13} />}
               </button>
             </Link>
           ))}
