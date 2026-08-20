@@ -194,11 +194,14 @@ export default function Preview() {
         method: "POST",
         body: JSON.stringify({ cvText, letterText, jobText: jobText || undefined, profileText, documentId: params.id, language: i18n.resolvedLanguage || "de" }),
       });
-      if (res?.locked && typeof res.preview === "string") {
-        setEditedLetter(res.preview);
+      // A free account may receive a response marked as locked for export
+      // purposes, but the complete perfected text is still readable in the
+      // browser. Only copying, editing, printing and downloading are gated.
+      if (res?.locked && typeof res.letter === "string") {
+        setEditedLetter(res.letter);
         setPerfectedApplied(true);
-        setPerfectedServerLocked(true);
-        setPerfectedProfilePreview(typeof res.profilePreview === "string" ? res.profilePreview : null);
+        setPerfectedServerLocked(false);
+        setPerfectedProfilePreview(typeof res.profile === "string" ? res.profile : (typeof res.profilePreview === "string" ? res.profilePreview : null));
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setTimeout(() => letterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
         return;
@@ -266,7 +269,7 @@ export default function Preview() {
   useEffect(() => {
     const d: any = doc;
     if (!d) return;
-    if (d.perfected_locked || (freeUser && typeof d.perfected_letter === "string")) {
+    if (d.perfected_locked || typeof d.perfected_letter === "string") {
       const letter = typeof d.perfected_letter === "string" ? d.perfected_letter : "";
       setEditedLetter(letter);
       setPerfectedApplied(true);
@@ -286,9 +289,7 @@ export default function Preview() {
     const d: any = doc;
     if (!cvRef.current || !d) return;
     if (d.perfected_cv_html) {
-      cvRef.current.innerHTML = freeUser
-        ? createClientHtmlPreview(d.perfected_cv_html)
-        : d.perfected_cv_html;
+      cvRef.current.innerHTML = d.perfected_cv_html;
       setCvPerfectedApplied(true);
     } else if (d.cv_html) {
       cvRef.current.innerHTML = d.cv_html;
@@ -651,7 +652,7 @@ export default function Preview() {
                   {editLocked ? "🔒 " : ""}{editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
                 </button>
               </div>
-              {showLockedCvPreview ? (
+              {false ? (
                 <div className="cv-wrap">
                   <div className="cv-sheet" style={{ padding: "32px 28px", minHeight: 280, position: "relative", overflow: "hidden" }}>
                     <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 10 }}>
@@ -662,9 +663,7 @@ export default function Preview() {
                         onCopy={blockCopy}
                         onCut={blockCopy}
                         dangerouslySetInnerHTML={{
-                          __html: freeUser
-                            ? createClientHtmlPreview((doc as any).perfected_cv_html)
-                            : (doc as any).perfected_cv_html,
+                          __html: (doc as any).perfected_cv_html,
                         }}
                         style={{ fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
                       />
