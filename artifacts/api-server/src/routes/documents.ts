@@ -176,14 +176,15 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     // interrupted/older write even though the full generation is still linked.
     // `perfectedLetter` is a second legacy marker. It is enough to keep the
     // document locked even if a database write lost its generation relation.
-    // The browser must never receive this full text for a free account.
-    const hasLockedGeneration = documentLocked && Boolean(pendingGeneration || doc.perfectedLetter);
+    // Free users may view the complete perfected document in the browser.
+    // Downloading, printing and copying remain blocked separately.
+    const hasPerfectedGeneration = Boolean(pendingGeneration || doc.perfectedLetter);
     const storedPerfectedLetter = doc.perfectedLetter;
-    const visiblePerfectedLetter = hasLockedGeneration
-      ? (pendingGeneration?.previewText || createPerfectedPreview(storedPerfectedLetter || doc.coverLetter || ""))
+    const visiblePerfectedLetter = hasPerfectedGeneration
+      ? (pendingGeneration?.fullText || storedPerfectedLetter || doc.coverLetter || "")
       : null;
-    const visiblePerfectedProfile = hasLockedGeneration && pendingGeneration?.fullProfile
-      ? (pendingGeneration.previewProfile || createPerfectedPreview(pendingGeneration.fullProfile))
+    const visiblePerfectedProfile = hasPerfectedGeneration && pendingGeneration?.fullProfile
+      ? pendingGeneration.fullProfile
       : null;
     const pd = (doc.profileData as any) || {};
     // A stale premium marker could previously let the browser save the
@@ -202,28 +203,24 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     const visibleCvHtml = visiblePerfectedProfile && pendingGeneration?.fullProfile
       ? replaceProfileText(doc.cvHtml, pendingGeneration.fullProfile, visiblePerfectedProfile)
       : doc.cvHtml;
-    const visiblePerfectedCvHtml = hasLockedGeneration
-      ? createHtmlPreview(
-          pendingGeneration?.documentType === "cv"
-            ? pendingGeneration.fullText
-            : doc.cvHtml,
-        )
+    const visiblePerfectedCvHtml = hasPerfectedGeneration
+      ? pendingGeneration?.documentType === "cv"
+        ? pendingGeneration.fullText
+        : doc.perfectedCvHtml || doc.cvHtml
       : null;
-    const visibleProfileData = hasLockedGeneration
-      ? { ...pd, cv_json: null }
+    const visibleProfileData = hasPerfectedGeneration
+      ? pd
       : visibleCvJson !== pd.cv_json
         ? { ...pd, cv_json: visibleCvJson }
       : doc.profileData;
-    const documentCvHtml = documentLocked ? createHtmlPreview(doc.cvHtml) : visibleCvHtml;
-    const documentCoverLetter = documentLocked
-      ? createPerfectedPreview(doc.coverLetter || "")
-      : doc.coverLetter;
+    const documentCvHtml = visiblePerfectedCvHtml || visibleCvHtml;
+    const documentCoverLetter = visiblePerfectedLetter || doc.coverLetter;
     res.json({
       id: doc.id,
       name: doc.name,
       template: doc.template,
       cv_html: documentCvHtml,
-      cv_json: hasLockedGeneration ? null : visibleCvJson,
+      cv_json: visibleCvJson,
        // A recovered legacy generation may have been written into cover_letter
        // before preview gating existed. Never send that matching full text to a
        // free account; the dedicated perfected_letter field above is its safe
@@ -236,8 +233,8 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       perfected_letter: visiblePerfectedLetter,
       perfected_cv_html: visiblePerfectedCvHtml,
       perfected_profile: visiblePerfectedProfile,
-        perfected_generation_id: hasLockedGeneration ? pendingGeneration?.id ?? null : null,
-       perfected_locked: hasLockedGeneration,
+      perfected_generation_id: pendingGeneration?.id ?? null,
+      perfected_locked: false,
       created_at: doc.createdAt,
     });
   } catch (err) {

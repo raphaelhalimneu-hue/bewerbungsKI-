@@ -72,12 +72,9 @@ export default function Preview() {
   const pdfLocked = documentLocked;
   // Free users can read their originals, but server-locked perfected text is
   // only ever rendered as the shortened preview.
-  const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
-  const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
-  const showLockedCvPreview = documentLocked && perfectedServerLocked;
-  const visibleLetter = freeUser && perfectedApplied && !perfectedServerLocked
-    ? createClientPreview(editedLetter)
-    : editedLetter;
+  const letterCopyLocked = documentLocked;
+  const cvCopyLocked = documentLocked;
+  const visibleLetter = editedLetter;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -271,18 +268,18 @@ export default function Preview() {
     if (!d) return;
     if (d.perfected_locked || (freeUser && typeof d.perfected_letter === "string")) {
       const letter = typeof d.perfected_letter === "string" ? d.perfected_letter : "";
-      setEditedLetter(freeUser ? createClientPreview(letter) : letter);
+      setEditedLetter(letter);
       setPerfectedApplied(true);
-      setPerfectedServerLocked(freeUser || Boolean(d.perfected_locked));
+      setPerfectedServerLocked(false);
       setPerfectedProfilePreview(typeof d.perfected_profile === "string"
-        ? (freeUser ? createClientPreview(d.perfected_profile) : d.perfected_profile)
+        ? d.perfected_profile
         : null);
     } else if (d.cover_letter) {
       setEditedLetter(d.cover_letter);
       setPerfectedServerLocked(false);
       setPerfectedProfilePreview(null);
     }
-  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked, freeUser]);
+  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked]);
 
   // Set CV HTML via ref so contentEditable edits are preserved across re-renders
   useEffect(() => {
@@ -357,7 +354,7 @@ export default function Preview() {
   // Free accounts: one print per part — the popup is opened synchronously
   // (click context), then the server confirms the remaining allowance.
   async function consumePrint(kind: "cv_print" | "letter_print"): Promise<boolean> {
-    if (!freeUser) return true;
+    if (!documentLocked) return true;
     try {
       const r: any = await customFetch(`/api/documents/${params.id}/export-event`, {
         method: "POST",
@@ -376,7 +373,7 @@ export default function Preview() {
     let el: HTMLElement | null = cvRef.current;
     // Free accounts: the screen may show the perfected version, but prints
     // always use the stored ORIGINAL (perfected output is paid-only).
-    if (freeUser && (doc as any)?.cv_html) {
+    if (documentLocked && (doc as any)?.cv_html) {
       const tmp = document.createElement("div");
       tmp.innerHTML = (doc as any).cv_html;
       el = tmp;
@@ -408,7 +405,7 @@ export default function Preview() {
   async function printLetter() {
     // Free accounts always print the stored ORIGINAL letter — the perfected
     // version shown on screen is paid-only.
-    const text = freeUser
+    const text = documentLocked
       ? ((doc as any)?.cover_letter || "")
       : (editedLetter || (doc as any)?.cover_letter || "");
     if (!text) return;
