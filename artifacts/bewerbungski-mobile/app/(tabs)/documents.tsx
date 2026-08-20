@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useListDocuments, useDeleteDocument } from '@workspace/api-client-react';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 
 export default function DocumentsScreen() {
   const colors = useColors();
@@ -45,6 +46,12 @@ export default function DocumentsScreen() {
     } catch {}
   }
 
+  function openScanner(id: string) {
+    Haptics.selectionAsync();
+    setSelected(null);
+    router.navigate({ pathname: '/(tabs)/scanner', params: { documentId: id } });
+  }
+
   if (!user) {
     return (
       <View style={[s.centered, { paddingTop: topPad }]}>
@@ -73,6 +80,15 @@ export default function DocumentsScreen() {
               <Text style={s.modalTitle} numberOfLines={1}>{selected.name}</Text>
             </View>
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: botPad + 40 }}>
+              <TouchableOpacity
+                style={s.scanButton}
+                onPress={() => openScanner(selected.id)}
+                activeOpacity={0.85}
+                testID="check-document"
+              >
+                <Feather name="check-circle" size={18} color={colors.primaryForeground} />
+                <Text style={s.scanButtonText}>Lebenslauf prüfen</Text>
+              </TouchableOpacity>
               {selected.cover_letter ? (
                 <>
                   <Text style={s.sectionTitle}>✉️ Bewerbung</Text>
@@ -119,6 +135,14 @@ export default function DocumentsScreen() {
                 <Text style={s.docDate}>{fmtDate((item as any).created_at)}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() => openScanner((item as any).id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityLabel="Lebenslauf prüfen"
+                  testID={`check-document-${(item as any).id}`}
+                >
+                  <Feather name="check-circle" size={19} color={colors.primary} />
+                </TouchableOpacity>
                 <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
                 <TouchableOpacity onPress={() => handleDelete((item as any).id, (item as any).name)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Feather name="trash-2" size={18} color={colors.destructive} />
@@ -147,6 +171,8 @@ function makeStyles(colors: ReturnType<typeof useColors>) {
     modalHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, paddingHorizontal: 20, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 12 },
     modalTitle: { flex: 1, fontSize: 17, fontWeight: '700' as const, fontFamily: 'Inter_700Bold', color: colors.foreground },
     closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.muted, alignItems: 'center' as const, justifyContent: 'center' as const },
+    scanButton: { minHeight: 46, borderRadius: colors.radius, backgroundColor: colors.primary, flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const, gap: 8, marginBottom: 20 },
+    scanButtonText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: colors.primaryForeground },
     sectionTitle: { fontSize: 16, fontWeight: '700' as const, fontFamily: 'Inter_700Bold', color: colors.foreground, marginBottom: 12 },
     card: { backgroundColor: colors.card, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: colors.border },
     letterText: { fontSize: 14, lineHeight: 22, color: colors.foreground, fontFamily: 'Inter_400Regular' },

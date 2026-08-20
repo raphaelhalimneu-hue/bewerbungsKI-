@@ -19,6 +19,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'doc.text', selected: 'doc.text.fill' }} />
         <Label>Dokumente</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="scanner">
+        <Icon sf={{ default: 'checkmark.seal', selected: 'checkmark.seal.fill' }} />
+        <Label>CV-Check</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="account">
         <Icon sf={{ default: 'person.circle', selected: 'person.circle.fill' }} />
         <Label>Konto</Label>
@@ -77,6 +81,18 @@ function ClassicTabLayout() {
               <SymbolView name="doc.text.fill" tintColor={color} size={24} />
             ) : (
               <Feather name="file-text" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="scanner"
+        options={{
+          title: 'CV-Check',
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="checkmark.seal.fill" tintColor={color} size={24} />
+            ) : (
+              <Feather name="check-circle" size={22} color={color} />
             ),
         }}
       />
