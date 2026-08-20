@@ -501,7 +501,16 @@
     "styleError": "Nie udało się rozpoznać wyglądu. Spróbuj z innym zdjęciem/PDF.",
     "improvedTitle": "Twój ulepszony tekst",
     "dailyLimit": "Osiągnięto dzienny limit (ochrona przed nadużyciami). Spróbuj ponownie jutro.",
-    "perfectLimit": "Twój limit udoskonalania (50×) został wyczerpany."
+    "perfectLimit": "Twój limit udoskonalania (50×) został wyczerpany.",
+    "improve": "Popraw tekst",
+    "improving": "Poprawianie aplikacji …",
+    "changesTitle": "Co poprawiono",
+    "copyImproved": "Kopiuj poprawiony tekst",
+    "copied": "Skopiowano",
+    "useImproved": "Użyj tego tekstu",
+    "copyError": "Nie udało się skopiować tekstu. Zaznacz go i skopiuj ręcznie.",
+    "busyError": "Usługa AI jest teraz zajęta. Spróbuj ponownie za chwilę.",
+    "perfectError": "Nie udało się poprawić tekstu. Spróbuj ponownie później."
   },
   "fileImport": {
     "button": "Prześlij plik (PDF, Word, zdjęcie)",

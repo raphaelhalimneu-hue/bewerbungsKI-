@@ -544,7 +544,16 @@
     "styleError": "Could not detect the design. Please try another photo/PDF.",
     "improvedTitle": "Your improved text",
     "dailyLimit": "Daily limit reached (abuse protection). Try again tomorrow.",
-    "perfectLimit": "Your perfecting quota (50×) is used up."
+    "perfectLimit": "Your perfecting quota (50×) is used up.",
+    "improve": "Improve it",
+    "improving": "Improving your application …",
+    "changesTitle": "What was improved",
+    "copyImproved": "Copy improved text",
+    "copied": "Copied",
+    "useImproved": "Use this text",
+    "copyError": "The text could not be copied. Please select it and copy it manually.",
+    "busyError": "The AI service is busy right now. Please try again in a moment.",
+    "perfectError": "The improvement could not be created. Please try again later."
   },
   "fileImport": {
     "button": "Upload file (PDF, Word, photo)",

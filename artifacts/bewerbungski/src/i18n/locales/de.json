@@ -544,7 +544,16 @@
     "styleError": "Design konnte nicht erkannt werden. Bitte anderes Foto/PDF versuchen.",
     "improvedTitle": "Dein verbesserter Text",
     "dailyLimit": "Tageslimit erreicht (Schutz vor Missbrauch). Morgen geht es weiter.",
-    "perfectLimit": "Dein Perfektionieren-Kontingent (50×) ist aufgebraucht."
+    "perfectLimit": "Dein Perfektionieren-Kontingent (50×) ist aufgebraucht.",
+    "improve": "Verbessern lassen",
+    "improving": "Anschreiben wird verbessert …",
+    "changesTitle": "Das wurde verbessert",
+    "copyImproved": "Verbesserten Text kopieren",
+    "copied": "Kopiert",
+    "useImproved": "Text übernehmen",
+    "copyError": "Der Text konnte nicht kopiert werden. Bitte markiere ihn und kopiere ihn manuell.",
+    "busyError": "Der KI-Dienst ist gerade ausgelastet. Bitte versuche es gleich noch einmal.",
+    "perfectError": "Die Verbesserung konnte nicht erstellt werden. Bitte versuche es später erneut."
   },
   "fileImport": {
     "button": "Datei hochladen (PDF, Word, Foto)",

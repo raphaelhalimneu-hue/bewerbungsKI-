@@ -501,7 +501,16 @@
     "styleError": "Tasarım algılanamadı. Lütfen başka bir fotoğraf/PDF deneyin.",
     "improvedTitle": "İyileştirilmiş metnin",
     "dailyLimit": "Günlük sınıra ulaşıldı (kötüye kullanım koruması). Yarın tekrar deneyin.",
-    "perfectLimit": "Mükemmelleştirme hakkınız (50×) tükendi."
+    "perfectLimit": "Mükemmelleştirme hakkınız (50×) tükendi.",
+    "improve": "İyileştirmesini iste",
+    "improving": "Başvurun iyileştiriliyor …",
+    "changesTitle": "Neler iyileştirildi",
+    "copyImproved": "İyileştirilmiş metni kopyala",
+    "copied": "Kopyalandı",
+    "useImproved": "Bu metni kullan",
+    "copyError": "Metin kopyalanamadı. Lütfen metni seçip elle kopyala.",
+    "busyError": "Yapay zekâ hizmeti şu anda yoğun. Lütfen biraz sonra tekrar dene.",
+    "perfectError": "Metin iyileştirilemedi. Lütfen daha sonra tekrar dene."
   },
   "fileImport": {
     "button": "Dosya yükle (PDF, Word, fotoğraf)",

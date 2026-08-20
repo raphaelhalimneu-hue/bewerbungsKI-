@@ -501,7 +501,16 @@
     "styleError": "No se pudo detectar el diseño. Prueba con otra foto/PDF.",
     "improvedTitle": "Tu texto mejorado",
     "dailyLimit": "Límite diario alcanzado (protección contra abusos). Inténtalo de nuevo mañana.",
-    "perfectLimit": "Tu cuota de perfeccionamiento (50×) está agotada."
+    "perfectLimit": "Tu cuota de perfeccionamiento (50×) está agotada.",
+    "improve": "Mejorarla",
+    "improving": "Mejorando tu candidatura …",
+    "changesTitle": "Qué se ha mejorado",
+    "copyImproved": "Copiar el texto mejorado",
+    "copied": "Copiado",
+    "useImproved": "Usar este texto",
+    "copyError": "No se ha podido copiar el texto. Selecciónalo y cópialo manualmente.",
+    "busyError": "El servicio de IA está ocupado. Inténtalo de nuevo en un momento.",
+    "perfectError": "No se ha podido mejorar el texto. Inténtalo de nuevo más tarde."
   },
   "fileImport": {
     "button": "Subir archivo (PDF, Word, foto)",
