@@ -52,6 +52,7 @@ export interface Document {
   job_title?: string | null;
   /** @nullable */
   job_company?: string | null;
+  bezahlt: boolean;
   created_at: string;
 }
 

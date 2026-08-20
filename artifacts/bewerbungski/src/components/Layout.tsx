@@ -61,7 +61,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const menuItems: { href: string; icon: React.ReactNode; label: string; active: boolean; locked?: boolean }[] = [
     { href: "/", icon: <FiHome size={18} />, label: t("nav.home"), active: location === "/" },
     { href: "/wizard", icon: <FiPlusCircle size={18} />, label: t("nav.createNew"), active: location.startsWith("/wizard"), locked: freeLimitReached },
-    { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview"), locked: freeLimitReached },
+    { href: "/documents", icon: <FiFileText size={18} />, label: t("nav.myDocuments"), active: location.startsWith("/documents") || location.startsWith("/preview") },
     { href: "/scanner", icon: <FiSearch size={18} />, label: t("scanner.nav"), active: location.startsWith("/scanner"), locked: freeLimitReached },
     { href: "/import", icon: <FiUpload size={18} />, label: t("importPage.nav"), active: location.startsWith("/import"), locked: freeLimitReached },
     { href: "/pricing", icon: <FiStar size={18} />, label: p?.is_premium ? t("nav.premiumActive") : t("nav.getPremium"), active: location === "/pricing" },

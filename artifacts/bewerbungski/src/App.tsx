@@ -83,16 +83,13 @@ function FreeFeatureGate({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (isLocked && (location === "/wizard" || location === "/documents" || location.startsWith("/documents/") || location.startsWith("/preview/") || location === "/scanner" || location === "/import")) {
+    if (isLocked && (location === "/wizard" || location === "/scanner" || location === "/import")) {
       navigate("/pricing");
     }
   }, [isLocked, location, navigate]);
 
   const isCurrentRouteGated =
     location === "/wizard" ||
-    location === "/documents" ||
-    location.startsWith("/documents/") ||
-    location.startsWith("/preview/") ||
     location === "/scanner" ||
     location === "/import";
 

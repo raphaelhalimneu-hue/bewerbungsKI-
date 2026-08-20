@@ -62,18 +62,19 @@ export default function Preview() {
   const freeUser = !!pAuth && !pAuth.is_unlimited && Number(pAuth.credits || 0) <= 0;
   // Free accounts can read their saved document, but editing, download and
   // print are paid-only. The server enforces the same rules.
-  const docxLocked = freeUser;
-  const editLocked = freeUser;
+  const documentLocked = !doc || !(doc as any).bezahlt;
+  const docxLocked = documentLocked;
+  const editLocked = documentLocked;
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
   void printUsed;
-  const cvPrintLocked = freeUser;
-  const letterPrintLocked = freeUser;
-  const pdfLocked = freeUser;
+  const cvPrintLocked = documentLocked;
+  const letterPrintLocked = documentLocked;
+  const pdfLocked = documentLocked;
   // Free users can read their originals, but server-locked perfected text is
   // only ever rendered as the shortened preview.
   const letterCopyLocked = perfectedServerLocked || (freeUser && (perfectedApplied || letterManuallyEdited));
   const cvCopyLocked = freeUser && (cvPerfectedApplied || cvManuallyEdited);
-  const showLockedCvPreview = freeUser && perfectedServerLocked;
+  const showLockedCvPreview = documentLocked && perfectedServerLocked;
   const visibleLetter = freeUser && perfectedApplied && !perfectedServerLocked
     ? createClientPreview(editedLetter)
     : editedLetter;
