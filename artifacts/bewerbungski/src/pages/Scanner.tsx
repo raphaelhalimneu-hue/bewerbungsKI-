@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { FileImportButton, type UploadedFile } from "../components/FileImportButton";
+import { buildAnalyzeRequest, saveWizardDesign, saveWizardPrefill, takeScanImport } from "../lib/importHandoff";
 
 type AnalyzeResult = {
   score: number;
@@ -167,7 +168,7 @@ export default function Scanner() {
   }, [user, p, freeUser, mode]);
 
   async function goWizard() {
-    try { sessionStorage.setItem("bk_prefill_text", cvText.trim()); } catch { /* ignore */ }
+    try { saveWizardPrefill(sessionStorage, cvText); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (lastFile) {
       setWizardBusy(true);
@@ -176,9 +177,7 @@ export default function Scanner() {
           method: "POST",
           body: JSON.stringify({ mimeType: lastFile.mimeType, data: lastFile.base64 }),
         });
-        if (style && typeof (style as any).accent === "string") {
-          sessionStorage.setItem("bk_prefill_style", JSON.stringify(style));
-        }
+        saveWizardDesign(sessionStorage, style);
       } catch { /* design copy is best-effort */ }
       setWizardBusy(false);
     }
@@ -267,32 +266,27 @@ export default function Scanner() {
   // Prefill from the Import page
   useEffect(() => {
     try {
-      const pre = sessionStorage.getItem("bk_scan_text");
-      const m = sessionStorage.getItem("bk_scan_mode");
-      if (pre) {
-        setCvText(pre);
-        if (m === "letter" || m === "cv") setMode(m);
-        sessionStorage.removeItem("bk_scan_text");
-        sessionStorage.removeItem("bk_scan_mode");
+      const imported = takeScanImport(sessionStorage);
+      if (imported) {
+        setCvText(imported.text);
+        setMode(imported.mode);
         // Check automatically, since there is no separate check button anymore
-        void analyze(pre);
+        // Pass the imported mode directly: React state updates asynchronously.
+        void analyze(imported.text, imported.mode);
       }
     } catch { /* ignore */ }
   }, []);
 
-  async function analyze(textOverride?: string) {
+  async function analyze(textOverride?: string, modeOverride?: "cv" | "letter") {
     if (!user) { setShowAuthModal(true); return; }
     const text = (textOverride ?? cvText).trim();
+    const analysisMode = modeOverride ?? mode;
     if (text.length < 80) { setErrorMsg(t("scanner.tooShort")); return; }
     setErrorMsg(""); setBusy(true); setResult(null);
     try {
       const res = await customFetch("/api/analyze", {
         method: "POST",
-        body: JSON.stringify({
-          cvText: text,
-          docType: mode,
-          language: i18n.resolvedLanguage || "de",
-        }),
+        body: JSON.stringify(buildAnalyzeRequest(text, analysisMode, i18n.resolvedLanguage || "de")),
       });
       setResult(res as AnalyzeResult);
     } catch (e: any) {

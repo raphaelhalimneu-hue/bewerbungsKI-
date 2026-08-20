@@ -10,6 +10,7 @@ import { renderCVContent, letterheadUrl } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
 import { compressImageIfNeeded } from "../lib/compressImage";
 import { FileImportButton } from "../components/FileImportButton";
+import { applyImportedStyle, takeWizardDesign, takeWizardPrefill } from "../lib/importHandoff";
 
 const STEPS = [
   { id: "personal",   icon: "👤" },
@@ -114,14 +115,10 @@ export default function Wizard() {
   // Prefill custom design from Scanner ("use file design"): style JSON stored before navigation
   useEffect(() => {
     try {
-      const style = sessionStorage.getItem("bk_prefill_style");
+      const style = takeWizardDesign(sessionStorage);
       if (style) {
-        sessionStorage.removeItem("bk_prefill_style");
-        const cs = JSON.parse(style);
-        if (cs && typeof cs.accent === "string") {
-          setCustomStyle(cs);
-          toast({ title: t("wizard.template.customReady") });
-        }
+        setCustomStyle(style);
+        toast({ title: t("wizard.template.customReady") });
       }
     } catch { /* ignore */ }
   }, []);
@@ -165,7 +162,7 @@ export default function Wizard() {
     setForm(f => ({ ...f, template: t }));
   }
   function setCustomStyle(cs: NonNullable<FormData["customStyle"]>) {
-    setForm(f => ({ ...f, customStyle: cs, template: "custom" }));
+    setForm(f => applyImportedStyle(f, cs));
   }
 
   function addExp() {
@@ -493,11 +490,10 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
   // Prefill from Scanner ("use as template"): text stored in sessionStorage before navigation
   useEffect(() => {
     try {
-      const pre = sessionStorage.getItem("bk_prefill_text");
-      if (pre && pre.trim().length >= 30) {
+      const pre = takeWizardPrefill(sessionStorage);
+      if (pre) {
         setFtText(pre);
         setFtOpen(true);
-        sessionStorage.removeItem("bk_prefill_text");
       }
     } catch { /* ignore */ }
   }, []);

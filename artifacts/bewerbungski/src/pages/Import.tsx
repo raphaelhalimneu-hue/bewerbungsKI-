@@ -4,6 +4,7 @@ import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import { FileImportButton, type UploadedFile } from "../components/FileImportButton";
 import { customFetch } from "@workspace/api-client-react";
+import { saveScanImport, saveWizardDesign, saveWizardPrefill } from "../lib/importHandoff";
 
 export default function ImportPage() {
   const { t } = useTranslation();
@@ -17,14 +18,13 @@ export default function ImportPage() {
 
   function goScan(mode: "cv" | "letter") {
     try {
-      sessionStorage.setItem("bk_scan_text", text.trim());
-      sessionStorage.setItem("bk_scan_mode", mode);
+      saveScanImport(sessionStorage, text, mode);
     } catch { /* ignore */ }
     navigate("/scanner");
   }
 
   async function goWizard() {
-    try { sessionStorage.setItem("bk_prefill_text", text.trim()); } catch { /* ignore */ }
+    try { saveWizardPrefill(sessionStorage, text); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (file) {
       setWizardBusy(true);
@@ -33,9 +33,7 @@ export default function ImportPage() {
           method: "POST",
           body: JSON.stringify({ mimeType: file.mimeType, data: file.base64 }),
         });
-        if (style && typeof (style as any).accent === "string") {
-          sessionStorage.setItem("bk_prefill_style", JSON.stringify(style));
-        }
+        saveWizardDesign(sessionStorage, style);
       } catch { /* design copy is best-effort */ }
       setWizardBusy(false);
     }

@@ -52,8 +52,9 @@ function thenable(resolve: () => any) {
 }
 
 export const fakeDb = {
-  select: (..._args: any[]) => {
-    const chain = thenable(() => store.docs);
+  select: (...args: any[]) => {
+    const isCountQuery = args.length === 1 && args[0] && typeof args[0] === "object" && "value" in args[0];
+    const chain = thenable(() => isCountQuery ? [{ value: store.docs.length }] : store.docs);
     const origFrom = chain.from;
     chain.from = (table: any) => {
       if (table === fakeTables.profilesTable) return thenable(() => [store.profile]);
