@@ -64,6 +64,10 @@ export function VerifyEmailModal() {
     try {
       setBusy(true);
       setError(null);
+      // Hide the blocking dialog immediately after the user submits a code.
+      // A rejected code is followed by sign-out in the catch block, so this
+      // never grants access to an unverified session.
+      setVerifiedLocally(true);
       await customFetch<any>("/api/verify/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
