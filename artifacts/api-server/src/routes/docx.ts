@@ -140,17 +140,16 @@ function formatPeriod(start?: string, end?: string, current?: boolean, presentWo
 // ── CV DOCX ──────────────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    // Free trial: PDF download stays free, Word (DOCX) requires a purchase
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
       .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!doc.bezahlt) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
 
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};
@@ -355,24 +354,16 @@ function isValidCvJson(cv: unknown): boolean {
 // ── CV DOCX from editor (cv_json) ────────────────────────────────────────────
 router.post("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    // Free trial: PDF download stays free, Word (DOCX) requires a purchase
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
-    // Editor export with client-supplied content — locked free users may not
-    // export edited/perfected content (their GET download of the stored
-    // original stays free).
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
       .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!doc.bezahlt) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
 
     const cv = req.body?.cv_json || (doc.profileData as any)?.cv_json;
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
@@ -522,17 +513,16 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 // ── Cover Letter DOCX ─────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    // Free trial: PDF download stays free, Word (DOCX) requires a purchase
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const [doc] = await db
       .select()
       .from(documentsTable)
       .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!doc.bezahlt) {
+      res.status(403).json({ error: "upgrade_required" });
+      return;
+    }
 
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};
@@ -542,7 +532,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
 
     // Use edited text if provided via query param (client sends updated text), else stored text.
     // Locked free users may only export the stored original.
-    const allowOverride = !(await isFreeQuotaLocked(req.userId!, req.userEmail));
+    const allowOverride = doc.bezahlt;
     const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 

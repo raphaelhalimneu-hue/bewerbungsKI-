@@ -174,9 +174,7 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
-    // Downloads are paid-only: free accounts can try everything on screen,
-    // but PDF export requires a purchase (policy 2026-08-19).
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
+    if (!doc.bezahlt) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
@@ -211,9 +209,7 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     // Accept edited text from query param (same pattern as cover-letter.docx).
     // Locked free users may only export the stored original — never edited/
     // perfected text passed from the client.
-    // Downloads are paid-only: free accounts can try everything on screen,
-    // but PDF export requires a purchase (policy 2026-08-19).
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
+    if (!doc.bezahlt) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
