@@ -20,6 +20,7 @@ export function VerifyEmailModal() {
   const [cooldown, setCooldown] = useState(0);
   const [verifiedLocally, setVerifiedLocally] = useState(false);
   const sentRef = useRef(false);
+  const wrongCodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const needsVerification = !!session && !!profile && profile.email_verified === false;
   const open = needsVerification && !verifiedLocally;
@@ -42,6 +43,10 @@ export function VerifyEmailModal() {
     const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(id);
   }, [cooldown]);
+
+  useEffect(() => () => {
+    if (wrongCodeTimerRef.current) clearTimeout(wrongCodeTimerRef.current);
+  }, []);
 
   async function sendCode() {
     try {
@@ -77,6 +82,12 @@ export function VerifyEmailModal() {
       refetchProfile();
     } catch {
       setError(t("verify.wrongCode"));
+      // Do not leave the blocking overlay stuck after a failed attempt.
+      // Signing out keeps the unverified account protected while the dialog
+      // disappears automatically after the error has been readable.
+      wrongCodeTimerRef.current = setTimeout(() => {
+        void signOut();
+      }, 2200);
     } finally {
       setBusy(false);
     }
