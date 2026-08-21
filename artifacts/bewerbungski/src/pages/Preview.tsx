@@ -51,6 +51,17 @@ export default function Preview() {
       && !(profile as any).is_unlimited
       && Number((profile as any).credits ?? 0) <= 0);
   const editLocked = freeUser;
+
+  useEffect(() => {
+    console.log("[BewerbungsKI] Preview user status", {
+      isPremium: (profile as any)?.is_premium ?? null,
+      isUnlimited: (profile as any)?.is_unlimited ?? null,
+      credits: (profile as any)?.credits ?? null,
+      freeUser,
+      editLocked,
+    });
+  }, [profile, freeUser, editLocked]);
+
   const visibleLetter = editedLetter;
   const hasCv = Boolean(
     doc && (
