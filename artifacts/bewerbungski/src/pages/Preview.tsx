@@ -70,7 +70,7 @@ export default function Preview() {
   // print are paid-only. The server enforces the same rules.
   const documentLocked = !doc || !(doc as any).bezahlt;
   const docxLocked = documentLocked;
-  const editLocked = documentLocked;
+  const editLocked = false;
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
   void printUsed;
   const cvPrintLocked = documentLocked;
