@@ -764,7 +764,7 @@ export default function Preview() {
                   />
                   <textarea
                     value={visibleLetter}
-                     readOnly={editLocked}
+                     disabled={editLocked}
                     onChange={e => {
                       editedLetterRef.current = e.target.value;
                       setEditedLetter(e.target.value);
@@ -785,6 +785,8 @@ export default function Preview() {
                       minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
                       background: "transparent", display: "block", boxSizing: "border-box",
                       position: "relative", zIndex: 1,
+                       userSelect: editLocked ? "none" : "text",
+                       WebkitUserSelect: editLocked ? "none" : "text",
                        ...(editLocked ? { cursor: "not-allowed", opacity: 0.78 } : {}),
                     }}
                   />
