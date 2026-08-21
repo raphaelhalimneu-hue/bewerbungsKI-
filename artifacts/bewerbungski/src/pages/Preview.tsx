@@ -11,6 +11,8 @@ import { useAuth } from "../context/AuthContext";
 import { AnalysisCard } from "./Scanner";
 import { clearPreviewDraftField, readPreviewDraft, writePreviewDraft } from "../lib/previewDraft";
 
+const MIN_AI_TEXT_LENGTH = 80;
+
 /** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
 function letterDecoHtml(doc: any): string {
   return templateDeco(doc?.template, doc?.profile_data?.customStyle?.accent);
@@ -84,6 +86,9 @@ export default function Preview() {
     (typeof editedLetter === "string" && editedLetter.trim()) ||
     (doc && typeof (doc as any).cover_letter === "string" && (doc as any).cover_letter.trim()),
   );
+  const currentLetterText = editedLetter || (doc && typeof (doc as any).cover_letter === "string" ? (doc as any).cover_letter : "");
+  const checkUsesLetter = currentLetterText.trim().length >= MIN_AI_TEXT_LENGTH;
+  const canPerfectLetter = currentLetterText.trim().length >= MIN_AI_TEXT_LENGTH;
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -286,9 +291,9 @@ export default function Preview() {
     const { cvText, letterText, jobText } = docTexts();
     const letter = letterOverride ?? letterText;
     // If a Bewerbung exists, check ONLY the Bewerbung (never drag the CV in); otherwise check the CV.
-    const isLetter = !!(letter && letter.trim().length >= 80);
+    const isLetter = !!(letter && letter.trim().length >= MIN_AI_TEXT_LENGTH);
     const mainText = isLetter ? letter : cvText;
-    if (mainText.length < 80) return;
+    if (mainText.length < MIN_AI_TEXT_LENGTH) return;
     setAiError(""); setChecking(true); setAnalysis(null);
     if (!keepChanges) setPerfectChanges(null);
     try {
@@ -308,7 +313,7 @@ export default function Preview() {
 
   async function runPerfect() {
     const { cvText, letterText, jobText } = docTexts();
-    if (!letterText || letterText.trim().length < 80) return;
+    if (!letterText || letterText.trim().length < MIN_AI_TEXT_LENGTH) return;
     // CV profile statement: perfected together with the letter (same rules)
     const cvJson: any = (doc as any)?.cv_json || null;
     const profileText = cvJson?.profile && String(cvJson.profile).trim().length >= 40 ? String(cvJson.profile) : undefined;
@@ -755,16 +760,23 @@ export default function Preview() {
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <button className="btn btn-p btn-sm" onClick={() => runCheck()} disabled={checking || perfecting}>
-                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
+                {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t(checkUsesLetter ? "preview.checkLetterBtn" : "preview.checkCvBtn")}</>}
               </button>
               {hasLetter && (
-                <button
-                  className="btn btn-g btn-sm"
-                  onClick={runPerfect}
-                  disabled={checking || perfecting || perfectedServerLocked}
-                >
-                  {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <button
+                    className="btn btn-g btn-sm"
+                    onClick={runPerfect}
+                    disabled={checking || perfecting || perfectedServerLocked || !canPerfectLetter}
+                  >
+                    {perfecting ? <><span className="spin" /> {t("preview.perfecting")}</> : <>✨ {t("preview.perfectBtn")}</>}
+                  </button>
+                  {!canPerfectLetter && (
+                    <span style={{ fontSize: 11.5, color: "var(--muted)", maxWidth: 190 }}>
+                      {t("preview.perfectMinLength")}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             {aiError && <div style={{ color: "var(--err)", fontSize: 13.5, marginTop: 10 }}>{aiError}</div>}
