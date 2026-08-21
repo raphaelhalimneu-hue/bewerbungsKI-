@@ -173,10 +173,6 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
 
 router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const documentType = req.query.type;
     if (documentType !== "cv" && documentType !== "letter") {
       res.status(400).json({ error: "invalid_document_type" });
