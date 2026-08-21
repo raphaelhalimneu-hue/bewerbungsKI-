@@ -12,3 +12,4 @@
 - [Features Aug 2026](features-overview.md) — profil-save (savedProfile jsonb), inline-edit (contentEditable CV + textarea letter), DOCX export (/api/documents/:id/download/cv.docx + cover-letter.docx), Mobile Expo app.
 - [Perfektionierungs-Vorschau](perfected-preview-gating.md) — Gratis-Nutzer erhalten nur serverseitig gekürzte Vorschauen; Volltexte bleiben generation-gebunden bis zum Kauf.
 - [Kontofreigaben](account-access-exceptions.md) — Keine fest eingebauten E-Mail-Ausnahmen: Sonderzugriff nur über die explizite Server-Allowlist.
+- [Sprachniveau-Speicherung](language-level-storage.md) — CEFR-Codes und der Muttersprache-Sentinel bleiben gespeichert; nur die sichtbaren Labels werden lokalisiert.

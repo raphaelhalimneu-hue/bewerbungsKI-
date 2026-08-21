@@ -445,7 +445,7 @@ export default function Preview() {
         pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
-      pdf.save(baseFileName("Lebenslauf") + ".pdf");
+      pdf.save(baseFileName(t("preview.cvFileName")) + ".pdf");
     } catch (e) { console.error("CV PDF export failed", e); }
     finally { setExporting(null); }
   }
@@ -459,7 +459,7 @@ export default function Preview() {
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
-      a.download = baseFileName("Bewerbung") + ".pdf";
+      a.download = baseFileName(t("preview.coverLetterFileName")) + ".pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -477,7 +477,7 @@ export default function Preview() {
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
-      a.download = baseFileName(type === "cv" ? "Lebenslauf" : "Bewerbung") + ".docx";
+      a.download = baseFileName(t(type === "cv" ? "preview.cvFileName" : "preview.coverLetterFileName")) + ".docx";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -493,7 +493,7 @@ export default function Preview() {
           <button className="btn btn-g" onClick={() => { void leavePreview(); }}>{t("preview.back")}</button>
           {doc && (doc as any).cv_json && (
             <button className="btn btn-p btn-sm" onClick={() => void leavePreview(`/documents/${params.id}/edit`)}>
-              ✏️ {t("editor.editInEditor") || "Live-Editor"}
+              ✏️ {t("editor.editInEditor")}
             </button>
           )}
           {doc && (
@@ -517,8 +517,8 @@ export default function Preview() {
                   <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
                     {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadCv")}</>}
                    </button>
-                   <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
-                      {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>⬇ CV .docx</>}
+                   <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title={t("preview.downloadDocxTooltip")} style={{ minWidth: 120 }}>
+                      {exporting === "cv-docx" ? <><span className="spin" /> {t("preview.creatingDocx")}</> : <>{t("preview.downloadCvDocx")}</>}
                    </button>
                   </>
                 )}
@@ -527,8 +527,8 @@ export default function Preview() {
                     <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
                       {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{t("preview.downloadLetter")}</>}
                     </button>
-                    <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 140 }}>
-                      {exporting === "letter-docx" ? <><span className="spin" /> Word…</> : <>⬇ Bewerbung .docx</>}
+                    <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cover-letter")} disabled={exporting !== null} title={t("preview.downloadDocxTooltip")} style={{ minWidth: 140 }}>
+                      {exporting === "letter-docx" ? <><span className="spin" /> {t("preview.creatingDocx")}</> : <>{t("preview.downloadLetterDocx")}</>}
                     </button>
                   </>
                 )}

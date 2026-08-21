@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { renderCVContent, type CVContent, type CustomStyle, type TemplateId } from "../lib/buildCVHTML";
+import { LANGUAGE_LEVEL_VALUES, languageLevelLabelKey, normalizeLanguageLevel } from "../lib/languageLevels";
 
 // ── Template list ────────────────────────────────────────────────────────────
 const TEMPLATES: { id: TemplateId; name: string; color: string }[] = [
@@ -159,7 +160,7 @@ export default function CVEditor() {
   }
 
   function addSkill() {
-    const val = window.prompt(t("editor.skillPrompt") || "Skill hinzufügen:");
+    const val = window.prompt(t("editor.skillPrompt"));
     if (val?.trim()) setCvState(s => ({ ...s, skills: [...s.skills, val.trim()] }));
   }
   function removeSkill(idx: number) {
@@ -189,10 +190,10 @@ export default function CVEditor() {
         method: "PATCH",
         body: JSON.stringify({ cv_json: cvState, cv_html: html, template }),
       });
-      setSaveMsg("✓ " + (t("editor.saved") || "Gespeichert"));
+      setSaveMsg("✓ " + t("editor.saved"));
       setTimeout(() => setSaveMsg(""), 3000);
     } catch (e: any) {
-      setSaveMsg("⚠ " + (e.message || "Fehler"));
+      setSaveMsg("⚠ " + (e.message || t("editor.error")));
     } finally {
       setSaving(false);
     }
@@ -222,7 +223,7 @@ export default function CVEditor() {
         left -= pageH;
       }
       const name = (doc as any)?.name?.replace(/[^a-zA-Z0-9\-_äöüÄÖÜß ]/g, "") || "";
-      pdf.save(`${name ? name + " – " : ""}Lebenslauf.pdf`);
+      pdf.save(`${name ? name + " – " : ""}${t("preview.cvFileName")}.pdf`);
     } catch (e) { console.error("PDF export failed", e); }
     finally { setExporting(null); }
   }
@@ -240,7 +241,7 @@ export default function CVEditor() {
       const a = document.createElement("a");
       a.href = objUrl;
       const name = (doc as any)?.name?.replace(/[^a-zA-Z0-9\-_äöüÄÖÜß ]/g, "") || "";
-      a.download = `${name ? name + " – " : ""}Lebenslauf.docx`;
+      a.download = `${name ? name + " – " : ""}${t("preview.cvFileName")}.docx`;
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(objUrl);
     } catch (e) { console.error("DOCX export failed", e); }
@@ -278,16 +279,16 @@ export default function CVEditor() {
         <div className="fade">
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
             <button className="btn btn-g" onClick={() => navigate(`/preview/${params.id}`)}>{t("preview.back")}</button>
-            <h2 style={{ fontFamily: "var(--fd)", fontSize: 20, fontWeight: 700 }}>{t("editor.noJsonTitle") || "Strukturierter Editor"}</h2>
+            <h2 style={{ fontFamily: "var(--fd)", fontSize: 20, fontWeight: 700 }}>{t("editor.noJsonTitle")}</h2>
           </div>
           <div className="card" style={{ padding: 32, textAlign: "center" }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-            <h3 style={{ marginBottom: 8 }}>{t("editor.noJsonTitle") || "Kein strukturierter Editor verfügbar"}</h3>
+            <h3 style={{ marginBottom: 8 }}>{t("editor.noJsonTitle")}</h3>
             <p style={{ color: "var(--muted)", marginBottom: 20 }}>
-              {t("editor.noJsonText") || "Dieses Dokument wurde ohne strukturierte Daten erstellt. Bearbeite es auf der Vorschau-Seite."}
+              {t("editor.noJsonText")}
             </p>
             <button className="btn btn-p" onClick={() => navigate(`/preview/${params.id}`)}>
-              {t("editor.backToPreview") || "Zur Vorschau"}
+              {t("editor.backToPreview")}
             </button>
           </div>
         </div>
@@ -301,31 +302,31 @@ export default function CVEditor() {
 
       {/* Contact & Name */}
       <section style={sectionStyle}>
-        <div style={sectionHeader}>{t("editor.sectionContact") || "Name & Kontakt"}</div>
+        <div style={sectionHeader}>{t("editor.sectionContact")}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <FieldRow label={t("editor.name") || "Name"}>
-            <input className="input" value={cvState.name} onChange={e => setCvState(s => ({ ...s, name: e.target.value }))} placeholder="Max Mustermann" />
+          <FieldRow label={t("editor.name")}>
+            <input className="input" value={cvState.name} onChange={e => setCvState(s => ({ ...s, name: e.target.value }))} placeholder={t("editor.namePh")} />
           </FieldRow>
-          <FieldRow label={t("editor.jobTitle") || "Berufsbezeichnung"}>
-            <input className="input" value={cvState.title} onChange={e => setCvState(s => ({ ...s, title: e.target.value }))} placeholder="Senior Software Engineer" />
+          <FieldRow label={t("editor.jobTitle")}>
+            <input className="input" value={cvState.title} onChange={e => setCvState(s => ({ ...s, title: e.target.value }))} placeholder={t("editor.jobTitlePh")} />
           </FieldRow>
-          <FieldRow label={t("editor.contact") || "Kontakt"}>
-            <input className="input" value={cvState.contact} onChange={e => setCvState(s => ({ ...s, contact: e.target.value }))} placeholder="Berlin · +49 … · mail@mail.de" />
+          <FieldRow label={t("editor.contact")}>
+            <input className="input" value={cvState.contact} onChange={e => setCvState(s => ({ ...s, contact: e.target.value }))} placeholder={t("editor.contactPh")} />
           </FieldRow>
-          <FieldRow label={t("editor.signature") || "Signatur"}>
-            <input className="input" value={cvState.signature} onChange={e => setCvState(s => ({ ...s, signature: e.target.value }))} placeholder="Berlin, den 1. August 2026 – Max Mustermann" />
+          <FieldRow label={t("editor.signature")}>
+            <input className="input" value={cvState.signature} onChange={e => setCvState(s => ({ ...s, signature: e.target.value }))} placeholder={t("editor.signaturePh")} />
           </FieldRow>
         </div>
       </section>
 
       {/* Profil / Zusammenfassung */}
       <section style={sectionStyle}>
-        <div style={sectionHeader}>{t("editor.sectionProfile") || "Profil / Zusammenfassung"}</div>
+        <div style={sectionHeader}>{t("editor.sectionProfile")}</div>
         <textarea
           className="textarea"
           value={cvState.profile}
           onChange={e => setCvState(s => ({ ...s, profile: e.target.value }))}
-          placeholder={t("editor.profilePh") || "2–4 Sätze über dich und deine Stärken …"}
+          placeholder={t("editor.profilePh")}
           style={{ minHeight: 90 }}
         />
       </section>
@@ -333,49 +334,49 @@ export default function CVEditor() {
       {/* Berufserfahrung */}
       <section style={sectionStyle}>
         <div style={{ ...sectionHeader, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{t("editor.sectionExp") || "Berufserfahrung"}</span>
-          <button className="btn btn-s btn-sm" onClick={addExp} style={{ fontSize: 12 }}>+ {t("editor.addExp") || "Hinzufügen"}</button>
+          <span>{t("editor.sectionExp")}</span>
+          <button className="btn btn-s btn-sm" onClick={addExp} style={{ fontSize: 12 }}>+ {t("editor.addExp")}</button>
         </div>
         {cvState.experience.length === 0 && (
-          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.expEmpty") || "Noch keine Einträge."}</div>
+          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.expEmpty")}</div>
         )}
         {cvState.experience.map((exp, eIdx) => (
           <div key={eIdx} style={entryCard}>
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginBottom: 8 }}>
-              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveExp(eIdx, -1)} disabled={eIdx === 0} title="Nach oben">↑</button>
-              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveExp(eIdx, 1)} disabled={eIdx === cvState.experience.length - 1} title="Nach unten">↓</button>
+              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveExp(eIdx, -1)} disabled={eIdx === 0} title={t("editor.moveUp")}>↑</button>
+              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveExp(eIdx, 1)} disabled={eIdx === cvState.experience.length - 1} title={t("editor.moveDown")}>↓</button>
               <button className="btn btn-d btn-sm" style={{ padding: "3px 8px" }} onClick={() => removeExp(eIdx)}>×</button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              <FieldRow label={t("editor.position") || "Position"}>
-                <input className="input" value={exp.position} onChange={e => updateExp(eIdx, "position", e.target.value)} placeholder="Senior Developer" />
+              <FieldRow label={t("editor.position")}>
+                <input className="input" value={exp.position} onChange={e => updateExp(eIdx, "position", e.target.value)} placeholder={t("editor.positionPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.company") || "Unternehmen"}>
-                <input className="input" value={exp.company} onChange={e => updateExp(eIdx, "company", e.target.value)} placeholder="Musterfirma GmbH" />
+              <FieldRow label={t("editor.company")}>
+                <input className="input" value={exp.company} onChange={e => updateExp(eIdx, "company", e.target.value)} placeholder={t("editor.companyPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.location") || "Ort"}>
-                <input className="input" value={exp.location} onChange={e => updateExp(eIdx, "location", e.target.value)} placeholder="Berlin" />
+              <FieldRow label={t("editor.location")}>
+                <input className="input" value={exp.location} onChange={e => updateExp(eIdx, "location", e.target.value)} placeholder={t("editor.locationPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.period") || "Zeitraum"}>
-                <input className="input" value={exp.period} onChange={e => updateExp(eIdx, "period", e.target.value)} placeholder="01/2021 – heute" />
+              <FieldRow label={t("editor.period")}>
+                <input className="input" value={exp.period} onChange={e => updateExp(eIdx, "period", e.target.value)} placeholder={t("editor.expPeriodPh")} />
               </FieldRow>
             </div>
             <div style={{ marginTop: 8 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text2)", marginBottom: 4 }}>{t("editor.bullets") || "Aufgaben / Bullet-Points"}</div>
+               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text2)", marginBottom: 4 }}>{t("editor.bullets")}</div>
               {exp.bullets.map((b, bIdx) => (
                 <div key={bIdx} style={{ display: "flex", gap: 6, marginBottom: 4 }}>
                   <input
                     className="input"
                     value={b}
                     onChange={e => updateExpBullet(eIdx, bIdx, e.target.value)}
-                    placeholder={t("editor.bulletPh") || "Aufgabe oder Erfolg …"}
+                     placeholder={t("editor.bulletPh")}
                     style={{ flex: 1 }}
                   />
                   <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => removeBullet(eIdx, bIdx)}>×</button>
                 </div>
               ))}
               <button className="btn btn-g btn-sm" style={{ fontSize: 12, marginTop: 2 }} onClick={() => addBullet(eIdx)}>
-                + {t("editor.addBullet") || "Bullet hinzufügen"}
+                 + {t("editor.addBullet")}
               </button>
             </div>
           </div>
@@ -385,34 +386,34 @@ export default function CVEditor() {
       {/* Ausbildung */}
       <section style={sectionStyle}>
         <div style={{ ...sectionHeader, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{t("editor.sectionEdu") || "Ausbildung"}</span>
-          <button className="btn btn-s btn-sm" onClick={addEdu} style={{ fontSize: 12 }}>+ {t("editor.addEdu") || "Hinzufügen"}</button>
+          <span>{t("editor.sectionEdu")}</span>
+          <button className="btn btn-s btn-sm" onClick={addEdu} style={{ fontSize: 12 }}>+ {t("editor.addEdu")}</button>
         </div>
         {cvState.education.length === 0 && (
-          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.eduEmpty") || "Noch keine Einträge."}</div>
+          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.eduEmpty")}</div>
         )}
         {cvState.education.map((edu, eIdx) => (
           <div key={eIdx} style={entryCard}>
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginBottom: 8 }}>
-              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveEdu(eIdx, -1)} disabled={eIdx === 0}>↑</button>
-              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveEdu(eIdx, 1)} disabled={eIdx === cvState.education.length - 1}>↓</button>
+              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveEdu(eIdx, -1)} disabled={eIdx === 0} title={t("editor.moveUp")}>↑</button>
+              <button className="btn btn-g btn-sm" style={{ padding: "3px 8px" }} onClick={() => moveEdu(eIdx, 1)} disabled={eIdx === cvState.education.length - 1} title={t("editor.moveDown")}>↓</button>
               <button className="btn btn-d btn-sm" style={{ padding: "3px 8px" }} onClick={() => removeEdu(eIdx)}>×</button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              <FieldRow label={t("editor.degree") || "Abschluss"}>
-                <input className="input" value={edu.degree} onChange={e => updateEdu(eIdx, "degree", e.target.value)} placeholder="B.Sc. Informatik" />
+              <FieldRow label={t("editor.degree")}>
+                <input className="input" value={edu.degree} onChange={e => updateEdu(eIdx, "degree", e.target.value)} placeholder={t("editor.degreePh")} />
               </FieldRow>
-              <FieldRow label={t("editor.institution") || "Hochschule / Schule"}>
-                <input className="input" value={edu.institution} onChange={e => updateEdu(eIdx, "institution", e.target.value)} placeholder="TU Berlin" />
+              <FieldRow label={t("editor.institution")}>
+                <input className="input" value={edu.institution} onChange={e => updateEdu(eIdx, "institution", e.target.value)} placeholder={t("editor.institutionPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.location") || "Ort"}>
-                <input className="input" value={edu.location} onChange={e => updateEdu(eIdx, "location", e.target.value)} placeholder="Berlin" />
+              <FieldRow label={t("editor.location")}>
+                <input className="input" value={edu.location} onChange={e => updateEdu(eIdx, "location", e.target.value)} placeholder={t("editor.locationPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.period") || "Zeitraum"}>
-                <input className="input" value={edu.period} onChange={e => updateEdu(eIdx, "period", e.target.value)} placeholder="10/2018 – 03/2022" />
+              <FieldRow label={t("editor.period")}>
+                <input className="input" value={edu.period} onChange={e => updateEdu(eIdx, "period", e.target.value)} placeholder={t("editor.eduPeriodPh")} />
               </FieldRow>
-              <FieldRow label={t("editor.note") || "Anmerkung (Note, etc.)"}>
-                <input className="input" value={edu.note} onChange={e => updateEdu(eIdx, "note", e.target.value)} placeholder="Note: 1,8" />
+              <FieldRow label={t("editor.note")}>
+                <input className="input" value={edu.note} onChange={e => updateEdu(eIdx, "note", e.target.value)} placeholder={t("editor.notePh")} />
               </FieldRow>
             </div>
           </div>
@@ -422,12 +423,12 @@ export default function CVEditor() {
       {/* Skills */}
       <section style={sectionStyle}>
         <div style={{ ...sectionHeader, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{t("editor.sectionSkills") || "Kenntnisse"}</span>
-          <button className="btn btn-s btn-sm" onClick={addSkill} style={{ fontSize: 12 }}>+ {t("editor.addSkill") || "Hinzufügen"}</button>
+          <span>{t("editor.sectionSkills")}</span>
+          <button className="btn btn-s btn-sm" onClick={addSkill} style={{ fontSize: 12 }}>+ {t("editor.addSkill")}</button>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7, paddingTop: 4 }}>
           {cvState.skills.length === 0 && (
-            <div style={{ color: "var(--muted)", fontSize: 13 }}>{t("editor.skillsEmpty") || "Noch keine Kenntnisse."}</div>
+            <div style={{ color: "var(--muted)", fontSize: 13 }}>{t("editor.skillsEmpty")}</div>
           )}
           {cvState.skills.map((s, i) => (
             <span key={i} style={{ background: "var(--brand-l)", color: "var(--brand)", borderRadius: 20, padding: "4px 12px", fontSize: 12, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -441,23 +442,20 @@ export default function CVEditor() {
       {/* Languages */}
       <section style={sectionStyle}>
         <div style={{ ...sectionHeader, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{t("editor.sectionLangs") || "Sprachen"}</span>
-          <button className="btn btn-s btn-sm" onClick={addLang} style={{ fontSize: 12 }}>+ {t("editor.addLang") || "Hinzufügen"}</button>
+          <span>{t("editor.sectionLangs")}</span>
+          <button className="btn btn-s btn-sm" onClick={addLang} style={{ fontSize: 12 }}>+ {t("editor.addLang")}</button>
         </div>
         {cvState.languages.length === 0 && (
-          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.langsEmpty") || "Noch keine Sprachen."}</div>
+          <div style={{ color: "var(--muted)", fontSize: 13, padding: "8px 0" }}>{t("editor.langsEmpty")}</div>
         )}
         {cvState.languages.map((lang, i) => (
           <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6, alignItems: "center" }}>
-            <input className="input" value={lang.name} onChange={e => updateLang(i, "name", e.target.value)} placeholder={t("editor.langName") || "Deutsch"} style={{ flex: 1 }} />
-            <select className="select" value={lang.level} onChange={e => updateLang(i, "level", e.target.value)} style={{ flex: 1 }}>
-              <option value="">Niveau …</option>
-              <option value="Muttersprache">Muttersprache</option>
-              <option value="C2 – Verhandlungssicher">C2 – Verhandlungssicher</option>
-              <option value="C1 – Sehr gut">C1 – Sehr gut</option>
-              <option value="B2 – Gut">B2 – Gut</option>
-              <option value="B1 – Grundkenntnisse">B1 – Grundkenntnisse</option>
-              <option value="A2 – Basiskenntnisse">A2 – Basiskenntnisse</option>
+            <input className="input" value={lang.name} onChange={e => updateLang(i, "name", e.target.value)} placeholder={t("editor.langNamePh")} style={{ flex: 1 }} />
+            <select className="select" value={normalizeLanguageLevel(lang.level)} onChange={e => updateLang(i, "level", e.target.value)} style={{ flex: 1 }}>
+              <option value="">{t("editor.levelPlaceholder")}</option>
+              {LANGUAGE_LEVEL_VALUES.map(level => (
+                <option key={level} value={level}>{t(languageLevelLabelKey(level))}</option>
+              ))}
             </select>
             <button className="btn btn-d btn-sm" style={{ padding: "5px 10px" }} onClick={() => removeLang(i)}>×</button>
           </div>
@@ -466,9 +464,9 @@ export default function CVEditor() {
 
       {/* Template Switcher */}
       <section style={sectionStyle}>
-        <div style={sectionHeader}>{t("editor.sectionTemplate") || "Vorlage wechseln"}</div>
+        <div style={sectionHeader}>{t("editor.sectionTemplate")}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-          {(customStyle ? [...TEMPLATES, { id: "custom" as TemplateId, name: "Eigenes Design", color: customStyle.accent }] : TEMPLATES).map(tpl => {
+          {(customStyle ? [...TEMPLATES, { id: "custom" as TemplateId, name: t("editor.customTemplate"), color: customStyle.accent }] : TEMPLATES).map(tpl => {
             const active = template === tpl.id;
             return (
               <button
@@ -519,13 +517,13 @@ export default function CVEditor() {
           {saveMsg && <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 600 }}>{saveMsg}</span>}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0 }}>
             <button className="btn btn-s btn-sm" onClick={handleSave} disabled={saving} style={{ minWidth: 90 }}>
-              {saving ? <><span className="spin" /> …</> : (t("editor.save") || "💾 Speichern")}
+              {saving ? <><span className="spin" /> …</> : t("editor.save")}
             </button>
             <button className="btn btn-p btn-sm" onClick={handleDownloadPdf} disabled={exporting !== null} style={{ minWidth: 120 }}>
-              {exporting === "pdf" ? <><span className="spin" /> PDF…</> : "⬇ PDF"}
+              {exporting === "pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : t("preview.downloadPdf")}
             </button>
             <button className="btn btn-g btn-sm" onClick={handleDownloadDocx} disabled={exporting !== null} style={{ minWidth: 120 }}>
-              {exporting === "docx" ? <><span className="spin" /> Word…</> : <>⬇ DOCX</>}
+              {exporting === "docx" ? <><span className="spin" /> {t("preview.creatingDocx")}</> : <>{t("preview.downloadCvDocx")}</>}
             </button>
           </div>
         </div>
@@ -540,14 +538,14 @@ export default function CVEditor() {
             onClick={() => setActiveTab("edit")}
             style={{ flex: 1, borderRadius: "10px 0 0 10px", justifyContent: "center" }}
           >
-            ✏️ {t("editor.tabEdit") || "Bearbeiten"}
+            ✏️ {t("editor.tabEdit")}
           </button>
           <button
             className={activeTab === "preview" ? "btn btn-p btn-sm" : "btn btn-g btn-sm"}
             onClick={() => setActiveTab("preview")}
             style={{ flex: 1, borderRadius: "0 10px 10px 0", justifyContent: "center" }}
           >
-            👁 {t("editor.tabPreview") || "Vorschau"}
+            👁 {t("editor.tabPreview")}
           </button>
         </div>
 
