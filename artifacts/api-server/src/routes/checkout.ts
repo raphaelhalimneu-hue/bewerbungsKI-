@@ -8,7 +8,7 @@ const router = Router();
 
 const PLANS = {
   single: { amount: 299, credits: 1, name: "BewerbungsKI Einzelbewerbung", description: "1 Bewerbung – Einmalzahlung, kein Abo" },
-  power: { amount: 1499, name: "BewerbungsKI Unbegrenzt", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
+  power: { amount: 1999, name: "BewerbungsKI Unbegrenzt", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
 } as const;
 
 type CreditPlan = keyof Pick<typeof PLANS, "single">;
@@ -29,7 +29,7 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
 
     const appUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
-    // One-time packages: single (1 application, 2.99) and power (unlimited, 14.99).
+    // One-time packages: single (1 application, 2.99) and power (unlimited, 19.99).
     const requestedPlan = (req.body as { plan?: string })?.plan;
     const plan = requestedPlan === "single" || requestedPlan === "power"
       ? requestedPlan
