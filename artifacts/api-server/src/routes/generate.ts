@@ -37,7 +37,10 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       !batchId ||
       !["cv", "letter"].includes(type) ||
       typeof systemPrompt !== "string" ||
-      typeof userPrompt !== "string"
+      typeof userPrompt !== "string" ||
+      systemPrompt.length > 20_000 ||
+      userPrompt.length > 50_000 ||
+      batchId.length > 100
     ) {
       res.status(400).json({ error: "Invalid generation request" });
       return;
