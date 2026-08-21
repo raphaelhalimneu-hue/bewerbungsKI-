@@ -486,6 +486,18 @@ function ShowcasePage({ label, html }: { label: string; html: string }) {
   );
 }
 
+function ShowcaseScore({ score, accent }: { score: number; accent: string }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+      margin: "0 auto 18px", fontSize: 13, color: "var(--muted)",
+    }}>
+      <span>Beispiel-ATS-Score</span>
+      <strong style={{ color: accent, fontSize: 20 }}>{score}/100</strong>
+    </div>
+  );
+}
+
 export function ExampleCVShowcase() {
   const { i18n } = useTranslation();
   const lang = EXAMPLE_BY_LANG[i18n.resolvedLanguage || "de"] ? (i18n.resolvedLanguage || "de") : "de";
@@ -507,11 +519,13 @@ export function ExampleCVShowcase() {
           their original PDF width and scroll horizontally on narrow screens. */}
       <div style={{ border: "1px solid #fde68a", borderRadius: 18, padding: "22px 12px 8px", background: "#fffbeb", minWidth: 0 }}>
         <h3 style={{ textAlign: "center", color: "#92400e", fontSize: 18, margin: "0 0 20px" }}>◌ {copy.before}: {copy.beforeTitle}</h3>
+        <ShowcaseScore score={58} accent="#92400e" />
         <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].label}`} html={beforeLetterHtml} />
         <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].cvLabel}`} html={beforeCVHtml} />
       </div>
       <div style={{ border: "1px solid #bfdbfe", borderRadius: 18, padding: "22px 12px 8px", background: "linear-gradient(135deg,#eff6ff,#f0fdf4)", minWidth: 0, boxShadow: "0 14px 34px rgba(37,99,235,.12)" }}>
         <h3 style={{ textAlign: "center", color: "var(--brand)", fontSize: 18, margin: "0 0 20px" }}>✨ {copy.after}: {copy.afterTitle}</h3>
+        <ShowcaseScore score={84} accent="var(--brand)" />
         <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].label}`} html={letterHtml} />
         <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].cvLabel}`} html={cvHtml} />
       </div>
