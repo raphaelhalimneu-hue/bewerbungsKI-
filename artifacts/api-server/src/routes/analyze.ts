@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { hasPaidEntitlement, isEmailUnverified, isFreeAccount, isFreeQuotaLocked, isUnlimitedEmail } from "../lib/freeLock";
+import { isEmailUnverified, isUnlimitedEmail } from "../lib/freeLock";
 import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -122,10 +122,6 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const unlimitedA = isUnlimitedEmail(req.userEmail);
     if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
@@ -202,7 +198,7 @@ router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res
       return;
     }
 
-    const locked = await isFreeAccount(req.userId!, req.userEmail);
+    const locked = false;
     res.json(generationPayload(generation, locked));
   } catch (err) {
     req.log.error({ err }, "GET /perfect/latest error");
@@ -286,36 +282,8 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
-    // Paid perfect quota: Power = 50 lifetime; Premium = 10 per purchased
-    // 10-pack (credits holds 10 per package, so cap = credits). Free users
-    // keep the small daily teaser quota above.
-    // Reserve the use atomically BEFORE calling the model (no check-then-act
-    // race); if the model call fails, the reservation is released below.
-    let reservedPowerUse = false;
-    if (!unlimitedP) {
-      const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
-       const cap = prof?.isUnlimited ? 50 : hasPaidEntitlement(prof) ? (prof?.credits ?? 0) : 0;
-      if (prof && cap > 0) {
-      const reserved = await db
-        .update(profilesTable)
-        .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
-        .where(and(eq(profilesTable.userId, req.userId!), lt(profilesTable.perfectCount, cap)))
-        .returning({ perfectCount: profilesTable.perfectCount });
-      if (reserved.length === 0) {
-        res.status(429).json({ error: "perfect_limit_reached" });
-        return;
-      }
-      reservedPowerUse = true;
-      }
-    }
-    const releasePowerUse = async () => {
-      if (!reservedPowerUse) return;
-      await db
-        .update(profilesTable)
-        .set({ perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)` })
-        .where(eq(profilesTable.userId, req.userId!))
-        .catch(() => {});
-    };
+    // Free users get the same daily AI quota; payment only controls export actions.
+    const releasePowerUse = async () => {};
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
     const systemPrompt = isCvMode
