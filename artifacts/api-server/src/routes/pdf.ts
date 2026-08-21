@@ -2,13 +2,23 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isFreeAccount } from "../lib/freeLock";
+import { perfectedGenerationsTable } from "@workspace/db";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { templateDeco } from "@workspace/template-deco";
 
 const router = Router();
+
+async function hasPerfectedContent(userId: string, doc: any): Promise<boolean> {
+  if (doc.perfectedLetter || doc.perfectedCvHtml) return true;
+  const [generation] = await db
+    .select({ id: perfectedGenerationsTable.id })
+    .from(perfectedGenerationsTable)
+    .where(and(eq(perfectedGenerationsTable.documentId, doc.id), eq(perfectedGenerationsTable.userId, userId)))
+    .limit(1);
+  return Boolean(generation);
+}
 
 // ── Chromium path (resolved once at module load, never per-request) ───────────
 /**
@@ -174,7 +184,7 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
-    if (!doc.bezahlt) {
+    if (!doc.bezahlt && await hasPerfectedContent(req.userId!, doc)) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
