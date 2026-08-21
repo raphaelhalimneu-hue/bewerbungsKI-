@@ -137,13 +137,77 @@ function formatPeriod(start?: string, end?: string, current?: boolean, presentWo
   return [s, e].filter(Boolean).join(" – ");
 }
 
+/**
+ * Inline edits in the compact preview change the already-rendered CV HTML,
+ * rather than the structured editor JSON. Convert that trusted, saved HTML
+ * into readable Word paragraphs so the downloaded document contains exactly
+ * the edited text instead of the original profile data.
+ */
+function htmlToDocumentLines(html: string): string[] {
+  const namedEntities: Record<string, string> = {
+    amp: "&",
+    apos: "'",
+    gt: ">",
+    lt: "<",
+    nbsp: " ",
+    quot: '"',
+  };
+  const decodeEntities = (value: string) => value
+    .replace(/&#(x[0-9a-f]+|\d+);/gi, (entity, code) => {
+      const number = String(code).toLowerCase().startsWith("x")
+        ? parseInt(String(code).slice(1), 16)
+        : parseInt(String(code), 10);
+      try {
+        return Number.isFinite(number) ? String.fromCodePoint(number) : entity;
+      } catch {
+        return entity;
+      }
+    })
+    .replace(/&([a-z]+);/gi, (entity, name) => namedEntities[String(name).toLowerCase()] ?? entity);
+
+  return decodeEntities(
+    html
+      .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(address|article|div|footer|h[1-6]|header|li|p|section|tr|ul|ol)>/gi, "\n")
+      .replace(/<li[^>]*>/gi, "• ")
+      .replace(/<[^>]+>/g, ""),
+  )
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+/g, " ").trim())
+    .filter(Boolean);
+}
+
+function createEditedHtmlCvDocx(html: string, theme: DocxTheme): Document {
+  const lines = htmlToDocumentLines(html);
+  const firstContentIndex = lines.findIndex(Boolean);
+  const children: Paragraph[] = [topBar(theme)];
+
+  for (const [index, line] of lines.entries()) {
+    children.push(new Paragraph({
+      children: [
+        index === firstContentIndex
+          ? new TextRun({ text: cleanText(line), bold: true, size: 32, font: FONT, color: theme.accent })
+          : normal(line, 21),
+      ],
+      spacing: { after: 90 },
+    }));
+  }
+
+  return new Document({
+    sections: [{ properties: { page: { margin: { top: 720, right: 900, bottom: 720, left: 900 } } }, children }],
+  });
+}
+
 // ── CV DOCX ──────────────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const documentId = String(req.params.id);
     const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     const storedProfileData = (doc.profileData as any) || {};
@@ -165,6 +229,17 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim();
     const theme = themeFor(doc.template, (doc.profileData as any));
     const H = headingsFor(doc.profileData as any);
+
+    if (storedProfileData.previewCvHtmlEdited && doc.cvHtml) {
+      const wordDoc = createEditedHtmlCvDocx(doc.cvHtml, theme);
+      const buffer = await Packer.toBuffer(wordDoc);
+      const safeName = (doc.name || "Lebenslauf").replace(/[^\w\-_äöüÄÖÜß ]/g, "");
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      const asciiName = `${safeName} - Lebenslauf.docx`.replace(/[^\x20-\x7E]/g, "_");
+      res.setHeader("Content-Disposition", `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(safeName + " – Lebenslauf.docx")}`);
+      res.send(buffer);
+      return;
+    }
 
     // Contact line: address | phone | email | linkedin
     const contactParts = [
@@ -365,10 +440,11 @@ function isValidCvJson(cv: unknown): boolean {
 // ── CV DOCX from editor (cv_json) ────────────────────────────────────────────
 router.post("/documents/:id/download/cv.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const documentId = String(req.params.id);
     const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     const storedProfileData = (doc.profileData as any) || {};
@@ -529,10 +605,11 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
 // ── Cover Letter DOCX ─────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const documentId = String(req.params.id);
     const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.bezahlt) {

@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import { templateDeco } from "@workspace/template-deco";
 import { useAuth } from "../context/AuthContext";
 import { AnalysisCard } from "./Scanner";
+import { clearPreviewDraftField, readPreviewDraft, writePreviewDraft } from "../lib/previewDraft";
 
 /** Deko für die Bewerbung-Karte — gemeinsame Quelle mit CV-Vorlagen und Server-PDF. */
 function letterDecoHtml(doc: any): string {
@@ -43,8 +44,13 @@ export default function Preview() {
   const [exporting, setExporting] = useState<"cv-pdf" | "letter-pdf" | "cv-docx" | "letter-docx" | null>(null);
   const [editedLetter, setEditedLetter] = useState("");
   const [editingCv, setEditingCv] = useState(false);
-  const [letterManuallyEdited, setLetterManuallyEdited] = useState(false);
-  const [cvManuallyEdited, setCvManuallyEdited] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const cvManuallyEdited = useRef(false);
+  const letterManuallyEdited = useRef(false);
+  const editedLetterRef = useRef("");
+  const saveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true));
+  const cvSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const letterSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [checking, setChecking] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [perfecting, setPerfecting] = useState(false);
@@ -89,9 +95,118 @@ export default function Preview() {
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
 
+  useEffect(() => {
+    editedLetterRef.current = editedLetter;
+  }, [editedLetter]);
+
   function blockCopy(e: ClipboardEvent<HTMLElement>) {
     e.preventDefault();
   }
+
+  /**
+   * Save only the preview portions that actually changed. Requests are queued
+   * so a blur, "Fertig" click, and download in quick succession cannot let an
+   * older PATCH overwrite a newer edit.
+   */
+  function savePreviewEdits({ cv = false, letter = false }: { cv?: boolean; letter?: boolean } = {}): Promise<boolean> {
+    if (!params.id || editLocked) return Promise.resolve(true);
+
+    const cvHtml = cv && cvManuallyEdited.current ? cvRef.current?.innerHTML : undefined;
+    const coverLetter = letter && letterManuallyEdited.current ? editedLetterRef.current : undefined;
+    if (cvHtml === undefined && coverLetter === undefined) return saveQueueRef.current;
+
+    const save = async () => {
+      try {
+        setSaveError("");
+        await customFetch(`/api/documents/${params.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            ...(cvHtml !== undefined ? { cv_html: cvHtml } : {}),
+            ...(coverLetter !== undefined ? { cover_letter: coverLetter } : {}),
+          }),
+        });
+        if (cvHtml !== undefined && cvRef.current?.innerHTML === cvHtml) {
+          cvManuallyEdited.current = false;
+          clearPreviewDraftField(params.id, "cvHtml", cvHtml);
+        }
+        if (coverLetter !== undefined && editedLetterRef.current === coverLetter) {
+          letterManuallyEdited.current = false;
+          clearPreviewDraftField(params.id, "coverLetter", coverLetter);
+        }
+        // Refresh the query cache for later navigation, while the current
+        // editable DOM/state remains the source of truth on this screen.
+        void refetchDocument();
+        return true;
+      } catch (error) {
+        console.error("Preview edit save failed", error);
+        setSaveError(t("scanner.error"));
+        return false;
+      }
+    };
+
+    const queuedSave = saveQueueRef.current.then(save, save);
+    saveQueueRef.current = queuedSave;
+    return queuedSave;
+  }
+
+  function clearCvSaveTimer() {
+    if (cvSaveTimerRef.current !== null) {
+      clearTimeout(cvSaveTimerRef.current);
+      cvSaveTimerRef.current = null;
+    }
+  }
+
+  function scheduleCvSave() {
+    clearCvSaveTimer();
+    cvSaveTimerRef.current = setTimeout(() => {
+      cvSaveTimerRef.current = null;
+      void savePreviewEdits({ cv: true });
+    }, 500);
+  }
+
+  function clearLetterSaveTimer() {
+    if (letterSaveTimerRef.current !== null) {
+      clearTimeout(letterSaveTimerRef.current);
+      letterSaveTimerRef.current = null;
+    }
+  }
+
+  function scheduleLetterSave() {
+    clearLetterSaveTimer();
+    letterSaveTimerRef.current = setTimeout(() => {
+      letterSaveTimerRef.current = null;
+      void savePreviewEdits({ letter: true });
+    }, 500);
+  }
+
+  async function leavePreview(destination = "/documents") {
+    clearCvSaveTimer();
+    clearLetterSaveTimer();
+    if (!(await savePreviewEdits({ cv: true, letter: true }))) return;
+    navigate(destination);
+  }
+
+  // Saving on input protects both editors from a refresh while they remain
+  // open. The unmount cleanup also starts a final save for navigation from the
+  // surrounding layout, where the Preview back button is not involved.
+  useEffect(() => {
+    const saveOnPageHide = () => {
+      clearCvSaveTimer();
+      clearLetterSaveTimer();
+      if (cvManuallyEdited.current || letterManuallyEdited.current) {
+        void savePreviewEdits({ cv: true, letter: true });
+      }
+    };
+    window.addEventListener("pagehide", saveOnPageHide);
+    return () => {
+      window.removeEventListener("pagehide", saveOnPageHide);
+      clearCvSaveTimer();
+      clearLetterSaveTimer();
+      if (cvManuallyEdited.current || letterManuallyEdited.current) {
+        void savePreviewEdits({ cv: true, letter: true });
+      }
+    };
+  }, [params.id, editLocked]);
 
   // Textareas and contentEditable elements don't consistently bubble clipboard
   // events on mobile browsers. Capture copy/cut at the document level too, so
@@ -152,7 +267,10 @@ export default function Preview() {
         method: "POST",
         body: JSON.stringify({ confirmFromCv: true }),
       });
-      if (resp?.result) setEditedLetter(resp.result);
+      if (resp?.result) {
+        editedLetterRef.current = resp.result;
+        setEditedLetter(resp.result);
+      }
       else setLetterError(true);
     } catch (e) {
       console.error("Cover letter generation failed", e);
@@ -284,6 +402,7 @@ export default function Preview() {
     if (!d) return;
     if (d.perfected_locked || typeof d.perfected_letter === "string") {
       const letter = typeof d.perfected_letter === "string" ? d.perfected_letter : "";
+      editedLetterRef.current = letter;
       setEditedLetter(letter);
       setPerfectedApplied(true);
       setPerfectedServerLocked(false);
@@ -291,8 +410,19 @@ export default function Preview() {
       setPerfectedProfilePreview(typeof d.perfected_profile === "string"
         ? d.perfected_profile
         : null);
-    } else if (d.cover_letter) {
+    } else {
+      const draftLetter = readPreviewDraft(params.id || "").coverLetter;
+      if (draftLetter !== undefined) {
+        editedLetterRef.current = draftLetter;
+        setEditedLetter(draftLetter);
+        letterManuallyEdited.current = true;
+        setTimeout(() => void savePreviewEdits({ letter: true }), 0);
+        return;
+      }
+      if (!d.cover_letter) return;
+      editedLetterRef.current = d.cover_letter;
       setEditedLetter(d.cover_letter);
+      letterManuallyEdited.current = false;
       setPerfectedServerLocked(false);
       setPerfectedProfilePreview(null);
       setPerfectChanges(null);
@@ -308,7 +438,12 @@ export default function Preview() {
   useEffect(() => {
     const d: any = doc;
     if (!cvRef.current || !d) return;
-    if (d.perfected_cv_html) {
+    const draftCvHtml = readPreviewDraft(params.id || "").cvHtml;
+    if (draftCvHtml !== undefined) {
+      cvRef.current.innerHTML = draftCvHtml;
+      cvManuallyEdited.current = true;
+      setTimeout(() => void savePreviewEdits({ cv: true }), 0);
+    } else if (d.perfected_cv_html) {
       cvRef.current.innerHTML = d.perfected_cv_html;
       setCvPerfectedApplied(true);
     } else if (d.cv_html) {
@@ -316,6 +451,7 @@ export default function Preview() {
     } else {
       cvRef.current.innerHTML = "";
     }
+    cvManuallyEdited.current = false;
   }, [(doc as any)?.id, (doc as any)?.perfected_cv_html, freeUser]);
 
   // If this query was cached while the account was free, refetch after purchase.
@@ -360,11 +496,14 @@ export default function Preview() {
   }, [(doc as any)?.id, editingCv]);
 
   function toggleEditCv() {
-    setEditingCv(prev => {
-      const next = !prev;
-      if (next) setTimeout(() => cvRef.current?.focus(), 50);
-      return next;
-    });
+    if (editingCv) {
+      setEditingCv(false);
+      clearCvSaveTimer();
+      void savePreviewEdits({ cv: true });
+      return;
+    }
+    setEditingCv(true);
+    setTimeout(() => cvRef.current?.focus(), 50);
   }
 
   function baseFileName(suffix: string) {
@@ -393,6 +532,7 @@ export default function Preview() {
   }
 
   async function printCv() {
+    if (!(await savePreviewEdits({ cv: true }))) return;
     let el: HTMLElement | null = cvRef.current;
     // Free accounts: the screen may show the perfected version, but prints
     // always use the stored ORIGINAL (perfected output is paid-only).
@@ -426,6 +566,7 @@ export default function Preview() {
   }
 
   async function printLetter() {
+    if (!(await savePreviewEdits({ letter: true }))) return;
     // Free accounts always print the stored ORIGINAL letter — the perfected
     // version shown on screen is paid-only.
     const text = documentLocked
@@ -446,6 +587,7 @@ export default function Preview() {
     // Downloads are paid-only for free accounts
     if (pdfLocked) { navigate("/pricing"); return; }
     if (!cvRef.current) return;
+    if (!(await savePreviewEdits({ cv: true }))) return;
     setExporting("cv-pdf");
     try {
       const el = cvRef.current;
@@ -485,11 +627,10 @@ export default function Preview() {
   async function handleDownloadLetterPdf() {
     // Downloads are paid-only for free accounts
     if (pdfLocked) { navigate("/pricing"); return; }
+    if (!(await savePreviewEdits({ letter: true }))) return;
     setExporting("letter-pdf");
     try {
-      let url = `/api/documents/${params.id}/download/cover-letter.pdf`;
-      if (editedLetter) url += "?text=" + encodeURIComponent(editedLetter);
-      const blob = await customFetch<Blob>(url, { responseType: "blob" });
+      const blob = await customFetch<Blob>(`/api/documents/${params.id}/download/cover-letter.pdf`, { responseType: "blob" });
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
@@ -504,14 +645,11 @@ export default function Preview() {
 
   async function downloadDocx(type: "cv" | "cover-letter") {
     if (docxLocked) { navigate("/pricing"); return; }
+    if (!(await savePreviewEdits({ cv: type === "cv", letter: type === "cover-letter" }))) return;
     const key = type === "cv" ? "cv-docx" : "letter-docx";
     setExporting(key as any);
     try {
-      let url = `/api/documents/${params.id}/download/${type}.docx`;
-      if (type === "cover-letter" && editedLetter) {
-        url += "?text=" + encodeURIComponent(editedLetter);
-      }
-      const blob = await customFetch<Blob>(url, { responseType: "blob" });
+      const blob = await customFetch<Blob>(`/api/documents/${params.id}/download/${type}.docx`, { responseType: "blob" });
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objUrl;
@@ -528,9 +666,9 @@ export default function Preview() {
     <Layout>
       <div className="fade">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-          <button className="btn btn-g" onClick={() => navigate("/documents")}>{t("preview.back")}</button>
+          <button className="btn btn-g" onClick={() => { void leavePreview(); }}>{t("preview.back")}</button>
           {doc && (doc as any).cv_json && (
-            <button className="btn btn-p btn-sm" onClick={() => (editLocked ? navigate("/pricing") : navigate(`/documents/${params.id}/edit`))} style={editLocked ? { opacity: 0.6 } : undefined}>
+            <button className="btn btn-p btn-sm" onClick={() => (editLocked ? navigate("/pricing") : void leavePreview(`/documents/${params.id}/edit`))} style={editLocked ? { opacity: 0.6 } : undefined}>
               {editLocked ? "🔒" : "✏️"} {t("editor.editInEditor") || "Live-Editor"}
             </button>
           )}
@@ -587,6 +725,11 @@ export default function Preview() {
         {error && (
           <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: 20, color: "var(--err)" }}>
             {t("preview.loadError")}
+          </div>
+        )}
+        {saveError && (
+          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: 12, color: "var(--err)", marginBottom: 16 }}>
+            {saveError}
           </div>
         )}
 
@@ -728,9 +871,29 @@ export default function Preview() {
                     className="cv-sheet"
                     contentEditable={editingCv}
                     suppressContentEditableWarning
-                    onInput={() => { if (editingCv) setCvManuallyEdited(true); }}
+                    onInput={() => {
+                      if (!editingCv) return;
+                      cvManuallyEdited.current = true;
+                      if (params.id && cvRef.current) {
+                        writePreviewDraft(params.id, { cvHtml: cvRef.current.innerHTML });
+                      }
+                      scheduleCvSave();
+                    }}
+                    onBlur={() => {
+                      if (!editingCv) return;
+                      clearCvSaveTimer();
+                      void savePreviewEdits({ cv: true });
+                    }}
                     onCopy={cvCopyLocked ? blockCopy : undefined}
                     onCut={cvCopyLocked ? blockCopy : undefined}
+                    onPaste={e => {
+                      if (!editingCv) return;
+                      e.preventDefault();
+                      document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
+                    }}
+                    onDrop={e => {
+                      if (editingCv) e.preventDefault();
+                    }}
                     style={{
                       outline: editingCv ? "2px solid var(--acc, #2563eb)" : "none",
                       userSelect: cvCopyLocked ? "none" : undefined,
@@ -797,9 +960,16 @@ export default function Preview() {
                       readOnly={editLocked}
                       onChange={e => {
                         if (!editLocked) {
+                          editedLetterRef.current = e.target.value;
                           setEditedLetter(e.target.value);
-                          setLetterManuallyEdited(true);
+                          letterManuallyEdited.current = true;
+                          if (params.id) writePreviewDraft(params.id, { coverLetter: e.target.value });
+                          scheduleLetterSave();
                         }
+                      }}
+                      onBlur={() => {
+                        clearLetterSaveTimer();
+                        void savePreviewEdits({ letter: true });
                       }}
                       onCopy={letterCopyLocked ? blockCopy : undefined}
                       onCut={letterCopyLocked ? blockCopy : undefined}

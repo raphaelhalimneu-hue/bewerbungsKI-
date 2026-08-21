@@ -45,6 +45,51 @@ function createHtmlPreview(html: string | null): string | null {
     .replace(/"/g, "&quot;")}</div>`;
 }
 
+const SAFE_CV_TAGS = new Set([
+  "div", "p", "br", "span", "strong", "b", "em", "i", "u",
+  "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li",
+  "table", "thead", "tbody", "tr", "th", "td", "a", "img",
+]);
+
+function safeCvStyle(value: string): string {
+  const trimmed = value.trim();
+  if (/(?:url\s*\(|expression\s*\(|@import|javascript:|behavior\s*:|-moz-binding)/i.test(trimmed)) return "";
+  return trimmed.replace(/(?:^|;)\s*position\s*:\s*(?:fixed|sticky)\s*;?/gi, ";");
+}
+
+/** Keep CV formatting while dropping active HTML before it reaches storage or export. */
+function sanitizeCvHtml(html: string): string {
+  const withoutActiveBlocks = html
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|video|audio|canvas)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<(script|style|iframe|object|embed|svg|math|form|input|button|textarea|select|video|audio|canvas)\b[^>]*\/?>/gi, "");
+
+  return withoutActiveBlocks.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (tag, rawTag: string, rawAttributes: string) => {
+    const tagName = rawTag.toLowerCase();
+    if (!SAFE_CV_TAGS.has(tagName)) return "";
+    if (tag.startsWith("</")) return `</${tagName}>`;
+
+    const attributes: string[] = [];
+    for (const match of rawAttributes.matchAll(/\s+([a-zA-Z][\w:-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g)) {
+      const name = match[1].toLowerCase();
+      const value = (match[2] ?? match[3] ?? match[4] ?? "").trim();
+      if (name === "class" && /^[\w\s-]{0,256}$/.test(value)) {
+        attributes.push(`class="${value}"`);
+      } else if (name === "style") {
+        const safeStyle = safeCvStyle(value);
+        if (safeStyle) attributes.push(`style="${safeStyle.replace(/"/g, "&quot;")}"`);
+      } else if (tagName === "a" && name === "href" && /^(?:https?:|mailto:|#|\/)/i.test(value)) {
+        attributes.push(`href="${escapeHtmlText(value)}"`);
+      } else if (tagName === "img" && name === "src" && /^(?:https?:|\/|data:image\/(?:png|jpe?g|webp|gif);base64,)/i.test(value)) {
+        attributes.push(`src="${escapeHtmlText(value)}"`);
+      } else if (tagName === "img" && name === "alt") {
+        attributes.push(`alt="${escapeHtmlText(value)}"`);
+      }
+    }
+    return `<${tagName}${attributes.length ? ` ${attributes.join(" ")}` : ""}>`;
+  });
+}
+
 router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const docs = await db
@@ -77,15 +122,14 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     let [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
-
-    const documentProfileData = (doc.profileData as any) || {};
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) {
       res.status(404).json({ error: "Not found" });
       return;
     }
 
+    const documentProfileData = (doc.profileData as any) || {};
     const documentLocked = !doc.bezahlt;
     let [pendingGeneration] = doc.perfectedGenerationId
       ? await db
@@ -302,7 +346,6 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
       if (err) { res.status(400).json({ error: err }); return; }
     }
 
-    // Validate cv_html is a string (if provided)
     if (cv_html !== undefined && typeof cv_html !== "string") {
       res.status(400).json({ error: "cv_html must be a string" }); return;
     }
@@ -311,26 +354,32 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
       res.status(400).json({ error: "cover_letter must be a string" }); return;
     }
 
+    const documentId = String(req.params.id);
     const [existing] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!existing) { res.status(404).json({ error: "Not found" }); return; }
 
+    const existingProfileData = (existing.profileData as Record<string, unknown>) || {};
     const updates: Record<string, any> = {};
-    if (cv_html !== undefined) updates.cvHtml = cv_html;
+    const sanitizedCvHtml = cv_html !== undefined ? sanitizeCvHtml(cv_html) : undefined;
+    if (sanitizedCvHtml !== undefined) updates.cvHtml = sanitizedCvHtml;
     if (template !== undefined) updates.template = template;
     if (cover_letter !== undefined) updates.coverLetter = cover_letter;
     if (cv_json !== undefined) {
-      // Merge cv_json into profileData
-    const pd = documentProfileData;
-      updates.profileData = { ...pd, cv_json };
+      updates.profileData = { ...existingProfileData, cv_json, previewCvHtmlEdited: false };
+    } else if (sanitizedCvHtml !== undefined) {
+      updates.profileData = { ...existingProfileData, previewCvHtmlEdited: true };
     }
     if (perfected_letter !== undefined) updates.perfectedLetter = perfected_letter;
     if (perfected_cv_html !== undefined) updates.perfectedCvHtml = perfected_cv_html;
 
-    await db.update(documentsTable).set(updates).where(eq(documentsTable.id, req.params.id));
+    await db
+      .update(documentsTable)
+      .set(updates)
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
     res.json({ ok: true });
   } catch (err) {
     req.log.error({ err }, "PATCH /documents/:id error");
@@ -375,7 +424,6 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
 
     res.status(201).json(doc);
 
-    // Fire-and-forget: send confirmation email with download links
     const userEmail = req.userEmail;
     if (userEmail) {
       const appUrl = (process.env.APP_URL || "https://bewerbungski.com").replace(/\/$/, "");
@@ -593,7 +641,7 @@ router.delete("/documents/:id", requireAuth, async (req: AuthenticatedRequest, r
       .delete(documentsTable)
       .where(
         and(
-          eq(documentsTable.id, req.params.id),
+          eq(documentsTable.id, String(req.params.id)),
           eq(documentsTable.userId, req.userId!)
         )
       );

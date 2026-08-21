@@ -5,7 +5,8 @@
  * controls the store contents, so the fake ignores WHERE clauses:
  * - select().from(documentsTable)...  resolves to all docs in the store
  * - insert().values(v).returning()    appends a doc and returns it
- * - update()/delete()                 resolve without effect (not under test)
+ * - update()                          applies fields to the seeded document
+ * - delete()                          resolves without effect
  */
 import { randomUUID } from "crypto";
 
@@ -73,7 +74,33 @@ export const fakeDb = {
     });
     return chain;
   },
-  update: (_table: any) => thenable(() => []),
+  update: (table: any) => {
+    let updates: Record<string, unknown> = {};
+    let applied = false;
+    const apply = () => {
+      if (!applied && table === fakeTables.documentsTable && store.docs[0]) {
+        Object.assign(store.docs[0], updates);
+        applied = true;
+      }
+      return table === fakeTables.documentsTable && store.docs[0] ? [store.docs[0]] : [];
+    };
+    const chain: any = {
+      set(value: Record<string, unknown>) {
+        updates = value;
+        return chain;
+      },
+      where() {
+        return chain;
+      },
+      returning() {
+        return Promise.resolve(apply());
+      },
+      then(onOk: any, onErr: any) {
+        return Promise.resolve(apply()).then(onOk, onErr);
+      },
+    };
+    return chain;
+  },
   delete: (_table: any) => thenable(() => []),
 };
 

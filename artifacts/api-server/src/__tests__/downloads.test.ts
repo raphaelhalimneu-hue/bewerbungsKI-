@@ -173,6 +173,34 @@ describe("downloads with special characters in document name", () => {
     expect(visibleText).not.toMatch(/\b(Name|Position|Abschluss|Ort)\b/);
   });
 
+  it("cv.docx contains the saved inline preview edits", async () => {
+    const doc = seedDoc({
+      name: TRICKY_NAME,
+      cvHtml: "<div><h1>Max Mustermann neu</h1><p>Neue Erfahrung im Vertrieb</p></div>",
+      bezahlt: true,
+      profileData: {
+        previewCvHtmlEdited: true,
+        personal: { firstName: "Max", lastName: "Müller" },
+      },
+    });
+
+    const res = await request(app)
+      .get(`/api/documents/${doc.id}/download/cv.docx`)
+      .set("Authorization", "Bearer test-token")
+      .buffer(true)
+      .parse((response, cb) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => cb(null, Buffer.concat(chunks)));
+      });
+
+    expect(res.status).toBe(200);
+    const zip = await JSZip.loadAsync(res.body as Buffer);
+    const xml = await zip.file("word/document.xml")!.async("string");
+    expect(xml).toContain("Max Mustermann neu");
+    expect(xml).toContain("Neue Erfahrung im Vertrieb");
+  });
+
   it("editor CV DOCX endpoint rejects a letter-only imported document", async () => {
     const doc = seedDoc({
       name: TRICKY_NAME,
