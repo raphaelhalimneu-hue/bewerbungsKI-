@@ -26,14 +26,33 @@ app.use(
     },
   }),
 );
-app.use(cors());
+const configuredOrigins = (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+    const allowedOrigins = new Set([
+    "https://bewerbungski.com",
+    "https://www.bewerbungski.com",
+    "https://website-publisher-raphaelhalim7.replit.app",
+    ...configuredOrigins,
+    ]);
+
+    app.use(cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin) || process.env.NODE_ENV !== "production") {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
+    }));
 // Stripe webhook needs the raw body for signature verification
 app.use("/api/webhook/stripe", express.raw({ type: "application/json" }));
 // File uploads (/api/extract) send base64 JSON up to ~11 MB; everything else keeps the small default limit.
 const defaultJson = express.json();
-const largeJson = express.json({ limit: "75mb" });
+const largeJson = express.json({ limit: "68mb" });
 app.use((req, res, next) => (req.path.endsWith("/extract") || req.path.endsWith("/design") ? largeJson : defaultJson)(req, res, next));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 
 app.use("/api", router);
 
