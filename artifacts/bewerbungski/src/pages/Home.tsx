@@ -236,7 +236,7 @@ type TransformationCopy = {
 
 const TRANSFORMATION_BY_LANG: Record<string, TransformationCopy> = {
   de: {
-    before: "Vorher", after: "Nachher", beforeTitle: "Stichpunkte & Rohtext", afterTitle: "Perfektionierte Bewerbung",
+    before: "Vorher", after: "Nachher", beforeTitle: "Mittelmäßig & unvollständig", afterTitle: "Ausführliche Top-Bewerbung",
     heading: "Aus wenigen Angaben wird eine Bewerbung, die überzeugt.",
     raw: "„Ich bin Pflegefachkraft und arbeite seit mehreren Jahren in einem Heim. Ich kann mit Menschen gut umgehen und suche eine neue Stelle in Hannover.“",
     improvements: ["klare fachliche Positionierung", "Erfolge statt allgemeiner Aussagen", "passend zur Stelle formuliert"],
@@ -305,9 +305,11 @@ const LETTER_BY_LANG: Record<string, ExampleLetter> = {
     salutation: "Sehr geehrte Frau Wagner,",
     paragraphs: [
       "mit großem Interesse habe ich Ihre Stellenanzeige gelesen. Als examinierte Pflegefachkraft mit acht Jahren Erfahrung in der stationären Alten- und Langzeitpflege möchte ich mein Können gern in Ihr Team einbringen.",
-      "In meiner aktuellen Position im AWO Pflegezentrum betreue ich eigenverantwortlich Bewohnerinnen und Bewohner aller Pflegegrade, übernehme das Wundmanagement und leite als zertifizierte Praxisanleiterin jährlich bis zu sechs Auszubildende an. Bei der letzten MDK-Prüfung wurde meine Station mit der Note 1,2 bewertet — ein Ergebnis, zu dem ich mit sorgfältiger Dokumentation und gelebten Expertenstandards beigetragen habe.",
-      "Ihre Einrichtung überzeugt mich durch den Anspruch, Pflege mit Zeit und Zuwendung zu gestalten. Genau so verstehe ich meinen Beruf: fachlich sicher, ruhig und den Menschen zugewandt — auch in fordernden Situationen.",
-      "Über die Einladung zu einem persönlichen Gespräch freue ich mich sehr.",
+      "In meiner aktuellen Position im AWO Pflegezentrum übernehme ich die eigenverantwortliche Betreuung von Bewohnerinnen und Bewohnern aller Pflegegrade. Zu meinen Aufgaben gehören die Erstellung und Aktualisierung von Pflegeplanungen, eine lückenlose Pflegedokumentation, die Medikamentengabe und Vitalzeichenkontrolle nach ärztlicher Verordnung sowie das Wundmanagement. Dabei arbeite ich eng mit Ärzten, Therapeuten und Angehörigen zusammen.",
+      "Zusätzlich bin ich als zertifizierte Praxisanleiterin für die fachliche Anleitung und Bewertung von jährlich bis zu sechs Auszubildenden verantwortlich. Auch neue Kolleginnen und Kollegen arbeite ich ein. Bei der letzten MDK-Prüfung wurde meine Station mit der Note 1,2 bewertet. Zu diesem Ergebnis trage ich mit sorgfältiger Dokumentation und der konsequenten Umsetzung aktueller Expertenstandards bei.",
+      "Zuvor war ich im Seniorenheim am Park tätig und betreute dort eigenverantwortlich 24 Bewohnerinnen und Bewohner in allen Pflegegraden. Dort sammelte ich umfassende Erfahrung in der Grund- und Behandlungspflege, der Mobilisation und Aktivierung sowie in Übergaben und der Zusammenarbeit im Drei-Schicht-System.",
+      "Meine Ausbildung zur examinierten Altenpflegerin absolvierte ich an der Pflegeschule Hannover. Die Weiterbildung zur Praxisanleitung mit 300 Stunden schloss ich berufsbegleitend am Bildungszentrum Pflege Niedersachsen ab. Diese Verbindung aus praktischer Pflege, Anleitung und strukturiertem Arbeiten möchte ich nun in Ihr Team einbringen.",
+      "Ich arbeite ruhig und zugewandt, auch in fordernden Situationen, und übernehme Verantwortung dort, wo eine verlässliche Pflege und klare Zusammenarbeit gefragt sind. Über die Einladung zu einem persönlichen Gespräch freue ich mich.",
     ],
     closing: "Mit freundlichen Grüßen",
   },
@@ -504,12 +506,12 @@ export function ExampleCVShowcase() {
       {/* Each side is a complete application: cover letter + CV. Documents stay at
           their original PDF width and scroll horizontally on narrow screens. */}
       <div style={{ border: "1px solid #fde68a", borderRadius: 18, padding: "22px 12px 8px", background: "#fffbeb", minWidth: 0 }}>
-        <h3 style={{ textAlign: "center", color: "#92400e", fontSize: 18, margin: "0 0 20px" }}>◌ {copy.before}: Ausgangsbewerbung</h3>
+        <h3 style={{ textAlign: "center", color: "#92400e", fontSize: 18, margin: "0 0 20px" }}>◌ {copy.before}: {copy.beforeTitle}</h3>
         <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].label}`} html={beforeLetterHtml} />
         <ShowcasePage label={`${copy.before} · ${LETTER_BY_LANG[lang].cvLabel}`} html={beforeCVHtml} />
       </div>
       <div style={{ border: "1px solid #bfdbfe", borderRadius: 18, padding: "22px 12px 8px", background: "linear-gradient(135deg,#eff6ff,#f0fdf4)", minWidth: 0, boxShadow: "0 14px 34px rgba(37,99,235,.12)" }}>
-        <h3 style={{ textAlign: "center", color: "var(--brand)", fontSize: 18, margin: "0 0 20px" }}>✨ {copy.after}: perfektionierte Bewerbung</h3>
+        <h3 style={{ textAlign: "center", color: "var(--brand)", fontSize: 18, margin: "0 0 20px" }}>✨ {copy.after}: {copy.afterTitle}</h3>
         <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].label}`} html={letterHtml} />
         <ShowcasePage label={`${copy.after} · ${LETTER_BY_LANG[lang].cvLabel}`} html={cvHtml} />
       </div>
