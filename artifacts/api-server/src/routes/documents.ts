@@ -3,7 +3,7 @@ import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@w
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
-import { hasPaidEntitlement, isFreeAccount, isFreeQuotaLocked, withFreeApplicationCreateLock } from "../lib/freeLock";
+import { hasPaidEntitlement, isFreeAccount, withFreeApplicationCreateLock } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -417,11 +417,6 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
         .returning();
       return created;
     });
-    if (!doc) {
-      res.status(403).json({ error: "free_limit_reached" });
-      return;
-    }
-
     res.status(201).json(doc);
 
     const userEmail = req.userEmail;
