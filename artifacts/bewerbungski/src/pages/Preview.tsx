@@ -769,6 +769,9 @@ export default function Preview() {
                       clearLetterSaveTimer();
                       void savePreviewEdits({ letter: true });
                     }}
+                   onCopy={e => e.preventDefault()}
+                   onCut={e => e.preventDefault()}
+                   onContextMenu={e => e.preventDefault()}
                     style={{
                       whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                       width: "100%", border: "none", outline: "none", resize: "vertical",
