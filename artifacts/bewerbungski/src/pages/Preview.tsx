@@ -259,6 +259,22 @@ export default function Preview() {
     };
   }, [letterCopyLocked, cvCopyLocked]);
 
+  // Block the browser print shortcut for free accounts as well as the visible print buttons.
+  useEffect(() => {
+    if (!documentLocked) return;
+
+    const preventPrintShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopPropagation();
+        navigate("/pricing");
+      }
+    };
+
+    document.addEventListener("keydown", preventPrintShortcut, true);
+    return () => document.removeEventListener("keydown", preventPrintShortcut, true);
+  }, [documentLocked, navigate]);
+
   async function handleCreateLetter() {
     setCreatingLetter(true);
     setLetterError(false);
