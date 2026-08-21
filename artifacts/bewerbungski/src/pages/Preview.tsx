@@ -274,6 +274,7 @@ export default function Preview() {
       setEditedLetter(letter);
       setPerfectedApplied(true);
       setPerfectedServerLocked(false);
+      setPerfectChanges(Array.isArray(d.perfected_changes) ? d.perfected_changes : []);
       setPerfectedProfilePreview(typeof d.perfected_profile === "string"
         ? d.perfected_profile
         : null);
@@ -281,8 +282,14 @@ export default function Preview() {
       setEditedLetter(d.cover_letter);
       setPerfectedServerLocked(false);
       setPerfectedProfilePreview(null);
+      setPerfectChanges(null);
     }
-  }, [(doc as any)?.id, (doc as any)?.perfected_letter, (doc as any)?.perfected_locked]);
+  }, [
+    (doc as any)?.id,
+    (doc as any)?.perfected_letter,
+    (doc as any)?.perfected_locked,
+    (doc as any)?.perfected_changes,
+  ]);
 
   // Set CV HTML via ref so contentEditable edits are preserved across re-renders
   useEffect(() => {

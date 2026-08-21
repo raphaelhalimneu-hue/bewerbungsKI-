@@ -233,6 +233,9 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       perfected_letter: visiblePerfectedLetter,
       perfected_cv_html: visiblePerfectedCvHtml,
       perfected_profile: visiblePerfectedProfile,
+       perfected_changes: hasPerfectedGeneration && Array.isArray(pendingGeneration?.changes)
+         ? pendingGeneration.changes
+         : null,
       perfected_generation_id: pendingGeneration?.id ?? null,
       perfected_locked: false,
       created_at: doc.createdAt,

@@ -170,7 +170,17 @@ export default function Scanner() {
   async function goWizard() {
     // Prefer the source text, but keep the improved result as a fallback when
     // the scanner view was populated only by a previous perfection run.
-    const wizardText = cvText.trim().length >= 30 ? cvText : (perfectedText || "");
+    // Never use a server-locked perfected preview as Wizard input. The Wizard
+    // places imported text into a normal textarea, where it would become
+    // copyable. An original scanner/import text is safe; a paid full result is
+    // already allowed to be copied and can still be used here.
+    const wizardText = cvText.trim().length >= 30
+      ? cvText
+      : (!perfectedLocked ? (perfectedText || "") : "");
+    if (wizardText.trim().length < 30) {
+      setErrorMsg(t("scanner.tooShort"));
+      return;
+    }
     try { saveWizardPrefill(sessionStorage, wizardText); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (lastFile) {

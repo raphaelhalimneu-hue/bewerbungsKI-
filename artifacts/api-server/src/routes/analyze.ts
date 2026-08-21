@@ -87,6 +87,7 @@ function generationPayload(
       generationId: generation.id,
       preview: generation.previewText,
       profilePreview: generation.previewProfile,
+      changes: Array.isArray(generation.changes) ? generation.changes : [],
       locked: true,
     };
   }
