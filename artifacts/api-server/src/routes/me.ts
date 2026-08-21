@@ -28,6 +28,9 @@ router.get("/me", requireAuth, async (req: AuthenticatedRequest, res) => {
       .where(eq(documentsTable.userId, userId));
     res.json({
       email: profile.email,
+      is_premium: !!profile.isPremium,
+      is_unlimited: !!profile.isUnlimited,
+      credits: profile.credits ?? 0,
       documents_count: Number(docCount) || 0,
       email_verified: !!profile.emailVerifiedAt,
     });

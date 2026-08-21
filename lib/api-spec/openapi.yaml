@@ -144,10 +144,19 @@ components:
       properties:
         email:
           type: string
+        is_premium:
+          type: boolean
+        is_unlimited:
+          type: boolean
+        credits:
+          type: integer
         documents_count:
           type: integer
       required:
         - email
+        - is_premium
+        - is_unlimited
+        - credits
         - documents_count
 
     GenerateInput:

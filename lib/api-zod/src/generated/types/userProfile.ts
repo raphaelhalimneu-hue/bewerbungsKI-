@@ -8,5 +8,8 @@
 
 export interface UserProfile {
   email: string;
+  is_premium: boolean;
+  is_unlimited: boolean;
+  credits: number;
   documents_count: number;
 }

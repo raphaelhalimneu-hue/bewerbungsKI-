@@ -23,6 +23,7 @@ export default function Preview() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error, refetch: refetchDocument } = useGetDocument(params.id ?? "");
+  const { profile } = useAuth();
   const cvRef = useRef<HTMLDivElement>(null);
   const cvWrapRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLDivElement>(null);
@@ -45,8 +46,11 @@ export default function Preview() {
   // True once the CV shown contains the AI-perfected profile (this session)
   const [cvPerfectedApplied, setCvPerfectedApplied] = useState(false);
   const [perfectedProfilePreview, setPerfectedProfilePreview] = useState<string | null>(null);
-  const freeUser = true;
-  const editLocked = false;
+  const freeUser = !profile
+    || (!(profile as any).is_premium
+      && !(profile as any).is_unlimited
+      && Number((profile as any).credits ?? 0) <= 0);
+  const editLocked = freeUser;
   const visibleLetter = editedLetter;
   const hasCv = Boolean(
     doc && (
@@ -356,6 +360,7 @@ export default function Preview() {
   }, [(doc as any)?.id, editingCv]);
 
   function toggleEditCv() {
+    if (editLocked) return;
     if (editingCv) {
       setEditingCv(false);
       clearCvSaveTimer();
@@ -640,7 +645,8 @@ export default function Preview() {
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.cv")}</h3>
                 <button
                   className={editingCv ? "btn btn-p btn-sm" : "btn btn-g btn-sm"}
-                   onClick={toggleEditCv}
+                  onClick={toggleEditCv}
+                  disabled={editLocked}
                 >
                   {editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
                 </button>
@@ -687,7 +693,7 @@ export default function Preview() {
                   <div
                     ref={cvRef}
                     className="cv-sheet"
-                    contentEditable={editingCv}
+                    contentEditable={editingCv && !editLocked}
                     suppressContentEditableWarning
                     onInput={() => {
                       if (!editingCv) return;
@@ -758,6 +764,7 @@ export default function Preview() {
                   />
                   <textarea
                     value={visibleLetter}
+                     readOnly={editLocked}
                     onChange={e => {
                       editedLetterRef.current = e.target.value;
                       setEditedLetter(e.target.value);
@@ -769,15 +776,16 @@ export default function Preview() {
                       clearLetterSaveTimer();
                       void savePreviewEdits({ letter: true });
                     }}
-                   onCopy={e => e.preventDefault()}
-                   onCut={e => e.preventDefault()}
-                   onContextMenu={e => e.preventDefault()}
+                   onCopy={freeUser ? e => e.preventDefault() : undefined}
+                   onCut={freeUser ? e => e.preventDefault() : undefined}
+                   onContextMenu={freeUser ? e => e.preventDefault() : undefined}
                     style={{
                       whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.8, color: "var(--text2)",
                       width: "100%", border: "none", outline: "none", resize: "vertical",
                       minHeight: 320, padding: "1.25rem", fontFamily: "inherit",
                       background: "transparent", display: "block", boxSizing: "border-box",
                       position: "relative", zIndex: 1,
+                       ...(editLocked ? { cursor: "not-allowed", opacity: 0.78 } : {}),
                     }}
                   />
                 </div>
