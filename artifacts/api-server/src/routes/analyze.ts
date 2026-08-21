@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { hasPaidEntitlement, isEmailUnverified, isFreeAccount, isFreeQuotaLocked, isUnlimitedEmail } from "../lib/freeLock";
-import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
-import { and, desc, eq, isNull, lt, sql } from "drizzle-orm";
+import { isEmailUnverified } from "../lib/freeLock";
+import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
 
 const router = Router();
@@ -122,12 +122,7 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
-    const unlimitedA = isUnlimitedEmail(req.userEmail);
-    if (!unlimitedA && !checkQuota(req.userId!, "analyze")) {
+    if (!checkQuota(req.userId!, "analyze")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
@@ -177,10 +172,6 @@ Bewerte den Score NUR anhand der Qualität des vorliegenden Textes – ehrlich u
 
 router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const documentType = req.query.type;
     if (documentType !== "cv" && documentType !== "letter") {
       res.status(400).json({ error: "invalid_document_type" });
@@ -202,8 +193,7 @@ router.get("/perfect/latest", requireAuth, async (req: AuthenticatedRequest, res
       return;
     }
 
-    const locked = await isFreeAccount(req.userId!, req.userEmail);
-    res.json(generationPayload(generation, locked));
+    res.json(generationPayload(generation, false));
   } catch (err) {
     req.log.error({ err }, "GET /perfect/latest error");
     res.status(500).json({ error: "Server error" });
@@ -230,11 +220,6 @@ router.get("/perfect/:id/full", requireAuth, async (req: AuthenticatedRequest, r
       res.status(404).json({ error: "not_found" });
       return;
     }
-    if (await isFreeAccount(req.userId!, req.userEmail)) {
-      res.status(402).json({ error: "purchase_required" });
-      return;
-    }
-
     res.json(generationPayload(generation, false));
   } catch (err) {
     req.log.error({ err }, "GET /perfect/:id/full error");
@@ -281,41 +266,10 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    const unlimitedP = isUnlimitedEmail(req.userEmail);
-    if (!unlimitedP && !checkQuota(req.userId!, "perfect")) {
+    if (!checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
-    // Paid perfect quota: Power = 50 lifetime; Premium = 10 per purchased
-    // 10-pack (credits holds 10 per package, so cap = credits). Free users
-    // keep the small daily teaser quota above.
-    // Reserve the use atomically BEFORE calling the model (no check-then-act
-    // race); if the model call fails, the reservation is released below.
-    let reservedPowerUse = false;
-    if (!unlimitedP) {
-      const [prof] = await db.select().from(profilesTable).where(eq(profilesTable.userId, req.userId!));
-       const cap = prof?.isUnlimited ? 50 : hasPaidEntitlement(prof) ? (prof?.credits ?? 0) : 0;
-      if (prof && cap > 0) {
-      const reserved = await db
-        .update(profilesTable)
-        .set({ perfectCount: sql`${profilesTable.perfectCount} + 1` })
-        .where(and(eq(profilesTable.userId, req.userId!), lt(profilesTable.perfectCount, cap)))
-        .returning({ perfectCount: profilesTable.perfectCount });
-      if (reserved.length === 0) {
-        res.status(429).json({ error: "perfect_limit_reached" });
-        return;
-      }
-      reservedPowerUse = true;
-      }
-    }
-    const releasePowerUse = async () => {
-      if (!reservedPowerUse) return;
-      await db
-        .update(profilesTable)
-        .set({ perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)` })
-        .where(eq(profilesTable.userId, req.userId!))
-        .catch(() => {});
-    };
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
     const systemPrompt = isCvMode
@@ -342,11 +296,10 @@ Alle Texte in der Sprache mit Code "${lang}".`;
     const userPrompt = `${isCvMode ? "LEBENSLAUF" : "ANSCHREIBEN"}:\n${letterText.slice(0, MAX_INPUT)}${profileText ? `\n\nPROFIL-STATEMENT:\n${String(profileText).slice(0, 3000)}` : ""}${cvText ? `\n\nLEBENSLAUF (Kontext, nicht umschreiben):\n${String(cvText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\n\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
-    if (text === null) { await releasePowerUse(); res.status(503).json({ error: "busy_try_again" }); return; }
+    if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }
     const parsed = parseJson(text);
     if (!parsed || typeof parsed.letter !== "string" || parsed.letter.trim().length < 80) {
       req.log.error({ text: text.slice(0, 500) }, "perfect: unparseable model output");
-      await releasePowerUse();
       res.status(500).json({ error: "perfect_failed" });
       return;
     }
@@ -358,7 +311,6 @@ Alle Texte in der Sprache mit Code "${lang}".`;
     const changes = Array.isArray(parsed.changes)
       ? parsed.changes.filter((change: unknown): change is string => typeof change === "string").slice(0, 10)
       : [];
-    const locked = await isFreeAccount(req.userId!, req.userEmail);
     const generationValues = {
       userId: req.userId!,
       documentId: documentId ?? null,
@@ -369,33 +321,12 @@ Alle Texte in der Sprache mit Code "${lang}".`;
       previewProfile: fullProfile ? createPerfectedPreview(fullProfile) : null,
       changes,
     };
-    let generation: typeof perfectedGenerationsTable.$inferSelect;
-    if (locked && documentId) {
-      generation = await db.transaction(async (tx) => {
-        const [created] = await tx
-          .insert(perfectedGenerationsTable)
-          .values(generationValues)
-          .returning();
-        await tx
-          .update(documentsTable)
-          .set({
-            perfectedLetter: fullText,
-            perfectedGenerationId: created.id,
-          })
-          .where(and(
-            eq(documentsTable.id, documentId),
-            eq(documentsTable.userId, req.userId!),
-          ));
-        return created;
-      });
-    } else {
-      [generation] = await db
-        .insert(perfectedGenerationsTable)
-        .values(generationValues)
-        .returning();
-    }
+    const [generation] = await db
+      .insert(perfectedGenerationsTable)
+      .values(generationValues)
+      .returning();
 
-    res.json(generationPayload(generation, locked));
+    res.json(generationPayload(generation, false));
   } catch (err) {
     req.log.error({ err }, "POST /perfect error");
     res.status(500).json({ error: "Server error" });

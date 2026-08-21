@@ -15,4 +15,7 @@ export interface DocumentInput {
   coverLetter?: string;
   jobTitle?: string;
   jobCompany?: string;
+  generationBatchId?: string;
+  cvGenerationId?: string;
+  letterGenerationId?: string;
 }

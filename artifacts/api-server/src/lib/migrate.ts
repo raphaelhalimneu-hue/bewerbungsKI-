@@ -20,23 +20,7 @@ export async function runStartupMigrations(): Promise<void> {
     CREATE INDEX IF NOT EXISTS generation_results_user_batch_idx
     ON generation_results (user_id, batch_id)
   `);
-  // Credits model: limit = 3 free + purchased credits (30 per package)
-  await pool.query(
-    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits integer NOT NULL DEFAULT 0`,
-  );
-  await pool.query(
-    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS free_trials_used integer NOT NULL DEFAULT 0`,
-  );
-
-  // Power package (29.90): unlimited applications + 50 lifetime perfect uses
-  await pool.query(
-    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_unlimited boolean NOT NULL DEFAULT false`,
-  );
-  await pool.query(
-    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS perfect_count integer NOT NULL DEFAULT 0`,
-  );
-
-  // Perfected view-only copies for locked free accounts
+  // Perfected document copies are retained for existing documents.
   await pool.query(
     `ALTER TABLE documents ADD COLUMN IF NOT EXISTS perfected_letter text`,
   );
@@ -123,14 +107,4 @@ export async function runStartupMigrations(): Promise<void> {
       last_sent_at timestamp NOT NULL DEFAULT now()
     )`,
   );
-
-  // Backfill: legacy premium buyers (boolean is_premium, no credits yet) keep
-  // their purchased 30-application package. Safe to re-run: after this change,
-  // is_premium=true always comes with credits>0, so only legacy rows match.
-  const res = await pool.query(
-    `UPDATE profiles SET credits = 30 WHERE is_premium = true AND credits = 0`,
-  );
-  if (res.rowCount) {
-    logger.info({ rows: res.rowCount }, "Backfilled credits for legacy premium profiles");
-  }
 }

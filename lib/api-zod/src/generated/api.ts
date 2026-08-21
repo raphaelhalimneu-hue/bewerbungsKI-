@@ -21,9 +21,6 @@ export const HealthCheckResponse = zod.object({
  */
 export const GetMeResponse = zod.object({
   "email": zod.string(),
-  "is_premium": zod.boolean(),
-  "credits": zod.number(),
-  "document_limit": zod.number(),
   "documents_count": zod.number()
 })
 
@@ -34,11 +31,13 @@ export const GetMeResponse = zod.object({
 export const GenerateDocumentBody = zod.object({
   "type": zod.enum(['cv', 'letter']),
   "systemPrompt": zod.string(),
-  "userPrompt": zod.string()
+  "userPrompt": zod.string(),
+  "batchId": zod.string()
 })
 
 export const GenerateDocumentResponse = zod.object({
-  "result": zod.string()
+  "result": zod.string(),
+  "generationId": zod.string()
 })
 
 
@@ -73,7 +72,10 @@ export const CreateDocumentBody = zod.object({
   "cvHtml": zod.string().optional(),
   "coverLetter": zod.string().optional(),
   "jobTitle": zod.string().optional(),
-  "jobCompany": zod.string().optional()
+  "jobCompany": zod.string().optional(),
+  "generationBatchId": zod.string().optional(),
+  "cvGenerationId": zod.string().optional(),
+  "letterGenerationId": zod.string().optional()
 })
 
 

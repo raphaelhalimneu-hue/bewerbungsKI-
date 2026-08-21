@@ -6,30 +6,21 @@ import { useAuth } from "../context/AuthContext";
 /** 5-star app rating with optional comment. Hidden once the user has rated. */
 export function RatingCard() {
   const { t } = useTranslation();
-  const { session, user, profile } = useAuth() as any;
+  const { session } = useAuth();
   const [existing, setExisting] = useState<any>(undefined); // undefined = loading
   const [stars, setStars] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
-  const freeLimitReached = Boolean(
-    user &&
-    profile &&
-    !profile.is_premium &&
-    !profile.is_unlimited &&
-    Number(profile.credits || 0) === 0 &&
-    Number(profile.documents_count || 0) >= 1,
-  );
-
   useEffect(() => {
-    if (!session || freeLimitReached) return;
+    if (!session) return;
     customFetch<any>("/api/ratings/me")
       .then(r => setExisting(r))
       .catch(() => setExisting(null));
-  }, [!!session, freeLimitReached]);
+  }, [!!session]);
 
-  if (!session || freeLimitReached || existing === undefined || existing) return null;
+  if (!session || existing === undefined || existing) return null;
   if (done) {
     return (
       <div className="card" style={{ marginTop: 28, textAlign: "center", padding: 20 }}>

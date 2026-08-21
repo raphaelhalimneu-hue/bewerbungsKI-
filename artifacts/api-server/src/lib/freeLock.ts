@@ -6,24 +6,6 @@ export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
 /** All document actions are currently free and unlimited. */
 export const FREE_PRINT_LIMIT = Number.MAX_SAFE_INTEGER;
 const freeApplicationCreateLocks = new Map<string, Promise<void>>();
-const UNLIMITED_PROFILE_EMAIL = "halimraphael9@gmail.com";
-
-export function isUnlimitedEmail(email?: string): boolean {
-  return false;
-}
-
-/**
- * Legacy helper kept for compatibility with old profile rows. Access no longer
- * depends on credits, plans, or purchase history.
- */
-export function hasPaidEntitlement(profile?: {
-  credits?: number | null;
-  isUnlimited?: boolean | null;
-} | null): boolean {
-  void profile;
-  return false;
-}
-
 /**
  * Exporting is free and does not consume a quota.
  */
@@ -38,27 +20,14 @@ export async function getPrintCounts(userId: string, docId: string): Promise<Rec
   return { cv_print: 0, letter_print: 0 };
 }
 
-/**
- * The app is currently completely free.
- */
-export async function isFreeAccount(userId: string, email?: string): Promise<boolean> {
-  void userId; void email;
-  return false;
-}
-
 /** True when the account still has to confirm its email address (new signups). */
 export async function isEmailUnverified(userId: string, email?: string): Promise<boolean> {
-  if (isUnlimitedEmail(email)) return false;
+  void email;
   const [profile] = await db
     .select()
     .from(profilesTable)
     .where(eq(profilesTable.userId, userId));
   return !profile?.emailVerifiedAt;
-}
-
-export async function isFreeQuotaLocked(userId: string, email?: string): Promise<boolean> {
-  void userId; void email;
-  return false;
 }
 
 /**
@@ -77,8 +46,9 @@ export async function withFreeApplicationCreateLock<T>(userId: string, callback:
   let client: { query: (text: string, values?: unknown[]) => Promise<unknown>; release: () => void } | undefined;
   try {
     if (typeof (pool as any).connect === "function") {
-      client = await (pool as any).connect();
-      await client.query("SELECT pg_advisory_lock(hashtext($1))", [userId]);
+      const connectedClient = await (pool as any).connect();
+      client = connectedClient;
+      await connectedClient.query("SELECT pg_advisory_lock(hashtext($1))", [userId]);
     }
     return await callback();
   } finally {

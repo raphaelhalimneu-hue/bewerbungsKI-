@@ -63,10 +63,6 @@ function getErrorMessage(error: unknown): string {
       return 'Bitte füge mindestens 80 Zeichen aus deinem Lebenslauf ein.';
     case 'daily_limit_reached':
       return 'Dein Tageslimit für diesen Check ist erreicht. Bitte versuche es morgen erneut.';
-    case 'perfect_limit_reached':
-      return 'Dein Kontingent für Perfektionierungen ist aufgebraucht.';
-    case 'upgrade_required':
-      return 'Dein kostenloses Kontingent ist aufgebraucht. Bitte schalte weitere Funktionen frei.';
     case 'email_unverified':
       return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
     case 'busy_try_again':

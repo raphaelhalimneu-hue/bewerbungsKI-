@@ -43,8 +43,6 @@ export default function CVEditor() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
-  const locked = false;
-  const docxLocked = false;
 
   const [cvState, setCvState] = useState<CVContent>(emptyCV());
   const [template, setTemplate] = useState<TemplateId>("modern");
@@ -183,7 +181,6 @@ export default function CVEditor() {
 
   // ── Save ─────────────────────────────────────────────────────────────────
   async function handleSave() {
-    if (locked) { navigate("/pricing"); return; }
     setSaving(true);
     setSaveMsg("");
     try {
@@ -204,9 +201,6 @@ export default function CVEditor() {
   // ── PDF export ───────────────────────────────────────────────────────────
   async function handleDownloadPdf() {
     if (!cvSheetRef.current) return;
-    // Free accounts cannot export edited content from the editor —
-    // their downloads live on the preview page (stored version only).
-    if (docxLocked) { navigate("/pricing"); return; }
     setExporting("pdf");
     try {
       const el = cvSheetRef.current;
@@ -235,7 +229,6 @@ export default function CVEditor() {
 
   // ── DOCX export ──────────────────────────────────────────────────────────
   async function handleDownloadDocx() {
-    if (docxLocked) { navigate("/pricing"); return; }
     setExporting("docx");
     try {
       const blob = await customFetch<Blob>(`/api/documents/${params.id}/download/cv.docx`, {
@@ -515,12 +508,6 @@ export default function CVEditor() {
   return (
     <Layout>
       <div className="fade" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)" }}>
-        {locked && (
-          <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 14px", marginBottom: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0 }}>
-            <span style={{ fontSize: 13.5 }}>🔒 {t("locked.editorText")}</span>
-            <button className="btn btn-p btn-sm" onClick={() => navigate("/pricing")}>{t("locked.cta")}</button>
-          </div>
-        )}
         {/* ── Top bar ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, flexWrap: "wrap", flexShrink: 0 }}>
           <button className="btn btn-g" onClick={() => navigate(`/preview/${params.id}`)} style={{ flexShrink: 0 }}>
@@ -531,14 +518,14 @@ export default function CVEditor() {
           </h2>
           {saveMsg && <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 600 }}>{saveMsg}</span>}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0 }}>
-            <button className="btn btn-s btn-sm" onClick={handleSave} disabled={saving || locked} style={{ minWidth: 90, ...(locked ? { opacity: 0.5 } : {}) }}>
+            <button className="btn btn-s btn-sm" onClick={handleSave} disabled={saving} style={{ minWidth: 90 }}>
               {saving ? <><span className="spin" /> …</> : (t("editor.save") || "💾 Speichern")}
             </button>
             <button className="btn btn-p btn-sm" onClick={handleDownloadPdf} disabled={exporting !== null} style={{ minWidth: 120 }}>
               {exporting === "pdf" ? <><span className="spin" /> PDF…</> : "⬇ PDF"}
             </button>
             <button className="btn btn-g btn-sm" onClick={handleDownloadDocx} disabled={exporting !== null} style={{ minWidth: 120 }}>
-              {exporting === "docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} DOCX</>}
+              {exporting === "docx" ? <><span className="spin" /> Word…</> : <>⬇ DOCX</>}
             </button>
           </div>
         </div>
@@ -573,7 +560,6 @@ export default function CVEditor() {
               width: 360, minWidth: 320, flexShrink: 0,
               borderRight: "1px solid var(--border)",
               overflowY: "auto", background: "var(--bg2)",
-              ...(locked ? { opacity: 0.5, pointerEvents: "none" as const } : {}),
             }}
           >
             <FormPanel />

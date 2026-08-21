@@ -144,19 +144,10 @@ components:
       properties:
         email:
           type: string
-        is_premium:
-          type: boolean
-        credits:
-          type: integer
-        document_limit:
-          type: integer
         documents_count:
           type: integer
       required:
         - email
-        - is_premium
-        - credits
-        - document_limit
         - documents_count
 
     GenerateInput:
@@ -169,18 +160,24 @@ components:
           type: string
         userPrompt:
           type: string
+        batchId:
+          type: string
       required:
         - type
         - systemPrompt
         - userPrompt
+        - batchId
 
     GenerateResult:
       type: object
       properties:
         result:
           type: string
+        generationId:
+          type: string
       required:
         - result
+        - generationId
 
     Document:
       type: object
@@ -225,6 +222,12 @@ components:
         jobTitle:
           type: string
         jobCompany:
+          type: string
+        generationBatchId:
+          type: string
+        cvGenerationId:
+          type: string
+        letterGenerationId:
           type: string
       required:
         - name

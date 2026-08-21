@@ -11,9 +11,6 @@ export interface HealthStatus {
 
 export interface UserProfile {
   email: string;
-  is_premium: boolean;
-  credits: number;
-  document_limit: number;
   documents_count: number;
 }
 
@@ -29,10 +26,12 @@ export interface GenerateInput {
   type: GenerateInputType;
   systemPrompt: string;
   userPrompt: string;
+  batchId: string;
 }
 
 export interface GenerateResult {
   result: string;
+  generationId: string;
 }
 
 export type DocumentProfileData = { [key: string]: unknown };
@@ -63,5 +62,8 @@ export interface DocumentInput {
   coverLetter?: string;
   jobTitle?: string;
   jobCompany?: string;
+  generationBatchId?: string;
+  cvGenerationId?: string;
+  letterGenerationId?: string;
 }
 

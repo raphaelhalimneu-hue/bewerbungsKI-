@@ -270,25 +270,30 @@ export default function CreateScreen() {
         uk: ' WICHTIG: Schreibe den gesamten Inhalt auf Ukrainisch.',
       };
       const langInstr = docLangInfo[form.docLang] || '';
+      const generationBatchId = `mobile-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
       setGenPhase('Lebenslauf wird erstellt …');
       const cvRes = await generateMutation.mutateAsync({ data: {
         type: 'cv',
+        batchId: generationBatchId,
         systemPrompt: 'Du bist ein professioneller Bewerbungsexperte. Antworte nur mit HTML-Inhalt, kein Markdown. Schreibe wie ein Mensch, keine KI-Floskeln.',
         userPrompt: `Erstelle Lebenslauf-HTML für:\n${JSON.stringify(form, null, 2)}\nOptimiert für: ${form.jobad.title || 'allgemein'} bei ${form.jobad.company || 'unbekannt'}.\nDatum: ${today}${langInstr}\n\nHTML-Gerüst (Inline-Styles, nicht ändern):\n<div style="font-family:Helvetica,Arial,sans-serif;color:#1f2937;padding:38px 46px 42px;">\n<div style="text-align:center;padding-bottom:18px;border-bottom:1.5px solid #1f2937;">\n<div style="font-size:28px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">VORNAME NACHNAME</div>\n<div style="font-size:13px;color:#6b7280;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">BERUFSBEZEICHNUNG</div>\n<div style="font-size:11.5px;color:#6b7280;margin-top:10px;">Adresse · Telefon · E-Mail</div></div>\n<!-- Sektionen folgen -->\n</div>`,
       } });
 
       let letterText = '';
+      let letterGenerationId: string | undefined;
       {
         setGenPhase('Bewerbung wird erstellt …');
         const letterRes = await generateMutation.mutateAsync({ data: {
           type: 'letter',
+          batchId: generationBatchId,
           systemPrompt: 'Du bist Experte für Bewerbungsunterlagen. Schreibe wie ein echter Bewerber, keine KI-Phrasen. Nur den Bewerbung-Text, kein HTML.',
           userPrompt: form.jobad.title || form.jobad.description
             ? `Bewerbung für: ${form.personal.firstName} ${form.personal.lastName}\nStelle: ${form.jobad.title} bei ${form.jobad.company}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ')}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nBeschreibung: ${form.jobad.description || 'nicht angegeben'}\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`
             : `Initiativbewerbung (KEINE konkrete Stellenanzeige vorhanden!) für: ${form.personal.firstName} ${form.personal.lastName}\nAngestrebte Position: ${form.experience[0]?.position || form.personal.title || 'passend zur Erfahrung'}\nErfahrung: ${form.experience.slice(0, 3).map(e => `${e.position} bei ${e.company}`).join('; ') || 'Berufseinsteiger'}\nSkills: ${form.skills.slice(0, 8).map(s => s.name).join(', ')}\nSchreibe ein überzeugendes allgemeines Initiativ-Bewerbung, Anrede "Sehr geehrte Damen und Herren", Empfänger "Personalabteilung". Erfinde KEINE Firma und KEINE Stelle.\n350–400 Wörter, formal, überzeugend. Beginne mit: "${form.personal.city || 'Ort'}, den ${today}"${langInstr}`,
         } });
         letterText = letterRes.result;
+        letterGenerationId = letterRes.generationId;
       }
 
       setGenPhase('Wird gespeichert …');
@@ -299,6 +304,9 @@ export default function CreateScreen() {
         coverLetter: letterText,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
+        generationBatchId,
+        cvGenerationId: cvRes.generationId,
+        letterGenerationId,
         profileData: form as any,
       } });
 
@@ -315,8 +323,7 @@ export default function CreateScreen() {
       router.navigate('/(tabs)/documents');
     } catch (e: any) {
       setGenerating(false);
-      if (e?.data?.error === 'free_limit_reached') router.navigate('/(tabs)/account');
-      else setGenError(e.message || 'Ein Fehler ist aufgetreten.');
+      setGenError(e.message || 'Ein Fehler ist aufgetreten.');
     }
   }
 

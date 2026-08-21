@@ -80,7 +80,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {user ? (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-[var(--text2)] hidden sm:block">
-                {profile?.email || user.email}
+                {(profile as any)?.email || user.email}
               </span>
               <button onClick={signOut} className="btn-g flex items-center justify-center p-2 rounded-lg" title={t("nav.signOut")}>
                 <FiLogOut size={18} />

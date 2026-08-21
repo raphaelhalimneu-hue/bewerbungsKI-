@@ -128,8 +128,6 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       return;
     }
 
-    const documentProfileData = (doc.profileData as any) || {};
-    const documentLocked = false;
     let [pendingGeneration] = doc.perfectedGenerationId
       ? await db
           .select()
@@ -142,28 +140,10 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
           .limit(1)
       : [undefined];
 
-    // Older or interrupted writes can be missing the document's generation ID.
-    // For a free account, any persisted perfection belonging to this document
-    // must be treated as locked. Do not require its full text to match the
-    // current cover letter: legacy clients could have formatted or saved it
-    // differently, which would otherwise expose the complete perfected text.
-    if (documentLocked && !pendingGeneration) {
-      const [legacyGeneration] = await db
-        .select()
-        .from(perfectedGenerationsTable)
-        .where(and(
-          eq(perfectedGenerationsTable.documentId, doc.id),
-          eq(perfectedGenerationsTable.userId, req.userId!),
-        ))
-        .orderBy(desc(perfectedGenerationsTable.createdAt))
-        .limit(1);
-      if (legacyGeneration) pendingGeneration = legacyGeneration;
-    }
-
-    // A verified buyer atomically promotes the exact pending generation. The
-    // conditional marker prevents concurrent GETs from applying a different
-    // generation or replaying an already-promoted result.
-    if (!documentLocked && pendingGeneration && doc.perfectedGenerationId) {
+    // Promote persisted improvements for every account. Historical records may
+    // contain only a linked generation, so use its full result rather than
+    // relying on the old duplicate columns.
+    if (pendingGeneration) {
       const currentProfileData = (doc.profileData as any) || {};
       const currentCvJson = currentProfileData.cv_json || null;
       const oldProfile = typeof currentCvJson?.profile === "string" ? currentCvJson.profile : "";
@@ -179,10 +159,16 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       const [promoted] = await db
         .update(documentsTable)
         .set({
-          coverLetter: doc.perfectedLetter,
-          cvHtml: doc.perfectedCvHtml || doc.cvHtml,
+          profileData: promotedProfileData,
+          coverLetter: pendingGeneration.documentType === "letter"
+            ? pendingGeneration.fullText
+            : doc.coverLetter,
+          cvHtml: pendingGeneration.documentType === "cv"
+            ? promotedCvHtml
+            : doc.cvHtml,
           perfectedLetter: null,
           perfectedCvHtml: null,
+          perfectedGenerationId: null,
         })
         .where(and(
           eq(documentsTable.id, doc.id),
@@ -190,9 +176,8 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
         ))
         .returning();
       if (promoted) doc = promoted;
-    } else if (!documentLocked && doc.perfectedLetter && !doc.perfectedGenerationId) {
-      // Legacy perfected copies predate generation IDs. Promote them once for
-      // existing buyers while keeping the new ID-bound path strict.
+    } else if (doc.perfectedLetter) {
+      // Legacy perfected copies predate generation IDs. Promote them once.
       const [promoted] = await db
         .update(documentsTable)
         .set({
@@ -209,13 +194,8 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       if (promoted) doc = promoted;
     }
 
-    // The generation relation is the source of truth for locked content.
-    // Do not use the legacy copy as the lock signal: it can be absent on an
-    // interrupted/older write even though the full generation is still linked.
-    // `perfectedLetter` is a second legacy marker. It is enough to keep the
-    // document locked even if a database write lost its generation relation.
-    // Free users may view the complete perfected document in the browser.
-    // Downloading, printing and copying remain blocked separately.
+    // A generation relation may exist for historical documents. Its complete
+    // content is now available in the browser and through all exports.
     const hasPerfectedGeneration = Boolean(pendingGeneration || doc.perfectedLetter);
     const storedPerfectedLetter = doc.perfectedLetter;
     const visiblePerfectedLetter = hasPerfectedGeneration
@@ -224,12 +204,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     const visiblePerfectedProfile = hasPerfectedGeneration && pendingGeneration?.fullProfile
       ? pendingGeneration.fullProfile
       : null;
-    const pd = documentProfileData;
-    // A stale premium marker could previously let the browser save the
-    // perfected profile straight into the original CV fields. When that
-    // account is now correctly classified as free, replace that stored
-    // perfected fragment before serializing the document. The complete
-    // profile must not survive in `cv_html`, `cv_json` or `profile_data`.
+    const pd = (doc.profileData as any) || {};
     const visibleCvJson = visiblePerfectedProfile && pendingGeneration?.fullProfile && pd.cv_json
       ? {
           ...pd.cv_json,
@@ -259,10 +234,6 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       template: doc.template,
       cv_html: documentCvHtml,
       cv_json: visibleCvJson,
-       // A recovered legacy generation may have been written into cover_letter
-       // before preview gating existed. Never send that matching full text to a
-       // free account; the dedicated perfected_letter field above is its safe
-       // replacement.
         cover_letter: documentCoverLetter,
       bezahlt: true,
        profile_data: visibleProfileData,
@@ -625,10 +596,6 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`;
 
 router.delete("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     await db
       .delete(documentsTable)
       .where(

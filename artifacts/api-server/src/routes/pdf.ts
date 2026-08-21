@@ -165,10 +165,11 @@ function sendPdfError(res: any, err: any, label: string, log: any) {
 // ── CV PDF ────────────────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const documentId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
@@ -194,10 +195,11 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
 // ── Cover Letter PDF ──────────────────────────────────────────────────────────
 router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const documentId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
+      .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
 

@@ -17,12 +17,6 @@ function checkDailyGenQuota(userId: string): boolean {
   return true;
 }
 
-function previewText(text: string): string {
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  const visibleWords = Math.max(1, Math.ceil(words.length * 0.25));
-  return `${words.slice(0, visibleWords).join(" ")} […]`;
-}
-
 router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.userId!;
@@ -121,18 +115,8 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .values({ userId, batchId, type, fullText: result })
       .returning({ id: generationResultsTable.id });
 
-    // The wizard generates CV first and letter second. Increment once after
-    // the letter so both parts of the first free application stay complete.
-    const firstFreeTrial = (profile?.freeTrialsUsed ?? 0) === 0;
-    if (firstFreeTrial && type === "letter") {
-      await db
-        .update(profilesTable)
-        .set({ freeTrialsUsed: 1 })
-        .where(and(eq(profilesTable.userId, userId), eq(profilesTable.freeTrialsUsed, 0)));
-    }
-
     res.json({
-      result: firstFreeTrial ? result : previewText(result),
+      result,
       generationId: stored.id,
     });
   } catch (err) {

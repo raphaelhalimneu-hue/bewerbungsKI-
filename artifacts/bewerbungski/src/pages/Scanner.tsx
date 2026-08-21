@@ -69,18 +69,10 @@ export function AnalysisCard({
   );
 }
 
-function createClientPreview(text: string): string {
-  const normalized = text.trim();
-  if (!normalized) return "";
-  const visibleLength = Math.max(1, Math.min(500, Math.max(24, Math.ceil(normalized.length * 0.35)), normalized.length - 1));
-  return `${normalized.slice(0, visibleLength).trimEnd()} […]`;
-}
-
 export default function Scanner() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
-  const { user, profile, setShowAuthModal } = useAuth();
-  const p = profile as any;
+  const { user, setShowAuthModal } = useAuth();
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -95,68 +87,15 @@ export default function Scanner() {
   const [wizardBusy, setWizardBusy] = useState(false);
   const cvInputRef = useRef<HTMLTextAreaElement>(null);
   const perfectedTextRef = useRef<HTMLDivElement>(null);
-  // Match the server entitlement rule; a stale is_premium flag is not payment.
-  const freeUser = !!p && !p.is_unlimited && Number(p.credits || 0) <= 0;
-  const perfectedCopyLocked = perfectedLocked && !!perfectedText;
 
-  function blockCopy(e: ClipboardEvent<HTMLElement>) {
-    e.preventDefault();
-  }
-
-  // Capture copy/cut events globally because Android's selection toolbar does
-  // not reliably bubble clipboard events from the preview.
+  // Scanner generations are persisted server-side and can be reused on reload.
   useEffect(() => {
-    if (!perfectedCopyLocked) return;
-    const isInside = (node: Node | null, container: HTMLElement | null) =>
-      !!node && !!container && (node === container || container.contains(node));
-    const isLockedTarget = (target: EventTarget | null) => {
-      const node = target instanceof Node ? target : null;
-      const active = document.activeElement;
-      const selection = window.getSelection();
-      return [
-        node,
-        active,
-        selection?.anchorNode ?? null,
-        selection?.focusNode ?? null,
-      ].some((candidate) =>
-        isInside(candidate, perfectedTextRef.current),
-      );
-    };
-    const preventClipboard = (event: Event) => {
-      if (isLockedTarget(event.target)) event.preventDefault();
-    };
-    const preventShortcut = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && ["c", "x"].includes(event.key.toLowerCase()) && isLockedTarget(event.target)) {
-        event.preventDefault();
-      }
-    };
-    document.addEventListener("copy", preventClipboard, true);
-    document.addEventListener("cut", preventClipboard, true);
-    document.addEventListener("keydown", preventShortcut, true);
-    return () => {
-      document.removeEventListener("copy", preventClipboard, true);
-      document.removeEventListener("cut", preventClipboard, true);
-      document.removeEventListener("keydown", preventShortcut, true);
-    };
-  }, [perfectedCopyLocked]);
-
-  // Scanner generations are persisted server-side. A reload receives only the
-  // preview for free accounts; after a purchase the same request returns full text.
-  useEffect(() => {
-    if (!user || !p) return;
+    if (!user) return;
     let cancelled = false;
     customFetch(`/api/perfect/latest?type=${mode}`)
       .then((res: any) => {
         if (cancelled) return;
-        if (res?.locked && typeof res.preview === "string") {
-          setPerfectedText(res.preview);
-          setPerfectedLocked(true);
-          setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
-        } else if (freeUser && typeof res?.letter === "string") {
-          setPerfectedText(createClientPreview(res.letter));
-          setPerfectedLocked(true);
-          setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
-        } else if (typeof res?.letter === "string") {
+        if (typeof res?.letter === "string") {
           setPerfectedText(res.letter);
           setPerfectedLocked(false);
           setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
@@ -165,18 +104,13 @@ export default function Scanner() {
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [user, p, freeUser, mode]);
+  }, [user, mode]);
 
   async function goWizard() {
-    // Prefer the source text, but keep the improved result as a fallback when
-    // the scanner view was populated only by a previous perfection run.
-    // Never use a server-locked perfected preview as Wizard input. The Wizard
-    // places imported text into a normal textarea, where it would become
-    // copyable. An original scanner/import text is safe; a paid full result is
-    // already allowed to be copied and can still be used here.
+    // Prefer the source text, but keep the improved result as a fallback.
     const wizardText = cvText.trim().length >= 30
       ? cvText
-      : (!perfectedLocked ? (perfectedText || "") : "");
+      : (perfectedText || "");
     if (wizardText.trim().length < 30) {
       setErrorMsg(t("scanner.tooShort"));
       return;
@@ -210,17 +144,7 @@ export default function Scanner() {
           language: i18n.resolvedLanguage || "de",
         }),
       });
-      if (res?.locked && typeof res.preview === "string") {
-        setPerfectedText(res.preview);
-        setPerfectedLocked(true);
-        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
-        setResult(null);
-      } else if (freeUser && typeof res?.letter === "string") {
-        setPerfectedText(createClientPreview(res.letter));
-        setPerfectedLocked(true);
-        setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
-        setResult(null);
-      } else if (typeof res?.letter === "string") {
+      if (typeof res?.letter === "string") {
         setCvText(res.letter);
         setPerfectedText(res.letter);
         setPerfectedLocked(false);
@@ -235,9 +159,7 @@ export default function Scanner() {
       const code = e?.data?.error;
       setErrorMsg(code === "daily_limit_reached"
         ? t("scanner.dailyLimit")
-        : code === "perfect_limit_reached"
-          ? t("scanner.perfectLimit")
-          : code === "busy_try_again"
+        : code === "busy_try_again"
             ? t("scanner.busyError")
             : t("scanner.perfectError"));
     } finally {
@@ -246,7 +168,7 @@ export default function Scanner() {
   }
 
   async function copyPerfectedText() {
-    if (perfectedCopyLocked || !perfectedText) return;
+    if (!perfectedText) return;
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(perfectedText);
@@ -270,7 +192,7 @@ export default function Scanner() {
   }
 
   function usePerfectedText() {
-    if (perfectedCopyLocked || !perfectedText) return;
+    if (!perfectedText) return;
     setCvText(perfectedText);
     setErrorMsg("");
     setCopied(false);
@@ -367,27 +289,23 @@ export default function Scanner() {
             <div ref={perfectedTextRef} className="card" style={{ marginTop: 16, position: "relative", overflow: "hidden" }}>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>✨ {t("scanner.improvedTitle")}</div>
           <div
-                onCopy={perfectedCopyLocked ? blockCopy : undefined}
-                onCut={perfectedCopyLocked ? blockCopy : undefined}
-                style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", userSelect: perfectedCopyLocked ? "none" : undefined, WebkitUserSelect: perfectedCopyLocked ? "none" : undefined }}
+                style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}
               >
               {perfectedText}
             </div>
-            {!perfectedLocked && (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-                <button className="btn btn-g" onClick={copyPerfectedText}>
-                  📋 {copied ? t("scanner.copied") : t("scanner.copyImproved")}
-                </button>
-                <button className="btn btn-g" onClick={usePerfectedText}>
-                  ↩ {t("scanner.useImproved")}
-                </button>
-              </div>
-            )}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
+              <button className="btn btn-g" onClick={copyPerfectedText}>
+                📋 {copied ? t("scanner.copied") : t("scanner.copyImproved")}
+              </button>
+              <button className="btn btn-g" onClick={usePerfectedText}>
+                ↩ {t("scanner.useImproved")}
+              </button>
+            </div>
             {perfectedLocked && (
               <div style={{ marginTop: 12, textAlign: "center" }}>
                 <div style={{ height: 42, marginTop: -54, position: "relative", background: "linear-gradient(to bottom, transparent, var(--card, #fff))", pointerEvents: "none" }} />
-                <button className="btn btn-p" onClick={() => navigate("/pricing")}>
-                  🔒 {t("preview.unlockPerfected")}
+                <button className="btn btn-p" onClick={() => setPerfectedLocked(false)}>
+                  {t("scanner.useImproved")}
                 </button>
                 <p style={{ margin: "8px auto 0", maxWidth: 560, fontSize: 12.5, lineHeight: 1.55, color: "var(--muted)" }}>
                   {t("preview.unlockPerfectedHint")}

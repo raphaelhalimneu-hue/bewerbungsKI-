@@ -8,4 +8,5 @@
 
 export interface GenerateResult {
   result: string;
+  generationId: string;
 }

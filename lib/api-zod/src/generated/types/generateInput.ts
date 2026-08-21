@@ -11,4 +11,5 @@ export interface GenerateInput {
   type: GenerateInputType;
   systemPrompt: string;
   userPrompt: string;
+  batchId: string;
 }
