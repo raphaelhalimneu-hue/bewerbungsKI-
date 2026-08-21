@@ -11,7 +11,7 @@ export default function Pricing() {
   const { t } = useTranslation();
   const checkoutMutation = useCreateCheckout();
 
-  async function handleUpgrade(plan: "single" | "starter" | "premium" | "power" = "premium") {
+  async function handleUpgrade(plan: "single" | "power" = "single") {
     if (!user) { setShowAuthModal(true); return; }
     try {
       toast({ title: t("pricing.redirect") });
@@ -23,7 +23,6 @@ export default function Pricing() {
   }
 
   const freeFeats = [t("pricing.freeFeat1"), t("pricing.freeFeat2"), t("pricing.freeFeat3"), t("pricing.freeFeat4")];
-  const premFeats = [t("pricing.premFeat1"), t("pricing.premFeat6"), t("pricing.premFeat2"), t("pricing.premFeat3"), t("pricing.premFeat4"), t("pricing.premFeat5")];
   const powerFeats = [t("pricing.powerFeat1"), t("pricing.powerFeat2"), t("pricing.premFeat2"), t("pricing.premFeat4"), t("pricing.premFeat5")];
 
   return (
@@ -69,79 +68,7 @@ export default function Pricing() {
             </button>
           </div>
 
-          {/* Starter bundle */}
-          <div className="pc">
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 16 }}>{t("pricing.starter")}</div>
-            <div className="price-num">{t("pricing.starterPrice")}</div>
-            <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>{t("pricing.starterOneTime")}</div>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat1")}</li>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.starterFeat6")}</li>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat2")}</li>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat3")}</li>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat4")}</li>
-              <li style={{ display: "flex", gap: 10, fontSize: 14 }}><span style={{ color: "var(--ok)" }}>✓</span>{t("pricing.premFeat5")}</li>
-            </ul>
-            <button className="btn btn-s btn-full btn-lg" onClick={() => handleUpgrade("starter")} disabled={checkoutMutation.isPending}>
-              {checkoutMutation.isPending ? <span className="spin" /> : null}{t("pricing.buyStarter")}
-            </button>
-          </div>
-
-          {/* Premium */}
-          <div className="pc hot">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", letterSpacing: ".08em" }}>{t("pricing.premium")}</div>
-              <span className="tag tag-w">{t("pricing.popular")}</span>
-            </div>
-            <div className="price-num">{t("pricing.premiumPrice")}</div>
-            <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>{t("pricing.oneTime")}</div>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-              {premFeats.map(f => (
-                <li key={f} style={{ display: "flex", gap: 10, fontSize: 14 }}>
-                  <span style={{ color: "var(--ok)", flexShrink: 0 }}>✓</span>{f}
-                </li>
-              ))}
-            </ul>
-            {(() => {
-              const p = profile as any;
-              const isPremium = !!p?.is_premium;
-              const atLimit =
-                isPremium &&
-                typeof p?.documents_count === "number" &&
-                typeof p?.document_limit === "number" &&
-                p.documents_count >= p.document_limit;
-              if (isPremium && !atLimit) {
-                return (
-                  <div style={{ background: "#dcfce7", color: "var(--ok)", borderRadius: 10, padding: "12px 20px", textAlign: "center", fontWeight: 600, fontSize: 14 }}>
-                    {t("pricing.premiumActive")}
-                  </div>
-                );
-              }
-              return (
-                <>
-                  {atLimit && (
-                    <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 12, textAlign: "center" }}>
-                      {t("pricing.limitReachedHint")}
-                    </p>
-                  )}
-                  <button
-                    className="btn btn-p btn-full btn-lg"
-                    onClick={() => handleUpgrade("premium")}
-                    disabled={checkoutMutation.isPending}
-                  >
-                    {checkoutMutation.isPending ? <span className="spin" /> : null}
-                    {checkoutMutation.isPending
-                      ? t("pricing.loading")
-                      : atLimit
-                        ? t("pricing.buyMore")
-                        : t("pricing.upgradeNow")}
-                  </button>
-                </>
-              );
-            })()}
-          </div>
-
-          {/* Power — 50 applications */}
+          {/* Unlimited applications */}
           <div className="pc">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", letterSpacing: ".08em" }}>{t("pricing.power")}</div>
