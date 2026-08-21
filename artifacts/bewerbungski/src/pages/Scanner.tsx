@@ -168,7 +168,10 @@ export default function Scanner() {
   }, [user, p, freeUser, mode]);
 
   async function goWizard() {
-    try { saveWizardPrefill(sessionStorage, cvText); } catch { /* ignore */ }
+    // Prefer the source text, but keep the improved result as a fallback when
+    // the scanner view was populated only by a previous perfection run.
+    const wizardText = cvText.trim().length >= 30 ? cvText : (perfectedText || "");
+    try { saveWizardPrefill(sessionStorage, wizardText); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (lastFile) {
       setWizardBusy(true);

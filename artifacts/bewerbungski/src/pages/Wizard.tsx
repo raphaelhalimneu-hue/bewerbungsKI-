@@ -499,6 +499,7 @@ function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setSh
         prefillHandled.current = true;
         setFtText(pre);
         if (user) {
+          setFtOpen(true);
           void importFreetext(pre);
         } else {
           setFtOpen(true);
