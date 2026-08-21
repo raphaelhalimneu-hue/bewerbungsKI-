@@ -7,9 +7,19 @@ import {
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isFreeAccount } from "../lib/freeLock";
+import { perfectedGenerationsTable } from "@workspace/db";
 
 const router = Router();
+
+async function hasPerfectedContent(userId: string, doc: any): Promise<boolean> {
+  if (doc.perfectedLetter || doc.perfectedCvHtml) return true;
+  const [generation] = await db
+    .select({ id: perfectedGenerationsTable.id })
+    .from(perfectedGenerationsTable)
+    .where(and(eq(perfectedGenerationsTable.documentId, doc.id), eq(perfectedGenerationsTable.userId, userId)))
+    .limit(1);
+  return Boolean(generation);
+}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const FONT = "Calibri";
@@ -215,7 +225,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       res.status(404).json({ error: "No CV stored" });
       return;
     }
-    if (!doc.bezahlt) {
+    if (!doc.bezahlt && await hasPerfectedContent(req.userId!, doc)) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
