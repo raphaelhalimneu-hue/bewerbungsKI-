@@ -106,7 +106,7 @@ router.post("/webhook/stripe", async (req, res) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
       if (userId) {
-        // premium = +10 applications (stackable); power = unlimited applications.
+        // single = +1 application; power = unlimited applications.
         // Idempotent: record the Stripe event id first; if it was already
         // processed (redelivery), the insert is a no-op and no credits are added.
         await db.transaction(async (tx) => {
@@ -129,11 +129,9 @@ router.post("/webhook/stripe", async (req, res) => {
               });
           } else {
             const creditPlan: CreditPlan =
-              session.metadata?.plan === "single" ||
-              session.metadata?.plan === "starter" ||
-              session.metadata?.plan === "premium"
+              session.metadata?.plan === "single"
                 ? session.metadata.plan
-                : "premium";
+                : "single";
             const credits = PLANS[creditPlan].credits;
             await tx
               .insert(profilesTable)
