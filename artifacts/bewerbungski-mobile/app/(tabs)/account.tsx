@@ -80,9 +80,9 @@ export default function AccountScreen() {
               <Text style={{ fontSize: 28 }}>⭐</Text>
               <Text style={s.upgradeTitle}>Premium freischalten</Text>
             </View>
-            <Text style={s.upgradeSub}>10 weitere Bewerbungen · 8 Sprachen · Alle Templates</Text>
+            <Text style={s.upgradeSub}>Unbegrenzt Bewerbungen · 8 Sprachen · Alle Templates</Text>
             <View style={[s.primaryBtn, { marginTop: 16 }]}>
-              <Text style={s.primaryBtnText}>9,99 € einmalig → Upgrade</Text>
+              <Text style={s.primaryBtnText}>19,99 € einmalig → Upgrade</Text>
             </View>
           </TouchableOpacity>
         )}
