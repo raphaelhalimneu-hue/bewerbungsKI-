@@ -326,6 +326,21 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 
     if (!existing) { res.status(404).json({ error: "Not found" }); return; }
 
+    const [profile] = await db
+      .select({
+        isPremium: profilesTable.isPremium,
+        isUnlimited: profilesTable.isUnlimited,
+        credits: profilesTable.credits,
+      })
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, req.userId!));
+    const freeUser = !profile
+      || (!profile.isPremium && !profile.isUnlimited && Number(profile.credits ?? 0) <= 0);
+    if (freeUser && (cv_html !== undefined || cv_json !== undefined || cover_letter !== undefined)) {
+      res.status(403).json({ error: "editing_requires_entitlement" });
+      return;
+    }
+
     const existingProfileData = (existing.profileData as Record<string, unknown>) || {};
     const updates: Record<string, any> = {};
     const sanitizedCvHtml = cv_html !== undefined ? sanitizeCvHtml(cv_html) : undefined;
