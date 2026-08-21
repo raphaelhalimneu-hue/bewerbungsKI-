@@ -294,6 +294,7 @@ PFLICHTREGELN:
       const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
+      let letterGenerationId = "";
       {
         const hasJobad = !!(form.jobad.title || form.jobad.description || form.jobad.company);
         setGenPhase(t("wizard.genLetter"));
@@ -345,6 +346,7 @@ Datum-Zeile EXAKT: "${(form.personal as any).city || "Ort"}, den ${today}"
 Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         } });
         letterText = letterRes.result;
+        letterGenerationId = letterRes.generationId;
       }
 
       // Save the profile while the initial free application is still open.
@@ -365,7 +367,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         coverLetter: letterText,
         generationBatchId: batchId,
         cvGenerationId: cvRes.generationId,
-        letterGenerationId: letterRes.generationId,
+        letterGenerationId,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
       } });
@@ -589,7 +591,7 @@ function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setSh
           </div>
           <textarea className="textarea" value={ftText} onChange={e => setFtText(e.target.value)} placeholder={t("wizard.freetext.placeholder")} style={{ minHeight: 170, marginBottom: 10 }} />
           <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" className="btn btn-p btn-sm" onClick={importFreetext} disabled={ftLoading || ftText.trim().length < 30}>
+            <button type="button" className="btn btn-p btn-sm" onClick={() => importFreetext()} disabled={ftLoading || ftText.trim().length < 30}>
               {ftLoading ? <><span className="spin" /> {t("wizard.freetext.importing")}</> : t("wizard.freetext.import")}
             </button>
             <button type="button" className="btn btn-g btn-sm" onClick={() => setFtOpen(false)}>{t("wizard.linkedin.cancel")}</button>
