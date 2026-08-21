@@ -66,20 +66,21 @@ export default function Preview() {
   // The API treats stale is_premium markers as unpaid. Mirror that rule here
   // so an old client status can never make a perfected full text visible.
   const freeUser = !!pAuth && !pAuth.is_unlimited && Number(pAuth.credits || 0) <= 0;
-  // Free accounts can read their saved document, but editing, download and
-  // print are paid-only. The server enforces the same rules.
+  // Free accounts can use the original document; only perfected content is protected.
   const documentLocked = !doc || !(doc as any).bezahlt;
-  const docxLocked = documentLocked;
+  const perfectedContentExists = Boolean(doc && ((doc as any).perfected_generation_id || (doc as any).perfected_letter || (doc as any).perfected_cv_html || (doc as any).perfected_profile));
+  const protectedPerfectedContent = documentLocked && perfectedContentExists;
+  const docxLocked = protectedPerfectedContent;
   const editLocked = false;
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
   void printUsed;
-  const cvPrintLocked = documentLocked;
-  const letterPrintLocked = documentLocked;
-  const pdfLocked = documentLocked;
+  const cvPrintLocked = protectedPerfectedContent;
+  const letterPrintLocked = protectedPerfectedContent;
+  const pdfLocked = protectedPerfectedContent;
   // Free users can read their originals, but server-locked perfected text is
   // only ever rendered as the shortened preview.
-  const letterCopyLocked = documentLocked;
-  const cvCopyLocked = documentLocked;
+  const letterCopyLocked = protectedPerfectedContent;
+  const cvCopyLocked = protectedPerfectedContent;
   const visibleLetter = editedLetter;
   const hasCv = Boolean(
     doc && (
@@ -261,7 +262,7 @@ export default function Preview() {
 
   // Block the browser print shortcut for free accounts as well as the visible print buttons.
   useEffect(() => {
-    if (!documentLocked) return;
+    if (!protectedPerfectedContent) return;
 
     const preventPrintShortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
@@ -273,7 +274,7 @@ export default function Preview() {
 
     document.addEventListener("keydown", preventPrintShortcut, true);
     return () => document.removeEventListener("keydown", preventPrintShortcut, true);
-  }, [documentLocked, navigate]);
+  }, [protectedPerfectedContent, navigate]);
 
   async function handleCreateLetter() {
     setCreatingLetter(true);
@@ -532,7 +533,7 @@ export default function Preview() {
   // Free accounts: one print per part — the popup is opened synchronously
   // (click context), then the server confirms the remaining allowance.
   async function consumePrint(kind: "cv_print" | "letter_print"): Promise<boolean> {
-    if (!documentLocked) return true;
+    if (!protectedPerfectedContent) return true;
     try {
       const r: any = await customFetch(`/api/documents/${params.id}/export-event`, {
         method: "POST",
@@ -552,7 +553,7 @@ export default function Preview() {
     let el: HTMLElement | null = cvRef.current;
     // Free accounts: the screen may show the perfected version, but prints
     // always use the stored ORIGINAL (perfected output is paid-only).
-    if (documentLocked && (doc as any)?.cv_html) {
+    if (protectedPerfectedContent && (doc as any)?.cv_html) {
       const tmp = document.createElement("div");
       tmp.innerHTML = (doc as any).cv_html;
       el = tmp;
