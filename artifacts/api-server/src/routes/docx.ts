@@ -146,18 +146,23 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    const storedProfileData = (doc.profileData as any) || {};
+    if (storedProfileData.documentTypes?.cv === false || (!doc.cvHtml && !storedProfileData.cv_json)) {
+      res.status(404).json({ error: "No CV stored" });
+      return;
+    }
     if (!doc.bezahlt) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
 
-    const pd = (doc.profileData as any) || {};
+    const pd = storedProfileData;
     const p = pd.personal || {};
     const experience: any[] = pd.experience || [];
     const education: any[] = pd.education || [];
     const skills: any[] = pd.skills || [];
     const languages: any[] = pd.languages || [];
-    const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Name";
+    const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim();
     const theme = themeFor(doc.template, (doc.profileData as any));
     const H = headingsFor(doc.profileData as any);
 
@@ -173,11 +178,13 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
     children.push(topBar(theme));
 
     // ── Header ──
-    children.push(new Paragraph({
-      children: [new TextRun({ text: cleanText(fullName.toUpperCase()), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
-    }));
+    if (fullName) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: cleanText(fullName.toUpperCase()), bold: true, size: 40, font: FONT, characterSpacing: 40, color: theme.accent })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 60 },
+      }));
+    }
     if (p.title) {
       children.push(new Paragraph({
         children: [muted(p.title, 22)],
@@ -213,6 +220,17 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
         const descLines: string[] = exp.description
           ? exp.description.split(/\n/).map((l: string) => l.trim()).filter(Boolean)
           : [];
+        const detailParagraphs = [
+          ...(exp.position ? [new Paragraph({ children: [bold(exp.position, 22)], spacing: { before: 140, after: 30 } })] : []),
+          ...(companyLine ? [new Paragraph({ children: [muted(companyLine, 20)], spacing: { after: 50 } })] : []),
+          ...descLines.map((line: string) =>
+            new Paragraph({
+              children: [normal("• " + line.replace(/^[-•·]\s*/, ""), 20)],
+              spacing: { after: 30 },
+              indent: { left: 120 },
+            })
+          ),
+        ];
 
         children.push(new Table({
           width: { size: 10106, type: WidthType.DXA },
@@ -223,17 +241,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
             new TableCell({
               width: { size: 7883, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
-              children: [
-                new Paragraph({ children: [bold(exp.position || "Position", 22)], spacing: { before: 140, after: 30 } }),
-                new Paragraph({ children: [muted(companyLine, 20)], spacing: { after: 50 } }),
-                ...descLines.map((line: string) =>
-                  new Paragraph({
-                    children: [normal("• " + line.replace(/^[-•·]\s*/, ""), 20)],
-                    spacing: { after: 30 },
-                    indent: { left: 120 },
-                  })
-                ),
-              ],
+              children: detailParagraphs.length ? detailParagraphs : [new Paragraph({})],
             }),
             new TableCell({
               width: { size: 2223, type: WidthType.DXA },
@@ -255,6 +263,10 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
         // institution field (not school)
         const institutionLine = [edu.institution, edu.city].filter(Boolean).join(", ");
         const degreeLine = [edu.degree, edu.field].filter(Boolean).join(" – ");
+        const detailParagraphs = [
+          ...(degreeLine ? [new Paragraph({ children: [bold(degreeLine, 22)], spacing: { before: 140, after: 30 } })] : []),
+          ...(institutionLine ? [new Paragraph({ children: [muted(institutionLine, 20)], spacing: { after: 80 } })] : []),
+        ];
 
         children.push(new Table({
           width: { size: 10106, type: WidthType.DXA },
@@ -265,10 +277,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
             new TableCell({
               width: { size: 7883, type: WidthType.DXA },
               borders: NO_BORDERS_CELL,
-              children: [
-                new Paragraph({ children: [bold(degreeLine || "Abschluss", 22)], spacing: { before: 140, after: 30 } }),
-                new Paragraph({ children: [muted(institutionLine, 20)], spacing: { after: 80 } }),
-              ],
+              children: detailParagraphs.length ? detailParagraphs : [new Paragraph({})],
             }),
             new TableCell({
               width: { size: 2223, type: WidthType.DXA },
@@ -300,20 +309,22 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       children.push(sectionHeading(H.languages, theme));
       for (const lang of languages) {
         children.push(new Paragraph({
-          children: [bold(lang.language || "", 21), normal(`  —  ${lang.level || ""}`, 21)],
+          children: [bold(lang.language || "", 21), ...(lang.level ? [normal(`  —  ${lang.level}`, 21)] : [])],
           spacing: { after: 60 },
         }));
       }
     }
 
     // ── Signature line ──
-    const city = p.city || "Ort";
+    const city = p.city || "";
     const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
     children.push(new Paragraph({
-      children: [normal(String(pd?.language || "de") === "de" ? `${city}, den ${today}` : `${city}, ${today}`, 20)],
+      children: [normal(city ? (String(pd?.language || "de") === "de" ? `${city}, den ${today}` : `${city}, ${today}`) : today, 20)],
       spacing: { before: 400, after: 40 },
     }));
-    children.push(new Paragraph({ children: [muted(fullName, 19)], spacing: { after: 0 } }));
+    if (fullName) {
+      children.push(new Paragraph({ children: [muted(fullName, 19)], spacing: { after: 0 } }));
+    }
 
     const wordDoc = new Document({
       sections: [{ properties: { page: { margin: { top: 720, right: 900, bottom: 720, left: 900 } } }, children }],
@@ -360,12 +371,17 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
       .where(and(eq(documentsTable.id, req.params.id), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    const storedProfileData = (doc.profileData as any) || {};
+    if (storedProfileData.documentTypes?.cv === false || (!doc.cvHtml && !storedProfileData.cv_json)) {
+      res.status(404).json({ error: "No CV stored" });
+      return;
+    }
     if (!doc.bezahlt) {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
 
-    const cv = req.body?.cv_json || (doc.profileData as any)?.cv_json;
+    const cv = req.body?.cv_json || storedProfileData.cv_json;
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
     if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
 

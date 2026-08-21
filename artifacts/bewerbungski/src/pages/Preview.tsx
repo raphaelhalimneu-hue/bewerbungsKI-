@@ -75,6 +75,16 @@ export default function Preview() {
   const letterCopyLocked = documentLocked;
   const cvCopyLocked = documentLocked;
   const visibleLetter = editedLetter;
+  const hasCv = Boolean(
+    doc && (
+      (typeof (doc as any).cv_html === "string" && (doc as any).cv_html.trim()) ||
+      (doc as any).cv_json
+    ),
+  );
+  const hasLetter = Boolean(
+    (typeof editedLetter === "string" && editedLetter.trim()) ||
+    (doc && typeof (doc as any).cover_letter === "string" && (doc as any).cover_letter.trim()),
+  );
   const [aiError, setAiError] = useState("");
   const [creatingLetter, setCreatingLetter] = useState(false);
   const [letterError, setLetterError] = useState(false);
@@ -138,7 +148,10 @@ export default function Preview() {
     setCreatingLetter(true);
     setLetterError(false);
     try {
-      const resp = await customFetch<{ result: string }>(`/api/documents/${params.id}/cover-letter`, { method: "POST" });
+      const resp = await customFetch<{ result: string }>(`/api/documents/${params.id}/cover-letter`, {
+        method: "POST",
+        body: JSON.stringify({ confirmFromCv: true }),
+      });
       if (resp?.result) setEditedLetter(resp.result);
       else setLetterError(true);
     } catch (e) {
@@ -300,6 +313,8 @@ export default function Preview() {
       setCvPerfectedApplied(true);
     } else if (d.cv_html) {
       cvRef.current.innerHTML = d.cv_html;
+    } else {
+      cvRef.current.innerHTML = "";
     }
   }, [(doc as any)?.id, (doc as any)?.perfected_cv_html, freeUser]);
 
@@ -525,25 +540,31 @@ export default function Preview() {
                 {(doc as any).name}
               </h2>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
-                {freeUser && (
+                 {freeUser && (
                   <>
-                    <button className="btn btn-p btn-sm" onClick={() => (cvPrintLocked ? navigate("/pricing") : printCv())} style={cvPrintLocked ? { opacity: 0.6 } : undefined}>
-                      {cvPrintLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.cv")}
-                    </button>
-                    {((doc as any)?.cover_letter || editedLetter) && (
+                     {hasCv && (
+                       <button className="btn btn-p btn-sm" onClick={() => (cvPrintLocked ? navigate("/pricing") : printCv())} style={cvPrintLocked ? { opacity: 0.6 } : undefined}>
+                         {cvPrintLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.cv")}
+                       </button>
+                     )}
+                     {hasLetter && (
                       <button className="btn btn-p btn-sm" onClick={() => (letterPrintLocked ? navigate("/pricing") : printLetter())} style={letterPrintLocked ? { opacity: 0.6 } : undefined}>
                         {letterPrintLocked ? "🔒 " : ""}{t("preview.print")} · {t("preview.coverLetter")}
                       </button>
                     )}
                   </>
                 )}
+                {hasCv && (
+                  <>
                   <button className="btn btn-p btn-sm" onClick={handleDownloadCvPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
                     {exporting === "cv-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{pdfLocked ? "🔒 " : ""}{t("preview.downloadCv")}</>}
-                </button>
-                <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
-                  {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV .docx</>}
-                </button>
-                {((doc as any)?.cover_letter || editedLetter) && (
+                   </button>
+                   <button className="btn btn-g btn-sm" onClick={() => downloadDocx("cv")} disabled={exporting !== null} title="Als Word-Datei (.docx) herunterladen" style={{ minWidth: 120 }}>
+                     {exporting === "cv-docx" ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV .docx</>}
+                   </button>
+                  </>
+                )}
+                 {hasLetter && (
                   <>
                     <button className="btn btn-p btn-sm" onClick={handleDownloadLetterPdf} disabled={exporting !== null} style={{ minWidth: 140 }}>
                       {exporting === "letter-pdf" ? <><span className="spin" /> {t("preview.creatingPdf")}</> : <>{pdfLocked ? "🔒 " : ""}{t("preview.downloadLetter")}</>}
@@ -569,7 +590,7 @@ export default function Preview() {
           </div>
         )}
 
-        {doc && (doc as any).profile_data?.atsScore?.score != null && (() => {
+        {doc && hasCv && (doc as any).profile_data?.atsScore?.score != null && (() => {
           const ats = (doc as any).profile_data.atsScore;
           const col = ats.score >= 70 ? "#059669" : ats.score >= 45 ? "#d97706" : "#dc2626";
           return (
@@ -594,13 +615,13 @@ export default function Preview() {
           );
         })()}
 
-        {doc && (
+        {doc && (hasCv || hasLetter) && (
           <div className="card" style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <button className="btn btn-p btn-sm" onClick={() => runCheck()} disabled={checking || perfecting}>
                 {checking ? <><span className="spin" /> {t("preview.checking")}</> : <>🔎 {t("preview.checkBtn")}</>}
               </button>
-              {((doc as any)?.cover_letter || editedLetter) && (
+              {hasLetter && (
                 <button
                   className="btn btn-g btn-sm"
                   onClick={runPerfect}
@@ -648,7 +669,7 @@ export default function Preview() {
 
         {doc && (
           <>
-            <div style={{ marginBottom: 28 }}>
+            {hasCv && <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.cv")}</h3>
                 <button
@@ -718,9 +739,9 @@ export default function Preview() {
                   />
                 </div>
               )}
-            </div>
+            </div>}
 
-            {!((doc as any)?.cover_letter || editedLetter) && (
+            {hasCv && !hasLetter && (
               <div className="card" style={{ border: "1px dashed var(--border)", borderRadius: 14, padding: 24, textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--fd)", fontSize: 17, fontWeight: 700, marginBottom: 6 }}>
                   ✉️ {t("preview.noLetterTitle")}
@@ -737,7 +758,7 @@ export default function Preview() {
               </div>
             )}
 
-            {((doc as any)?.cover_letter || editedLetter) && (
+            {hasLetter && (
               <div ref={letterRef}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <h3 style={{ fontFamily: "var(--fd)", fontSize: 18, fontWeight: 700 }}>{t("preview.coverLetter")}</h3>

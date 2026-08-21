@@ -221,7 +221,7 @@
     "perfectDone": "Ön yazı iyileştirildi ve kaydedildi",
     "changes": "Neler iyileştirildi",
     "noLetterTitle": "Henüz ön yazı yok",
-    "noLetterText": "Bu belge için henüz bir ön yazı oluşturulmadı. Tek tıkla şimdi oluşturun — otomatik olarak kaydedilir.",
+    "noLetterText": "Bu özgeçmiş için henüz bir ön yazı yok. Tıklayarak, ön yazının yalnızca mevcut özgeçmiş verileriyle oluşturulmasını onaylarsınız. Eksik bilgiler eklenmez.",
     "createLetterNow": "✉️ Ön yazıyı şimdi oluştur",
     "creatingLetter": "Ön yazı oluşturuluyor …",
     "letterCreateError": "Ön yazı oluşturulamadı. Lütfen tekrar deneyin.",
@@ -415,7 +415,9 @@
       "toneKreativ": "Yaratıcı",
       "toneFormellDesc": "Klasik, profesyonel",
       "toneModernDesc": "Net, doğrudan",
-      "toneKreativDesc": "Kişisel, anlatısal"
+      "toneKreativDesc": "Kişisel, anlatısal",
+      "importedCvOnly": "Yalnızca özgeçmiş oluşturulacak. Özgeçmiş bilgilerinden bir ön yazı uydurulmayacak.",
+      "importedLetterOnly": "Yalnızca aktarılan ön yazı kaydedilecek. Bundan bir özgeçmiş uydurulmayacak."
     },
     "premiumLimit": "Limite ulaşıldı: tüm başvurular kullanıldı. Fiyatlandırma sayfasından yeni bir 10'luk paket satın al.",
     "lookup": {
@@ -455,7 +457,12 @@
       "import": "Yapay zeka doldursun",
       "importing": "Yapay zeka analiz ediyor…",
       "success": "Veriler uygulandı! Lütfen alanları kontrol edin.",
-      "error": "Analiz başarısız oldu. Lütfen tekrar deneyin."
+      "error": "Analiz başarısız oldu. Lütfen tekrar deneyin.",
+      "documentType": "Aktarılan metin hangi belge türü?",
+      "cv": "Özgeçmiş",
+      "letter": "Ön yazı",
+      "cvHint": "Yalnızca özgeçmiş oluşturulur; otomatik ön yazı uydurulmaz.",
+      "letterHint": "Metin ön yazı olarak kaydedilir; bundan özgeçmiş uydurulmaz."
     }
   },
   "notFound": {

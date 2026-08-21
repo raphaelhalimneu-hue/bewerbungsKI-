@@ -222,7 +222,7 @@
     "perfectDone": "Bewerbung verbessert und gespeichert",
     "changes": "Das wurde verbessert",
     "noLetterTitle": "Noch keine Bewerbung vorhanden",
-    "noLetterText": "Zu diesem Dokument wurde noch keine Bewerbung erstellt. Erstelle es jetzt mit einem Klick — es wird automatisch gespeichert.",
+    "noLetterText": "Zu diesem Lebenslauf gibt es noch kein Anschreiben. Mit dem Klick bestätigst du, dass ein Anschreiben ausschließlich aus den vorhandenen Lebenslaufdaten erstellt wird. Fehlende Fakten werden nicht ergänzt.",
     "createLetterNow": "✉️ Bewerbung jetzt erstellen",
     "creatingLetter": "Bewerbung wird erstellt …",
     "letterCreateError": "Die Bewerbung konnte nicht erstellt werden. Bitte versuche es erneut.",
@@ -458,7 +458,9 @@
       "toneKreativ": "Kreativ",
       "toneFormellDesc": "Klassisch, DIN 5008, seriös",
       "toneModernDesc": "Klar, direkt, ohne Floskeln",
-      "toneKreativDesc": "Persönlich, erzählerisch, individuell"
+      "toneKreativDesc": "Persönlich, erzählerisch, individuell",
+      "importedCvOnly": "Es wird nur ein Lebenslauf erstellt. Eine Bewerbung wird nicht aus den Lebenslaufdaten erfunden.",
+      "importedLetterOnly": "Es wird nur die übernommene Bewerbung gespeichert. Ein Lebenslauf wird daraus nicht erfunden."
     },
     "premiumLimit": "Limit erreicht: Alle Bewerbungen verbraucht. Kaufe auf der Preise-Seite ein weiteres 10er-Paket.",
     "lookup": {
@@ -498,7 +500,12 @@
       "import": "KI ausfüllen lassen",
       "importing": "KI analysiert…",
       "success": "Daten übernommen! Bitte prüfe die Felder.",
-      "error": "Analyse fehlgeschlagen. Bitte erneut versuchen."
+      "error": "Analyse fehlgeschlagen. Bitte erneut versuchen.",
+      "documentType": "Was ist der übernommene Text?",
+      "cv": "Lebenslauf",
+      "letter": "Bewerbung / Anschreiben",
+      "cvHint": "Es wird nur ein Lebenslauf erstellt. Ein Anschreiben wird nicht automatisch erfunden.",
+      "letterHint": "Der Text wird als Anschreiben gespeichert. Daraus wird kein Lebenslauf erfunden."
     }
   },
   "notFound": {

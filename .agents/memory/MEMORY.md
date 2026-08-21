@@ -4,7 +4,7 @@
 
 - [BewerbungsKI i18n decisions](i18n-decisions.md) — UI in 8 languages incl. RTL Arabic; applications default to German but language is selectable (all 8) since 2026-08-11; AI prompts stay German-instructed.
 - [Railway deploy method](railway-deploy.md) — tar-ball upload via backboard GraphQL API; multipart and CLI do NOT work with the workspace token.
-- [Custom domain bewerbungski.com](custom-domain.md) — Strato CNAME only (no TXT); stuck Railway certs fixed by delete+recreate, which changes the CNAME target.
+- [Custom domain bewerbungski.com](custom-domain.md) — www uses Strato CNAME + Railway TXT verification; apex depends on Strato HTTPS redirect and can fail separately.
 - [AI provider](groq-provider.md) — generation runs on Claude (claude-sonnet-4-5) since 2026-08-11; errors usually mean empty Anthropic credit.
 - [Pricing model](pricing-model.md) — eine kostenlose Bewerbung, danach alle App-Funktionen serverseitig gesperrt bis zum Kauf; 9,99 € einmalig für 10 weitere.
 - [Briefkopf-Vorlagen](letterhead-templates.md) — 19 user-designte PNG-Briefköpfe ersetzen die alte 14er-Auswahl (2026-08-17); alte IDs bleiben für Bestandsdokumente renderbar; PDF-Puppeteer erlaubt nur /letterheads/*.png von Disk.

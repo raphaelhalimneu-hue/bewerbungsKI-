@@ -164,6 +164,26 @@ describe("POST /documents/:id/cover-letter", () => {
     expect(state.docs[0].coverLetter).toBe(res.body.result);
   });
 
+  it("requires explicit confirmation before generating a letter from an imported CV", async () => {
+    const profileData = {
+      ...makeDoc().profileData,
+      documentTypes: { cv: true, letter: false },
+    };
+    state.docs = [makeDoc({ id: "doc-cv-only", profileData })];
+
+    const blocked = await request(app).post("/api/documents/doc-cv-only/cover-letter").set(auth);
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.error).toBe("cover_letter_confirmation_required");
+    expect(state.claudeCalls).toBe(0);
+
+    const confirmed = await request(app)
+      .post("/api/documents/doc-cv-only/cover-letter")
+      .set(auth)
+      .send({ confirmFromCv: true });
+    expect(confirmed.status).toBe(200);
+    expect(state.claudeCalls).toBe(1);
+  });
+
   it("is idempotent: returns the existing letter without a new AI call", async () => {
     state.docs = [makeDoc({ id: "doc-idem", coverLetter: "Bereits vorhanden" })];
     const res = await request(app).post("/api/documents/doc-idem/cover-letter").set(auth);

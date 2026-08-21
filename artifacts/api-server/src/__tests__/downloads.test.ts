@@ -11,6 +11,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
+import JSZip from "jszip";
 
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
@@ -74,6 +75,7 @@ function seedFullDoc() {
     profileData: PROFILE_DATA,
     coverLetter: COVER_LETTER,
     cvHtml: CV_HTML,
+    bezahlt: true,
   });
 }
 
@@ -134,6 +136,75 @@ describe("downloads with special characters in document name", () => {
     expect(body.length).toBeGreaterThan(1000);
     // DOCX files are ZIP archives → magic bytes "PK"
     expect(body.subarray(0, 2).toString("latin1")).toBe("PK");
+  });
+
+  it("cv.docx omits fact-like placeholders when imported CV data is sparse", async () => {
+    const doc = seedDoc({
+      name: TRICKY_NAME,
+      cvHtml: "<div>CV</div>",
+      bezahlt: true,
+      profileData: {
+        documentTypes: { cv: true, letter: false },
+        personal: {},
+        experience: [{ company: "ACME", position: "", description: "" }],
+        education: [{ institution: "Berufsschule", degree: "", field: "" }],
+        skills: [],
+        languages: [{ language: "Deutsch", level: "" }],
+      },
+    });
+    const res = await request(app)
+      .get(`/api/documents/${doc.id}/download/cv.docx`)
+      .set("Authorization", "Bearer test-token")
+      .buffer(true)
+      .parse((response, cb) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => cb(null, Buffer.concat(chunks)));
+      });
+
+    expect(res.status).toBe(200);
+    const zip = await JSZip.loadAsync(res.body as Buffer);
+    const xml = await zip.file("word/document.xml")!.async("string");
+    const visibleText = [...xml.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)]
+      .map((match) => match[1])
+      .join(" ");
+    expect(visibleText).toContain("ACME");
+    expect(visibleText).toContain("Berufsschule");
+    expect(visibleText).not.toMatch(/\b(Name|Position|Abschluss|Ort)\b/);
+  });
+
+  it("editor CV DOCX endpoint rejects a letter-only imported document", async () => {
+    const doc = seedDoc({
+      name: TRICKY_NAME,
+      cvHtml: null,
+      coverLetter: COVER_LETTER,
+      bezahlt: true,
+      profileData: {
+        documentTypes: { cv: false, letter: true },
+        personal: {},
+        cv_json: null,
+      },
+    });
+
+    const res = await request(app)
+      .post(`/api/documents/${doc.id}/download/cv.docx`)
+      .set("Authorization", "Bearer test-token")
+      .send({
+        cv_json: {
+          name: "Erfundener Name",
+          title: "Erfundene Position",
+          contact: "",
+          profile: "",
+          experience: [],
+          education: [],
+          skills: [],
+          languages: [],
+          signature: "",
+        },
+      });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe("No CV stored");
   });
 
   it("cover-letter.docx → 200, valid DOCX, ASCII-safe headers", async () => {
@@ -203,7 +274,7 @@ describe("downloads with special characters in document name", () => {
   });
 
   it("cover-letter.pdf → 404 when no cover letter is stored", async () => {
-    const doc = seedDoc({ name: TRICKY_NAME, profileData: PROFILE_DATA, coverLetter: "" });
+    const doc = seedDoc({ name: TRICKY_NAME, profileData: PROFILE_DATA, coverLetter: "", bezahlt: true });
     const res = await request(app)
       .get(`/api/documents/${doc.id}/download/cover-letter.pdf`)
       .set("Authorization", "Bearer test-token");

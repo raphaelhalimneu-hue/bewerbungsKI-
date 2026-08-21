@@ -221,7 +221,7 @@
     "perfectDone": "List motywacyjny poprawiony i zapisany",
     "changes": "Co poprawiono",
     "noLetterTitle": "Brak listu motywacyjnego",
-    "noLetterText": "Do tego dokumentu nie utworzono jeszcze listu motywacyjnego. Utwórz go teraz jednym kliknięciem — zostanie zapisany automatycznie.",
+    "noLetterText": "To CV nie ma jeszcze listu motywacyjnego. Klikając, potwierdzasz utworzenie listu wyłącznie z istniejących danych CV. Brakujące fakty nie zostaną dodane.",
     "createLetterNow": "✉️ Utwórz list motywacyjny teraz",
     "creatingLetter": "Tworzenie listu motywacyjnego …",
     "letterCreateError": "Nie udało się utworzyć listu motywacyjnego. Spróbuj ponownie.",
@@ -415,7 +415,9 @@
       "toneKreativ": "Kreatywny",
       "toneFormellDesc": "Klasyczny, profesjonalny",
       "toneModernDesc": "Jasny, bezpośredni",
-      "toneKreativDesc": "Osobisty, narracyjny"
+      "toneKreativDesc": "Osobisty, narracyjny",
+      "importedCvOnly": "Zostanie utworzone tylko CV. List motywacyjny nie zostanie wymyślony na podstawie CV.",
+      "importedLetterOnly": "Zostanie zapisany tylko zaimportowany list. CV nie zostanie na jego podstawie wymyślone."
     },
     "premiumLimit": "Limit osiągnięty: wszystkie aplikacje wykorzystane. Kup kolejny pakiet 10 na stronie cennika.",
     "lookup": {
@@ -455,7 +457,12 @@
       "import": "Niech AI wypełni pola",
       "importing": "AI analizuje…",
       "success": "Dane zastosowane! Sprawdź pola.",
-      "error": "Analiza nie powiodła się. Spróbuj ponownie."
+      "error": "Analiza nie powiodła się. Spróbuj ponownie.",
+      "documentType": "Jakiego typu jest importowany tekst?",
+      "cv": "CV",
+      "letter": "List motywacyjny",
+      "cvHint": "Zostanie utworzone tylko CV; list nie będzie automatycznie wymyślany.",
+      "letterHint": "Tekst zostanie zapisany jako list; CV nie zostanie z niego wymyślone."
     }
   },
   "notFound": {

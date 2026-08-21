@@ -1,6 +1,7 @@
 import type { CustomStyle, FormData } from "./buildCVHTML";
 
 export type ScanMode = "cv" | "letter";
+export type WizardPrefill = { text: string; mode: ScanMode };
 
 export type SessionStorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -19,14 +20,49 @@ export function takeScanImport(storage: SessionStorageLike): { text: string; mod
   return { text, mode: storedMode === "letter" ? "letter" : "cv" };
 }
 
-export function saveWizardPrefill(storage: SessionStorageLike, text: string) {
-  storage.setItem("bk_prefill_text", text.trim());
+export function detectImportedDocumentType(text: string): ScanMode {
+  const normalized = text.toLowerCase();
+  const letterSignals = [
+    /sehr geehrte[rn]?/,
+    /hiermit bewerbe/,
+    /ich bewerbe mich/,
+    /mit freundlichen grüßen/,
+    /dear (sir|madam|hiring)/,
+    /cover letter/,
+    /sincerely/,
+  ];
+  const cvSignals = [
+    /berufserfahrung/,
+    /ausbildung/,
+    /lebenslauf/,
+    /kenntnisse/,
+    /curriculum vitae/,
+    /work experience/,
+    /education/,
+    /skills/,
+  ];
+  const letterScore = letterSignals.filter((pattern) => pattern.test(normalized)).length;
+  const cvScore = cvSignals.filter((pattern) => pattern.test(normalized)).length;
+  return letterScore > cvScore ? "letter" : "cv";
 }
 
-export function takeWizardPrefill(storage: SessionStorageLike): string | null {
+export function saveWizardPrefill(storage: SessionStorageLike, text: string, mode?: ScanMode) {
+  storage.setItem("bk_prefill_text", text.trim());
+  storage.setItem("bk_prefill_mode", mode || detectImportedDocumentType(text));
+}
+
+export function takeWizardPrefill(storage: SessionStorageLike): WizardPrefill | null {
   const text = storage.getItem("bk_prefill_text");
+  const storedMode = storage.getItem("bk_prefill_mode");
   storage.removeItem("bk_prefill_text");
-  return text && text.trim().length >= 30 ? text : null;
+  storage.removeItem("bk_prefill_mode");
+  if (!text || text.trim().length < 30) return null;
+  return {
+    text,
+    mode: storedMode === "letter" || storedMode === "cv"
+      ? storedMode
+      : detectImportedDocumentType(text),
+  };
 }
 
 export function saveWizardDesign(storage: SessionStorageLike, style: unknown): boolean {

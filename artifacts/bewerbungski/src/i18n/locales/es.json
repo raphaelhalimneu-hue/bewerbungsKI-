@@ -221,7 +221,7 @@
     "perfectDone": "Carta mejorada y guardada",
     "changes": "Qué se mejoró",
     "noLetterTitle": "Aún no hay carta de presentación",
-    "noLetterText": "Todavía no se ha creado una carta de presentación para este documento. Créala ahora con un clic — se guardará automáticamente.",
+    "noLetterText": "Este currículum aún no tiene carta de presentación. Al hacer clic, confirmas que se cree usando solo los datos existentes del currículum. No se añadirán datos que falten.",
     "createLetterNow": "✉️ Crear carta de presentación ahora",
     "creatingLetter": "Creando carta de presentación …",
     "letterCreateError": "No se pudo crear la carta de presentación. Inténtalo de nuevo.",
@@ -415,7 +415,9 @@
       "toneKreativ": "Creativo",
       "toneFormellDesc": "Clásico, profesional, tradicional",
       "toneModernDesc": "Claro, directo, sin frases vacías",
-      "toneKreativDesc": "Personal, narrativo, individual"
+      "toneKreativDesc": "Personal, narrativo, individual",
+      "importedCvOnly": "Solo se creará el currículum. No se inventará una carta a partir de sus datos.",
+      "importedLetterOnly": "Solo se guardará la carta importada. No se inventará un currículum a partir de ella."
     },
     "premiumLimit": "Límite alcanzado: todas las solicitudes usadas. Compra otro paquete de 10 en la página de precios.",
     "lookup": {
@@ -455,7 +457,12 @@
       "import": "Dejar que la IA lo complete",
       "importing": "La IA está analizando…",
       "success": "¡Datos aplicados! Revisa los campos.",
-      "error": "Error en el análisis. Inténtalo de nuevo."
+      "error": "Error en el análisis. Inténtalo de nuevo.",
+      "documentType": "¿Qué tipo de documento es el texto importado?",
+      "cv": "Currículum",
+      "letter": "Carta de presentación",
+      "cvHint": "Solo se creará el currículum; no se inventará una carta automáticamente.",
+      "letterHint": "El texto se guardará como carta; no se inventará un currículum a partir de él."
     }
   },
   "notFound": {

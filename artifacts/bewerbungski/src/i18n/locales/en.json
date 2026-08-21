@@ -222,7 +222,7 @@
     "perfectDone": "Cover letter improved and saved",
     "changes": "What was improved",
     "noLetterTitle": "No cover letter yet",
-    "noLetterText": "No cover letter has been created for this document yet. Create it now with one click — it will be saved automatically.",
+    "noLetterText": "This CV does not have a cover letter yet. By clicking, you confirm that a letter may be created using only the existing CV data. Missing facts will not be added.",
     "createLetterNow": "✉️ Create cover letter now",
     "creatingLetter": "Creating cover letter …",
     "letterCreateError": "The cover letter could not be created. Please try again.",
@@ -458,7 +458,9 @@
       "toneKreativ": "Creative",
       "toneFormellDesc": "Classic, professional, traditional",
       "toneModernDesc": "Clear, direct, no filler phrases",
-      "toneKreativDesc": "Personal, storytelling, individual"
+      "toneKreativDesc": "Personal, storytelling, individual",
+      "importedCvOnly": "Only a CV will be created. A cover letter will not be invented from the CV data.",
+      "importedLetterOnly": "Only the imported cover letter will be saved. A CV will not be invented from it."
     },
     "premiumLimit": "Limit reached: all applications used. Buy another 10-pack on the pricing page.",
     "lookup": {
@@ -498,7 +500,12 @@
       "import": "Let AI fill it in",
       "importing": "AI is analyzing…",
       "success": "Data applied! Please review the fields.",
-      "error": "Analysis failed. Please try again."
+      "error": "Analysis failed. Please try again.",
+      "documentType": "What type of document is this text?",
+      "cv": "CV / résumé",
+      "letter": "Cover letter",
+      "cvHint": "Only a CV will be created. A cover letter will not be invented automatically.",
+      "letterHint": "The text will be saved as a cover letter. No CV will be invented from it."
     }
   },
   "notFound": {

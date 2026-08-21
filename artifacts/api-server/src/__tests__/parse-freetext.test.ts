@@ -50,7 +50,7 @@ const MODEL_JSON = {
   ],
   skills: [
     { name: "Wartung & Instandhaltung", level: 90 },
-    { name: "Diagnose", level: "not-a-number" }, // must be normalized to default 80
+    { name: "Diagnose", level: "not-a-number" }, // unknown levels must stay unknown
   ],
   languages: [{ language: "Deutsch", level: "Muttersprache" }, { language: "" }],
   school: { type: "", name: "", city: "", year: "" },
@@ -129,10 +129,10 @@ describe("POST /api/parse-freetext", () => {
     expect(d.education[0].degree).toBe("Ausbildung zum KFZ-Mechatroniker");
     expect(d.school).toMatchObject({ type: "Realschulabschluss", name: "Realschule München", year: "2016" });
 
-    // skills: invalid level normalized to 80
+    // skills: an absent/invalid level must not be invented
     expect(d.skills).toEqual([
       { name: "Wartung & Instandhaltung", level: 90 },
-      { name: "Diagnose", level: 80 },
+      { name: "Diagnose", level: null },
     ]);
 
     // languages: empty entries dropped
@@ -142,14 +142,31 @@ describe("POST /api/parse-freetext", () => {
     expect(d.jobad).toMatchObject({ title: "Mechatroniker", company: "Auto AG" });
   });
 
-  it("success: strips markdown code fences from the model output", async () => {
-    mockAnthropicFetch(MODEL_JSON, (s) => "```json\n" + s + "\n```");
+  it("strips code fences and does not turn a school start year into a graduation year", async () => {
+    mockAnthropicFetch({
+      ...MODEL_JSON,
+      education: [{
+        institution: "Realschule",
+        city: "Berlin",
+        degree: "Realschulabschluss",
+        field: "",
+        grade: "",
+        start: "2018-01",
+        end: "",
+      }],
+      school: {},
+    }, (s) => "```json\n" + s + "\n```");
     const res = await request(app)
       .post("/api/parse-freetext")
       .set("Authorization", "Bearer test-token")
       .send({ text: LONG_TEXT });
     expect(res.status).toBe(200);
     expect(res.body.data.personal.firstName).toBe("Max");
+    expect(res.body.data.school).toMatchObject({
+      type: "Realschulabschluss",
+      name: "Realschule",
+      year: "",
+    });
   });
 
   it("500 parse_failed when the model returns invalid JSON", async () => {

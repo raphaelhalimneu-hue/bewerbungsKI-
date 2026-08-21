@@ -181,7 +181,7 @@ export default function Scanner() {
       setErrorMsg(t("scanner.tooShort"));
       return;
     }
-    try { saveWizardPrefill(sessionStorage, wizardText); } catch { /* ignore */ }
+    try { saveWizardPrefill(sessionStorage, wizardText, mode); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (lastFile) {
       setWizardBusy(true);

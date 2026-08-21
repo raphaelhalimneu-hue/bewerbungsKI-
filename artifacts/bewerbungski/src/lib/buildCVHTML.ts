@@ -5,7 +5,7 @@ export type PersonalData = {
 };
 export type Experience = { company: string; city: string; position: string; start: string; end: string; current: boolean; description: string; };
 export type Education = { institution: string; city: string; degree: string; field: string; grade: string; start: string; end: string; };
-export type Skill = { name: string; level: number; };
+export type Skill = { name: string; level: number | null; };
 export type Language = { language: string; level: string; };
 import { DECO, templateDeco, type TemplateId } from "@workspace/template-deco";
 export { DECO, templateDeco, TEMPLATE_IDS, type TemplateId } from "@workspace/template-deco";

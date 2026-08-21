@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyImportedStyle,
   buildAnalyzeRequest,
+  detectImportedDocumentType,
   saveScanImport,
   saveWizardDesign,
   saveWizardPrefill,
@@ -56,18 +57,25 @@ describe("Import session handoff", () => {
 
   it("passes Import text to Wizard's free-text import and consumes it", () => {
     const storage = memoryStorage();
-    saveWizardPrefill(storage, CV_TEXT);
+    saveWizardPrefill(storage, CV_TEXT, "cv");
 
-    expect(takeWizardPrefill(storage)).toBe(CV_TEXT);
+    expect(takeWizardPrefill(storage)).toEqual({ text: CV_TEXT, mode: "cv" });
     expect(storage.getItem("bk_prefill_text")).toBeNull();
+    expect(storage.getItem("bk_prefill_mode")).toBeNull();
   });
 
-  it("passes Scanner text to Wizard's free-text import and consumes it", () => {
+  it("keeps a cover letter classified as a cover letter on its way to the Wizard", () => {
     const storage = memoryStorage();
-    saveWizardPrefill(storage, CV_TEXT);
+    saveWizardPrefill(storage, LETTER_TEXT, "letter");
 
-    expect(takeWizardPrefill(storage)).toBe(CV_TEXT);
+    expect(takeWizardPrefill(storage)).toEqual({ text: LETTER_TEXT, mode: "letter" });
     expect(storage.getItem("bk_prefill_text")).toBeNull();
+    expect(storage.getItem("bk_prefill_mode")).toBeNull();
+  });
+
+  it("detects common CV and cover-letter structures for direct imports", () => {
+    expect(detectImportedDocumentType(CV_TEXT)).toBe("cv");
+    expect(detectImportedDocumentType(LETTER_TEXT)).toBe("letter");
   });
 
   it("uses imported design JSON as the custom template", () => {

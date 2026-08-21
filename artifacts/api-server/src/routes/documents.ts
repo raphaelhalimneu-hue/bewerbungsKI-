@@ -56,6 +56,7 @@ router.get("/documents", requireAuth, async (req: AuthenticatedRequest, res) => 
         job_company: documentsTable.jobCompany,
         created_at: documentsTable.createdAt,
         ats_score: sql`${documentsTable.profileData}->'atsScore'`,
+        has_cv: sql<boolean>`(${documentsTable.cvHtml} IS NOT NULL AND ${documentsTable.cvHtml} != '')`,
         has_cover_letter: sql<boolean>`(${documentsTable.coverLetter} IS NOT NULL AND ${documentsTable.coverLetter} != '')`,
       })
       .from(documentsTable)
@@ -73,15 +74,12 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
   try {
     const rawId = req.params.id;
     const documentId = Array.isArray(rawId) ? rawId[0] : rawId;
-    let [doc] = await db
+    const [doc] = await db
       .select()
       .from(documentsTable)
-      .where(
-        and(
-          eq(documentsTable.id, documentId),
-          eq(documentsTable.userId, req.userId!)
-        )
-      );
+      .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
+
+    const documentProfileData = (doc.profileData as any) || {};
 
     if (!doc) {
       res.status(404).json({ error: "Not found" });
@@ -138,17 +136,14 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
       const [promoted] = await db
         .update(documentsTable)
         .set({
-          coverLetter: pendingGeneration.fullText,
-          cvHtml: promotedCvHtml,
-          profileData: promotedProfileData,
+          coverLetter: doc.perfectedLetter,
+          cvHtml: doc.perfectedCvHtml || doc.cvHtml,
           perfectedLetter: null,
           perfectedCvHtml: null,
-          perfectedGenerationId: null,
         })
         .where(and(
           eq(documentsTable.id, doc.id),
           eq(documentsTable.userId, req.userId!),
-          eq(documentsTable.perfectedGenerationId, pendingGeneration.id),
         ))
         .returning();
       if (promoted) doc = promoted;
@@ -186,7 +181,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     const visiblePerfectedProfile = hasPerfectedGeneration && pendingGeneration?.fullProfile
       ? pendingGeneration.fullProfile
       : null;
-    const pd = (doc.profileData as any) || {};
+    const pd = documentProfileData;
     // A stale premium marker could previously let the browser save the
     // perfected profile straight into the original CV fields. When that
     // account is now correctly classified as free, replace that stored
@@ -329,7 +324,7 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
     if (cover_letter !== undefined) updates.coverLetter = cover_letter;
     if (cv_json !== undefined) {
       // Merge cv_json into profileData
-      const pd = (existing.profileData as any) || {};
+    const pd = documentProfileData;
       updates.profileData = { ...pd, cv_json };
     }
     if (perfected_letter !== undefined) updates.perfectedLetter = perfected_letter;
@@ -431,16 +426,8 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
       .select()
       .from(documentsTable)
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
-    if (!doc) { res.status(404).json({ error: "Not found" }); return; }
 
-    // Idempotent: existiert bereits ein Anschreiben, wird es zurückgegeben —
-    // keine erneute (kostenpflichtige) KI-Generierung.
-    if (doc.coverLetter && doc.coverLetter.trim() !== "") {
-      res.json({ result: doc.coverLetter, alreadyExisted: true });
-      return;
-    }
-
-    // Rate-Limit pro Nutzer
+    const documentProfileData = (doc.profileData as any) || {};
     const now = Date.now();
     const hist = (letterRegenHistory.get(req.userId!) || []).filter((t) => now - t < LETTER_REGEN_WINDOW_MS);
     if (hist.length >= LETTER_REGEN_MAX) {
@@ -469,7 +456,7 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
       return;
     }
 
-    const pd = (doc.profileData as any) || {};
+    const pd = documentProfileData;
     const personal = pd.personal || {};
     const jobad = pd.jobad || {};
     const experience: any[] = Array.isArray(pd.experience) ? pd.experience : [];
@@ -501,21 +488,23 @@ STRUKTUR (DIN 5008):
 8. Schluss: Gesprächseinladung, keine Floskeln
 9. „Mit freundlichen Grüßen" + Name
 
-Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen. 350–420 Wörter.`;
+    VERBINDLICH: Nutze nur Fakten, die in den folgenden Daten ausdrücklich stehen. Erfinde keine Arbeitgeber, Positionen, Tätigkeiten, Erfolge, Ausbildungen, Abschlüsse, Zeiträume, Kenntnisse, Sprachen oder persönlichen Angaben. Nutze nur so viele Wörter, wie die vorhandenen Fakten tragen.
+
+    Ausgabe: NUR der Anschreiben-Text, kein HTML, keine Erklärungen.`;
 
     const userPrompt = `Schreibe Anschreiben (Sprache: ${lang.name}):
 
 Bewerber: ${personal.firstName || ""} ${personal.lastName || ""}${personal.title ? ", " + personal.title : ""}
 Adresse Bewerber: ${[personal.address, `${personal.zip || ""} ${personal.city || ""}`.trim()].filter(Boolean).join(", ")}
-Stelle: ${hasJobad ? `${jobad.title || "Initiativbewerbung"} bei ${jobad.company || "dem Unternehmen"}` : `Initiativbewerbung als ${experience[0]?.position || personal.title || "Fachkraft"} (keine konkrete Stellenanzeige — schreibe ein überzeugendes Initiativ-Anschreiben passend zum Werdegang, Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${jobad.address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${jobad.address}` : ""}
+    Stelle: ${hasJobad ? `${jobad.title || "Initiativbewerbung"} bei ${jobad.company || "dem Unternehmen"}` : `Initiativbewerbung${experience[0]?.position || personal.title ? ` als ${experience[0]?.position || personal.title}` : ""} (keine konkrete Stellenanzeige — Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${jobad.address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${jobad.address}` : ""}
 Stellenbeschreibung: ${jobad.description || "nicht angegeben"}
 
 Erfahrung (aktuellste zuerst):
 ${experience.slice(0, 4).map((e) => `• ${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}${e.start ? " (" + String(e.start).slice(0, 7) + " – " + (e.current ? "heute" : String(e.end || "").slice(0, 7)) + ")" : ""}${e.description ? ": " + String(e.description).slice(0, 120) : ""}`).join("\n")}
 
-Kernkompetenzen: ${skills.slice(0, 10).map((s) => s.name).join(", ") || "aus Erfahrung ableiten"}
+    Kernkompetenzen: ${skills.slice(0, 10).map((s) => s.name).join(", ") || "nicht angegeben"}
 
-Datum-Zeile EXAKT: "${personal.city || "Ort"}, den ${today}"
+Datum-Zeile EXAKT: "${personal.city ? `${personal.city}, den ${today}` : today}"
 Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`;
 
     const callClaude = () =>

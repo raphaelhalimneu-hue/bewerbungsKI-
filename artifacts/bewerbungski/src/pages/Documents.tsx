@@ -138,24 +138,28 @@ export default function Documents() {
                     </div>
                     {!freeLocked && <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
                       {/* CV downloads */}
-                      <button
-                        className="btn btn-p btn-sm"
-                        disabled={busy}
-                        onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cv.pdf`, `${safeName(doc)} – Lebenslauf.pdf`, `${doc.id}-cv-pdf`)}
-                        title={t("docs.downloadCvPdf")}
-                        style={{ fontSize: 12 }}
-                      >
-                        {downloading === `${doc.id}-cv-pdf` ? <><span className="spin" /> PDF…</> : <>⬇ CV PDF</>}
-                      </button>
-                      <button
-                        className="btn btn-g btn-sm"
-                        disabled={busy}
-                        onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cv.docx`, `${safeName(doc)} – Lebenslauf.docx`, `${doc.id}-cv-docx`)}
-                        title={t("docs.downloadCvDocx")}
-                        style={{ fontSize: 12 }}
-                      >
-                        {downloading === `${doc.id}-cv-docx` ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV DOCX</>}
-                      </button>
+                      {doc.has_cv !== false && (
+                        <>
+                          <button
+                            className="btn btn-p btn-sm"
+                            disabled={busy}
+                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cv.pdf`, `${safeName(doc)} – Lebenslauf.pdf`, `${doc.id}-cv-pdf`)}
+                            title={t("docs.downloadCvPdf")}
+                            style={{ fontSize: 12 }}
+                          >
+                            {downloading === `${doc.id}-cv-pdf` ? <><span className="spin" /> PDF…</> : <>⬇ CV PDF</>}
+                          </button>
+                          <button
+                            className="btn btn-g btn-sm"
+                            disabled={busy}
+                            onClick={() => downloadFile(doc.id, `/api/documents/${doc.id}/download/cv.docx`, `${safeName(doc)} – Lebenslauf.docx`, `${doc.id}-cv-docx`)}
+                            title={t("docs.downloadCvDocx")}
+                            style={{ fontSize: 12 }}
+                          >
+                            {downloading === `${doc.id}-cv-docx` ? <><span className="spin" /> Word…</> : <>{docxLocked ? "🔒" : "⬇"} CV DOCX</>}
+                          </button>
+                        </>
+                      )}
                       {/* Cover letter downloads (only if document has one) */}
                       {doc.has_cover_letter && (
                         <>

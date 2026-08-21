@@ -4,7 +4,7 @@ import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import { FileImportButton, type UploadedFile } from "../components/FileImportButton";
 import { customFetch } from "@workspace/api-client-react";
-import { saveScanImport, saveWizardDesign, saveWizardPrefill } from "../lib/importHandoff";
+import { detectImportedDocumentType, saveScanImport, saveWizardDesign, saveWizardPrefill } from "../lib/importHandoff";
 
 export default function ImportPage() {
   const { t } = useTranslation();
@@ -24,7 +24,7 @@ export default function ImportPage() {
   }
 
   async function goWizard() {
-    try { saveWizardPrefill(sessionStorage, text); } catch { /* ignore */ }
+    try { saveWizardPrefill(sessionStorage, text, detectImportedDocumentType(text)); } catch { /* ignore */ }
     // If a file (PDF/photo) was uploaded, copy its design too
     if (file) {
       setWizardBusy(true);

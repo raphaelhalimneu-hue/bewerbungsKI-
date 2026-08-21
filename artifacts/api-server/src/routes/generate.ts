@@ -33,7 +33,12 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       userPrompt: string;
       batchId: string;
     };
-    if (!batchId || !["cv", "letter"].includes(type)) {
+    if (
+      !batchId ||
+      !["cv", "letter"].includes(type) ||
+      typeof systemPrompt !== "string" ||
+      typeof userPrompt !== "string"
+    ) {
       res.status(400).json({ error: "Invalid generation request" });
       return;
     }
@@ -95,6 +100,10 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       return;
     }
 
+    const factualityGuard = type === "cv"
+      ? `VERBINDLICHE SICHERHEITSREGEL: Erstelle ausschließlich einen Lebenslauf. Verwende nur Fakten, die im Nutzertext ausdrücklich enthalten sind. Erfinde oder ergänze niemals Arbeitgeber, Positionen, Tätigkeiten, Erfolge, Ausbildung, Abschlüsse, Zeiträume, Kenntnisse, Sprachen oder persönliche Angaben. Fehlende Abschnitte bleiben leer; Lücken im Werdegang werden nicht erklärt oder gefüllt.`
+      : `VERBINDLICHE SICHERHEITSREGEL: Erstelle ausschließlich ein Bewerbungsanschreiben. Verwende nur Fakten, die im Nutzertext ausdrücklich enthalten sind. Erfinde oder ergänze niemals Arbeitgeber, Positionen, Tätigkeiten, Erfolge, Ausbildung, Abschlüsse, Zeiträume, Kenntnisse oder persönliche Angaben.`;
+
     const callClaude = () =>
       fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -106,7 +115,7 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
           max_tokens: 4096,
-          system: systemPrompt,
+          system: `${systemPrompt}\n\n${factualityGuard}`,
           messages: [{ role: "user", content: userPrompt }],
         }),
       });

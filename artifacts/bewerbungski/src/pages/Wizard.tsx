@@ -10,7 +10,7 @@ import { renderCVContent, letterheadUrl } from "../lib/buildCVHTML";
 import { computeAtsScore } from "../lib/atsScore";
 import { compressImageIfNeeded } from "../lib/compressImage";
 import { FileImportButton } from "../components/FileImportButton";
-import { applyImportedStyle, takeWizardDesign, takeWizardPrefill } from "../lib/importHandoff";
+import { applyImportedStyle, detectImportedDocumentType, takeWizardDesign, takeWizardPrefill, type ScanMode } from "../lib/importHandoff";
 
 const STEPS = [
   { id: "personal",   icon: "👤" },
@@ -99,6 +99,7 @@ export default function Wizard() {
   const [motivation, setMotivation] = useState("");
   const [achievement, setAchievement] = useState("");
   const [tone, setTone] = useState<"formell" | "modern" | "kreativ">("formell");
+  const [importedDocument, setImportedDocument] = useState<{ type: ScanMode; text: string } | null>(null);
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
@@ -217,7 +218,9 @@ export default function Wizard() {
 
   async function handleGenerate() {
     if (!user) { setPendingGenerate(true); setShowAuthModal(true); return; }
-    if (!form.personal.firstName || !form.personal.lastName) {
+    const generateCv = !importedDocument || importedDocument.type === "cv";
+    const generateLetter = !importedDocument || importedDocument.type === "letter";
+    if (generateCv && (!form.personal.firstName || !form.personal.lastName)) {
       toast({ title: t("wizard.nameRequired"), variant: "destructive" }); return;
     }
     setGenerating(true);
@@ -234,16 +237,19 @@ export default function Wizard() {
       };
       const lang = DOC_LANGS[docLang] || DOC_LANGS.de;
       const batchId = crypto.randomUUID();
-      const ts = styleFor(form);
-      const sz = (n: number) => Math.round(n * ts.scale * 10) / 10;
       const usePhoto = !!form.personal.photo && docLang !== "en";
       // Never send the base64 photo through the AI prompt — use a placeholder instead.
       const promptForm = { ...form, personal: { ...form.personal, photo: undefined } };
       const langInstr = docLang === "de" ? "" : ` WICHTIG: Schreibe den GESAMTEN Inhalt auf ${lang.name} (nicht auf Deutsch). Beachte die landestypischen Konventionen: ${lang.conventions}`;
       const today = new Date().toLocaleDateString(lang.locale, { day: "2-digit", month: "2-digit", year: "numeric" });
-      setGenPhase(t("wizard.genCv"));
-      // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
-      const cvRes = await generateMutation.mutateAsync({ data: {
+      let cvRes: { result: string; generationId?: string } | null = null;
+      let cvContent: CVContent | null = null;
+      let cvHtml: string | undefined;
+      let ats: ReturnType<typeof computeAtsScore> = null;
+      if (generateCv) {
+        setGenPhase(t("wizard.genCv"));
+        // NOTE: AI prompts stay German on purpose — generated documents target the German job market.
+        cvRes = await generateMutation.mutateAsync({ data: {
         type: "cv",
         batchId,
         systemPrompt: `Du bist ein professioneller Bewerbungsexperte. Antworte NUR mit validem JSON — kein Markdown, kein Wrapper, keine Erklärungen.
@@ -266,39 +272,41 @@ Gib exakt dieses JSON-Schema zurück:
 }
 
 PFLICHTREGELN:
-1. LÜCKENLOSIGKEIT: Jede Lücke > 6 Monate zwischen Einträgen als eigenen experience-Eintrag einfügen (z.B. "Berufliche Neuorientierung", "Familienphase", period: "01/2003 – 08/2023"). Lücken von Jahrzehnten → mehrere Einträge mit echten Jahreszahlen.
-2. SCHULABSCHLUSS: Wenn kein Schulabschluss in den Daten → ersten education-Eintrag setzen: degree "Schulabschluss — Bitte ergänzen", period "Bitte ergänzen".
-3. SKILLS: Mindestens 6 Einträge im skills-Array. Wenn keine Skills übergeben → aus Berufserfahrung und Stelle ableiten.
-4. SPRACHEN: Mindestens 1 Eintrag. Wenn keine → Deutsch Muttersprache eintragen.
-5. PROFIL: Immer 3–5 Sätze, konkret, keine KI-Floskeln.
-6. BULLETS: Jede experience-Station hat 2–4 bullets mit konkreten Tätigkeiten/Erfolgen.
-7. DATUM: signature-Feld EXAKT mit dem übergebenen Datum befüllen.
-8. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".
-9. CHRONOLOGIE: Alle Einträge in education UND experience chronologisch AUFSTEIGEND sortieren (ältester Eintrag zuerst, neuester zuletzt). education beginnt IMMER mit dem Schulabschluss, danach Ausbildung/Studium.`,
-        userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) für:\n${JSON.stringify(promptForm, null, 2)}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "unbekannt"}.\nsignature-Feld: "${(form.personal as any).city || "Ort"}, den ${today}"\n${form.school?.type || form.school?.name ? `\nSchulabschluss des Bewerbers (MUSS als erster education-Eintrag erscheinen): ${[form.school.type, form.school.name && `an ${form.school.name}`, form.school.city, form.school.year].filter(Boolean).join(", ")}` : "\nKein Schulabschluss angegeben → ersten education-Eintrag als 'Schulabschluss — Bitte ergänzen' anlegen."}\nAlle Lücken > 6 Monate füllen. Mindestens 6 Skills.${langInstr}`,
-      } });
+1. FAKTENTREUE: Verwende ausschließlich Fakten, die in den übergebenen Daten oder im Quelltext ausdrücklich stehen. Erfinde und ergänze niemals Arbeitgeber, Positionen, Tätigkeiten, Erfolge, Ausbildung, Abschlüsse, Zeiträume, Kenntnisse, Sprachen oder persönliche Angaben.
+2. KEINE LÜCKENFÜLLER: Lücken im Werdegang bleiben Lücken. Erzeuge keine Einträge wie "Neuorientierung", "Familienphase" oder "Bitte ergänzen".
+3. LEERE DATEN: Wenn für einen Abschnitt keine Fakten vorliegen, gib dort ein leeres Array bzw. einen leeren String zurück.
+4. PROFIL UND BULLETS: Formuliere vorhandene Fakten professionell um, aber füge keine neuen Behauptungen hinzu. Ohne ausreichende Fakten bleibt das Profil leer; ohne Tätigkeitsbeschreibung bleiben bullets leer.
+5. DATUM: signature-Feld EXAKT mit dem übergebenen Datum befüllen.
+6. Schreibe wie ein Mensch: keine Phrasen wie "dynamisch", "leidenschaftlich", "stets bestrebt".
+7. CHRONOLOGIE: Vorhandene Einträge in education UND experience chronologisch AUFSTEIGEND sortieren (ältester Eintrag zuerst, neuester zuletzt).`,
+          userPrompt: `Erstelle Lebenslauf-JSON (Sprache: ${lang.name}) ausschließlich aus diesen Daten:\n${JSON.stringify(promptForm, null, 2)}${importedDocument?.type === "cv" ? `\n\nVerbindlicher Quelltext des hochgeladenen Lebenslaufs (keine Fakten außerhalb dieses Textes ergänzen):\n${importedDocument.text.slice(0, 20000)}` : ""}\n\nOptimiert für: ${form.jobad.title || "allgemein"} bei ${form.jobad.company || "nicht angegeben"}.\nsignature-Feld: "${(form.personal as any).city ? `${(form.personal as any).city}, den ${today}` : today}"\n${form.school?.type || form.school?.name ? `\nSchulabschluss des Bewerbers: ${[form.school.type, form.school.name && `an ${form.school.name}`, form.school.city, form.school.year].filter(Boolean).join(", ")}` : ""}${langInstr}`,
+        } });
 
-      // Parse structured JSON and render with fixed professional template
-      let cvContent: CVContent;
-      try {
-        const raw = cvRes.result.replace(/^```(?:json)?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
-        cvContent = JSON.parse(raw) as CVContent;
-      } catch {
-        // Fallback: try to extract JSON from partial response
-        const match = cvRes.result.match(/\{[\s\S]*\}/);
-        if (match) { cvContent = JSON.parse(match[0]) as CVContent; }
-        else { throw new Error("CV-Generierung fehlgeschlagen. Bitte erneut versuchen."); }
+        // Parse structured JSON and render with fixed professional template
+        try {
+          const raw = cvRes.result.replace(/^```(?:json)?\s*/i,"").replace(/\s*```\s*$/i,"").trim();
+          cvContent = JSON.parse(raw) as CVContent;
+        } catch {
+          // Fallback: try to extract JSON from partial response
+          const match = cvRes.result.match(/\{[\s\S]*\}/);
+          if (match) { cvContent = JSON.parse(match[0]) as CVContent; }
+          else { throw new Error("CV-Generierung fehlgeschlagen. Bitte erneut versuchen."); }
+        }
+        if (usePhoto && form.personal.photo) cvContent.photo = form.personal.photo;
+        cvHtml = renderCVContent(cvContent, form.template, form.customStyle, docLang);
+        ats = computeAtsScore(form, cvHtml);
       }
-      if (usePhoto && form.personal.photo) cvContent.photo = form.personal.photo;
-      const cvHtml = renderCVContent(cvContent, form.template, form.customStyle, docLang);
-      const ats = computeAtsScore(form, cvHtml);
 
       let letterText = "";
-      let letterGenerationId = "";
-      {
+      let letterRes: { result: string; generationId?: string } | null = null;
+      if (importedDocument?.type === "letter") {
+        // Preserve an imported cover letter verbatim. Generating from it could
+        // silently add work history or qualifications that are not in the file.
+        letterText = importedDocument.text.trim();
+      } else if (generateLetter) {
         const hasJobad = !!(form.jobad.title || form.jobad.description || form.jobad.company);
         setGenPhase(t("wizard.genLetter"));
-        const letterRes = await generateMutation.mutateAsync({ data: {
+        letterRes = await generateMutation.mutateAsync({ data: {
           type: "letter",
           batchId,
           systemPrompt: `Du bist Experte für Bewerbungsanschreiben. Schreibe wie ein echter, gut ausgebildeter Mensch — nicht wie eine KI.
@@ -311,6 +319,7 @@ TON: ${tone === "formell"
 }
 
 REGELN FÜR ALLE TÖNE:
+- Verwende ausschließlich die übergebenen Fakten. Erfinde keine Arbeitgeber, Tätigkeiten, Erfolge, Ausbildungen, Kenntnisse oder persönlichen Angaben.
 - Keine KI-Phrasen: kein „dynamisch", „leidenschaftlich", „stets", „zeitnah", „ich bin überzeugt, dass ich", „ich freue mich sehr".
 - Keine Aufzählungen mit Gedankenstrichen im Fließtext.
 - Aktive Sprache: „Ich entwickelte" statt „Es wurde entwickelt".
@@ -327,26 +336,25 @@ STRUKTUR (DIN 5008):
 8. Schluss: Gesprächseinladung, keine Floskeln
 9. „Mit freundlichen Grüßen" + Name
 
-Ausgabe: NUR der Bewerbung-Text, kein HTML, keine Erklärungen. 350–420 Wörter.`,
+    Ausgabe: NUR der Bewerbung-Text, kein HTML, keine Erklärungen. Nutze nur so viele Wörter, wie die vorhandenen Fakten tragen.`,
           userPrompt: `Schreibe Bewerbung (Sprache: ${lang.name}):
 
 Bewerber: ${form.personal.firstName} ${form.personal.lastName}${form.personal.title ? ", " + form.personal.title : ""}
 Adresse Bewerber: ${[form.personal.address, `${form.personal.zip} ${form.personal.city}`.trim()].filter(Boolean).join(", ")}
-Stelle: ${hasJobad ? `${form.jobad.title || "Initiativbewerbung"} bei ${form.jobad.company || "dem Unternehmen"}` : `Initiativbewerbung als ${form.experience[0]?.position || form.personal.title || "Fachkraft"} (keine konkrete Stellenanzeige — schreibe ein überzeugendes Initiativ-Bewerbung passend zum Werdegang, Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${(form.jobad as any).address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${(form.jobad as any).address}` : ""}
+    Stelle: ${hasJobad ? `${form.jobad.title || "Initiativbewerbung"} bei ${form.jobad.company || "dem Unternehmen"}` : `Initiativbewerbung${form.experience[0]?.position || form.personal.title ? ` als ${form.experience[0]?.position || form.personal.title}` : ""} (keine konkrete Stellenanzeige — Empfängeradresse generisch als "Personalabteilung" ohne erfundenen Firmennamen)`}${(form.jobad as any).address ? `\nUnternehmensadresse (MUSS als Empfängeradresse erscheinen): ${(form.jobad as any).address}` : ""}
 Stellenbeschreibung: ${form.jobad.description || "nicht angegeben"}
 
 Erfahrung (aktuellste zuerst):
 ${form.experience.slice(0, 4).map(e => `• ${e.position} bei ${e.company}${e.city ? ", " + e.city : ""}${e.start ? " (" + e.start.slice(0,7) + " – " + (e.current ? "heute" : (e.end?.slice(0,7)||"")) + ")" : ""}${e.description ? ": " + e.description.slice(0,120) : ""}`).join("\n")}
 
-Kernkompetenzen: ${form.skills.slice(0, 10).map(s => s.name).join(", ") || "aus Erfahrung ableiten"}
+    Kernkompetenzen: ${form.skills.slice(0, 10).map(s => s.name).join(", ") || "nicht angegeben"}
 ${motivation ? `\nMotivation/Bezug zum Unternehmen (UNBEDINGT einbauen, WÖRTLICH verwenden): ${motivation}` : ""}
 ${achievement ? `\nBesonderer Erfolg (UNBEDINGT konkret nennen): ${achievement}` : ""}
 
-Datum-Zeile EXAKT: "${(form.personal as any).city || "Ort"}, den ${today}"
+Datum-Zeile EXAKT: "${(form.personal as any).city ? `${(form.personal as any).city}, den ${today}` : today}"
 Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
         } });
         letterText = letterRes.result;
-        letterGenerationId = letterRes.generationId;
       }
 
       // Save the profile while the initial free application is still open.
@@ -360,14 +368,20 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
 
       setGenPhase(t("wizard.genSaving"));
       const created = await createMutation.mutateAsync({ data: {
-        name: `${form.personal.firstName} ${form.personal.lastName}${form.jobad.title ? " – " + form.jobad.title : ""}`,
+        name: `${[form.personal.firstName, form.personal.lastName].filter(Boolean).join(" ") || (importedDocument?.type === "letter" ? "Bewerbung" : "Lebenslauf")}${form.jobad.title ? " – " + form.jobad.title : ""}`,
         template: form.template,
-        profileData: { ...form, atsScore: ats, cv_json: cvContent, language: docLang } as unknown as Record<string, unknown>,
+        profileData: {
+          ...form,
+          atsScore: ats,
+          cv_json: cvContent,
+          language: docLang,
+          documentTypes: { cv: Boolean(cvHtml), letter: Boolean(letterText) },
+        } as unknown as Record<string, unknown>,
         cvHtml,
-        coverLetter: letterText,
+        coverLetter: letterText || undefined,
         generationBatchId: batchId,
-        cvGenerationId: cvRes.generationId,
-        letterGenerationId,
+        cvGenerationId: cvRes?.generationId,
+        letterGenerationId: letterRes?.generationId,
         jobTitle: form.jobad.title,
         jobCompany: form.jobad.company,
       } });
@@ -451,7 +465,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
               </button>
             </div>
           )}
-          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: (d as any).jobad ? { ...f.jobad, ...(d as any).jobad } : f.jobad, template: f.template }))} user={user} authLoading={authLoading} setShowAuthModal={setShowAuthModal} />}
+          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: (d as any).jobad ? { ...f.jobad, ...(d as any).jobad } : f.jobad, template: f.template }))} onImportedDocument={setImportedDocument} user={user} authLoading={authLoading} setShowAuthModal={setShowAuthModal} />}
           {step === 1 && <StepSchool school={form.school} setSchool={setSchool} />}
           {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
           {step === 3 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
@@ -459,7 +473,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
           {step === 5 && <StepLanguages items={form.languages} addLang={addLang} updateLang={updateLang} delLang={delLang} />}
           {step === 6 && <StepJobAd form={form} setJobad={setJobad} />}
           {step === 7 && <StepTemplate form={form} setTemplate={setTemplate} setCustomStyle={setCustomStyle} />}
-          {step === 8 && <StepGenerate form={form} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} tone={tone} setTone={setTone} />}
+          {step === 8 && <StepGenerate form={form} importedDocument={importedDocument} user={user} setShowAuthModal={setShowAuthModal} handleGenerate={handleGenerate} docLang={docLang} setDocLang={setDocLang} motivation={motivation} setMotivation={setMotivation} achievement={achievement} setAchievement={setAchievement} tone={tone} setTone={setTone} />}
         </div>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "space-between", flexWrap: "wrap" }}>
@@ -474,9 +488,10 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
   );
 }
 
-function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setShowAuthModal }: {
+function StepPersonal({ form, setPersonal, applyImport, onImportedDocument, user, authLoading, setShowAuthModal }: {
   form: FormData; setPersonal: (k: string, v: string) => void;
   applyImport: (d: Partial<FormData>) => void;
+  onImportedDocument: (source: { type: ScanMode; text: string }) => void;
   user: any; authLoading: boolean; setShowAuthModal: (v: boolean) => void;
 }) {
   const p = form.personal;
@@ -487,6 +502,7 @@ function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setSh
   const [liLoading, setLiLoading] = useState(false);
   const [ftOpen, setFtOpen] = useState(false);
   const [ftText, setFtText] = useState("");
+  const [ftMode, setFtMode] = useState<ScanMode>("cv");
   const [ftLoading, setFtLoading] = useState(false);
   const prefillHandled = useRef(false);
 
@@ -497,28 +513,31 @@ function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setSh
       const pre = takeWizardPrefill(sessionStorage);
       if (pre) {
         prefillHandled.current = true;
-        setFtText(pre);
-        if (user) {
-          setFtOpen(true);
-          void importFreetext(pre);
-        } else {
-          setFtOpen(true);
-        }
+        setFtText(pre.text);
+        setFtMode(pre.mode);
+        setFtOpen(true);
+        if (user) void importFreetext(pre.text, pre.mode);
       }
     } catch { /* ignore */ }
   }, [authLoading, user]);
 
-  async function importFreetext(textOverride?: string) {
+  async function importFreetext(textOverride?: string, modeOverride?: ScanMode) {
     if (!user) { setShowAuthModal(true); return; }
-    const textToImport = (textOverride ?? ftText).trim();
-    if (textToImport.length < 30) return;
+    const source = {
+      type: modeOverride ?? ftMode,
+      text: (textOverride ?? ftText).trim(),
+    };
+    if (source.text.length < 30) return;
     setFtLoading(true);
     try {
-      const res = await customFetch<{ data: Partial<FormData> }>("/api/parse-freetext", {
-        method: "POST",
-        body: JSON.stringify({ text: textToImport }),
-      });
-      applyImport(res.data);
+      if (source.type === "cv") {
+        const res = await customFetch<{ data: Partial<FormData> }>("/api/parse-freetext", {
+          method: "POST",
+          body: JSON.stringify({ text: source.text }),
+        });
+        applyImport(res.data);
+      }
+      onImportedDocument(source);
       setFtOpen(false); setFtText("");
       toast({ title: t("wizard.freetext.success") });
     } catch {
@@ -588,9 +607,41 @@ function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setSh
         <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 16, background: "var(--bg2)" }}>
           <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10, lineHeight: 1.5 }}>{t("wizard.freetext.hint")}</div>
           <div style={{ marginBottom: 10 }}>
-            <FileImportButton onText={(txt) => setFtText(txt)} />
+            <FileImportButton onText={(txt) => { setFtText(txt); setFtMode(detectImportedDocumentType(txt)); }} />
           </div>
-          <textarea className="textarea" value={ftText} onChange={e => setFtText(e.target.value)} placeholder={t("wizard.freetext.placeholder")} style={{ minHeight: 170, marginBottom: 10 }} />
+          <textarea
+            className="textarea"
+            value={ftText}
+            onChange={e => {
+              const next = e.target.value;
+              if (!ftText.trim()) setFtMode(detectImportedDocumentType(next));
+              setFtText(next);
+            }}
+            placeholder={t("wizard.freetext.placeholder")}
+            style={{ minHeight: 170, marginBottom: 10 }}
+          />
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 7 }}>{t("wizard.freetext.documentType")}</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {(["cv", "letter"] as const).map((mode) => (
+                <label
+                  key={mode}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 7, cursor: "pointer",
+                    border: `1px solid ${ftMode === mode ? "var(--brand)" : "var(--border)"}`,
+                    background: ftMode === mode ? "var(--brand-l)" : "var(--card)",
+                    borderRadius: 9, padding: "8px 11px", fontSize: 13,
+                  }}
+                >
+                  <input type="radio" name="import-document-type" checked={ftMode === mode} onChange={() => setFtMode(mode)} />
+                  {t(`wizard.freetext.${mode}`)}
+                </label>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, marginTop: 7 }}>
+              {t(`wizard.freetext.${ftMode}Hint`)}
+            </div>
+          </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" className="btn btn-p btn-sm" onClick={() => importFreetext()} disabled={ftLoading || ftText.trim().length < 30}>
               {ftLoading ? <><span className="spin" /> {t("wizard.freetext.importing")}</> : t("wizard.freetext.import")}
@@ -867,10 +918,10 @@ function StepSkills({ items, skillInput, setSkillInput, skillLevel, setSkillLeve
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
               <span style={{ fontSize: 14, fontWeight: 500 }}>{sk.name}</span>
-              <span style={{ fontSize: 12, color: "var(--muted)" }}>{lvlLabels[LVL_VALS.indexOf(sk.level)] || sk.level + "%"}</span>
+              <span style={{ fontSize: 12, color: "var(--muted)" }}>{sk.level == null ? "—" : lvlLabels[LVL_VALS.indexOf(sk.level)] || sk.level + "%"}</span>
             </div>
             <div style={{ height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: `${sk.level}%`, height: "100%", background: "linear-gradient(90deg,var(--brand),var(--accent))", borderRadius: 3 }} />
+              <div style={{ width: `${sk.level ?? 0}%`, height: "100%", background: "linear-gradient(90deg,var(--brand),var(--accent))", borderRadius: 3 }} />
             </div>
           </div>
           <button className="btn btn-g btn-sm" onClick={() => delSkill(i)} style={{ color: "var(--err)" }}>×</button>
@@ -893,6 +944,7 @@ function StepLanguages({ items, addLang, updateLang, delLang }: { items: Languag
           <div className="field" style={{ flex: "0 1 160px", minWidth: 110 }}>
             <label className="label">{t("wizard.langs.level")}</label>
             <select className="select" value={l.level} onChange={e => updateLang(i, "level", e.target.value)}>
+              <option value="">—</option>
               {langLevels.map(lv => <option key={lv} value={lv}>{lv === "Muttersprache" ? t("wizard.langs.native") : lv}</option>)}
             </select>
           </div>
@@ -1043,14 +1095,15 @@ function StepTemplate({ form, setTemplate, setCustomStyle }: { form: FormData; s
   );
 }
 
-function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, setDocLang, motivation, setMotivation, achievement, setAchievement, tone, setTone }: {
+function StepGenerate({ form, importedDocument, user, setShowAuthModal, handleGenerate, docLang, setDocLang, motivation, setMotivation, achievement, setAchievement, tone, setTone }: {
   form: FormData; user: any; setShowAuthModal: (v: boolean) => void; handleGenerate: () => void;
+  importedDocument: { type: ScanMode; text: string } | null;
   docLang: string; setDocLang: (v: string) => void;
   motivation: string; setMotivation: (v: string) => void;
   achievement: string; setAchievement: (v: string) => void;
   tone: "formell" | "modern" | "kreativ"; setTone: (v: "formell" | "modern" | "kreativ") => void;
 }) {
-  const hasName = !!form.personal.firstName;
+  const hasName = importedDocument?.type === "letter" || !!(form.personal.firstName && form.personal.lastName);
   const { t } = useTranslation();
   const templateName = form.template.charAt(0).toUpperCase() + form.template.slice(1);
   return (
@@ -1063,8 +1116,19 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
         </p>
       </div>
 
+      {importedDocument && (
+        <div style={{ background: "var(--brand-l)", border: "1px solid #bfdbfe", borderRadius: 14, padding: 16, marginBottom: 18 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 5 }}>
+            {importedDocument.type === "cv" ? `📋 ${t("wizard.freetext.cv")}` : `✉️ ${t("wizard.freetext.letter")}`}
+          </div>
+          <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.55 }}>
+            {t(`wizard.gen.imported${importedDocument.type === "cv" ? "Cv" : "Letter"}Only`)}
+          </div>
+        </div>
+      )}
+
       {/* Tone selector */}
-      {form.jobad.title && (
+      {!importedDocument && form.jobad.title && (
         <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, marginBottom: 16 }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{t("wizard.gen.toneLabel")}</div>
           <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
@@ -1088,7 +1152,7 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
       )}
 
       {/* Optional boost questions */}
-      {form.jobad.title && (
+      {!importedDocument && form.jobad.title && (
         <div style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, marginBottom: 20 }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t("wizard.gen.boostTitle")}</div>
           <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16, lineHeight: 1.5 }}>{t("wizard.gen.boostHint")}</div>
@@ -1103,7 +1167,7 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
         </div>
       )}
 
-      <div className="field" style={{ maxWidth: 320, margin: "0 auto 20px" }}>
+      {importedDocument?.type !== "letter" && <div className="field" style={{ maxWidth: 320, margin: "0 auto 20px" }}>
         <label className="label">{t("wizard.gen.docLang")}</label>
         <select className="select" value={docLang} onChange={e => setDocLang(e.target.value)}>
           <option value="de">Deutsch</option>
@@ -1115,7 +1179,7 @@ function StepGenerate({ form, user, setShowAuthModal, handleGenerate, docLang, s
           <option value="ru">Русский</option>
           <option value="uk">Українська</option>
         </select>
-      </div>
+      </div>}
 
       {!hasName && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "#92400e" }}>{t("wizard.gen.fillFirst")}</div>}
       {!user && <div style={{ background: "var(--brand-l)", border: "1px solid #bfdbfe", borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13, color: "var(--brand)" }}>{t("wizard.gen.loginFirst")}</div>}
