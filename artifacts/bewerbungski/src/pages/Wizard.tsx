@@ -513,10 +513,17 @@ function StepPersonal({ form, setPersonal, applyImport, onImportedDocument, user
       const pre = takeWizardPrefill(sessionStorage);
       if (pre) {
         prefillHandled.current = true;
-        setFtText(pre.text);
         setFtMode(pre.mode);
-        setFtOpen(true);
-        if (user) void importFreetext(pre.text, pre.mode);
+        if (user) {
+          // Automatically transferred text goes straight to the parser. Do
+          // not render it in the normal free-text textarea, where a
+          // perfected preview would become copyable.
+          void importFreetext(pre.text, pre.mode);
+        } else {
+          // Preserve the manual/auth flow for logged-out visitors.
+          setFtText(pre.text);
+          setFtOpen(true);
+        }
       }
     } catch { /* ignore */ }
   }, [authLoading, user]);

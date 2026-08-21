@@ -74,7 +74,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
   try {
     const rawId = req.params.id;
     const documentId = Array.isArray(rawId) ? rawId[0] : rawId;
-    const [doc] = await db
+    let [doc] = await db
       .select()
       .from(documentsTable)
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
