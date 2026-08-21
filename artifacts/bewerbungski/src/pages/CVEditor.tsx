@@ -45,9 +45,9 @@ export default function CVEditor() {
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
   const { profile } = useAuth();
   const p = profile as any;
-  const locked = !!p && !p.is_premium && (p.credits || 0) === 0 && (p.documents_count || 0) >= 1;
-  // Free trial: PDF stays free, Word (DOCX) requires a purchase
-  const docxLocked = !!p && !p.is_premium && (p.credits || 0) === 0;
+  // Free users may use the editor; only exporting remains paid-only.
+  const locked = false;
+  const docxLocked = !!doc && !(doc as any).bezahlt;
 
   const [cvState, setCvState] = useState<CVContent>(emptyCV());
   const [template, setTemplate] = useState<TemplateId>("modern");
