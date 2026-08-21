@@ -12,10 +12,8 @@ import Wizard from "@/pages/Wizard";
 import Documents from "@/pages/Documents";
 import Preview from "@/pages/Preview";
 import CVEditor from "@/pages/CVEditor";
-import Pricing from "@/pages/Pricing";
 import Scanner from "@/pages/Scanner";
 import ImportPage from "@/pages/Import";
-import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,13 +63,7 @@ function LocaleHeadSync() {
   return null;
 }
 
-/**
- * Free accounts receive one complete application. Once it is saved, new work
- * and changes are purchase-gated while the completed document remains viewable.
- */
 function FreeFeatureGate({ children }: { children: React.ReactNode }) {
-  // Feature access is enforced at the action/API level, not by hiding whole
-  // pages. Free users must be able to create, check, and import documents.
   return <>{children}</>;
 }
 
@@ -104,8 +96,7 @@ function Router() {
       <Route path="/documents/:id/edit" component={RestrictedEditor} />
       <Route path="/scanner" component={RestrictedScanner} />
       <Route path="/import" component={RestrictedImport} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/pricing" component={Home} />
       <Route component={NotFound} />
     </Switch>
   );

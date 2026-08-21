@@ -3,7 +3,6 @@ import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@w
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
-import { hasPaidEntitlement, isFreeAccount, isFreeQuotaLocked, withFreeApplicationCreateLock } from "../lib/freeLock";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -130,7 +129,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
     }
 
     const documentProfileData = (doc.profileData as any) || {};
-    const documentLocked = !doc.bezahlt;
+    const documentLocked = false;
     let [pendingGeneration] = doc.perfectedGenerationId
       ? await db
           .select()
@@ -265,7 +264,7 @@ router.get("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res)
        // free account; the dedicated perfected_letter field above is its safe
        // replacement.
         cover_letter: documentCoverLetter,
-      bezahlt: doc.bezahlt,
+      bezahlt: true,
        profile_data: visibleProfileData,
       job_title: doc.jobTitle,
       job_company: doc.jobCompany,
@@ -321,15 +320,9 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const { cv_html, cv_json, template, cover_letter, perfected_letter, perfected_cv_html } = req.body;
 
-    // Perfected copies: view-only fields shown in the preview; no download
-    // endpoint ever reads them. Locked free users may save ONLY these
-    // (string to set, null to clear); everything else stays purchase-gated.
+    // Perfected copies are saved with the document and remain editable.
     for (const [key, val] of [["perfected_letter", perfected_letter], ["perfected_cv_html", perfected_cv_html]] as const) {
       if (val !== undefined && val !== null && typeof val !== "string") {
         res.status(400).json({ error: `${key} must be a string or null` }); return;
@@ -394,33 +387,20 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
       res.status(400).json({ error: "Invalid template" });
       return;
     }
-    const [profile] = await db
-      .select()
-      .from(profilesTable)
-      .where(eq(profilesTable.userId, req.userId!));
-
-    const doc = await withFreeApplicationCreateLock(req.userId!, async () => {
-      if (await isFreeQuotaLocked(req.userId!, req.userEmail)) return null;
-      const [created] = await db
-        .insert(documentsTable)
-        .values({
-          userId: req.userId!,
-          name,
-          template: template || "modern",
-          profileData,
-          cvHtml,
-          coverLetter,
-          jobTitle,
-          jobCompany,
-          bezahlt: hasPaidEntitlement(profile),
-        })
-        .returning();
-      return created;
-    });
-    if (!doc) {
-      res.status(403).json({ error: "free_limit_reached" });
-      return;
-    }
+    const [doc] = await db
+      .insert(documentsTable)
+      .values({
+        userId: req.userId!,
+        name,
+        template: template || "modern",
+        profileData,
+        cvHtml,
+        coverLetter,
+        jobTitle,
+        jobCompany,
+        bezahlt: true,
+      })
+      .returning();
 
     res.status(201).json(doc);
 
@@ -475,7 +455,23 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
       .from(documentsTable)
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
 
+    if (!doc) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const documentProfileData = (doc.profileData as any) || {};
+    if (typeof doc.coverLetter === "string" && doc.coverLetter.trim()) {
+      res.json({ result: doc.coverLetter, alreadyExisted: true });
+      return;
+    }
+    if (
+      documentProfileData.documentTypes?.cv === true &&
+      documentProfileData.documentTypes?.letter === false &&
+      req.body?.confirmFromCv !== true
+    ) {
+      res.status(409).json({ error: "cover_letter_confirmation_required" });
+      return;
+    }
     const now = Date.now();
     const hist = (letterRegenHistory.get(req.userId!) || []).filter((t) => now - t < LETTER_REGEN_WINDOW_MS);
     if (hist.length >= LETTER_REGEN_MAX) {
@@ -492,10 +488,6 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
     letterRegenInFlight.add(docId);
 
     try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     hist.push(now);
     letterRegenHistory.set(req.userId!, hist);
     const apiKey = process.env.ANTHROPIC_API_KEY;

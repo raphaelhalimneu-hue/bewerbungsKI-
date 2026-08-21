@@ -1,17 +1,16 @@
 ---
-name: Pricing model
-description: Free vs. paid boundaries for BewerbungsKI after the one-application free trial
+name: Free access model
+description: Temporary fully free access policy for BewerbungsKI
 ---
 
-# Preismodell (Stand 2026-08-19)
+# Kostenloser Zugang (Stand 2026-08-21)
 
-**Regel (explizit bestätigt): Gratis-Nutzer können genau eine vollständige Bewerbung erstellen. Sobald dieses erste Dokument gespeichert ist, werden alle App-Funktionen bis zum Kauf gesperrt.**
+**Regel (explizit bestätigt): BewerbungsKI ist vorübergehend vollständig kostenlos. Kein Dokument, Export, Druck, Import, Scan, Perfektionierung oder Editor darf von einer Zahlung, Credits oder einem Tarif abhängen.**
 
-- Käufer: Einzelbewerbung 2,99 € (+1), 5er-Paket 9,99 € (+5), 10er-Paket 14,99 € (+10); Power bleibt unbegrenzt für 29,90 €.
-- Gratis: `document_limit` in `/me` = 1. Nach dem Speichern blockiert der Server Generierung, Import, Scanner/Analyse, Perfektionierung, Profil- und Dokumentzugriffe einschließlich Bearbeiten, Ansehen und Löschen.
-- Die öffentlichen Seiten Start, Login/Registrierung und Preise bleiben zugänglich. Checkout bleibt erreichbar, damit die Sperre niemals einen Kauf verhindert.
-- PDF-, Word- und Druckausgaben bleiben zusätzlich für Gratis-Konten gesperrt.
-- Die Web-App entfernt nach Ablauf des Gratisversuchs die App-Navigation und leitet direkte Routen zur Preisseite weiter. Das ist nur UX; der Server ist die maßgebliche Sperre.
+- Die frühere Preis-Seite zeigt die Startseite; Checkout, Stripe-Webhooks und bezahlte Zugriffswege sind deaktiviert.
+- Historische Zahlungsdaten bleiben erhalten, werden aber niemals als Zugangsvoraussetzung ausgewertet.
+- Die exakte freiwillige Unterstützungsnachricht steht auf der Startseite; der Donate-Link ist nur ein zentraler Platzhalter und schaltet nichts frei.
+- E-Mail-Verifizierung und technische Limits gegen Missbrauch dürfen unabhängig von Zahlungen bestehen bleiben.
 
-**Why:** Ein günstiger Einzelkauf senkt die Einstiegshürde; Pakete bieten gleichzeitig einen klaren Mengenrabatt.
-**How to apply:** Jede neue authentifizierte App-Funktion darauf prüfen, ob sie nach dem ersten gespeicherten Gratis-Dokument serverseitig mit `isFreeQuotaLocked` abgewiesen werden muss. Öffentliche Marketing- und Kaufwege dürfen nicht gesperrt werden.
+**Why:** Die App soll in ihrer aktuellen Phase ohne Bezahlbarriere nutzbar sein; freiwillige Spenden sind ausdrücklich keine Gegenleistung für Funktionen.
+**How to apply:** Neue und bestehende Funktionen serverseitig sowie in Web und Mobile immer ohne Zahlungs-, Premium-, Credit- oder Paket-Prüfung zugänglich halten. Bei einer späteren Reaktivierung von Monetarisierung zuerst eine neue explizite Produktentscheidung einholen.

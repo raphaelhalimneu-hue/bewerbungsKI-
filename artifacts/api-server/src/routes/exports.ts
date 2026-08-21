@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { consumePrintQuota, getPrintCounts, PRINT_KINDS, FREE_PRINT_LIMIT, type PrintKind } from "../lib/freeLock";
+import { PRINT_KINDS, type PrintKind } from "../lib/freeLock";
 
 const router: IRouter = Router();
 
@@ -14,13 +14,11 @@ function paramId(v: unknown): string {
 router.get("/documents/:id/export-counters", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const docId = paramId(req.params.id);
-    const [doc] = await db.select({ bezahlt: documentsTable.bezahlt })
+    const [doc] = await db.select({ id: documentsTable.id })
       .from(documentsTable)
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
-    if (doc.bezahlt) { res.json({ free: false }); return; }
-    const counts = await getPrintCounts(req.userId!, docId);
-    res.json({ free: true, limit: FREE_PRINT_LIMIT, counts });
+    res.json({ free: false, limit: 0, counts: {} });
   } catch (err) {
     req.log.error({ err }, "GET export-counters error");
     res.status(500).json({ error: "Server error" });
@@ -37,19 +35,14 @@ router.post("/documents/:id/export-event", requireAuth, async (req: Authenticate
       return;
     }
     const [doc] = await db
-      .select({ id: documentsTable.id, bezahlt: documentsTable.bezahlt })
+      .select({ id: documentsTable.id })
       .from(documentsTable)
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
     if (!doc) {
       res.status(404).json({ error: "Not found" });
       return;
     }
-    if (doc.bezahlt) {
-      res.json({ allowed: true });
-      return;
-    }
-    const allowed = await consumePrintQuota(req.userId!, docId, kind);
-    res.json({ allowed });
+    res.json({ allowed: true });
   } catch (err) {
     req.log.error({ err }, "POST export-event error");
     res.status(500).json({ error: "Server error" });

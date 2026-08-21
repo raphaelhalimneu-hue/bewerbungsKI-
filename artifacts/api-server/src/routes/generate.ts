@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { db, profilesTable, documentsTable, generationResultsTable } from "@workspace/db";
-import { and, count, eq, gte } from "drizzle-orm";
+import { db, profilesTable, generationResultsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { hasPaidEntitlement, isUnlimitedEmail } from "../lib/freeLock";
 
 const router = Router();
 
-// Silent fair-use limit for Power (unlimited) users: 10 generations/day.
+// A modest per-account daily limit protects the AI service from automated abuse.
 const genUsage = new Map<string, { day: string; n: number }>();
 function checkDailyGenQuota(userId: string): boolean {
   const day = new Date().toISOString().slice(0, 10);
@@ -48,50 +47,14 @@ router.post("/generate", requireAuth, async (req: AuthenticatedRequest, res) => 
       .from(profilesTable)
       .where(eq(profilesTable.userId, userId));
 
-    const [{ value }] = await db
-      .select({ value: count() })
-      .from(documentsTable)
-      .where(eq(documentsTable.userId, userId));
-    const credits = profile?.credits ?? 0;
-    const unlimited = isUnlimitedEmail(req.userEmail);
-    const paid = hasPaidEntitlement(profile);
-    if (!unlimited && !profile?.emailVerifiedAt) {
+    if (!profile?.emailVerifiedAt) {
       // New signups must confirm their email address before generating
       res.status(403).json({ error: "email_unverified" });
       return;
     }
-    if (profile?.isUnlimited && !unlimited) {
-      // Power package: unlimited applications, but a silent fair-use cap of
-      // 10 new generations per day protects the AI budget from abuse.
-      // Durable part: documents actually saved today (survives restarts);
-      // the in-memory counter additionally covers generate-without-save.
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
-      const [{ value: todayCount }] = await db
-        .select({ value: count() })
-        .from(documentsTable)
-        .where(and(eq(documentsTable.userId, userId), gte(documentsTable.createdAt, todayStart)));
-      if (Number(todayCount) >= 10 || !checkDailyGenQuota(userId)) {
-        res.status(429).json({ error: "daily_limit_reached" });
-        return;
-      }
-    } else if (!unlimited && paid) {
-      const limit = 1 + credits; // buyers: 10 per purchased package
-      if (value >= limit) {
-        res.status(403).json({ error: "premium_limit_reached" });
-        return;
-      }
-    } else if (!unlimited) {
-      // One complete application is free. Once it is saved, all further
-      // generation is purchase-gated.
-      if (Number(value) >= 1) {
-        res.status(403).json({ error: "free_limit_reached" });
-        return;
-      }
-      if (!checkDailyGenQuota(userId)) {
-        res.status(429).json({ error: "daily_limit_reached" });
-        return;
-      }
+    if (!checkDailyGenQuota(userId)) {
+      res.status(429).json({ error: "daily_limit_reached" });
+      return;
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

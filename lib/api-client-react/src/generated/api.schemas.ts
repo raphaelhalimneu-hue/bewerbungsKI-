@@ -29,12 +29,10 @@ export interface GenerateInput {
   type: GenerateInputType;
   systemPrompt: string;
   userPrompt: string;
-  batchId: string;
 }
 
 export interface GenerateResult {
   result: string;
-  generationId: string;
 }
 
 export type DocumentProfileData = { [key: string]: unknown };
@@ -52,7 +50,6 @@ export interface Document {
   job_title?: string | null;
   /** @nullable */
   job_company?: string | null;
-  bezahlt: boolean;
   created_at: string;
 }
 
@@ -66,16 +63,5 @@ export interface DocumentInput {
   coverLetter?: string;
   jobTitle?: string;
   jobCompany?: string;
-  generationBatchId?: string;
-  cvGenerationId?: string;
-  letterGenerationId?: string;
-}
-
-export interface CheckoutInput {
-  plan: string;
-}
-
-export interface CheckoutResult {
-  url: string;
 }
 

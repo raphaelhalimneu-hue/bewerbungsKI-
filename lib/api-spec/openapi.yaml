@@ -15,8 +15,6 @@ tags:
     description: Document operations
   - name: generate
     description: AI generation
-  - name: checkout
-    description: Payments
 paths:
   /healthz:
     get:
@@ -64,8 +62,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GenerateResult"
-        "403":
-          description: Free limit reached
 
   /documents:
     get:
@@ -132,34 +128,6 @@ paths:
       responses:
         "204":
           description: Deleted
-
-  /checkout:
-    post:
-      operationId: createCheckout
-      tags: [checkout]
-      summary: Create Stripe checkout session
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CheckoutInput"
-      responses:
-        "200":
-          description: Checkout URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CheckoutResult"
-
-  /webhook/stripe:
-    post:
-      operationId: stripeWebhook
-      tags: [checkout]
-      summary: Stripe webhook handler
-      responses:
-        "200":
-          description: OK
 
 components:
   schemas:
@@ -262,18 +230,3 @@ components:
         - name
         - template
 
-    CheckoutInput:
-      type: object
-      properties:
-        plan:
-          type: string
-      required:
-        - plan
-
-    CheckoutResult:
-      type: object
-      properties:
-        url:
-          type: string
-      required:
-        - url

@@ -107,15 +107,3 @@ export const DeleteDocumentParams = zod.object({
 })
 
 
-/**
- * @summary Create Stripe checkout session
- */
-export const CreateCheckoutBody = zod.object({
-  "plan": zod.string()
-})
-
-export const CreateCheckoutResponse = zod.object({
-  "url": zod.string()
-})
-
-

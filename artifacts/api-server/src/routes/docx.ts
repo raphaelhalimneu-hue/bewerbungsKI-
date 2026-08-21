@@ -7,7 +7,6 @@ import {
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isFreeAccount } from "../lib/freeLock";
 
 const router = Router();
 
@@ -215,11 +214,6 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       res.status(404).json({ error: "No CV stored" });
       return;
     }
-    if (!doc.bezahlt) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
-
     const pd = storedProfileData;
     const p = pd.personal || {};
     const experience: any[] = pd.experience || [];
@@ -452,11 +446,6 @@ router.post("/documents/:id/download/cv.docx", requireAuth, async (req: Authenti
       res.status(404).json({ error: "No CV stored" });
       return;
     }
-    if (!doc.bezahlt) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
-
     const cv = req.body?.cv_json || storedProfileData.cv_json;
     if (!cv) { res.status(400).json({ error: "No cv_json" }); return; }
     if (!isValidCvJson(cv)) { res.status(400).json({ error: "Invalid cv_json structure" }); return; }
@@ -612,11 +601,6 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
       .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
-    if (!doc.bezahlt) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
-
     const pd = (doc.profileData as any) || {};
     const p = pd.personal || {};
     const fullName = `${p.firstName || ""} ${p.lastName || ""}`.trim() || "";
@@ -624,9 +608,7 @@ router.get("/documents/:id/download/cover-letter.docx", requireAuth, async (req:
     const H = headingsFor(doc.profileData as any);
 
     // Use edited text if provided via query param (client sends updated text), else stored text.
-    // Locked free users may only export the stored original.
-    const allowOverride = doc.bezahlt;
-    const letterText: string = (allowOverride && (req.query.text as string)) || doc.coverLetter || "";
+    const letterText: string = (req.query.text as string) || doc.perfectedLetter || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
     const children: any[] = [];

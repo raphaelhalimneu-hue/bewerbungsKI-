@@ -388,20 +388,11 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
 
       toast({ title: t("wizard.success") });
       refetchProfile();
-      // Open the exact document that was just saved. This avoids a race where
-      // the profile refresh activates the free lock before the document list
-      // has refreshed, and keeps the saved CV and letter visible read-only.
+      // Open the exact document that was just saved.
       const documentId = (created as any)?.id;
       navigate(documentId ? `/preview/${documentId}` : "/documents");
     } catch (e: any) {
-      if (e?.data?.error === "free_limit_reached" || e?.message?.includes("free_limit_reached")) {
-        navigate("/pricing");
-      } else if (e?.data?.error === "premium_limit_reached" || e?.message?.includes("premium_limit_reached")) {
-        toast({ title: t("wizard.premiumLimit"), variant: "destructive" });
-        navigate("/pricing");
-      } else {
-        toast({ title: t("wizard.genError"), description: e.message || t("wizard.genErrorUnknown"), variant: "destructive" });
-      }
+      toast({ title: t("wizard.genError"), description: e.message || t("wizard.genErrorUnknown"), variant: "destructive" });
     } finally {
       setGenerating(false);
       setGenPhase("");

@@ -55,28 +55,25 @@ router.get("/download/RaphaelKI2026", async (_req, res) => {
             bullet("Neue Kunden registrieren sich mit E-Mail + Passwort - keine Bestaetigung."),
             line(""),
 
-            h1("3. Preis und Bezahlung (Stripe)"),
-            bullet("Preis: 9,99 EUR einmalig - kein Abo - enthaelt 20 Bewerbungen."),
-            bullet("Einnahmen siehst du auf: dashboard.stripe.com oder in der Stripe-App."),
-            bullet("Gratis-Grenze: 1 Bewerbung kostenlos, danach kommt die Kaufaufforderung."),
+            h1("3. Kostenloser Zugang"),
+            bullet("Alle Funktionen der App sind kostenlos verfügbar."),
+            bullet("Der optionale Support-Link ist freiwillig und schaltet keine Funktionen frei."),
             line(""),
 
             h1("4. Technik - wo alles laeuft"),
             bullet("Hosting:      railway.com          (dein Konto)"),
             bullet("Kundendaten:  supabase.com         (Konto: raphaelhalimneu@gmail.com)"),
             bullet("KI:           console.anthropic.com (dein Konto - Guthaben im Blick behalten!)"),
-            bullet("Bezahlung:    dashboard.stripe.com (dein Konto)"),
             line(""),
 
             h1("5. WICHTIG - jede Woche tun!"),
             bullet("Mindestens 1x pro Woche auf supabase.com einloggen!"),
-            bullet("Sonst pausiert das Konto automatisch und Anmeldung + Bezahlung funktionieren NICHT."),
+            bullet("Sonst pausiert das Konto automatisch und die Anmeldung funktioniert nicht."),
             line(""),
 
             h1("6. Tipps fuer dich"),
             bullet("Zum Testen: Adresse direkt in Chrome eintippen, nicht im Facebook-Fenster."),
             bullet("In Chrome: drei Punkte oben rechts - dann 'Zum Startbildschirm hinzufuegen'."),
-            bullet("Kunde hat Zahlungsprobleme? Seite in Chrome/Safari oeffnen statt Facebook-Browser."),
             bullet("Bewerbungs-Erstellung kann bis zu 1 Minute dauern - das ist normal."),
             line(""),
 

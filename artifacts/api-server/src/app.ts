@@ -27,8 +27,6 @@ app.use(
   }),
 );
 app.use(cors());
-// Stripe webhook needs the raw body for signature verification
-app.use("/api/webhook/stripe", express.raw({ type: "application/json" }));
 // File uploads (/api/extract) send base64 JSON up to ~11 MB; everything else keeps the small default limit.
 const defaultJson = express.json();
 const largeJson = express.json({ limit: "75mb" });

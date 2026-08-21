@@ -20,8 +20,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  CheckoutInput,
-  CheckoutResult,
   Document,
   DocumentInput,
   GenerateInput,
@@ -222,7 +220,7 @@ export const generateDocument = async (generateInput: GenerateInput, options?: R
 
 
 
-export const getGenerateDocumentMutationOptions = <TError = ErrorType<void>,
+export const getGenerateDocumentMutationOptions = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateDocument>>, TError,{data: BodyType<GenerateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof generateDocument>>, TError,{data: BodyType<GenerateInput>}, TContext> => {
 
@@ -251,12 +249,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type GenerateDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof generateDocument>>>
     export type GenerateDocumentMutationBody = BodyType<GenerateInput>
-    export type GenerateDocumentMutationError = ErrorType<void>
+    export type GenerateDocumentMutationError = ErrorType<unknown>
 
     /**
  * @summary Generate CV or cover letter with AI
  */
-export const useGenerateDocument = <TError = ErrorType<void>,
+export const useGenerateDocument = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateDocument>>, TError,{data: BodyType<GenerateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof generateDocument>>,
@@ -560,146 +558,5 @@ export const useDeleteDocument = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteDocumentMutationOptions(options));
-    }
-
-export const getCreateCheckoutUrl = () => {
-
-
-
-
-  return `/api/checkout`
-}
-
-/**
- * @summary Create Stripe checkout session
- */
-export const createCheckout = async (checkoutInput: CheckoutInput, options?: RequestInit): Promise<CheckoutResult> => {
-
-  return customFetch<CheckoutResult>(getCreateCheckoutUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      checkoutInput,)
-  }
-);}
-
-
-
-
-export const getCreateCheckoutMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data: BodyType<CheckoutInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data: BodyType<CheckoutInput>}, TContext> => {
-
-const mutationKey = ['createCheckout'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCheckout>>, {data: BodyType<CheckoutInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createCheckout(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof createCheckout>>>
-    export type CreateCheckoutMutationBody = BodyType<CheckoutInput>
-    export type CreateCheckoutMutationError = ErrorType<unknown>
-
-    /**
- * @summary Create Stripe checkout session
- */
-export const useCreateCheckout = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCheckout>>, TError,{data: BodyType<CheckoutInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createCheckout>>,
-        TError,
-        {data: BodyType<CheckoutInput>},
-        TContext
-      > => {
-      return useMutation(getCreateCheckoutMutationOptions(options));
-    }
-
-export const getStripeWebhookUrl = () => {
-
-
-
-
-  return `/api/webhook/stripe`
-}
-
-/**
- * @summary Stripe webhook handler
- */
-export const stripeWebhook = async ( options?: RequestInit): Promise<void> => {
-
-  return customFetch<void>(getStripeWebhookUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-export const getStripeWebhookMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeWebhook>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof stripeWebhook>>, TError,void, TContext> => {
-
-const mutationKey = ['stripeWebhook'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stripeWebhook>>, void> = () => {
-
-
-          return  stripeWebhook(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type StripeWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof stripeWebhook>>>
-
-    export type StripeWebhookMutationError = ErrorType<unknown>
-
-    /**
- * @summary Stripe webhook handler
- */
-export const useStripeWebhook = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeWebhook>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof stripeWebhook>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getStripeWebhookMutationOptions(options));
     }
 

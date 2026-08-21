@@ -304,7 +304,6 @@ export default function Scanner() {
       setResult(res as AnalyzeResult);
     } catch (e: any) {
       const code = (e as any)?.data?.error;
-      if (code === "upgrade_required") { navigate("/pricing"); return; }
       setErrorMsg(code === "daily_limit_reached" ? t("scanner.dailyLimit") : t("scanner.error"));
     } finally {
       setBusy(false);

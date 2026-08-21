@@ -27,9 +27,7 @@ export default function AccountScreen() {
     );
   }
 
-  const isPremium = (profile as any)?.is_premium ?? false;
   const docCount = (profile as any)?.documents_count ?? 0;
-  const docLimit = (profile as any)?.document_limit ?? (isPremium ? 11 : 1);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -45,9 +43,9 @@ export default function AccountScreen() {
           </View>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={s.email}>{user.email}</Text>
-            <View style={[s.badge, { backgroundColor: isPremium ? '#fef3c7' : colors.muted }]}>
-              <Text style={[s.badgeText, { color: isPremium ? '#92400e' : colors.mutedForeground }]}>
-                {isPremium ? '⭐ Premium' : 'Kostenlos'}
+            <View style={[s.badge, { backgroundColor: colors.muted }]}>
+              <Text style={[s.badgeText, { color: colors.mutedForeground }]}>
+                Completely free
               </Text>
             </View>
           </View>
@@ -60,32 +58,14 @@ export default function AccountScreen() {
             <Text style={s.statLabel}>Bewerbungen</Text>
           </View>
           <View style={s.statCard}>
-            <Text style={s.statNum}>{docLimit}</Text>
-            <Text style={s.statLabel}>Max. erlaubt</Text>
+            <Text style={s.statNum}>∞</Text>
+            <Text style={s.statLabel}>Alle Funktionen</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>8</Text>
             <Text style={s.statLabel}>Sprachen</Text>
           </View>
         </View>
-
-        {/* Premium upgrade */}
-        {!isPremium && (
-          <TouchableOpacity
-            style={s.upgradeCard}
-            activeOpacity={0.88}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Linking.openURL('https://bewerbungski.com/pricing'); }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-              <Text style={{ fontSize: 28 }}>⭐</Text>
-              <Text style={s.upgradeTitle}>Premium freischalten</Text>
-            </View>
-            <Text style={s.upgradeSub}>10 weitere Bewerbungen · 8 Sprachen · Alle Templates</Text>
-            <View style={[s.primaryBtn, { marginTop: 16 }]}>
-              <Text style={s.primaryBtnText}>9,99 € einmalig → Upgrade</Text>
-            </View>
-          </TouchableOpacity>
-        )}
 
         {/* Menu items */}
         <View style={s.menuCard}>
@@ -146,11 +126,6 @@ function makeStyles(colors: ReturnType<typeof useColors>) {
     statCard: { flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 16, alignItems: 'center' as const, borderWidth: 1, borderColor: colors.border },
     statNum: { fontSize: 26, fontWeight: '700' as const, fontFamily: 'Inter_700Bold', color: colors.primary },
     statLabel: { fontSize: 11, color: colors.mutedForeground, marginTop: 4, fontFamily: 'Inter_400Regular', textAlign: 'center' as const },
-    upgradeCard: { backgroundColor: '#0f172a', borderRadius: 18, padding: 20, marginBottom: 16 },
-    upgradeTitle: { fontSize: 18, fontWeight: '700' as const, fontFamily: 'Inter_700Bold', color: '#fff' },
-    upgradeSub: { fontSize: 13, color: '#94a3b8', fontFamily: 'Inter_400Regular', lineHeight: 20 },
-    primaryBtn: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 13, alignItems: 'center' as const },
-    primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' as const, fontFamily: 'Inter_700Bold' },
     menuCard: { backgroundColor: colors.card, borderRadius: 18, marginBottom: 16, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' as const },
     signOutBtn: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'center' as const, gap: 10, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: colors.destructive },
     signOutText: { fontSize: 15, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold', color: colors.destructive },

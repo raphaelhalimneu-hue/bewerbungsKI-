@@ -43,11 +43,8 @@ export default function CVEditor() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { data: doc, isLoading, error } = useGetDocument(params.id ?? "");
-  const { profile } = useAuth();
-  const p = profile as any;
-  const locked = !!p && !p.is_premium && (p.credits || 0) === 0 && (p.documents_count || 0) >= 1;
-  // Free trial: PDF stays free, Word (DOCX) requires a purchase
-  const docxLocked = !!p && !p.is_premium && (p.credits || 0) === 0;
+  const locked = false;
+  const docxLocked = false;
 
   const [cvState, setCvState] = useState<CVContent>(emptyCV());
   const [template, setTemplate] = useState<TemplateId>("modern");

@@ -5,6 +5,7 @@ import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload
 import { useEffect, useMemo, useState } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
+import { DONATION_LINK } from "../lib/donation";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -625,6 +626,25 @@ export default function Home() {
               <FiCheck style={{ color: "var(--ok)", flexShrink: 0 }} /> {label}
             </span>
           ))}
+        </div>
+
+        <div style={{ margin: "26px auto 0", maxWidth: 620, color: "var(--muted)", fontSize: 14, lineHeight: 1.6 }}>
+          <p style={{ margin: "0 0 10px" }}>
+            This app is completely free. I would really appreciate a small donation – but of course, it is entirely voluntary!
+          </p>
+          <a
+            href={DONATION_LINK}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-g btn-sm"
+            style={{
+              display: "inline-flex", textDecoration: "none",
+              background: "var(--brand)", color: "#fff", borderColor: "var(--brand)",
+              padding: "8px 16px",
+            }}
+          >
+            Donate
+          </a>
         </div>
       </div>
 

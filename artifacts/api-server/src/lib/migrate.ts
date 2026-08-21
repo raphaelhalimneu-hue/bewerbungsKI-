@@ -87,15 +87,6 @@ export async function runStartupMigrations(): Promise<void> {
     )`,
   );
 
-  // Idempotency ledger for Stripe webhook events
-  await pool.query(
-    `CREATE TABLE IF NOT EXISTS stripe_events (
-      id text PRIMARY KEY,
-      user_id text NOT NULL,
-      created_at timestamp NOT NULL DEFAULT now()
-    )`,
-  );
-
   // Email verification: new signups must confirm their address via 6-digit code.
   // Existing accounts are grandfathered in (backfilled as verified) exactly once,
   // guarded by a column-existence check so re-runs never re-verify new users.

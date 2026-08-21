@@ -62,24 +62,17 @@ export default function Preview() {
   const [perfectedServerLocked, setPerfectedServerLocked] = useState(false);
   const [perfectedProfilePreview, setPerfectedProfilePreview] = useState<string | null>(null);
   const { profile } = useAuth();
-  const pAuth = profile as any;
-  // The API treats stale is_premium markers as unpaid. Mirror that rule here
-  // so an old client status can never make a perfected full text visible.
-  const freeUser = !!pAuth && !pAuth.is_unlimited && Number(pAuth.credits || 0) <= 0;
-  // Free accounts can read their saved document, but editing, download and
-  // print are paid-only. The server enforces the same rules.
-  const documentLocked = !doc || !(doc as any).bezahlt;
-  const docxLocked = documentLocked;
-  const editLocked = documentLocked;
+  const freeUser = true;
+  const documentLocked = false;
+  const docxLocked = false;
+  const editLocked = false;
   const [printUsed, setPrintUsed] = useState<Record<string, number>>({});
   void printUsed;
-  const cvPrintLocked = documentLocked;
-  const letterPrintLocked = documentLocked;
-  const pdfLocked = documentLocked;
-  // Free users can read their originals, but server-locked perfected text is
-  // only ever rendered as the shortened preview.
-  const letterCopyLocked = documentLocked;
-  const cvCopyLocked = documentLocked;
+  const cvPrintLocked = false;
+  const letterPrintLocked = false;
+  const pdfLocked = false;
+  const letterCopyLocked = false;
+  const cvCopyLocked = false;
   const visibleLetter = editedLetter;
   const hasCv = Boolean(
     doc && (

@@ -2,7 +2,6 @@ import { Router } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isFreeQuotaLocked, isFreeAccount } from "../lib/freeLock";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -174,10 +173,6 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
-    if (!doc.bezahlt) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const cvHtml = doc.perfectedCvHtml || doc.cvHtml;
 
     const pdfBuffer = await htmlToPdf(wrapHtml(cvHtml));
@@ -207,12 +202,6 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
 
     // Accept edited text from query param (same pattern as cover-letter.docx).
-    // Locked free users may only export the stored original — never edited/
-    // perfected text passed from the client.
-    if (!doc.bezahlt) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const letterText: string = (req.query.text as string) || doc.perfectedLetter || doc.coverLetter || "";
     if (!letterText.trim()) { res.status(404).json({ error: "No cover letter" }); return; }
 
