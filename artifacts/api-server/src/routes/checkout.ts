@@ -8,12 +8,10 @@ const router = Router();
 
 const PLANS = {
   single: { amount: 299, credits: 1, name: "BewerbungsKI Einzelbewerbung", description: "1 Bewerbung – Einmalzahlung, kein Abo" },
-  starter: { amount: 999, credits: 5, name: "BewerbungsKI 5er-Paket", description: "5 Bewerbungen – Einmalzahlung, kein Abo" },
-  premium: { amount: 1499, credits: 10, name: "BewerbungsKI 10er-Paket", description: "10 Bewerbungen – Einmalzahlung, kein Abo" },
-  power: { amount: 2990, name: "BewerbungsKI Power", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
+  power: { amount: 1499, name: "BewerbungsKI Unbegrenzt", description: "Unbegrenzt Bewerbungen – Einmalzahlung, kein Abo" },
 } as const;
 
-type CreditPlan = keyof Pick<typeof PLANS, "single" | "starter" | "premium">;
+type CreditPlan = keyof Pick<typeof PLANS, "single">;
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -31,12 +29,11 @@ router.post("/checkout", requireAuth, async (req: AuthenticatedRequest, res) => 
 
     const appUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
-    // One-time packages: single (1 application, 2.99), starter (5, 9.99),
-    // premium (10, 14.99), and power (unlimited, 29.90).
+    // One-time packages: single (1 application, 2.99) and power (unlimited, 14.99).
     const requestedPlan = (req.body as { plan?: string })?.plan;
-    const plan = requestedPlan === "single" || requestedPlan === "starter" || requestedPlan === "power"
+    const plan = requestedPlan === "single" || requestedPlan === "power"
       ? requestedPlan
-      : "premium";
+      : "single";
     const cfg = PLANS[plan];
 
     // A Power (unlimited) account gains nothing from buying again — block it.
