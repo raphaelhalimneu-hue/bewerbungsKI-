@@ -321,10 +321,6 @@ function validateCvJson(cv_json: unknown): string | null {
 
 router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     const { cv_html, cv_json, template, cover_letter, perfected_letter, perfected_cv_html } = req.body;
 
     // Perfected copies: view-only fields shown in the preview; no download
@@ -400,7 +396,6 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
       .where(eq(profilesTable.userId, req.userId!));
 
     const doc = await withFreeApplicationCreateLock(req.userId!, async () => {
-      if (await isFreeQuotaLocked(req.userId!, req.userEmail)) return null;
       const [created] = await db
         .insert(documentsTable)
         .values({
@@ -487,10 +482,6 @@ router.post("/documents/:id/cover-letter", requireAuth, requireVerifiedEmail, as
     letterRegenInFlight.add(docId);
 
     try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     hist.push(now);
     letterRegenHistory.set(req.userId!, hist);
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -628,10 +619,6 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`;
 
 router.delete("/documents/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    if (await isFreeQuotaLocked(req.userId!, req.userEmail)) {
-      res.status(403).json({ error: "upgrade_required" });
-      return;
-    }
     await db
       .delete(documentsTable)
       .where(
