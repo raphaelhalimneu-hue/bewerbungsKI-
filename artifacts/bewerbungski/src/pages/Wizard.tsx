@@ -102,7 +102,7 @@ export default function Wizard() {
   const [generating, setGenerating] = useState(false);
   const [pendingGenerate, setPendingGenerate] = useState(false);
   const [genPhase, setGenPhase] = useState("");
-  const { user, setShowAuthModal, refetchProfile } = useAuth();
+  const { user, loading: authLoading, setShowAuthModal, refetchProfile } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const { t } = useTranslation();
@@ -449,7 +449,7 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
               </button>
             </div>
           )}
-          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: (d as any).jobad ? { ...f.jobad, ...(d as any).jobad } : f.jobad, template: f.template }))} user={user} setShowAuthModal={setShowAuthModal} />}
+          {step === 0 && <StepPersonal form={form} setPersonal={setPersonal} applyImport={(d) => setForm(f => ({ ...f, ...d, personal: { ...f.personal, ...(d.personal || {}) }, jobad: (d as any).jobad ? { ...f.jobad, ...(d as any).jobad } : f.jobad, template: f.template }))} user={user} authLoading={authLoading} setShowAuthModal={setShowAuthModal} />}
           {step === 1 && <StepSchool school={form.school} setSchool={setSchool} />}
           {step === 2 && <StepEducation items={form.education} addEdu={addEdu} updateEdu={updateEdu} delEdu={delEdu} />}
           {step === 3 && <StepExperience items={form.experience} addExp={addExp} updateExp={updateExp} delExp={delExp} />}
@@ -472,10 +472,10 @@ Eröffnung NICHT mit „Hiermit bewerbe ich mich".${langInstr}`,
   );
 }
 
-function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }: {
+function StepPersonal({ form, setPersonal, applyImport, user, authLoading, setShowAuthModal }: {
   form: FormData; setPersonal: (k: string, v: string) => void;
   applyImport: (d: Partial<FormData>) => void;
-  user: any; setShowAuthModal: (v: boolean) => void;
+  user: any; authLoading: boolean; setShowAuthModal: (v: boolean) => void;
 }) {
   const p = form.personal;
   const { t } = useTranslation();
@@ -486,26 +486,34 @@ function StepPersonal({ form, setPersonal, applyImport, user, setShowAuthModal }
   const [ftOpen, setFtOpen] = useState(false);
   const [ftText, setFtText] = useState("");
   const [ftLoading, setFtLoading] = useState(false);
+  const prefillHandled = useRef(false);
 
   // Prefill from Scanner ("use as template"): text stored in sessionStorage before navigation
   useEffect(() => {
+    if (authLoading || prefillHandled.current) return;
     try {
       const pre = takeWizardPrefill(sessionStorage);
       if (pre) {
+        prefillHandled.current = true;
         setFtText(pre);
-        setFtOpen(true);
+        if (user) {
+          void importFreetext(pre);
+        } else {
+          setFtOpen(true);
+        }
       }
     } catch { /* ignore */ }
-  }, []);
+  }, [authLoading, user]);
 
-  async function importFreetext() {
+  async function importFreetext(textOverride?: string) {
     if (!user) { setShowAuthModal(true); return; }
-    if (ftText.trim().length < 30) return;
+    const textToImport = (textOverride ?? ftText).trim();
+    if (textToImport.length < 30) return;
     setFtLoading(true);
     try {
       const res = await customFetch<{ data: Partial<FormData> }>("/api/parse-freetext", {
         method: "POST",
-        body: JSON.stringify({ text: ftText }),
+        body: JSON.stringify({ text: textToImport }),
       });
       applyImport(res.data);
       setFtOpen(false); setFtText("");
