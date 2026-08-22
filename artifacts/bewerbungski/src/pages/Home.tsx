@@ -558,6 +558,11 @@ export default function Home() {
       .catch(() => {});
   }, []);
   const { t, i18n } = useTranslation();
+  const germanSite = (i18n.resolvedLanguage || "de").startsWith("de");
+  const donationMessage = germanSite
+    ? "Diese App ist vollständig kostenlos. Über eine kleine freiwillige Spende würde ich mich sehr freuen."
+    : "This app is completely free. I would really appreciate a small donation – but of course, it is entirely voluntary!";
+  const donationLabel = germanSite ? "Freiwillig unterstützen" : "Donate";
 
   const features = [
     { icon: <FiLayout />, title: t("home.feat1Title"), desc: t("home.feat1Desc") },
@@ -630,7 +635,7 @@ export default function Home() {
 
         <div style={{ margin: "26px auto 0", maxWidth: 620, color: "var(--muted)", fontSize: 14, lineHeight: 1.6 }}>
           <p style={{ margin: "0 0 10px" }}>
-            This app is completely free. I would really appreciate a small donation – but of course, it is entirely voluntary!
+            {donationMessage}
           </p>
           <a
             href={DONATION_LINK}
@@ -643,7 +648,7 @@ export default function Home() {
               padding: "8px 16px",
             }}
           >
-            Donate
+            {donationLabel}
           </a>
         </div>
       </div>
