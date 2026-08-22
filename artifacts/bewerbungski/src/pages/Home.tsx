@@ -637,7 +637,7 @@ export default function Home() {
             {donationMessage}
           </p>
           <a
-            href={`mailto:${donationEmail}`}
+            href={`https://www.paypal.com/donate?business=${encodeURIComponent(donationEmail)}&currency_code=EUR`}
             style={{
               fontWeight: 600, color: "var(--brand)",
               textDecoration: "underline",
