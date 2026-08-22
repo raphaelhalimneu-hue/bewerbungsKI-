@@ -5,7 +5,6 @@ import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload
 import { useEffect, useMemo, useState } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
-import { DONATION_LINK } from "../lib/donation";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -562,7 +561,7 @@ export default function Home() {
   const donationMessage = germanSite
     ? "Diese App ist vollständig kostenlos. Über eine kleine freiwillige Spende würde ich mich sehr freuen."
     : "This app is completely free. I would really appreciate a small donation – but of course, it is entirely voluntary!";
-  const donationLabel = germanSite ? "Freiwillig unterstützen" : "Donate";
+  const donationEmail = "rosehalim@aol.com";
 
   const features = [
     { icon: <FiLayout />, title: t("home.feat1Title"), desc: t("home.feat1Desc") },
@@ -637,19 +636,9 @@ export default function Home() {
           <p style={{ margin: "0 0 10px" }}>
             {donationMessage}
           </p>
-          <a
-            href={DONATION_LINK}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-g btn-sm"
-            style={{
-              display: "inline-flex", textDecoration: "none",
-              background: "var(--brand)", color: "#fff", borderColor: "var(--brand)",
-              padding: "8px 16px",
-            }}
-          >
-            {donationLabel}
-          </a>
+          <div style={{ fontWeight: 600, color: "var(--text)" }}>
+            {donationEmail}
+          </div>
         </div>
       </div>
 
