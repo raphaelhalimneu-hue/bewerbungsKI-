@@ -557,10 +557,7 @@ export default function Home() {
       .catch(() => {});
   }, []);
   const { t, i18n } = useTranslation();
-  const germanSite = (i18n.resolvedLanguage || "de").startsWith("de");
-  const donationMessage = germanSite
-    ? "Diese App ist vollständig kostenlos. Über eine kleine freiwillige Spende würde ich mich sehr freuen."
-    : "This app is completely free. I would really appreciate a small donation – but of course, it is entirely voluntary!";
+  const donationMessage = t("home.donationMessage");
   const donationEmail = "rosehalim@aol.com";
 
   const features = [
