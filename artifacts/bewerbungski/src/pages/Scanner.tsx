@@ -74,6 +74,10 @@ export default function Scanner() {
   const [, navigate] = useLocation();
   const { user, profile, setShowAuthModal } = useAuth();
   const scannerFreeUser = !profile || (!(profile as any).is_premium && !(profile as any).is_unlimited && Number((profile as any).credits ?? 0) <= 0);
+  const isUnlimited = !!(profile as any)?.is_unlimited;
+  const perfectRemaining: number | undefined = isUnlimited
+    ? (profile as any)?.perfect_remaining
+    : undefined;
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -292,6 +296,13 @@ export default function Scanner() {
               </button>
             )}
           </div>
+          {perfectRemaining !== undefined && (
+            <p style={{ margin: "6px 0 0", fontSize: 12.5, color: perfectRemaining === 0 ? "var(--err)" : "var(--muted)" }}>
+              {perfectRemaining === 0
+                ? t("scanner.perfectLimit")
+                : t("scanner.perfectRemaining", { count: perfectRemaining })}
+            </p>
+          )}
         </div>
 
         {perfectedText && (

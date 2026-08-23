@@ -587,6 +587,7 @@
     "improvedTitle": "Tu texto mejorado",
     "dailyLimit": "Límite diario alcanzado (protección contra abusos). Inténtalo de nuevo mañana.",
     "perfectLimit": "Tu cuota de perfeccionamiento (50×) está agotada.",
+    "perfectRemaining": "Quedan {{count}} de 50 perfeccionamientos",
     "improve": "Mejorarla",
     "improving": "Mejorando tu candidatura …",
     "changesTitle": "Qué se ha mejorado",

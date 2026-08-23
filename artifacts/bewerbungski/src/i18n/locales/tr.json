@@ -587,6 +587,7 @@
     "improvedTitle": "İyileştirilmiş metnin",
     "dailyLimit": "Günlük sınıra ulaşıldı (kötüye kullanım koruması). Yarın tekrar deneyin.",
     "perfectLimit": "Mükemmelleştirme hakkınız (50×) tükendi.",
+    "perfectRemaining": "50 mükemmelleştirmeden {{count}} tanesi kaldı",
     "improve": "İyileştirmesini iste",
     "improving": "Başvurun iyileştiriliyor …",
     "changesTitle": "Neler iyileştirildi",

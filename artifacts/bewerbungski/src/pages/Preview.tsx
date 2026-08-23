@@ -51,6 +51,10 @@ export default function Preview() {
       && !(profile as any).is_unlimited
       && Number((profile as any).credits ?? 0) <= 0);
   const editLocked = freeUser;
+  const isUnlimited = !!(profile as any)?.is_unlimited;
+  const perfectRemaining: number | undefined = isUnlimited
+    ? (profile as any)?.perfect_remaining
+    : undefined;
   function requirePaid(): boolean {
     if (!freeUser) return true;
     window.alert(t("preview.unlockPerfectedHint"));
@@ -622,6 +626,13 @@ export default function Preview() {
                   {!canPerfectLetter && (
                     <span style={{ fontSize: 11.5, color: "var(--muted)", maxWidth: 190 }}>
                       {t("preview.perfectMinLength")}
+                    </span>
+                  )}
+                  {perfectRemaining !== undefined && (
+                    <span style={{ fontSize: 11.5, color: perfectRemaining === 0 ? "var(--err)" : "var(--muted)", maxWidth: 220 }}>
+                      {perfectRemaining === 0
+                        ? t("scanner.perfectLimit")
+                        : t("scanner.perfectRemaining", { count: perfectRemaining })}
                     </span>
                   )}
                 </div>

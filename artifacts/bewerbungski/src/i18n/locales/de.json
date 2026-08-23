@@ -587,6 +587,7 @@
     "improvedTitle": "Dein verbesserter Text",
     "dailyLimit": "Tageslimit erreicht (Schutz vor Missbrauch). Morgen geht es weiter.",
     "perfectLimit": "Dein Perfektionieren-Kontingent (50×) ist aufgebraucht.",
+    "perfectRemaining": "Noch {{count}} von 50 Perfektionierungen übrig",
     "improve": "Verbessern lassen",
     "improving": "Anschreiben wird verbessert …",
     "changesTitle": "Das wurde verbessert",

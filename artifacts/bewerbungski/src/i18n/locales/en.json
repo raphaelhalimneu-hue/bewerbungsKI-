@@ -587,6 +587,7 @@
     "improvedTitle": "Your improved text",
     "dailyLimit": "Daily limit reached (abuse protection). Try again tomorrow.",
     "perfectLimit": "Your perfecting quota (50×) is used up.",
+    "perfectRemaining": "{{count}} of 50 perfections remaining",
     "improve": "Improve it",
     "improving": "Improving your application …",
     "changesTitle": "What was improved",
