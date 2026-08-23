@@ -18,24 +18,17 @@ export function VerifyEmailModal() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
-  const [verifiedLocally, setVerifiedLocally] = useState(false);
   const sentRef = useRef(false);
 
   const needsVerification = !!session && !!profile && profile.email_verified === false;
-  const open = needsVerification && !verifiedLocally;
-
-  // Reset the local dismissal for a different account. The dialog still
-  // reappears if the server says that the new account needs verification.
-  useEffect(() => {
-    setVerifiedLocally(false);
-  }, [session?.user?.id]);
+  const open = needsVerification;
 
   useEffect(() => {
-    if (!needsVerification || verifiedLocally) { sentRef.current = false; return; }
+    if (!needsVerification) { sentRef.current = false; return; }
     if (sentRef.current) return;
     sentRef.current = true;
     sendCode();
-  }, [needsVerification, verifiedLocally]);
+  }, [needsVerification]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -64,28 +57,18 @@ export function VerifyEmailModal() {
     try {
       setBusy(true);
       setError(null);
-      // Hide the blocking dialog immediately after the user submits a code.
-      // A rejected code is followed by sign-out in the catch block, so this
-      // never grants access to an unverified session.
-      setVerifiedLocally(true);
       await customFetch<any>("/api/verify/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
+      // Keep the modal governed by the server-reported profile status. This
+      // prevents a stale client state from granting access after confirmation.
+      await refetchProfile();
       toast({ title: t("verify.success") });
-      // Close immediately after the server accepted the code. The profile
-      // refetch below remains the source of truth for subsequent renders.
-      setVerifiedLocally(true);
       setCode("");
-      refetchProfile();
     } catch {
       setError(t("verify.wrongCode"));
-      // Close immediately after a failed attempt and end the unverified
-      // session. This prevents the blocking overlay/button from remaining
-      // stuck while keeping the account protected.
-      setVerifiedLocally(true);
-      void signOut();
     } finally {
       setBusy(false);
     }

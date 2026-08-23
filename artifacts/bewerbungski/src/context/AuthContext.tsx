@@ -13,7 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
-  refetchProfile: () => void;
+  refetchProfile: () => Promise<unknown>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

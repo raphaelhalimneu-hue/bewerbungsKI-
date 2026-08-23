@@ -73,10 +73,15 @@ router.post("/verify/confirm", requireAuth, async (req: AuthenticatedRequest, re
       res.status(400).json({ error: "wrong_code" });
       return;
     }
-    await db
+    const verified = await db
       .update(profilesTable)
       .set({ emailVerifiedAt: new Date() })
-      .where(eq(profilesTable.userId, userId));
+      .where(eq(profilesTable.userId, userId))
+      .returning({ userId: profilesTable.userId });
+    if (!verified.length) {
+      res.status(404).json({ error: "profile_not_found" });
+      return;
+    }
     await pool.query(`DELETE FROM email_codes WHERE user_id = $1`, [userId]);
     res.json({ verified: true });
   } catch (err) {
