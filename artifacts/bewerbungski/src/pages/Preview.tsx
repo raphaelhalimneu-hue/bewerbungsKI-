@@ -683,9 +683,15 @@ export default function Preview() {
                   {editingCv ? t("preview.doneEditing") : t("preview.editCvBtn")}
                 </button>
               </div>
-              {false ? (
+              {freeUser ? (
                 <div className="cv-wrap">
-                  <div className="cv-sheet" style={{ padding: "32px 28px", minHeight: 280, position: "relative", overflow: "hidden" }}>
+                  <div
+                    className="cv-sheet"
+                    onCopy={e => e.preventDefault()}
+                    onCut={e => e.preventDefault()}
+                    onContextMenu={e => e.preventDefault()}
+                    style={{ padding: "32px 28px", minHeight: 280, position: "relative", overflow: "hidden", userSelect: "none", WebkitUserSelect: "none" }}
+                  >
                     <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text)", marginBottom: 10 }}>
                       🔒 {t("preview.previewOnly")}
                     </div>
@@ -702,7 +708,7 @@ export default function Preview() {
                           {t("preview.profilePreview")}
                         </div>
                         <div
-                          style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
+                         style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.65, userSelect: "none", WebkitUserSelect: "none" }}
                         >
                           {perfectedProfilePreview}
                         </div>
