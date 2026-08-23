@@ -45,6 +45,21 @@ if (process.env.NODE_ENV === "production") {
     __dirname,
     "../../bewerbungski/dist/public",
   );
+
+  // Internal/login-only pages must not appear in Google results.
+  // X-Robots-Tag is delivered in the initial HTTP response, before JS runs —
+  // more reliable than a client-side <meta> tag for Googlebot.
+  // Pattern matches /{lang?}/(wizard|documents|preview|scanner|import|admin)(/ or end).
+  const NOINDEX_RE =
+    /^\/(?:(?:en|es|tr|ar|uk|ru|pl)\/)?(?:wizard|documents|preview|scanner|import|admin)(?:\/|$)/;
+
+  app.use((req, res, next) => {
+    if (NOINDEX_RE.test(req.path)) {
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    }
+    next();
+  });
+
   app.use(express.static(frontendDist));
   // SPA fallback: any non-/api route serves index.html
   app.get(/^(?!\/api\/).*/, (_req, res) => {
