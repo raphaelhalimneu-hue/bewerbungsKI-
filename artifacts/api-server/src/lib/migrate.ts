@@ -107,4 +107,19 @@ export async function runStartupMigrations(): Promise<void> {
       last_sent_at timestamp NOT NULL DEFAULT now()
     )`,
   );
+
+  // Power-Plan daily rolling counters (DB-backed to survive restarts and scale
+  // across multiple API instances; reset automatically when the date changes).
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS daily_perfect_count integer NOT NULL DEFAULT 0`,
+  );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS daily_perfect_date text`,
+  );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS daily_doc_count integer NOT NULL DEFAULT 0`,
+  );
+  await pool.query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS daily_doc_date text`,
+  );
 }

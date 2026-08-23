@@ -12,6 +12,11 @@ export const profilesTable = pgTable("profiles", {
   // Power package: unlimited applications, perfect capped at 50 lifetime
   isUnlimited: boolean("is_unlimited").notNull().default(false),
   perfectCount: integer("perfect_count").notNull().default(0),
+  // Power fair-use: daily rolling counters (YYYY-MM-DD UTC date stored as text)
+  dailyPerfectCount: integer("daily_perfect_count").notNull().default(0),
+  dailyPerfectDate: text("daily_perfect_date"),   // null = never used
+  dailyDocCount: integer("daily_doc_count").notNull().default(0),
+  dailyDocDate: text("daily_doc_date"),           // null = never used
   stripeCustomerId: text("stripe_customer_id"),
   // Null = email not yet confirmed (accounts created before this feature were backfilled)
   emailVerifiedAt: timestamp("email_verified_at"),

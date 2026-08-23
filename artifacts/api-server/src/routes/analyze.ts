@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { isEmailUnverified, isFreeQuotaLocked } from "../lib/freeLock";
-import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
 
 const router = Router();
@@ -25,6 +25,10 @@ function checkQuota(userId: string, kind: "analyze" | "perfect"): boolean {
   if (usage.size > 10000) usage.clear(); // bound memory
   return true;
 }
+
+// Power-Plan limits for unlimited users (enforced via atomic DB update, not in-memory)
+const POWER_LIFETIME_PERFECT_LIMIT = 50; // total lifetime uses
+const POWER_DAILY_PERFECT_LIMIT = 10;    // silent fair-use cap per UTC day
 
 async function callClaude(req: AuthenticatedRequest, systemPrompt: string, userPrompt: string): Promise<string | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -274,10 +278,55 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
       res.status(403).json({ error: "upgrade_required" });
       return;
     }
-    if (!checkQuota(req.userId!, "perfect")) {
+
+    // Load profile to check whether the user is on the Power plan.
+    const [perfProfile] = await db
+      .select({ isUnlimited: profilesTable.isUnlimited })
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, req.userId!));
+
+    let reservedPerfectSlot = false;
+    let reservationDate = ""; // UTC date of the reservation — needed for safe rollback
+    if (perfProfile?.isUnlimited) {
+      // One atomic conditional UPDATE simultaneously enforces the 50-lifetime cap
+      // and the 10/day fair-use limit. Using WHERE instead of a prior SELECT prevents
+      // two concurrent requests both passing the limit check at 49.
+      const today = new Date().toISOString().slice(0, 10);
+      reservationDate = today;
+      const [reserved] = await db
+        .update(profilesTable)
+        .set({
+          perfectCount: sql`${profilesTable.perfectCount} + 1`,
+          dailyPerfectCount: sql`CASE WHEN ${profilesTable.dailyPerfectDate} = ${today} THEN ${profilesTable.dailyPerfectCount} + 1 ELSE 1 END`,
+          dailyPerfectDate: today,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(profilesTable.userId, req.userId!),
+          sql`${profilesTable.perfectCount} < ${POWER_LIFETIME_PERFECT_LIMIT}`,
+          sql`(${profilesTable.dailyPerfectDate} IS DISTINCT FROM ${today} OR ${profilesTable.dailyPerfectCount} < ${POWER_DAILY_PERFECT_LIMIT})`,
+        ))
+        .returning({ perfectCount: profilesTable.perfectCount });
+
+      if (!reserved) {
+        // Determine which limit was hit for the precise error code.
+        const [current] = await db
+          .select({ perfectCount: profilesTable.perfectCount })
+          .from(profilesTable)
+          .where(eq(profilesTable.userId, req.userId!));
+        if ((current?.perfectCount ?? 0) >= POWER_LIFETIME_PERFECT_LIMIT) {
+          res.status(429).json({ error: "perfect_limit_reached" });
+        } else {
+          res.status(429).json({ error: "daily_limit_reached" });
+        }
+        return;
+      }
+      reservedPerfectSlot = true;
+    } else if (!checkQuota(req.userId!, "perfect")) {
       res.status(429).json({ error: "daily_limit_reached" });
       return;
     }
+
     const lang = typeof language === "string" && language.length <= 5 ? language : "de";
 
     const systemPrompt = isCvMode
@@ -304,10 +353,38 @@ Alle Texte in der Sprache mit Code "${lang}".`;
     const userPrompt = `${isCvMode ? "LEBENSLAUF" : "ANSCHREIBEN"}:\n${letterText.slice(0, MAX_INPUT)}${profileText ? `\n\nPROFIL-STATEMENT:\n${String(profileText).slice(0, 3000)}` : ""}${cvText ? `\n\nLEBENSLAUF (Kontext, nicht umschreiben):\n${String(cvText).slice(0, MAX_INPUT)}` : ""}${jobText ? `\n\nSTELLENANZEIGE:\n${String(jobText).slice(0, MAX_INPUT)}` : ""}`;
 
     const text = await callClaude(req, systemPrompt, userPrompt);
-    if (text === null) { res.status(503).json({ error: "busy_try_again" }); return; }
+    if (text === null) {
+      // Roll back both counters so a failed AI call does not consume the slot.
+      // dailyPerfectCount is only decremented when dailyPerfectDate still matches
+      // the reservation date — guards against a request that crosses UTC midnight
+      // decrementing the next day's counter.
+      if (reservedPerfectSlot) {
+        await db
+          .update(profilesTable)
+          .set({
+            perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)`,
+            dailyPerfectCount: sql`CASE WHEN ${profilesTable.dailyPerfectDate} = ${reservationDate} THEN GREATEST(${profilesTable.dailyPerfectCount} - 1, 0) ELSE ${profilesTable.dailyPerfectCount} END`,
+            updatedAt: new Date(),
+          })
+          .where(eq(profilesTable.userId, req.userId!));
+      }
+      res.status(503).json({ error: "busy_try_again" });
+      return;
+    }
     const parsed = parseJson(text);
     if (!parsed || typeof parsed.letter !== "string" || parsed.letter.trim().length < 80) {
       req.log.error({ text: text.slice(0, 500) }, "perfect: unparseable model output");
+      // Roll back on parse failure — the generation was not stored.
+      if (reservedPerfectSlot) {
+        await db
+          .update(profilesTable)
+          .set({
+            perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)`,
+            dailyPerfectCount: sql`CASE WHEN ${profilesTable.dailyPerfectDate} = ${reservationDate} THEN GREATEST(${profilesTable.dailyPerfectCount} - 1, 0) ELSE ${profilesTable.dailyPerfectCount} END`,
+            updatedAt: new Date(),
+          })
+          .where(eq(profilesTable.userId, req.userId!));
+      }
       res.status(500).json({ error: "perfect_failed" });
       return;
     }
@@ -329,10 +406,33 @@ Alle Texte in der Sprache mit Code "${lang}".`;
       previewProfile: fullProfile ? createPerfectedPreview(fullProfile) : null,
       changes,
     };
-    const [generation] = await db
-      .insert(perfectedGenerationsTable)
-      .values(generationValues)
-      .returning();
+    let generation: typeof generationValues & { id: string };
+    try {
+      const [gen] = await db
+        .insert(perfectedGenerationsTable)
+        .values(generationValues)
+        .returning();
+      generation = gen as typeof generation;
+    } catch (insertErr) {
+      req.log.error({ insertErr }, "POST /perfect: generation insert failed");
+      // Roll back the Power-plan quota slot — the generation was never persisted.
+      if (reservedPerfectSlot) {
+        try {
+          await db
+            .update(profilesTable)
+            .set({
+              perfectCount: sql`GREATEST(${profilesTable.perfectCount} - 1, 0)`,
+              dailyPerfectCount: sql`CASE WHEN ${profilesTable.dailyPerfectDate} = ${reservationDate} THEN GREATEST(${profilesTable.dailyPerfectCount} - 1, 0) ELSE ${profilesTable.dailyPerfectCount} END`,
+              updatedAt: new Date(),
+            })
+            .where(eq(profilesTable.userId, req.userId!));
+        } catch (rollbackErr) {
+          req.log.error({ rollbackErr }, "POST /perfect: quota rollback after insert failure also failed");
+        }
+      }
+      res.status(500).json({ error: "Server error" });
+      return;
+    }
 
     res.json(generationPayload(generation, false));
   } catch (err) {

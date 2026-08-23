@@ -11,6 +11,59 @@ const router = Router();
 const SINGLE_PRICE_ID = process.env.STRIPE_SINGLE_PRICE_ID || "price_1U7KOJPyO6gYxvx2wLcVO9uo";
 const UNLIMITED_PRICE_ID = process.env.STRIPE_UNLIMITED_PRICE_ID || "price_1U7KS5PyO6gYxvx2IdCtEVN1";
 
+// ---------------------------------------------------------------------------
+// In-process deduplication for unlimited checkout sessions
+//
+// Prevents rapid double-submits or concurrent requests from creating two
+// separate Stripe sessions for the same user within this process.
+//
+// Each entry stores the checkout URL and an expiry matching Stripe's session
+// lifetime (~30 minutes). The cache is cleared when the completed webhook
+// arrives, ensuring a fresh session can always be created for a new purchase.
+//
+// NOTE: Multi-instance deployments that need cross-process deduplication
+// should replace this with a shared store (e.g. Redis) or Stripe's customer +
+// subscription lookup. For single-instance deployments this covers every
+// realistic concurrent-request scenario.
+// ---------------------------------------------------------------------------
+const CHECKOUT_SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+interface PendingSession { url: string; expiresAt: number }
+const pendingUnlimitedSessions = new Map<string, PendingSession>();
+
+/** Remove a user's pending session cache entry (call when checkout completes). */
+export function clearPendingUnlimitedSession(userId: string): void {
+  pendingUnlimitedSessions.delete(userId);
+}
+
+/** For testing: wipe all pending session cache entries between test cases. */
+export function clearAllPendingUnlimitedSessions(): void {
+  pendingUnlimitedSessions.clear();
+}
+
+// Per-user promise queue so that concurrent unlimited checkout requests within
+// the same process are serialized — the second request always sees the result
+// of the first (either the already_unlimited flag or the cached session URL).
+const checkoutQueues = new Map<string, Promise<void>>();
+
+function withCheckoutLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+  const prev = checkoutQueues.get(userId) ?? Promise.resolve();
+  let release!: () => void;
+  const slot = new Promise<void>((resolve) => { release = resolve; });
+  // Store the chained promise so we can compare it for cleanup
+  const queued = prev.then(() => slot);
+  checkoutQueues.set(userId, queued);
+  return prev.then(async () => {
+    try {
+      return await fn();
+    } finally {
+      release();
+      if (checkoutQueues.get(userId) === queued) {
+        checkoutQueues.delete(userId);
+      }
+    }
+  });
+}
+
 function stripeForm(values: Record<string, string>) {
   return new URLSearchParams(values);
 }
@@ -43,9 +96,59 @@ router.post("/stripe/checkout", requireAuth, async (req: AuthenticatedRequest, r
       res.status(400).json({ error: "invalid_package" });
       return;
     }
+
+    if (kind === "unlimited") {
+      // Serialize unlimited checkout requests per user. The lock guarantees that
+      // two concurrent requests cannot both pass the isUnlimited check with a
+      // stale read — the second request runs only after the first has written its
+      // cached session URL (or returned already_unlimited).
+      const url = await withCheckoutLock(req.userId!, async () => {
+        // 1. Hard block: user already has the plan.
+        const [profile] = await db
+          .select({ isUnlimited: profilesTable.isUnlimited })
+          .from(profilesTable)
+          .where(eq(profilesTable.userId, req.userId!));
+        if (profile?.isUnlimited) return null; // signal already_unlimited
+
+        // 2. Return the cached session if it is still valid.
+        const pending = pendingUnlimitedSessions.get(req.userId!);
+        if (pending && pending.expiresAt > Date.now()) return pending.url;
+
+        // 3. Create a fresh Stripe Checkout Session.
+        const origin = `${req.protocol}://${req.get("host")}`;
+        const session = await stripeRequest("checkout/sessions", stripeForm({
+          mode: "subscription",
+          "line_items[0][price]": price,
+          "line_items[0][quantity]": "1",
+          "success_url": `${origin}/pricing?checkout=success`,
+          "cancel_url": `${origin}/pricing?checkout=cancelled`,
+          "allow_promotion_codes": "true",
+          "metadata[userId]": req.userId!,
+          "metadata[kind]": kind,
+          ...(req.userEmail ? { customer_email: req.userEmail } : {}),
+        }));
+
+        // 4. Cache the URL so duplicate requests within the session window
+        //    hit the same session and cannot trigger a second charge.
+        pendingUnlimitedSessions.set(req.userId!, {
+          url: session.url,
+          expiresAt: Date.now() + CHECKOUT_SESSION_TTL_MS,
+        });
+        return session.url as string;
+      });
+
+      if (url === null) {
+        res.status(400).json({ error: "already_unlimited" });
+        return;
+      }
+      res.json({ url });
+      return;
+    }
+
+    // Single / non-unlimited purchase — no deduplication needed
     const origin = `${req.protocol}://${req.get("host")}`;
     const session = await stripeRequest("checkout/sessions", stripeForm({
-      mode: kind === "unlimited" ? "subscription" : "payment",
+      mode: "payment",
       "line_items[0][price]": price,
       "line_items[0][quantity]": "1",
       "success_url": `${origin}/pricing?checkout=success`,
@@ -97,21 +200,51 @@ router.post("/stripe/webhook", async (req, res) => {
       res.status(400).json({ error: "invalid_metadata" });
       return;
     }
-    const inserted = await db.insert(stripeEventsTable)
-      .values({ id: String(event.id), userId })
-      .onConflictDoNothing()
-      .returning({ id: stripeEventsTable.id });
-    if (inserted.length) {
-      if (kind === "unlimited") {
-        await db.update(profilesTable)
-          .set({ isPremium: true, isUnlimited: true, updatedAt: new Date() })
-          .where(eq(profilesTable.userId, userId));
-      } else {
-        await db.update(profilesTable)
-          .set({ isPremium: true, credits: sql`${profilesTable.credits} + 1`, updatedAt: new Date() })
-          .where(eq(profilesTable.userId, userId));
+    // Populate the verified email from the Stripe session so that a newly
+    // created profile (missing-profile upsert path) passes isEmailUnverified
+    // and can immediately use protected endpoints like /perfect.
+    const customerEmail = String(
+      session.customer_details?.email || session.customer_email || "",
+    );
+    const now = new Date();
+    // Use a single DB transaction so that if the profile upsert fails after
+    // the event-ID is inserted, the whole thing rolls back. Stripe will
+    // re-deliver the event, and the next attempt will try again cleanly.
+    await db.transaction(async (tx) => {
+      const inserted = await tx.insert(stripeEventsTable)
+        .values({ id: String(event.id), userId })
+        .onConflictDoNothing()
+        .returning({ id: stripeEventsTable.id });
+      if (inserted.length) {
+        if (kind === "unlimited") {
+          // Upsert: create profile if missing (e.g. user deleted account row),
+          // otherwise upgrade existing profile to Power plan.
+          // emailVerifiedAt is set only in VALUES (new-profile path); existing
+          // profiles already have a verified timestamp and we must not overwrite it.
+          await tx.insert(profilesTable)
+            .values({ userId, email: customerEmail, isPremium: true, isUnlimited: true, emailVerifiedAt: now, updatedAt: now })
+            .onConflictDoUpdate({
+              target: profilesTable.userId,
+              set: { isPremium: true, isUnlimited: true, updatedAt: now },
+            });
+        } else {
+          // Upsert: create profile with 1 credit if missing, otherwise add 1 credit.
+          await tx.insert(profilesTable)
+            .values({ userId, email: customerEmail, isPremium: true, credits: 1, emailVerifiedAt: now, updatedAt: now })
+            .onConflictDoUpdate({
+              target: profilesTable.userId,
+              set: {
+                isPremium: true,
+                credits: sql`${profilesTable.credits} + 1`,
+                updatedAt: now,
+              },
+            });
+        }
       }
-    }
+    });
+    // Clear the pending unlimited session so future legitimate checkout
+    // attempts start a fresh session rather than reusing the completed one.
+    if (kind === "unlimited") clearPendingUnlimitedSession(userId);
     res.json({ received: true });
   } catch (err) {
     req.log.error({ err }, "Stripe webhook error");

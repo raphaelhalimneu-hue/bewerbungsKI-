@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
+import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
@@ -9,6 +9,9 @@ import { createPerfectedPreview } from "../lib/perfectedText";
 import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
+
+// Power-Plan fair-use: max 10 new documents per user per UTC day (enforced via atomic DB update)
+const POWER_DAILY_DOC_LIMIT = 10;
 
 function escapeHtmlText(value: string): string {
   return value
@@ -366,20 +369,75 @@ router.post("/documents", requireAuth, async (req: AuthenticatedRequest, res) =>
       res.status(400).json({ error: "Invalid template" });
       return;
     }
-    const [doc] = await db
-      .insert(documentsTable)
-      .values({
-        userId: req.userId!,
-        name,
-        template: template || "modern",
-        profileData,
-        cvHtml,
-        coverLetter,
-        jobTitle,
-        jobCompany,
-        bezahlt: true,
-      })
-      .returning();
+
+    // Power-Plan fair-use: atomic conditional DB update enforces 10 new documents/day.
+    // For unlimited users the quota-reservation and document insert are wrapped in a
+    // single transaction so a failed insert rolls back the quota slot automatically
+    // (prevents permanently consuming a daily slot without creating a document).
+    const [profile] = await db
+      .select({ isUnlimited: profilesTable.isUnlimited })
+      .from(profilesTable)
+      .where(eq(profilesTable.userId, req.userId!));
+
+    let doc: any;
+
+    if (profile?.isUnlimited) {
+      const today = new Date().toISOString().slice(0, 10);
+      const txResult = await db.transaction(async (tx) => {
+        const [reserved] = await tx
+          .update(profilesTable)
+          .set({
+            dailyDocCount: sql`CASE WHEN ${profilesTable.dailyDocDate} = ${today} THEN ${profilesTable.dailyDocCount} + 1 ELSE 1 END`,
+            dailyDocDate: today,
+            updatedAt: new Date(),
+          })
+          .where(and(
+            eq(profilesTable.userId, req.userId!),
+            sql`(${profilesTable.dailyDocDate} IS DISTINCT FROM ${today} OR ${profilesTable.dailyDocCount} < ${POWER_DAILY_DOC_LIMIT})`,
+          ))
+          .returning({ dailyDocCount: profilesTable.dailyDocCount });
+        if (!reserved) {
+          return null; // quota exceeded — signal to caller without throwing
+        }
+        const [row] = await tx
+          .insert(documentsTable)
+          .values({
+            userId: req.userId!,
+            name,
+            template: template || "modern",
+            profileData,
+            cvHtml,
+            coverLetter,
+            jobTitle,
+            jobCompany,
+            bezahlt: true,
+          })
+          .returning();
+        return row;
+      });
+
+      if (txResult === null) {
+        res.status(429).json({ error: "daily_document_limit_reached" });
+        return;
+      }
+      doc = txResult;
+    } else {
+      const [row] = await db
+        .insert(documentsTable)
+        .values({
+          userId: req.userId!,
+          name,
+          template: template || "modern",
+          profileData,
+          cvHtml,
+          coverLetter,
+          jobTitle,
+          jobCompany,
+          bezahlt: true,
+        })
+        .returning();
+      doc = row;
+    }
 
     res.status(201).json(doc);
 
