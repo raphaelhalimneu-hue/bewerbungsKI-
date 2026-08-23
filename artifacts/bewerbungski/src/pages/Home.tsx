@@ -680,7 +680,7 @@ export default function Home() {
             <h3 style={{ fontSize: 18, fontWeight: 700 }}>{t("pricing.single")}</h3>
             <strong style={{ fontSize: 28 }}>{t("pricing.singlePrice")}</strong>
             <p style={{ color: "var(--muted)", fontSize: 13, flex: 1 }}>{t("pricing.singleOneTime")}</p>
-            <button className="btn btn-p" onClick={() => void startCheckout("single")} disabled={checkoutKind !== null || Boolean(paidProfile?.is_premium && !paidProfile?.is_unlimited)}>
+            <button className="btn btn-p" onClick={() => void startCheckout("single")} disabled={checkoutKind !== null}>
               {checkoutKind === "single" ? t("pricing.redirect") : t("pricing.buySingle")}
             </button>
           </div>
