@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { templateDeco } from "@workspace/template-deco";
+import { hasPaidEntitlement } from "../lib/freeLock";
 
 const router = Router();
 
@@ -172,6 +173,7 @@ router.get("/documents/:id/download/cv.pdf", requireAuth, async (req: Authentica
       .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!(await hasPaidEntitlement(req.userId!))) { res.status(403).json({ error: "download_requires_entitlement" }); return; }
     if (!doc.cvHtml) { res.status(404).json({ error: "No CV HTML stored" }); return; }
 
     const cvHtml = doc.perfectedCvHtml || doc.cvHtml;
@@ -202,6 +204,7 @@ router.get("/documents/:id/download/cover-letter.pdf", requireAuth, async (req: 
       .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!(await hasPaidEntitlement(req.userId!))) { res.status(403).json({ error: "download_requires_entitlement" }); return; }
 
     // Accept edited text from query param (same pattern as cover-letter.docx).
     const letterText: string = (req.query.text as string) || doc.perfectedLetter || doc.coverLetter || "";

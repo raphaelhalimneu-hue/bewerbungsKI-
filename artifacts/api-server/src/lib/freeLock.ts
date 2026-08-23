@@ -14,6 +14,15 @@ export async function consumePrintQuota(userId: string, docId: string, kind: Pri
   return true;
 }
 
+export async function hasPaidEntitlement(userId: string): Promise<boolean> {
+  const [profile] = await db.select({
+    isPremium: profilesTable.isPremium,
+    isUnlimited: profilesTable.isUnlimited,
+    credits: profilesTable.credits,
+  }).from(profilesTable).where(eq(profilesTable.userId, userId));
+  return !!profile && (!!profile.isPremium || !!profile.isUnlimited || Number(profile.credits ?? 0) > 0);
+}
+
 /** Current print counts for one document (missing kinds = 0). */
 export async function getPrintCounts(userId: string, docId: string): Promise<Record<PrintKind, number>> {
   void userId; void docId;

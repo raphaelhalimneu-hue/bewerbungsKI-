@@ -7,6 +7,7 @@ import {
 import { db, documentsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
+import { hasPaidEntitlement } from "../lib/freeLock";
 
 const router = Router();
 
@@ -209,6 +210,7 @@ router.get("/documents/:id/download/cv.docx", requireAuth, async (req: Authentic
       .where(and(eq(documentsTable.id, documentId), eq(documentsTable.userId, req.userId!)));
 
     if (!doc) { res.status(404).json({ error: "Not found" }); return; }
+    if (!(await hasPaidEntitlement(req.userId!))) { res.status(403).json({ error: "download_requires_entitlement" }); return; }
     const storedProfileData = (doc.profileData as any) || {};
     if (storedProfileData.documentTypes?.cv === false || (!doc.cvHtml && !storedProfileData.cv_json)) {
       res.status(404).json({ error: "No CV stored" });

@@ -72,7 +72,8 @@ export function AnalysisCard({
 export default function Scanner() {
   const { t, i18n } = useTranslation();
   const [, navigate] = useLocation();
-  const { user, setShowAuthModal } = useAuth();
+  const { user, profile, setShowAuthModal } = useAuth();
+  const scannerFreeUser = !profile || (!(profile as any).is_premium && !(profile as any).is_unlimited && Number((profile as any).credits ?? 0) <= 0);
   const [mode, setMode] = useState<"cv" | "letter">("cv");
   const [cvText, setCvText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -97,14 +98,14 @@ export default function Scanner() {
         if (cancelled) return;
         if (typeof res?.letter === "string") {
           setPerfectedText(res.letter);
-          setPerfectedLocked(false);
+           setPerfectedLocked(scannerFreeUser);
           setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
           setCvText((current) => current || res.letter);
         }
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [user, mode]);
+  }, [user, mode, scannerFreeUser]);
 
   async function goWizard() {
     // Prefer the source text, but keep the improved result as a fallback.
@@ -147,7 +148,7 @@ export default function Scanner() {
       if (typeof res?.letter === "string") {
         setCvText(res.letter);
         setPerfectedText(res.letter);
-        setPerfectedLocked(false);
+        setPerfectedLocked(scannerFreeUser);
         setPerfectChanges(Array.isArray(res.changes) ? res.changes : []);
         setResult(null);
         setPerfecting(false);
@@ -169,6 +170,10 @@ export default function Scanner() {
 
   async function copyPerfectedText() {
     if (!perfectedText) return;
+    if (scannerFreeUser) {
+      setErrorMsg(t("preview.unlockPerfectedHint"));
+      return;
+    }
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(perfectedText);
@@ -193,6 +198,10 @@ export default function Scanner() {
 
   function usePerfectedText() {
     if (!perfectedText) return;
+    if (scannerFreeUser) {
+      setErrorMsg(t("preview.unlockPerfectedHint"));
+      return;
+    }
     setCvText(perfectedText);
     setErrorMsg("");
     setCopied(false);
@@ -291,13 +300,13 @@ export default function Scanner() {
           <div
                 style={{ whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}
               >
-              {perfectedText}
+              {scannerFreeUser ? `${perfectedText.slice(0, 280)}…` : perfectedText}
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-              <button className="btn btn-g" onClick={copyPerfectedText}>
+              <button className="btn btn-g" onClick={copyPerfectedText} disabled={scannerFreeUser}>
                 📋 {copied ? t("scanner.copied") : t("scanner.copyImproved")}
               </button>
-              <button className="btn btn-g" onClick={usePerfectedText}>
+              <button className="btn btn-g" onClick={usePerfectedText} disabled={scannerFreeUser}>
                 ↩ {t("scanner.useImproved")}
               </button>
             </div>

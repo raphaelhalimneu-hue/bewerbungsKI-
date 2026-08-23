@@ -5,6 +5,7 @@ import { FiArrowRight, FiCheck, FiZap, FiLayout, FiGlobe, FiLinkedin, FiDownload
 import { useEffect, useMemo, useState } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { renderCVContent, type CVContent } from "../lib/buildCVHTML";
+import { useAuth } from "../context/AuthContext";
 
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -559,6 +560,27 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const donationMessage = t("home.donationMessage");
   const donationEmail = "rosehalim@aol.com";
+  const { user, profile, setShowAuthModal } = useAuth();
+  const paidProfile = profile as any;
+  const [checkoutKind, setCheckoutKind] = useState<"single" | "unlimited" | null>(null);
+
+  async function startCheckout(kind: "single" | "unlimited") {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    setCheckoutKind(kind);
+    try {
+      const result = await customFetch<{ url: string }>("/api/stripe/checkout", {
+        method: "POST",
+        body: JSON.stringify({ kind }),
+      });
+      if (!result?.url) throw new Error("missing_checkout_url");
+      window.location.assign(result.url);
+    } catch {
+      setCheckoutKind(null);
+    }
+  }
 
   const features = [
     { icon: <FiLayout />, title: t("home.feat1Title"), desc: t("home.feat1Desc") },
@@ -576,14 +598,14 @@ export default function Home() {
     <Layout>
       {/* ── HERO ── */}
       <div className="fade" style={{ textAlign: "center", padding: "12px 0 48px" }}>
-        {/* Free badge */}
+        {/* Free preview badge */}
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "#dcfce7", color: "#15803d",
           borderRadius: 999, padding: "6px 16px", fontSize: 13, fontWeight: 700,
           marginBottom: 22, border: "1px solid #bbf7d0",
         }}>
-          🎁 {t("home.freeBadge")}
+          🎁 {t("pricing.freeForever")}
         </div>
 
         <h1 style={{
@@ -629,21 +651,34 @@ export default function Home() {
           ))}
         </div>
 
-        <div style={{ margin: "26px auto 0", maxWidth: 620, color: "var(--muted)", fontSize: 14, lineHeight: 1.6 }}>
-          <p style={{ margin: "0 0 10px" }}>
-            {donationMessage}
-          </p>
-          <a
-            href={`https://www.paypal.com/donate?business=${encodeURIComponent(donationEmail)}&currency_code=EUR`}
-            style={{
-              fontWeight: 600, color: "var(--brand)",
-              textDecoration: "underline",
-            }}
-          >
-            {donationEmail}
-          </a>
-        </div>
       </div>
+
+      <section aria-labelledby="pricing-title" style={{ marginBottom: 64 }}>
+        <h2 id="pricing-title" style={{ fontFamily: "var(--fd)", fontSize: "clamp(22px,3.5vw,32px)", fontWeight: 700, textAlign: "center", marginBottom: 10 }}>
+          {t("pricing.title")}
+        </h2>
+        <p style={{ textAlign: "center", color: "var(--muted)", marginBottom: 24 }}>
+          {t("pricing.singleOneTime")} · {t("pricing.premiumPrice")} / Monat
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, maxWidth: 760, margin: "0 auto" }}>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700 }}>{t("pricing.single")}</h3>
+            <strong style={{ fontSize: 28 }}>{t("pricing.singlePrice")}</strong>
+            <p style={{ color: "var(--muted)", fontSize: 13, flex: 1 }}>{t("pricing.singleOneTime")}</p>
+            <button className="btn btn-p" onClick={() => void startCheckout("single")} disabled={checkoutKind !== null || Boolean(paidProfile?.is_premium && !paidProfile?.is_unlimited)}>
+              {checkoutKind === "single" ? t("pricing.redirect") : t("pricing.buySingle")}
+            </button>
+          </div>
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12, borderColor: "var(--brand)" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700 }}>{t("pricing.premium")}</h3>
+            <strong style={{ fontSize: 28 }}>{t("pricing.premiumPrice")}</strong>
+            <p style={{ color: "var(--muted)", fontSize: 13, flex: 1 }}>14,99 € / Monat · {t("pricing.premFeat4")}</p>
+            <button className="btn btn-p" onClick={() => void startCheckout("unlimited")} disabled={checkoutKind !== null || Boolean(paidProfile?.is_unlimited)}>
+              {paidProfile?.is_unlimited ? t("pricing.premiumActive") : checkoutKind === "unlimited" ? t("pricing.redirect") : t("pricing.upgradeNow")}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* ── HOW IT WORKS ── */}
       <section style={{ marginBottom: 64 }}>

@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, documentsTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { PRINT_KINDS, type PrintKind } from "../lib/freeLock";
+import { PRINT_KINDS, type PrintKind, hasPaidEntitlement } from "../lib/freeLock";
 
 const router: IRouter = Router();
 
@@ -40,6 +40,10 @@ router.post("/documents/:id/export-event", requireAuth, async (req: Authenticate
       .where(and(eq(documentsTable.id, docId), eq(documentsTable.userId, req.userId!)));
     if (!doc) {
       res.status(404).json({ error: "Not found" });
+      return;
+    }
+    if (!(await hasPaidEntitlement(req.userId!))) {
+      res.status(403).json({ allowed: false, error: "export_requires_entitlement" });
       return;
     }
     res.json({ allowed: true });

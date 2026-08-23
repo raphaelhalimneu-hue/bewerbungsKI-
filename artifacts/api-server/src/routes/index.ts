@@ -13,6 +13,7 @@ import extractRouter from "./extract";
 import ratingsRouter from "./ratings";
 import verifyRouter from "./verify";
 import exportsRouter from "./exports";
+import stripeRouter from "./stripe";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(extractRouter);
 router.use(ratingsRouter);
 router.use(verifyRouter);
 router.use(exportsRouter);
+router.use(stripeRouter);
 
 export default router;

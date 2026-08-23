@@ -51,6 +51,11 @@ export default function Preview() {
       && !(profile as any).is_unlimited
       && Number((profile as any).credits ?? 0) <= 0);
   const editLocked = freeUser;
+  function requirePaid(): boolean {
+    if (!freeUser) return true;
+    window.alert(t("preview.unlockPerfectedHint"));
+    return false;
+  }
 
   useEffect(() => {
     console.log("[BewerbungsKI] Preview user status", {
@@ -390,6 +395,7 @@ export default function Preview() {
   }
 
   async function printCv() {
+    if (!requirePaid()) return;
     if (!(await savePreviewEdits({ cv: true }))) return;
     let el: HTMLElement | null = cvRef.current;
     if (!el) return;
@@ -416,6 +422,7 @@ export default function Preview() {
   }
 
   async function printLetter() {
+    if (!requirePaid()) return;
     if (!(await savePreviewEdits({ letter: true }))) return;
     const text = editedLetter || (doc as any)?.cover_letter || "";
     if (!text) return;
@@ -429,6 +436,7 @@ export default function Preview() {
 
   // CV PDF: client-side via html2canvas so contentEditable edits are captured
   async function handleDownloadCvPdf() {
+    if (!requirePaid()) return;
     if (!cvRef.current) return;
     if (!(await savePreviewEdits({ cv: true }))) return;
     setExporting("cv-pdf");
@@ -468,6 +476,7 @@ export default function Preview() {
 
   // Cover letter PDF: server-side so edited text is forwarded correctly
   async function handleDownloadLetterPdf() {
+    if (!requirePaid()) return;
     if (!(await savePreviewEdits({ letter: true }))) return;
     setExporting("letter-pdf");
     try {
@@ -485,6 +494,7 @@ export default function Preview() {
   }
 
   async function downloadDocx(type: "cv" | "cover-letter") {
+    if (!requirePaid()) return;
     if (!(await savePreviewEdits({ cv: type === "cv", letter: type === "cover-letter" }))) return;
     const key = type === "cv" ? "cv-docx" : "letter-docx";
     setExporting(key as any);
