@@ -50,7 +50,9 @@ export default function Preview() {
     || (!(profile as any).is_premium
       && !(profile as any).is_unlimited
       && Number((profile as any).credits ?? 0) <= 0);
-  const editLocked = freeUser;
+  // Free users may still edit their original application. Once a perfected
+  // version is shown, that version becomes view-only until the account is paid.
+  const editLocked = freeUser && perfectedApplied;
   const isUnlimited = !!(profile as any)?.is_unlimited;
   const perfectRemaining: number | undefined = isUnlimited
     ? (profile as any)?.perfect_remaining
