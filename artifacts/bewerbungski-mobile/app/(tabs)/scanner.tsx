@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   StyleSheet,
   Text,
@@ -12,7 +13,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { customFetch } from '@workspace/api-client-react';
+import { customFetch, useGetMe } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
@@ -37,6 +38,13 @@ type StoredDocument = {
   profile_data?: { jobad?: { description?: string } } | null;
 };
 
+type MeProfile = {
+  is_premium?: boolean;
+  is_unlimited?: boolean;
+  credits?: number;
+  documents_count?: number;
+};
+
 function htmlToText(html: string): string {
   return html
     .replace(/<(?:br|\/p|\/div|\/li|\/h[1-6])\s*\/?>/gi, '\n')
@@ -55,9 +63,23 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-function getErrorMessage(error: unknown): string {
+/** Returns true when the account has exhausted its free quota and needs an upgrade. */
+function computeIsLocked(profile: MeProfile | undefined | null): boolean {
+  if (!profile) return false;
+  const isPremium = !!profile.is_premium;
+  const isUnlimited = !!profile.is_unlimited;
+  const credits = Number(profile.credits ?? 0);
+  const docCount = Number(profile.documents_count ?? 0);
+  // Locked: free user (no premium, no unlimited, no credits) who already has at least 1 document
+  return !isPremium && !isUnlimited && credits <= 0 && docCount >= 1;
+}
+
+function getErrorMessage(error: unknown): string | 'locked' {
   const code = (error as { data?: { error?: string } })?.data?.error;
   switch (code) {
+    case 'upgrade_required':
+    case 'editing_requires_entitlement':
+      return 'locked';
     case 'cv_too_short':
     case 'letter_too_short':
       return 'Bitte füge mindestens 80 Zeichen aus deinem Lebenslauf ein.';
@@ -70,6 +92,32 @@ function getErrorMessage(error: unknown): string {
     default:
       return 'Der Check konnte nicht durchgeführt werden. Bitte versuche es erneut.';
   }
+}
+
+function LockedBanner({ colors, styles }: { colors: ReturnType<typeof useColors>; styles: ReturnType<typeof makeStyles> }) {
+  return (
+    <View style={styles.lockedCard}>
+      <View style={styles.lockedIconRow}>
+        <Feather name="lock" size={28} color={colors.primary} />
+      </View>
+      <Text style={styles.lockedTitle}>Gratis-Bewerbung verbraucht</Text>
+      <Text style={styles.lockedBody}>
+        Du hast deine kostenlose Bewerbung bereits erstellt. Schalte dein Konto frei, um den
+        CV-Check und die Perfektionierung weiter zu nutzen.
+      </Text>
+      <TouchableOpacity
+        style={styles.lockedButton}
+        activeOpacity={0.85}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          Linking.openURL('https://bewerbungski.com/#pricing');
+        }}
+      >
+        <Feather name="zap" size={16} color={colors.primaryForeground} />
+        <Text style={styles.lockedButtonText}>Jetzt freischalten – bewerbungski.com</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 export default function ScannerScreen() {
@@ -88,10 +136,17 @@ export default function ScannerScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isPerfecting, setIsPerfecting] = useState(false);
   const [error, setError] = useState('');
+  const [serverLocked, setServerLocked] = useState(false);
   const isWeb = Platform.OS === 'web';
   const topPad = isWeb ? 67 : insets.top;
   const bottomPad = isWeb ? 34 : insets.bottom;
   const styles = useMemo(() => makeStyles(colors), [colors]);
+
+  // Fetch user profile to detect free-user lock state before any API call
+  const { data: meData } = useGetMe({ query: { enabled: !!user } as any });
+  const profile = meData as MeProfile | undefined;
+  const profileLocked = computeIsLocked(profile);
+  const isLocked = profileLocked || serverLocked;
 
   useEffect(() => {
     if (!documentId || !user) return;
@@ -149,7 +204,12 @@ export default function ScannerScreen() {
       setResult(response);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      const msg = getErrorMessage(requestError);
+      if (msg === 'locked') {
+        setServerLocked(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -185,7 +245,12 @@ export default function ScannerScreen() {
       setResult(null);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      const msg = getErrorMessage(requestError);
+      if (msg === 'locked') {
+        setServerLocked(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsPerfecting(false);
     }
@@ -196,7 +261,7 @@ export default function ScannerScreen() {
       <View style={[styles.centered, { paddingTop: topPad, backgroundColor: colors.background }]}>
         <Feather name="lock" size={40} color={colors.mutedForeground} />
         <Text style={[styles.emptyTitle, { marginTop: 16 }]}>Bitte anmelden</Text>
-        <Text style={styles.emptyText}>Melde dich im Tab „Erstellen“ an, um deinen Lebenslauf prüfen zu lassen.</Text>
+        <Text style={styles.emptyText}>Melde dich im Tab „Erstellen" an, um deinen Lebenslauf prüfen zu lassen.</Text>
       </View>
     );
   }
@@ -222,64 +287,69 @@ export default function ScannerScreen() {
           </View>
         </View>
 
-        <View style={styles.card}>
-          <View style={styles.labelRow}>
-            <Text style={styles.label}>Lebenslauf</Text>
-            {isLoadingDocument ? <ActivityIndicator size="small" color={colors.primary} /> : null}
+        {/* Locked state: show upgrade banner instead of the input form */}
+        {isLocked ? (
+          <LockedBanner colors={colors} styles={styles} />
+        ) : (
+          <View style={styles.card}>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>Lebenslauf</Text>
+              {isLoadingDocument ? <ActivityIndicator size="small" color={colors.primary} /> : null}
+            </View>
+            <TextInput
+              value={cvText}
+              onChangeText={(value) => {
+                setCvText(value);
+                setError('');
+              }}
+              placeholder="Füge hier den Text deines Lebenslaufs ein …"
+              placeholderTextColor={colors.mutedForeground}
+              multiline
+              textAlignVertical="top"
+              autoCorrect={false}
+              style={styles.cvInput}
+              testID="cv-check-input"
+            />
+            <Text style={styles.hint}>{cvText.trim().length} Zeichen · mindestens 80 erforderlich</Text>
+
+            <Text style={[styles.label, { marginTop: 18 }]}>Stellenanzeige <Text style={styles.optional}>(optional)</Text></Text>
+            <TextInput
+              value={jobText}
+              onChangeText={setJobText}
+              placeholder="Füge die Stellenanzeige ein, damit die Tipps besser passen."
+              placeholderTextColor={colors.mutedForeground}
+              multiline
+              textAlignVertical="top"
+              autoCorrect={false}
+              style={styles.jobInput}
+              testID="cv-check-job-input"
+            />
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+
+            <TouchableOpacity
+              style={[styles.primaryButton, (isAnalyzing || isPerfecting || cvText.trim().length < 80) && styles.disabled]}
+              onPress={analyze}
+              disabled={isAnalyzing || isPerfecting || cvText.trim().length < 80}
+              activeOpacity={0.85}
+              testID="run-cv-check"
+            >
+              {isAnalyzing ? <ActivityIndicator color={colors.primaryForeground} /> : <Feather name="search" size={18} color={colors.primaryForeground} />}
+              <Text style={styles.primaryButtonText}>{isAnalyzing ? 'Wird geprüft …' : 'Lebenslauf prüfen'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryButton, (isAnalyzing || isPerfecting || cvText.trim().length < 80) && styles.disabled]}
+              onPress={perfect}
+              disabled={isAnalyzing || isPerfecting || cvText.trim().length < 80}
+              activeOpacity={0.85}
+              testID="perfect-cv"
+            >
+              {isPerfecting ? <ActivityIndicator color={colors.primary} /> : <Feather name="edit-3" size={17} color={colors.primary} />}
+              <Text style={styles.secondaryButtonText}>{isPerfecting ? 'Wird verbessert …' : 'Lebenslauf perfektionieren'}</Text>
+            </TouchableOpacity>
           </View>
-          <TextInput
-            value={cvText}
-            onChangeText={(value) => {
-              setCvText(value);
-              setError('');
-            }}
-            placeholder="Füge hier den Text deines Lebenslaufs ein …"
-            placeholderTextColor={colors.mutedForeground}
-            multiline
-            textAlignVertical="top"
-            autoCorrect={false}
-            style={styles.cvInput}
-            testID="cv-check-input"
-          />
-          <Text style={styles.hint}>{cvText.trim().length} Zeichen · mindestens 80 erforderlich</Text>
-
-          <Text style={[styles.label, { marginTop: 18 }]}>Stellenanzeige <Text style={styles.optional}>(optional)</Text></Text>
-          <TextInput
-            value={jobText}
-            onChangeText={setJobText}
-            placeholder="Füge die Stellenanzeige ein, damit die Tipps besser passen."
-            placeholderTextColor={colors.mutedForeground}
-            multiline
-            textAlignVertical="top"
-            autoCorrect={false}
-            style={styles.jobInput}
-            testID="cv-check-job-input"
-          />
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          <TouchableOpacity
-            style={[styles.primaryButton, (isAnalyzing || isPerfecting || cvText.trim().length < 80) && styles.disabled]}
-            onPress={analyze}
-            disabled={isAnalyzing || isPerfecting || cvText.trim().length < 80}
-            activeOpacity={0.85}
-            testID="run-cv-check"
-          >
-            {isAnalyzing ? <ActivityIndicator color={colors.primaryForeground} /> : <Feather name="search" size={18} color={colors.primaryForeground} />}
-            <Text style={styles.primaryButtonText}>{isAnalyzing ? 'Wird geprüft …' : 'Lebenslauf prüfen'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.secondaryButton, (isAnalyzing || isPerfecting || cvText.trim().length < 80) && styles.disabled]}
-            onPress={perfect}
-            disabled={isAnalyzing || isPerfecting || cvText.trim().length < 80}
-            activeOpacity={0.85}
-            testID="perfect-cv"
-          >
-            {isPerfecting ? <ActivityIndicator color={colors.primary} /> : <Feather name="edit-3" size={17} color={colors.primary} />}
-            <Text style={styles.secondaryButtonText}>{isPerfecting ? 'Wird verbessert …' : 'Lebenslauf perfektionieren'}</Text>
-          </TouchableOpacity>
-        </View>
+        )}
 
         {result ? (
           <View style={styles.card}>
@@ -403,5 +473,12 @@ function makeStyles(colors: ReturnType<typeof useColors>) {
     lockHintText: { flex: 1, fontSize: 12, lineHeight: 18, fontFamily: 'Inter_400Regular', color: colors.mutedForeground },
     changeList: { marginTop: 18 },
     changeTitle: { fontSize: 14, fontFamily: 'Inter_700Bold', color: colors.foreground, marginBottom: 8 },
+    // Locked-state banner
+    lockedCard: { backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.primary, borderRadius: colors.radius + 4, padding: 24, marginBottom: 16, alignItems: 'center' as const },
+    lockedIconRow: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.accent, alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: 16 },
+    lockedTitle: { fontSize: 18, fontFamily: 'Inter_700Bold', color: colors.foreground, textAlign: 'center' as const, marginBottom: 10 },
+    lockedBody: { fontSize: 14, lineHeight: 21, fontFamily: 'Inter_400Regular', color: colors.mutedForeground, textAlign: 'center' as const, marginBottom: 20 },
+    lockedButton: { flexDirection: 'row' as const, gap: 8, alignItems: 'center' as const, backgroundColor: colors.primary, borderRadius: colors.radius, paddingHorizontal: 20, paddingVertical: 13 },
+    lockedButtonText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: colors.primaryForeground },
   });
 }
