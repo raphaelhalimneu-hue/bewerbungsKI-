@@ -20,7 +20,7 @@
   },
   "home": {
     "badge": "🚀 Lebenslauf + Bewerbung in 3 Minuten",
-    "freeBadge": "Alle Funktionen sind kostenlos",
+    "freeBadge": "Kostenlos ausprobieren",
     "titlePre": "Deine Bewerbung –",
     "titleEm": "professionell & fertig.",
     "subtitle": "Profil eingeben, Stellenanzeige einfügen – KI schreibt deinen Lebenslauf und deine Bewerbung in 3 Minuten. Auf Deutsch oder in 7 weiteren Sprachen.",
@@ -61,7 +61,7 @@
     "feat6Desc": "Professionelles Bewerbungsfoto direkt im Lebenslauf integrieren – optional.",
     "faqTitle": "Häufige Fragen",
     "faq1Q": "Was kostet BewerbungsKI?",
-    "faq1A": "Alle Funktionen sind vollständig kostenlos – einschließlich Erstellen, Bearbeiten, Prüfen, Drucken und Download.",
+    "faq1A": "Erstellen, Bearbeiten und Prüfen kannst du kostenlos ausprobieren. Für das Drucken und Herunterladen perfektionierter Texte brauchst du ein bezahltes Paket.",
     "faq2Q": "Wie gut ist die Qualität?",
     "faq2A": "Die KI analysiert dein Profil und die Stellenanzeige und schreibt echten, individuellen Text – keine Bausteinbriefe, keine Floskeln.",
     "faq3Q": "Was passiert mit meinen Daten?",
@@ -69,7 +69,7 @@
     "faq4Q": "Kann ich die Dokumente bearbeiten?",
     "faq4A": "Ja – nach der Generierung kannst du Lebenslauf und Bewerbung direkt in der App bearbeiten und erneut herunterladen.",
     "ctaBottomTitle": "Deine Traumstelle wartet.",
-    "ctaBottomSub": "Erstelle, bearbeite, prüfe, drucke und lade deine Bewerbung kostenlos herunter.",
+    "ctaBottomSub": "Erstelle, bearbeite und prüfe deine Bewerbung kostenlos. Drucken und Herunterladen sind mit einem bezahlten Paket möglich.",
     "ctaBottom": "Jetzt kostenlos starten",
     "germanNote": "Deine Bewerbung in 8 Sprachen – z. B. auf Deutsch, perfekt für den deutschen Arbeitsmarkt.",
     "ba": {
