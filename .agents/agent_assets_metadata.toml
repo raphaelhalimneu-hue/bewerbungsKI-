@@ -112,3 +112,10 @@ uri = "file://attached_assets/google-reactions-anonymized.jpg"
 type = "image"
 title = "Google-Reaktionen anonymisiert"
 description = "Alle sichtbaren Gesichter und Profilbilder wurden unkenntlich gemacht."
+
+[[outputs]]
+id = "465RQ_aaRFRpfh9lAdzPb"
+uri = "file://exports/bewerbungsKI-source-759bdbe.zip"
+type = "unspecified"
+title = "BewerbungsKI-Projektcode herunterladen"
+description = "ZIP-Archiv des aktuellen Projektcodes. Enthält den Quellcode ohne Zugangsdaten, node_modules und temporäre Replit-Dateien."
