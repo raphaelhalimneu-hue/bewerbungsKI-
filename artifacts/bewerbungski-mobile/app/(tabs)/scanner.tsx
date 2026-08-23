@@ -43,6 +43,7 @@ type MeProfile = {
   is_unlimited?: boolean;
   credits?: number;
   documents_count?: number;
+  perfect_remaining?: number;
 };
 
 function htmlToText(html: string): string {
@@ -147,6 +148,7 @@ export default function ScannerScreen() {
   const profile = meData as MeProfile | undefined;
   const profileLocked = computeIsLocked(profile);
   const isLocked = profileLocked || serverLocked;
+  const perfectRemaining = Math.max(0, Number(profile?.perfect_remaining ?? 50));
 
   useEffect(() => {
     if (!documentId || !user) return;
@@ -286,6 +288,14 @@ export default function ScannerScreen() {
             <Text style={styles.subtitle}>Erhalte klare Hinweise von einem KI-Bewerbungscoach.</Text>
           </View>
         </View>
+        {!!profile?.is_unlimited && (
+          <View style={[styles.perfectingQuota, { borderColor: colors.primary, backgroundColor: `${colors.primary}12` }]}>
+            <Feather name="zap" size={16} color={colors.primary} />
+            <Text style={[styles.perfectingQuotaText, { color: colors.primary }]}>
+              Noch {perfectRemaining} von 50 KI-Perfektionierungen verfügbar
+            </Text>
+          </View>
+        )}
 
         {/* Locked state: show upgrade banner instead of the input form */}
         {isLocked ? (
@@ -439,6 +449,8 @@ function makeStyles(colors: ReturnType<typeof useColors>) {
     headingIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: colors.accent },
     title: { fontSize: 24, lineHeight: 30, fontFamily: 'Inter_700Bold', color: colors.foreground },
     subtitle: { fontSize: 14, lineHeight: 20, fontFamily: 'Inter_400Regular', color: colors.mutedForeground, marginTop: 2 },
+    perfectingQuota: { flexDirection: 'row' as const, gap: 8, alignItems: 'center' as const, borderWidth: 1, borderRadius: colors.radius, paddingHorizontal: 12, paddingVertical: 10, marginTop: -8, marginBottom: 16 },
+    perfectingQuotaText: { flex: 1, fontSize: 13, lineHeight: 18, fontFamily: 'Inter_700Bold' },
     card: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: colors.radius + 4, padding: 16, marginBottom: 16 },
     labelRow: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const },
     label: { fontSize: 14, fontFamily: 'Inter_700Bold', color: colors.foreground },

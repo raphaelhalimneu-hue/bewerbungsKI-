@@ -35,6 +35,7 @@ export default function AccountScreen() {
 
   const isPremium = !!(profile as any)?.is_premium;
   const isUnlimited = !!(profile as any)?.is_unlimited;
+  const perfectRemaining = Math.max(0, Number((profile as any)?.perfect_remaining ?? 50));
 
   async function startCheckout(kind: 'single' | 'unlimited', label: 'premium' | 'power') {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -104,8 +105,8 @@ export default function AccountScreen() {
             <Text style={s.statLabel}>Bewerbungen</Text>
           </View>
           <View style={s.statCard}>
-            <Text style={s.statNum}>∞</Text>
-            <Text style={s.statLabel}>Alle Funktionen</Text>
+            <Text style={s.statNum}>{isUnlimited ? `${perfectRemaining}/50` : '∞'}</Text>
+            <Text style={s.statLabel}>{isUnlimited ? 'Perfektionierungen' : 'Alle Funktionen'}</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>8</Text>
@@ -194,7 +195,9 @@ export default function AccountScreen() {
             <Feather name="zap" size={20} color={colors.primary} />
             <View style={{ flex: 1 }}>
               <Text style={[s.activeBannerTitle, { color: colors.primary }]}>Power aktiv</Text>
-              <Text style={[s.activeBannerSub, { color: colors.mutedForeground }]}>Unbegrenzt Bewerbungen · 50× KI-Perfektionieren</Text>
+              <Text style={[s.activeBannerSub, { color: colors.mutedForeground }]}>
+                Unbegrenzt Bewerbungen · Noch {perfectRemaining} von 50 KI-Perfektionierungen verfügbar
+              </Text>
             </View>
           </View>
         )}
