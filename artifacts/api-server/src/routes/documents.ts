@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { db, documentsTable, perfectedGenerationsTable, profilesTable } from "@workspace/db";
+import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 import { requireVerifiedEmail } from "../middlewares/verified";
 import { sendEmail } from "../lib/email";
 import { buildDocumentEmail } from "../lib/emailTemplates";
 import { createPerfectedPreview } from "../lib/perfectedText";
+import { isFreeQuotaLocked } from "../lib/freeLock";
 
 const router = Router();
 
@@ -326,19 +327,11 @@ router.patch("/documents/:id", requireAuth, async (req: AuthenticatedRequest, re
 
     if (!existing) { res.status(404).json({ error: "Not found" }); return; }
 
-    const [profile] = await db
-      .select({
-        isPremium: profilesTable.isPremium,
-        isUnlimited: profilesTable.isUnlimited,
-        credits: profilesTable.credits,
-      })
-      .from(profilesTable)
-      .where(eq(profilesTable.userId, req.userId!));
-    const freeUser = !profile
-      || (!profile.isPremium && !profile.isUnlimited && Number(profile.credits ?? 0) <= 0);
-    if (freeUser && (cv_html !== undefined || cv_json !== undefined || cover_letter !== undefined)) {
-      res.status(403).json({ error: "editing_requires_entitlement" });
-      return;
+    if (cv_html !== undefined || cv_json !== undefined || cover_letter !== undefined) {
+      if (await isFreeQuotaLocked(req.userId!)) {
+        res.status(403).json({ error: "upgrade_required" });
+        return;
+      }
     }
 
     const existingProfileData = (existing.profileData as Record<string, unknown>) || {};

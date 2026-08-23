@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
-import { isEmailUnverified } from "../lib/freeLock";
+import { isEmailUnverified, isFreeQuotaLocked } from "../lib/freeLock";
 import { db, documentsTable, perfectedGenerationsTable } from "@workspace/db";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { createPerfectedPreview } from "../lib/perfectedText";
@@ -120,6 +120,10 @@ router.post("/analyze", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
+      return;
+    }
+    if (await isFreeQuotaLocked(req.userId!)) {
+      res.status(403).json({ error: "upgrade_required" });
       return;
     }
     if (!checkQuota(req.userId!, "analyze")) {
@@ -264,6 +268,10 @@ router.post("/perfect", requireAuth, async (req: AuthenticatedRequest, res) => {
     }
     if (await isEmailUnverified(req.userId!, req.userEmail)) {
       res.status(403).json({ error: "email_unverified" });
+      return;
+    }
+    if (await isFreeQuotaLocked(req.userId!)) {
+      res.status(403).json({ error: "upgrade_required" });
       return;
     }
     if (!checkQuota(req.userId!, "perfect")) {

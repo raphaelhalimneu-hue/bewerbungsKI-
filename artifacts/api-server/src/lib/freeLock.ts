@@ -1,6 +1,35 @@
 import { db, pool, profilesTable, documentsTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 
+/**
+ * Returns true when a free user (no isPremium, no isUnlimited, 0 credits) already
+ * owns at least one document. Analyze, perfect, and content-editing endpoints return
+ * 403 upgrade_required in that case. Paying users and unlimited accounts are never locked.
+ */
+export async function isFreeQuotaLocked(userId: string): Promise<boolean> {
+  const [profile] = await db
+    .select({
+      isPremium: profilesTable.isPremium,
+      isUnlimited: profilesTable.isUnlimited,
+      credits: profilesTable.credits,
+    })
+    .from(profilesTable)
+    .where(eq(profilesTable.userId, userId));
+
+  // Any form of paid access bypasses the lock.
+  if (profile?.isPremium || profile?.isUnlimited || Number(profile?.credits ?? 0) > 0) {
+    return false;
+  }
+
+  // Count how many documents this user owns.
+  const [row] = await db
+    .select({ value: count() })
+    .from(documentsTable)
+    .where(eq(documentsTable.userId, userId));
+
+  return Number(row?.value ?? 0) >= 1;
+}
+
 export type PrintKind = "cv_print" | "letter_print";
 export const PRINT_KINDS: PrintKind[] = ["cv_print", "letter_print"];
 /** All document actions are currently free and unlimited. */
