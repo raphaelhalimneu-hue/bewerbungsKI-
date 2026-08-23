@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./context/AuthContext";
 import i18n, { updateLocaleHead } from "./i18n";
 import { appBase, appPath, pathLang, pathForLang } from "./lib/basePath";
+import { ExitIntentPopup } from "./components/ExitIntentPopup";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Wizard from "@/pages/Wizard";
@@ -113,6 +114,7 @@ export default function App() {
             <LocaleHeadSync />
             <Router />
           </WouterRouter>
+          <ExitIntentPopup />
           <Toaster />
         </TooltipProvider>
       </AuthProvider>
