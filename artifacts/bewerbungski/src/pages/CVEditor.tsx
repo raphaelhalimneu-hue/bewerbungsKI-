@@ -7,25 +7,30 @@ import { customFetch } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { renderCVContent, type CVContent, type CustomStyle, type TemplateId } from "../lib/buildCVHTML";
+import { letterheadUrl, renderCVContent, type CVContent, type CustomStyle, type TemplateId } from "../lib/buildCVHTML";
 import { LANGUAGE_LEVEL_VALUES, languageLevelLabelKey, normalizeLanguageLevel } from "../lib/languageLevels";
 
 // ── Template list ────────────────────────────────────────────────────────────
-const TEMPLATES: { id: TemplateId; name: string; color: string }[] = [
-  { id: "modern",    name: "Modern",    color: "#111827" },
-  { id: "classic",   name: "Classic",   color: "#0f172a" },
-  { id: "creative",  name: "Creative",  color: "#1e3a5f" },
-  { id: "executive", name: "Executive", color: "#1f2937" },
-  { id: "minimal",   name: "Minimal",   color: "#111827" },
-  { id: "elegant",   name: "Elegant",   color: "#92400e" },
-  { id: "bold",      name: "Bold",      color: "#0f172a" },
-  { id: "compact",   name: "Compact",   color: "#1f2937" },
-  { id: "swiss",     name: "Swiss",     color: "#dc2626" },
-  { id: "nordic",    name: "Nordic",    color: "#0e7490" },
-  { id: "corporate", name: "Corporate", color: "#166534" },
-  { id: "timeline",  name: "Timeline",  color: "#c2410c" },
-  { id: "slate",     name: "Slate",     color: "#1e293b" },
-  { id: "terra",     name: "Terra",     color: "#78350f" },
+const TEMPLATES: { id: TemplateId; name: string }[] = [
+  { id: "blobs",         name: "Blobs" },
+  { id: "welle",         name: "Welle" },
+  { id: "halo",          name: "Halo" },
+  { id: "splitblock",    name: "Block" },
+  { id: "klammern",      name: "Frame" },
+  { id: "winkel",        name: "Chevron" },
+  { id: "bogen",         name: "Arc" },
+  { id: "zweig",         name: "Botanic" },
+  { id: "berge",         name: "Horizon" },
+  { id: "konfetti",      name: "Konfetti" },
+  { id: "wellenband",    name: "Candy" },
+  { id: "farbkreis",     name: "Citrus" },
+  { id: "blobcorner",    name: "Nova" },
+  { id: "aurora",        name: "Aurora" },
+  { id: "prisma",        name: "Prisma" },
+  { id: "verlaufswelle", name: "Flow" },
+  { id: "blaupause",     name: "Blueprint" },
+  { id: "technik",       name: "Graphit" },
+  { id: "raster",        name: "Raster" },
 ];
 
 // ── Default empty CVContent ──────────────────────────────────────────────────
@@ -466,7 +471,7 @@ export default function CVEditor() {
       <section style={sectionStyle}>
         <div style={sectionHeader}>{t("editor.sectionTemplate")}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-          {(customStyle ? [...TEMPLATES, { id: "custom" as TemplateId, name: t("editor.customTemplate"), color: customStyle.accent }] : TEMPLATES).map(tpl => {
+          {(customStyle ? [...TEMPLATES, { id: "custom" as TemplateId, name: t("editor.customTemplate") }] : TEMPLATES).map(tpl => {
             const active = template === tpl.id;
             return (
               <button
@@ -480,7 +485,16 @@ export default function CVEditor() {
                   transition: "all .15s",
                 }}
               >
-                <div style={{ width: 28, height: 36, background: tpl.color, borderRadius: 3 }} />
+                {tpl.id === "custom" ? (
+                  <div style={{ width: 56, height: 78, background: customStyle?.accent, borderRadius: 3 }} />
+                ) : (
+                  <img
+                    src={letterheadUrl(tpl.id)}
+                    alt={tpl.name}
+                    loading="lazy"
+                    style={{ display: "block", width: 56, height: 78, objectFit: "cover", borderRadius: 3 }}
+                  />
+                )}
                 <div style={{ fontSize: 11, fontWeight: 600, color: active ? "var(--brand)" : "var(--text2)" }}>{tpl.name}</div>
                 {active && <div style={{ fontSize: 10, color: "var(--brand)" }}>✓</div>}
               </button>
