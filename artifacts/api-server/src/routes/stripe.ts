@@ -9,7 +9,7 @@ const router = Router();
 // credentials. Keep the approved live price IDs as a safe fallback so the
 // checkout stays available while deployment variables are being synchronized.
 const SINGLE_PRICE_ID = process.env.STRIPE_SINGLE_PRICE_ID || "price_1U7KOJPyO6gYxvx2wLcVO9uo";
-const UNLIMITED_PRICE_ID = process.env.STRIPE_UNLIMITED_PRICE_ID || "price_1U7KS5PyO6gYxvx2IdCtEVN1";
+const UNLIMITED_PRICE_ID = process.env.STRIPE_UNLIMITED_PRICE_ID || "price_1U7hzpPyO6gYxvx2ZqHeLMp2";
 
 // ---------------------------------------------------------------------------
 // In-process deduplication for unlimited checkout sessions

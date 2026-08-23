@@ -48,7 +48,7 @@ VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 VITE_STRIPE_PUBLISHABLE_KEY = "pk_live_51U1aQwPyO6gYxvx2zl0E6h2b8xLrHaVBgfG5onbTPULWEuYFF4K7BLxEU7PyIGNQc5wHax2CQjXlxMvfmpvltGnV006dxz5HvX"
 CHROMIUM_PATH = "/nix/store/5afrhwm7zqn1vb7p5z1mc2rkh2grsfgz-ungoogled-chromium-138.0.7204.100/bin/chromium"
 STRIPE_SINGLE_PRICE_ID = "price_1U7KOJPyO6gYxvx2wLcVO9uo"
-STRIPE_UNLIMITED_PRICE_ID = "price_1U7KS5PyO6gYxvx2IdCtEVN1"
+STRIPE_UNLIMITED_PRICE_ID = "price_1U7hzpPyO6gYxvx2ZqHeLMp2"
 
 [nix]
 channel = "stable-25_05"
