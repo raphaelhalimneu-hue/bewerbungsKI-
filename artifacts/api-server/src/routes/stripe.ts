@@ -5,8 +5,11 @@ import { db, profilesTable, stripeEventsTable } from "@workspace/db";
 import { requireAuth, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router = Router();
-const SINGLE_PRICE_ID = process.env.STRIPE_SINGLE_PRICE_ID;
-const UNLIMITED_PRICE_ID = process.env.STRIPE_UNLIMITED_PRICE_ID;
+// Railway's production environment previously contained only the Stripe
+// credentials. Keep the approved live price IDs as a safe fallback so the
+// checkout stays available while deployment variables are being synchronized.
+const SINGLE_PRICE_ID = process.env.STRIPE_SINGLE_PRICE_ID || "price_1U7KOJPyO6gYxvx2wLcVO9uo";
+const UNLIMITED_PRICE_ID = process.env.STRIPE_UNLIMITED_PRICE_ID || "price_1U7KS5PyO6gYxvx2IdCtEVN1";
 
 function stripeForm(values: Record<string, string>) {
   return new URLSearchParams(values);

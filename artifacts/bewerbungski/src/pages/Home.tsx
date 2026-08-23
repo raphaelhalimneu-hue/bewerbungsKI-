@@ -558,15 +558,16 @@ export default function Home() {
       .catch(() => {});
   }, []);
   const { t, i18n } = useTranslation();
-  const donationMessage = t("home.donationMessage");
-  const donationEmail = "rosehalim@aol.com";
   const { user, profile, setShowAuthModal } = useAuth();
   const paidProfile = profile as any;
   const [checkoutKind, setCheckoutKind] = useState<"single" | "unlimited" | null>(null);
+  const [checkoutError, setCheckoutError] = useState("");
 
   async function startCheckout(kind: "single" | "unlimited") {
+    setCheckoutError("");
     if (!user) {
       setShowAuthModal(true);
+      setCheckoutError("Bitte melde dich zuerst an, um den Kauf fortzusetzen.");
       return;
     }
     setCheckoutKind(kind);
@@ -577,7 +578,16 @@ export default function Home() {
       });
       if (!result?.url) throw new Error("missing_checkout_url");
       window.location.assign(result.url);
-    } catch {
+    } catch (error: any) {
+      console.error("Stripe checkout start failed", error);
+      const code = error?.data?.error;
+      setCheckoutError(
+        code === "invalid_package"
+          ? "Das Paket ist gerade nicht verfügbar. Bitte versuche es in einer Minute erneut."
+          : code === "checkout_unavailable"
+            ? "Stripe konnte den Kauf gerade nicht starten. Bitte versuche es erneut."
+            : "Der Kauf konnte nicht gestartet werden. Bitte versuche es erneut.",
+      );
       setCheckoutKind(null);
     }
   }
@@ -660,6 +670,11 @@ export default function Home() {
         <p style={{ textAlign: "center", color: "var(--muted)", marginBottom: 24 }}>
           {t("pricing.singleOneTime")} · {t("pricing.premiumPrice")} / Monat
         </p>
+        {checkoutError && (
+          <p role="alert" style={{ maxWidth: 760, margin: "0 auto 16px", textAlign: "center", color: "var(--err)", fontWeight: 600 }}>
+            {checkoutError}
+          </p>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, maxWidth: 760, margin: "0 auto" }}>
           <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700 }}>{t("pricing.single")}</h3>
