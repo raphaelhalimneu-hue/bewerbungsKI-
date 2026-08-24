@@ -32,14 +32,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
+    // Token bei JEDEM Request frisch holen – Supabase erneuert abgelaufene Tokens automatisch.
+    const freshTokenGetter = async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token ?? null;
+    };
+    setAuthTokenGetter(freshTokenGetter);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session) {
-        setAuthTokenGetter(() => session.access_token);
-      } else {
-        setAuthTokenGetter(null);
-      }
       setLoading(false);
     });
 
@@ -48,13 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session) {
-        setAuthTokenGetter(() => session.access_token);
-        if (event === "SIGNED_IN") {
-          refetchProfile();
-        }
-      } else {
-        setAuthTokenGetter(null);
+      if (session && event === "SIGNED_IN") {
+        refetchProfile();
       }
       setLoading(false);
     });
