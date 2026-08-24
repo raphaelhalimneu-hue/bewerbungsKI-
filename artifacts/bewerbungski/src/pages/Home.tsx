@@ -581,8 +581,11 @@ export default function Home() {
     } catch (error: any) {
       console.error("Stripe checkout start failed", error);
       const code = error?.data?.error;
+      const status = error?.status ?? error?.response?.status;
       setCheckoutError(
-        code === "invalid_package"
+        status === 401
+          ? "Sitzung abgelaufen. Bitte melde dich neu an und versuche es erneut."
+          : code === "invalid_package"
           ? "Das Paket ist gerade nicht verfügbar. Bitte versuche es in einer Minute erneut."
           : code === "checkout_unavailable"
             ? "Stripe konnte den Kauf gerade nicht starten. Bitte versuche es erneut."
